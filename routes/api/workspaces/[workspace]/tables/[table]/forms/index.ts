@@ -35,34 +35,35 @@ export const GET = defineHandler.withValidator({ params, query: formsSearchSchem
   );
 });
 
-export const POST = defineHandler(
-  requireAdmin,
-  defineHandler.withValidator({ params, body: formInputSchema })(async (c, { params, body }) => {
-    const table = await findTable(params.table);
-    if (!table) throw httpError(404, NOT_FOUND);
+export const POST = defineHandler.withValidator({ params, body: formInputSchema })(async (
+  c,
+  { params, body },
+) => {
+  requireAdmin(c);
+  const table = await findTable(params.table);
+  if (!table) throw httpError(404, NOT_FOUND);
 
-    const problem = checkFormDefinition(await listColumns(table.id), body);
-    if (problem) throw httpError(400, problem);
+  const problem = checkFormDefinition(await listColumns(table.id), body);
+  if (problem) throw httpError(400, problem);
 
-    try {
-      return await createForm(table, body, requireAuth(c).id);
-    } catch (error) {
-      conflictOrBadRequest(error, "A form with this name already exists.");
-    }
-  }),
-);
+  try {
+    return await createForm(table, body, requireAuth(c).id);
+  } catch (error) {
+    conflictOrBadRequest(error, "A form with this name already exists.");
+  }
+});
 
-export const DELETE = defineHandler(
-  requireAdmin,
-  defineHandler.withValidator({ params, body: formsDeleteSchema })(async (c, { params, body }) => {
-    const table = await findTable(params.table);
-    if (!table) throw httpError(404, NOT_FOUND);
+export const DELETE = defineHandler.withValidator({ params, body: formsDeleteSchema })(async (
+  c,
+  { params, body },
+) => {
+  requireAdmin(c);
+  const table = await findTable(params.table);
+  if (!table) throw httpError(404, NOT_FOUND);
 
-    const ids = [...new Set(body.ids)];
-    if ((await findForms(table.id, ids)).length !== ids.length)
-      throw httpError(404, NOT_FOUND);
+  const ids = [...new Set(body.ids)];
+  if ((await findForms(table.id, ids)).length !== ids.length) throw httpError(404, NOT_FOUND);
 
-    await softDeleteForms(ids, requireAuth(c).id);
-    return { ok: true };
-  }),
-);
+  await softDeleteForms(ids, requireAuth(c).id);
+  return { ok: true };
+});

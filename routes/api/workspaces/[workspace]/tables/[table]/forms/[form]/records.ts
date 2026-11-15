@@ -7,7 +7,7 @@ import { httpError, NOT_FOUND, writeFailure } from "@/lib/http";
 import { checkLinks } from "@/lib/records/links";
 import { createRecordRow } from "@/lib/records/repository";
 import { findMissingRequired, parseRecordValues, recordPatchSchema } from "@/lib/records/values";
-import { authorize } from "@/lib/roles/guard";
+import { requireAccess } from "@/lib/roles/require-access";
 import { findTable, listColumns } from "@/lib/tables/repository";
 
 const params = z.object({
@@ -22,7 +22,7 @@ export const POST = defineHandler.withValidator({ params, body: recordPatchSchem
 ) => {
   const workspace = c.get("workspaceId");
   const user = requireAuth(c);
-  await authorize(user, "create", params.table, params.form);
+  await requireAccess(c, "create", params.table, params.form);
   const table = await findTable(params.table);
   if (!table) throw httpError(404, NOT_FOUND);
   const form = await findForm(table.id, params.form);

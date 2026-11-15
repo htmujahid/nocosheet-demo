@@ -16,7 +16,7 @@ import { countOwnedRecords, createRecordRow, findRecords } from "@/lib/records/r
 import { sortKeyOf } from "@/lib/records/sort-param";
 import { checkRecordsQuery } from "@/lib/records/validation";
 import { findMissingRequired, parseRecordValues, recordPatchSchema } from "@/lib/records/values";
-import { authorize } from "@/lib/roles/guard";
+import { requireAccess } from "@/lib/roles/require-access";
 import { findTable, listColumns } from "@/lib/tables/repository";
 import { viewScopeSchema } from "@/lib/views/query";
 
@@ -26,7 +26,7 @@ export const GET = defineHandler.withValidator({ params, query: recordsApiSchema
   c,
   { params, query },
 ) => {
-  const { ownerId } = await authorize(requireAuth(c), "read", params.table);
+  const { ownerId } = await requireAccess(c, "read", params.table);
   const table = await findTable(params.table);
   if (!table) throw httpError(404, NOT_FOUND);
   const columns = await listColumns(table.id);
@@ -56,7 +56,7 @@ export const POST = defineHandler.withValidator({
   body: recordPatchSchema,
 })(async (c, { params, query, body }) => {
   const workspace = c.get("workspaceId");
-  await authorize(requireAuth(c), "create", params.table, query.view);
+  await requireAccess(c, "create", params.table, query.view);
   const table = await findTable(params.table);
   if (!table) throw httpError(404, NOT_FOUND);
   const columns = await listColumns(table.id);
@@ -86,7 +86,7 @@ export const DELETE = defineHandler.withValidator({
 })(async (c, { params, query, body }) => {
   const workspace = c.get("workspaceId");
   const user = requireAuth(c);
-  const { ownerId } = await authorize(user, "delete", params.table, query.view);
+  const { ownerId } = await requireAccess(c, "delete", params.table, query.view);
   const table = await findTable(params.table);
   if (!table) throw httpError(404, NOT_FOUND);
 

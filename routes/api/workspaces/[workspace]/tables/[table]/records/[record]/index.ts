@@ -7,7 +7,7 @@ import { deleteRecords } from "@/lib/records/deletion";
 import { checkLinks } from "@/lib/records/links";
 import { countOwnedRecords, findRecord, updateRecordRow } from "@/lib/records/repository";
 import { parseRecordValues, recordPatchSchema } from "@/lib/records/values";
-import { authorize, authorizeAny } from "@/lib/roles/guard";
+import { requireAccess } from "@/lib/roles/require-access";
 import { findTable, listColumns } from "@/lib/tables/repository";
 import { viewScopeSchema } from "@/lib/views/query";
 import { findView } from "@/lib/views/repository";
@@ -22,12 +22,7 @@ export const GET = defineHandler.withValidator({ params, query: viewScopeSchema 
   c,
   { params, query },
 ) => {
-  const { ownerId } = await authorizeAny(
-    requireAuth(c),
-    ["read", "update"],
-    params.table,
-    query.view,
-  );
+  const { ownerId } = await requireAccess(c, ["read", "update"], params.table, query.view);
   const table = await findTable(params.table);
   if (!table) throw httpError(404, NOT_FOUND);
   const all = await listColumns(table.id);
@@ -47,7 +42,7 @@ export const PATCH = defineHandler.withValidator({
 })(async (c, { params, query, body }) => {
   const workspace = c.get("workspaceId");
   const user = requireAuth(c);
-  const { ownerId } = await authorize(user, "update", params.table, query.view);
+  const { ownerId } = await requireAccess(c, "update", params.table, query.view);
   const table = await findTable(params.table);
   if (!table) throw httpError(404, NOT_FOUND);
   const columns = await listColumns(table.id);
@@ -85,7 +80,7 @@ export const DELETE = defineHandler.withValidator({ params, query: viewScopeSche
 ) => {
   const workspace = c.get("workspaceId");
   const user = requireAuth(c);
-  const { ownerId } = await authorize(user, "delete", params.table, query.view);
+  const { ownerId } = await requireAccess(c, "delete", params.table, query.view);
   const table = await findTable(params.table);
   if (!table) throw httpError(404, NOT_FOUND);
 

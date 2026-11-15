@@ -4,11 +4,13 @@ import { classifyDbError } from "./db-errors";
 
 export const NOT_FOUND = "Not found.";
 
-export function httpError(status: 400 | 403 | 404 | 409, message: string, field?: string) {
-  return new HTTPException(
-    status,
-    field ? { res: Response.json({ message, field }, { status }) } : { message },
-  );
+export type ErrorStatus = 400 | 403 | 404 | 409 | 413 | 415;
+
+export function httpError(status: ErrorStatus, message: string, field?: string) {
+  return new HTTPException(status, {
+    message,
+    res: Response.json(field ? { message, field } : { message }, { status }),
+  });
 }
 
 export function conflictOrBadRequest(error: unknown, conflictMessage: string): never {

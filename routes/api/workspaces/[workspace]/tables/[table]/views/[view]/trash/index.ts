@@ -11,12 +11,10 @@ const params = z.object({
   view: z.coerce.number().int().positive(),
 });
 
-export const DELETE = defineHandler(
-  requireAdmin,
-  defineHandler.withValidator({ params })(async (c, { params }) => {
-    const view = await findDeletedView(params.table, params.view);
-    if (!view) throw httpError(404, "This view isn't in the trash.");
-    await purgeView(c.get("workspaceId"), view);
-    return { ok: true };
-  }),
-);
+export const DELETE = defineHandler.withValidator({ params })(async (c, { params }) => {
+  requireAdmin(c);
+  const view = await findDeletedView(params.table, params.view);
+  if (!view) throw httpError(404, "This view isn't in the trash.");
+  await purgeView(c.get("workspaceId"), view);
+  return { ok: true };
+});

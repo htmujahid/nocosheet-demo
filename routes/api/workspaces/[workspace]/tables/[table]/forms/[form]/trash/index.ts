@@ -11,12 +11,10 @@ const params = z.object({
   form: z.coerce.number().int().positive(),
 });
 
-export const DELETE = defineHandler(
-  requireAdmin,
-  defineHandler.withValidator({ params })(async (_c, { params }) => {
-    const form = await findDeletedForm(params.table, params.form);
-    if (!form) throw httpError(404, "This form isn't in the trash.");
-    await purgeForm(form.id);
-    return { ok: true };
-  }),
-);
+export const DELETE = defineHandler.withValidator({ params })(async (c, { params }) => {
+  requireAdmin(c);
+  const form = await findDeletedForm(params.table, params.form);
+  if (!form) throw httpError(404, "This form isn't in the trash.");
+  await purgeForm(form.id);
+  return { ok: true };
+});

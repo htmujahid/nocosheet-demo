@@ -1,48 +1,43 @@
 import { defineHandler } from "void";
-import { requireAuth } from "void/auth";
 import { z } from "zod";
 
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { conflictOrBadRequest, httpError, NOT_FOUND } from "@/lib/http";
-import { authorizeAny } from "@/lib/roles/guard";
+import { requireAccess } from "@/lib/roles/require-access";
 import { TITLE_FORMATS } from "@/lib/tables/formats";
-import {
-  findColumnByName,
-  findTable,
-  listColumns,
-  updateTable,
-} from "@/lib/tables/repository";
+import { findColumnByName, findTable, listColumns, updateTable } from "@/lib/tables/repository";
 import { tableUpdateSchema } from "@/lib/tables/validation";
 
 const params = z.object({ workspace: z.string(), table: z.coerce.number().int().positive() });
 
 export const GET = defineHandler.withValidator({ params })(async (c, { params }) => {
-  await authorizeAny(requireAuth(c), ["read", "create", "update"], params.table);
+  await requireAccess(c, ["read", "create", "update"], params.table);
   const table = await findTable(params.table);
   if (!table) throw httpError(404, NOT_FOUND);
   return { ...table, columns: await listColumns(table.id) };
 });
 
-export const PATCH = defineHandler(
-  requireAdmin,
-  defineHandler.withValidator({ params, body: tableUpdateSchema })(async (c, { params, body }) => {
-    const table = await findTable(params.table);
-    if (!table) throw httpError(404, NOT_FOUND);
-    const { titleColumn, ...fields } = body;
+export const PATCH = defineHandler.withValidator({ params, body: tableUpdateSchema })(async (
+  c,
+  { params, body },
+) => {
+  requireAdmin(c);
+  const table = await findTable(params.table);
+  if (!table) throw httpError(404, NOT_FOUND);
+  const { titleColumn, ...fields } = body;
 
-    let titleColumnId: number | null | undefined;
-    if (titleColumn === null) titleColumnId = null;
-    else if (titleColumn !== undefined) {
-      const match = await findColumnByName(table.id, titleColumn);
-      if (!match || !TITLE_FORMATS.includes(match.format as never))
-        throw httpError(400, "Pick a column that can be used as the title.");
-      titleColumnId = match.id;
-    }
+  let titleColumnId: number | null | undefined;
+  if (titleColumn === null) titleColumnId = null;
+  else if (titleColumn !== undefined) {
+    const match = await findColumnByName(table.id, titleColumn);
+    if (!match || !TITLE_FORMATS.includes(match.format as never))
+      throw httpError(400, "Pick a column that can be used as the title.");
+    titleColumnId = match.id;
+  }
 
-    try {
-      return await updateTable(table.id, { ...fields, titleColumnId });
-    } catch (error) {
-      conflictOrBadRequest(error, "A table with this name already exists.");
-    }
-  }),
-);
+  try {
+    return await updateTable(table.id, { ...fields, titleColumnId });
+  } catch (error) {
+    conflictOrBadRequest(error, "A table with this name already exists.");
+  }
+});

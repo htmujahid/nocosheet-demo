@@ -15,7 +15,7 @@ import {
 import { createRecordRows, findExistingRecordIds } from "@/lib/records/repository";
 import type { ParsedValue } from "@/lib/records/values";
 import { findMissingRequired, isEditableColumn, parseRecordValues } from "@/lib/records/values";
-import { authorize } from "@/lib/roles/guard";
+import { requireAccess } from "@/lib/roles/require-access";
 import { type Column, findTable, listColumns } from "@/lib/tables/repository";
 import { viewScopeSchema } from "@/lib/views/query";
 
@@ -28,7 +28,7 @@ export const POST = defineHandler.withValidator({
 })(async (c, { params, query, body }) => {
   const workspace = c.get("workspaceId");
   const user = requireAuth(c);
-  await authorize(user, "create", params.table, query.view);
+  await requireAccess(c, "create", params.table, query.view);
   const table = await findTable(params.table);
   if (!table) throw httpError(404, NOT_FOUND);
   const columns = await listColumns(table.id);

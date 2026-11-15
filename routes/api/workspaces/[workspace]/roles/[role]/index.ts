@@ -18,68 +18,65 @@ import { roleUpdateSchema } from "@/lib/roles/validation";
 
 const params = z.object({ workspace: z.string(), role: z.coerce.number().int().positive() });
 
-export const GET = defineHandler(
-  requireAdmin,
-  defineHandler.withValidator({ params })(async (_c, { params }) => {
-    const role = await findRoleWithGrants(params.role);
-    if (!role) throw httpError(404, "Role not found.");
-    return role;
-  }),
-);
+export const GET = defineHandler.withValidator({ params })(async (c, { params }) => {
+  requireAdmin(c);
+  const role = await findRoleWithGrants(params.role);
+  if (!role) throw httpError(404, "Role not found.");
+  return role;
+});
 
-export const PATCH = defineHandler(
-  requireAdmin,
-  defineHandler.withValidator({ params, body: roleUpdateSchema })(async (_c, { params, body }) => {
-    const role = await findRole(params.role);
-    if (!role) throw httpError(404, "Role not found.");
+export const PATCH = defineHandler.withValidator({ params, body: roleUpdateSchema })(async (
+  c,
+  { params, body },
+) => {
+  requireAdmin(c);
+  const role = await findRole(params.role);
+  if (!role) throw httpError(404, "Role not found.");
 
-    if (body.name !== undefined && body.name !== role.name) {
-      if (role.isSystem) throw httpError(400, "Built-in roles can't be renamed.");
-      const existing = await findRoleByName(body.name);
-      if (existing && existing.id !== role.id)
-        throw httpError(409, `A role named "${body.name}" already exists.`);
-    }
-    if (role.kind !== "custom" && body.isDefault)
-      throw httpError(400, `The ${role.name} role can't be the default.`);
-    if (body.isDefault === false && role.isDefault)
-      throw httpError(400, "Make another role the default instead.");
+  if (body.name !== undefined && body.name !== role.name) {
+    if (role.isSystem) throw httpError(400, "Built-in roles can't be renamed.");
+    const existing = await findRoleByName(body.name);
+    if (existing && existing.id !== role.id)
+      throw httpError(409, `A role named "${body.name}" already exists.`);
+  }
+  if (role.kind !== "custom" && body.isDefault)
+    throw httpError(400, `The ${role.name} role can't be the default.`);
+  if (body.isDefault === false && role.isDefault)
+    throw httpError(400, "Make another role the default instead.");
 
-    if (body.grants) await assertGrantable(body.grants);
+  if (body.grants) await assertGrantable(body.grants);
 
-    try {
-      if (body.name !== undefined || body.description !== undefined)
-        await updateRole(role.id, { name: body.name, description: body.description });
-      if (body.grants) await replaceGrants(role.id, body.grants);
-      if (body.isDefault) await makeDefaultRole(role.id);
-    } catch (error) {
-      conflictOrBadRequest(error, `A role named "${body.name}" already exists.`);
-    }
+  try {
+    if (body.name !== undefined || body.description !== undefined)
+      await updateRole(role.id, { name: body.name, description: body.description });
+    if (body.grants) await replaceGrants(role.id, body.grants);
+    if (body.isDefault) await makeDefaultRole(role.id);
+  } catch (error) {
+    conflictOrBadRequest(error, `A role named "${body.name}" already exists.`);
+  }
 
-    return findRoleWithGrants(role.id);
-  }),
-);
+  return findRoleWithGrants(role.id);
+});
 
-export const DELETE = defineHandler(
-  requireAdmin,
-  defineHandler.withValidator({ params })(async (_c, { params }) => {
-    const role = await findRole(params.role);
-    if (!role) throw httpError(404, "Role not found.");
-    if (role.isSystem) throw httpError(400, "Built-in roles can't be deleted.");
-    if (role.isDefault)
-      throw httpError(400, "This is the default role. Make another role the default first.");
+export const DELETE = defineHandler.withValidator({ params })(async (c, { params }) => {
+  requireAdmin(c);
+  const role = await findRole(params.role);
+  if (!role) throw httpError(404, "Role not found.");
+  if (role.isSystem) throw httpError(400, "Built-in roles can't be deleted.");
+  if (role.isDefault)
+    throw httpError(400, "This is the default role. Make another role the default first.");
 
-    const members = await countRoleMembers(role.id);
-    if (members > 0)
-      throw httpError(
-        409,
-        `${members} ${members === 1 ? "member has" : "members have"} this role. Give ${members === 1 ? "them" : "them"} another role first.`,
-      );
+  const members = await countRoleMembers(role.id);
+  if (members > 0)
+    throw httpError(
+      409,
+      `${members} ${members === 1 ? "member has" : "members have"} this role. Give ${members === 1 ? "them" : "them"} another role first.`,
+    );
 
-    try {
-      await deleteRole(role.id);
-    } catch (error) {
-      conflictOrBadRequest(error, "This role is still assigned to members.");
-    }
-    return { ok: true };
-  }),
-);
+  try {
+    await deleteRole(role.id);
+  } catch (error) {
+    conflictOrBadRequest(error, "This role is still assigned to members.");
+  }
+  return { ok: true };
+});

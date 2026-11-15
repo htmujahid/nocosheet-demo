@@ -7,11 +7,9 @@ import { findTable, listDeletedColumns } from "@/lib/tables/repository";
 
 const params = z.object({ workspace: z.string(), table: z.coerce.number().int().positive() });
 
-export const GET = defineHandler(
-  requireAdmin,
-  defineHandler.withValidator({ params })(async (_c, { params }) => {
-    const table = await findTable(params.table);
-    if (!table) throw httpError(404, NOT_FOUND);
-    return { rows: await listDeletedColumns(table.id) };
-  }),
-);
+export const GET = defineHandler.withValidator({ params })(async (c, { params }) => {
+  requireAdmin(c);
+  const table = await findTable(params.table);
+  if (!table) throw httpError(404, NOT_FOUND);
+  return { rows: await listDeletedColumns(table.id) };
+});

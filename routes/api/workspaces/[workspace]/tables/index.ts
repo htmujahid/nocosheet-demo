@@ -14,50 +14,50 @@ import {
 } from "@/lib/tables/repository";
 import { tableInputSchema, tablesDeleteSchema } from "@/lib/tables/validation";
 
-export const GET = defineHandler(
-  requireAdmin,
-  defineHandler.withValidator({ query: tablesSearchSchema })(async (_c, { query }) =>
-    listTables(resolveTablesQuery(query)),
-  ),
-);
+export const GET = defineHandler.withValidator({ query: tablesSearchSchema })(async (
+  c,
+  { query },
+) => {
+  requireAdmin(c);
+  return listTables(resolveTablesQuery(query));
+});
 
-export const POST = defineHandler(
-  requireAdmin,
-  defineHandler.withValidator({ body: tableInputSchema })(async (c, { body }) => {
-    const user = requireAuth(c);
+export const POST = defineHandler.withValidator({ body: tableInputSchema })(async (c, { body }) => {
+  requireAdmin(c);
+  const user = requireAuth(c);
 
-    try {
-      return await createTable(c.get("workspaceId"), body, user.id);
-    } catch (error) {
-      conflictOrBadRequest(error, "A table with this name already exists.");
-    }
-  }),
-);
+  try {
+    return await createTable(c.get("workspaceId"), body, user.id);
+  } catch (error) {
+    conflictOrBadRequest(error, "A table with this name already exists.");
+  }
+});
 
-export const DELETE = defineHandler(
-  requireAdmin,
-  defineHandler.withValidator({ body: tablesDeleteSchema })(async (c, { body }) => {
-    const ids = [...new Set(body.ids)];
+export const DELETE = defineHandler.withValidator({ body: tablesDeleteSchema })(async (
+  c,
+  { body },
+) => {
+  requireAdmin(c);
+  const ids = [...new Set(body.ids)];
 
-    const tables = await findTables(ids);
-    if (tables.length !== ids.length) throw httpError(404, NOT_FOUND);
+  const tables = await findTables(ids);
+  if (tables.length !== ids.length) throw httpError(404, NOT_FOUND);
 
-    const [link] = await findLinkingColumns(ids, { liveOnly: true });
-    if (link)
-      throw httpError(
-        409,
-        `"${link.table}" has a column "${link.column}" that links to a table you are deleting. Delete "${link.table}" first.`,
-      );
+  const [link] = await findLinkingColumns(ids, { liveOnly: true });
+  if (link)
+    throw httpError(
+      409,
+      `"${link.table}" has a column "${link.column}" that links to a table you are deleting. Delete "${link.table}" first.`,
+    );
 
-    try {
-      if (body.permanent) await dropTables(c.get("workspaceId"), tables);
-      else await softDeleteTables(ids, requireAuth(c).id);
-    } catch (error) {
-      throw httpError(
-        409,
-        error instanceof Error ? error.message : "The tables could not be deleted.",
-      );
-    }
-    return { ok: true };
-  }),
-);
+  try {
+    if (body.permanent) await dropTables(c.get("workspaceId"), tables);
+    else await softDeleteTables(ids, requireAuth(c).id);
+  } catch (error) {
+    throw httpError(
+      409,
+      error instanceof Error ? error.message : "The tables could not be deleted.",
+    );
+  }
+  return { ok: true };
+});

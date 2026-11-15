@@ -11,17 +11,15 @@ const params = z.object({
   form: z.coerce.number().int().positive(),
 });
 
-export const POST = defineHandler(
-  requireAdmin,
-  defineHandler.withValidator({ params })(async (_c, { params }) => {
-    const form = await findDeletedForm(params.table, params.form);
-    if (!form) throw httpError(404, "This form isn't in the trash.");
+export const POST = defineHandler.withValidator({ params })(async (c, { params }) => {
+  requireAdmin(c);
+  const form = await findDeletedForm(params.table, params.form);
+  if (!form) throw httpError(404, "This form isn't in the trash.");
 
-    try {
-      await restoreForm(form.id);
-    } catch (error) {
-      conflictOrBadRequest(error, `A form named "${form.name}" already exists.`);
-    }
-    return { id: form.id };
-  }),
-);
+  try {
+    await restoreForm(form.id);
+  } catch (error) {
+    conflictOrBadRequest(error, `A form named "${form.name}" already exists.`);
+  }
+  return { id: form.id };
+});

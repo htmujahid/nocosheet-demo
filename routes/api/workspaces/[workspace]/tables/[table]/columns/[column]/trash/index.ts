@@ -12,19 +12,17 @@ const params = z.object({
   column: z.coerce.number().int().positive(),
 });
 
-export const DELETE = defineHandler(
-  requireAdmin,
-  defineHandler.withValidator({ params })(async (c, { params }) => {
-    const table = await findTable(params.table);
-    if (!table) throw httpError(404, NOT_FOUND);
-    const column = await findDeletedColumn(table.id, params.column);
-    if (!column) throw httpError(404, "This column isn't in the trash.");
+export const DELETE = defineHandler.withValidator({ params })(async (c, { params }) => {
+  requireAdmin(c);
+  const table = await findTable(params.table);
+  if (!table) throw httpError(404, NOT_FOUND);
+  const column = await findDeletedColumn(table.id, params.column);
+  if (!column) throw httpError(404, "This column isn't in the trash.");
 
-    try {
-      await dropColumn(c.get("workspaceId"), table, column);
-    } catch (error) {
-      throw httpError(409, classifyDbError(error).message);
-    }
-    return { ok: true };
-  }),
-);
+  try {
+    await dropColumn(c.get("workspaceId"), table, column);
+  } catch (error) {
+    throw httpError(409, classifyDbError(error).message);
+  }
+  return { ok: true };
+});

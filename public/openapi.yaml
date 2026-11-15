@@ -2435,18 +2435,15 @@ components:
   responses:
     BadRequest:
       description: The request is invalid. Schema failures return a ValidationError; other problems return
-        a plain text message, or an Error when a field is named.
+        an Error.
       content:
         application/json:
           schema:
             oneOf:
             - $ref: '#/components/schemas/ValidationError'
             - $ref: '#/components/schemas/Error'
-        text/plain:
-          schema:
-            type: string
     Unauthorized:
-      description: Not signed in.
+      description: Not signed in. The framework answers with a plain text message.
       content:
         text/plain:
           schema:
@@ -2454,28 +2451,33 @@ components:
     Forbidden:
       description: You don't have permission to do this.
       content:
-        text/plain:
+        application/json:
           schema:
-            type: string
+            $ref: '#/components/schemas/Error'
     NotFound:
-      description: The table, record or other item doesn't exist.
+      description: The table, record or other item doesn't exist, or you can't see it.
       content:
-        text/plain:
+        application/json:
           schema:
-            type: string
+            $ref: '#/components/schemas/Error'
     Conflict:
       description: The change conflicts with existing data, for example a name that is already taken.
       content:
-        text/plain:
-          schema:
-            type: string
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
     PayloadTooLarge:
       description: The file is too large.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
     UnsupportedMediaType:
       description: The file type isn't allowed.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
   schemas:
     Error:
       type: object
@@ -2486,8 +2488,8 @@ components:
           type: string
       required:
       - message
-      description: Returned as JSON when an error names the field it is about. Other errors are a plain
-        text message.
+      description: Returned for every error except schema validation failures. field is set when the error
+        is about one field.
     ValidationError:
       type: object
       properties:

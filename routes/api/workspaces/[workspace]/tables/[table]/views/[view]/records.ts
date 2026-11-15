@@ -1,5 +1,4 @@
 import { defineHandler } from "void";
-import { requireAuth } from "void/auth";
 import { z } from "zod";
 
 import { httpError, NOT_FOUND } from "@/lib/http";
@@ -8,7 +7,7 @@ import { recordsApiSchema, resolveRecordsQuery, withFilters } from "@/lib/record
 import { findRecords } from "@/lib/records/repository";
 import { sortKeyOf } from "@/lib/records/sort-param";
 import { checkRecordsQuery } from "@/lib/records/validation";
-import { authorize } from "@/lib/roles/guard";
+import { requireAccess } from "@/lib/roles/require-access";
 import { findTable, listColumns } from "@/lib/tables/repository";
 import { physicalViewName } from "@/lib/views/naming";
 import { findView } from "@/lib/views/repository";
@@ -23,7 +22,7 @@ export const GET = defineHandler.withValidator({ params, query: recordsApiSchema
   c,
   { params, query },
 ) => {
-  const { ownerId } = await authorize(requireAuth(c), "read", params.table, params.view);
+  const { ownerId } = await requireAccess(c, "read", params.table, params.view);
   const table = await findTable(params.table);
   if (!table) throw httpError(404, NOT_FOUND);
   const row = await findView(table.id, params.view);

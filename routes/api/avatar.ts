@@ -3,6 +3,7 @@ import { requireAuth } from "void/auth";
 import { storage } from "void/storage";
 
 import { AVATAR_MAX_BYTES, AVATAR_TYPES, avatarKey, avatarUrl } from "@/lib/avatar";
+import { httpError } from "@/lib/http";
 
 const USER_ID_PATTERN = /^[\w-]+$/;
 
@@ -30,10 +31,9 @@ export const POST = defineHandler(async (c) => {
   const user = requireAuth(c);
   const file = (await c.req.formData()).get("file");
 
-  if (!(file instanceof File)) return c.json({ error: "Missing file" }, 400);
-  if (!AVATAR_TYPES.includes(file.type))
-    return c.json({ error: "Use a PNG, JPEG, WebP or GIF image" }, 415);
-  if (file.size > AVATAR_MAX_BYTES) return c.json({ error: "Image must be 2 MB or smaller" }, 413);
+  if (!(file instanceof File)) throw httpError(400, "Missing file");
+  if (!AVATAR_TYPES.includes(file.type)) throw httpError(415, "Use a PNG, JPEG, WebP or GIF image");
+  if (file.size > AVATAR_MAX_BYTES) throw httpError(413, "Image must be 2 MB or smaller");
 
   await storage.put(avatarKey(user.id), file, { httpMetadata: { contentType: file.type } });
 

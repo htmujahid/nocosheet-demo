@@ -11,17 +11,15 @@ const params = z.object({
   view: z.coerce.number().int().positive(),
 });
 
-export const POST = defineHandler(
-  requireAdmin,
-  defineHandler.withValidator({ params })(async (_c, { params }) => {
-    const view = await findDeletedView(params.table, params.view);
-    if (!view) throw httpError(404, "This view isn't in the trash.");
+export const POST = defineHandler.withValidator({ params })(async (c, { params }) => {
+  requireAdmin(c);
+  const view = await findDeletedView(params.table, params.view);
+  if (!view) throw httpError(404, "This view isn't in the trash.");
 
-    try {
-      await restoreView(view.id);
-    } catch (error) {
-      conflictOrBadRequest(error, `A view named "${view.name}" already exists.`);
-    }
-    return { id: view.id };
-  }),
-);
+  try {
+    await restoreView(view.id);
+  } catch (error) {
+    conflictOrBadRequest(error, `A view named "${view.name}" already exists.`);
+  }
+  return { id: view.id };
+});

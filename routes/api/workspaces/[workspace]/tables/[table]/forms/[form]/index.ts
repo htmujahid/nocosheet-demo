@@ -7,7 +7,7 @@ import { requireAdmin } from "@/lib/auth/require-admin";
 import { findForm, softDeleteForm, updateForm } from "@/lib/forms/repository";
 import { checkFormDefinition, formInputSchema } from "@/lib/forms/validation";
 import { conflictOrBadRequest, httpError, NOT_FOUND } from "@/lib/http";
-import { authorize } from "@/lib/roles/guard";
+import { requireAccess } from "@/lib/roles/require-access";
 import { findTable, listColumns } from "@/lib/tables/repository";
 
 const params = z.object({
@@ -18,7 +18,7 @@ const params = z.object({
 
 export const GET = defineHandler.withValidator({ params })(async (c, { params }) => {
   const user = requireAuth(c);
-  await authorize(user, "create", params.table, params.form);
+  await requireAccess(c, "create", params.table, params.form);
   const table = await findTable(params.table);
   if (!table) throw httpError(404, NOT_FOUND);
   const form = await findForm(table.id, params.form);
@@ -34,29 +34,28 @@ export const GET = defineHandler.withValidator({ params })(async (c, { params })
   };
 });
 
-export const PATCH = defineHandler(
-  requireAdmin,
-  defineHandler.withValidator({ params, body: formInputSchema })(async (c, { params, body }) => {
-    const table = await findTable(params.table);
-    if (!table) throw httpError(404, NOT_FOUND);
-    if (!(await findForm(table.id, params.form))) throw httpError(404, NOT_FOUND);
+export const PATCH = defineHandler.withValidator({ params, body: formInputSchema })(async (
+  c,
+  { params, body },
+) => {
+  requireAdmin(c);
+  const table = await findTable(params.table);
+  if (!table) throw httpError(404, NOT_FOUND);
+  if (!(await findForm(table.id, params.form))) throw httpError(404, NOT_FOUND);
 
-    const problem = checkFormDefinition(await listColumns(table.id), body);
-    if (problem) throw httpError(400, problem);
+  const problem = checkFormDefinition(await listColumns(table.id), body);
+  if (problem) throw httpError(400, problem);
 
-    try {
-      return await updateForm(params.form, body);
-    } catch (error) {
-      conflictOrBadRequest(error, "A form with this name already exists.");
-    }
-  }),
-);
+  try {
+    return await updateForm(params.form, body);
+  } catch (error) {
+    conflictOrBadRequest(error, "A form with this name already exists.");
+  }
+});
 
-export const DELETE = defineHandler(
-  requireAdmin,
-  defineHandler.withValidator({ params })(async (c, { params }) => {
-    if (!(await findForm(params.table, params.form))) throw httpError(404, NOT_FOUND);
-    await softDeleteForm(params.form, requireAuth(c).id);
-    return { ok: true };
-  }),
-);
+export const DELETE = defineHandler.withValidator({ params })(async (c, { params }) => {
+  requireAdmin(c);
+  if (!(await findForm(params.table, params.form))) throw httpError(404, NOT_FOUND);
+  await softDeleteForm(params.form, requireAuth(c).id);
+  return { ok: true };
+});
