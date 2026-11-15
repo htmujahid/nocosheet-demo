@@ -5,6 +5,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 
 import {
   ChevronDownIcon,
+  DownloadIcon,
   PencilIcon,
   PlusIcon,
   RefreshCwIcon,
@@ -23,6 +24,7 @@ import {
   MenuTrigger,
 } from "@/components/ui/menu";
 import { FormsMenu } from "@/components/workspace/forms/forms-menu";
+import { useExportRecords } from "@/components/workspace/records/use-export-records";
 import { workspaceKeys } from "@/data/workspace/keys";
 import { viewsQueryOptions } from "@/data/workspace/views";
 import { useAccess } from "@/hooks/use-access";
@@ -47,6 +49,8 @@ export function ViewActions({
   const { data: views = [] } = useQuery(viewsQueryOptions(workspace, tableId));
   const active = views.find((item) => item.id === view);
   const canCreate = access.can("create", tableId);
+  const canExport = access.can("export", tableId) && access.can("read", tableId);
+  const exportRecords = useExportRecords(workspace, tableId, view);
 
   return (
     <div className="flex items-center gap-2">
@@ -76,6 +80,20 @@ export function ViewActions({
               Refresh
             </MenuItem>
           </MenuGroup>
+          {canExport && (
+            <>
+              <MenuSeparator />
+              <MenuGroup>
+                <MenuItem
+                  disabled={exportRecords.isPending}
+                  onClick={() => exportRecords.mutate(undefined)}
+                >
+                  <DownloadIcon aria-hidden="true" />
+                  Export
+                </MenuItem>
+              </MenuGroup>
+            </>
+          )}
           {access.admin && active && (
             <>
               <MenuSeparator />

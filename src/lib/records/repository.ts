@@ -247,6 +247,7 @@ export async function findExportRecords(
   table: Table,
   columns: Column[],
   ownerId?: string,
+  source?: string,
 ) {
   const exported = columns.filter((column) => column.format !== "binary");
   const names = [
@@ -259,7 +260,7 @@ export async function findExportRecords(
   ];
 
   const rows = await db.all<Record<string, unknown>>(
-    sql`select ${raw(names.map((name) => `t.${quoteIdent(name)} as ${quoteIdent(name)}`).join(", "))} from ${raw(quoteIdent(physicalTableName(workspace, table.tableName)))} t ${ownerId ? sql`where t."created_by" = ${ownerId}` : sql``} order by t."id" limit ${EXPORT_LIMIT + 1}`,
+    sql`select ${raw(names.map((name) => `t.${quoteIdent(name)} as ${quoteIdent(name)}`).join(", "))} from ${raw(quoteIdent(source ?? physicalTableName(workspace, table.tableName)))} t ${ownerId ? sql`where t."created_by" = ${ownerId}` : sql``} order by t."id" limit ${EXPORT_LIMIT + 1}`,
   );
 
   return {

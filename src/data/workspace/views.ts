@@ -35,6 +35,20 @@ export const viewQueryOptions = (workspace: string, tableId: number, viewId: num
     retry: false,
   });
 
+export const viewExportQueryOptions = (workspace: string, tableId: number, viewId: number) =>
+  queryOptions({
+    queryKey: workspaceKeys.viewExport(tableId, viewId),
+    queryFn: () =>
+      unwrapFetch(
+        fetch("/api/workspaces/:workspace/tables/:table/views/:view/export", {
+          params: { workspace, table: String(tableId), view: String(viewId) },
+        }),
+      ),
+    staleTime: 0,
+    gcTime: 0,
+    retry: false,
+  });
+
 export const viewsPageQueryOptions = (workspace: string, tableId: number, query: ViewsQuery) =>
   queryOptions({
     queryKey: workspaceKeys.viewList(tableId, query),

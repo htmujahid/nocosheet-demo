@@ -13,6 +13,7 @@ export const workspaceKeys = {
   columnsTrash: (id: number) => [...workspaceKeys.table(id), "columns-trash"] as const,
   views: (id: number) => [...workspaceKeys.table(id), "views"] as const,
   view: (id: number, viewId: number) => [...workspaceKeys.views(id), "detail", viewId] as const,
+  viewExport: (id: number, viewId: number) => [...workspaceKeys.view(id, viewId), "export"] as const,
   viewList: (id: number, query: object) => [...workspaceKeys.views(id), "list", query] as const,
   viewsTrash: (id: number) => [...workspaceKeys.views(id), "trash"] as const,
   forms: (id: number) => [...workspaceKeys.table(id), "forms"] as const,

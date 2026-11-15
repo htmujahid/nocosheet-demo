@@ -9,7 +9,7 @@ import { buildViewerColumns, type ViewScope } from "./columns";
 
 type Detail = Parameters<typeof buildViewerColumns>[0] & { name: string; tableName: string };
 
-export function useRecordScope(workspace: string, tableId: number, view?: ViewScope) {
+export function useRecordScope(workspace: string, tableId: number, view?: Pick<ViewScope, "id">) {
   const options = view
     ? viewQueryOptions(workspace, tableId, view.id)
     : tableQueryOptions(workspace, tableId);
@@ -17,6 +17,7 @@ export function useRecordScope(workspace: string, tableId: number, view?: ViewSc
 
   return useMemo(
     () => ({
+      name: data.name,
       tableName: view ? data.tableName : data.name,
       columns: buildViewerColumns(data),
     }),
