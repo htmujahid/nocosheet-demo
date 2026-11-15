@@ -4,18 +4,28 @@ import { z } from "zod";
 
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { conflictOrBadRequest, httpError } from "@/lib/http";
-import { findTable } from "@/lib/tables/repository";
-import {
-  findView,
-  softDeleteView,
-  updateView,
-} from "@/lib/views/repository";
+import { authorize } from "@/lib/roles/guard";
+import { findTable, listColumns } from "@/lib/tables/repository";
+import { findView, softDeleteView, updateView } from "@/lib/views/repository";
 import { viewPatchSchema } from "@/lib/views/validation";
 
 const params = z.object({
   workspace: z.string(),
   table: z.coerce.number().int().positive(),
   view: z.coerce.number().int().positive(),
+});
+
+export const GET = defineHandler.withValidator({ params })(async (c, { params }) => {
+  await authorize(requireAuth(c), "read", params.table);
+  const table = await findTable(params.table);
+  if (!table) throw httpError(404, "Table not found.");
+  const view = await findView(table.id, params.view);
+  if (!view) throw httpError(404, "View not found.");
+
+  const columns = (await listColumns(table.id)).filter((column) =>
+    view.selectColumns.includes(column.columnName),
+  );
+  return { ...view, tableName: table.name, titleColumnId: table.titleColumnId, columns };
 });
 
 export const PATCH = defineHandler(

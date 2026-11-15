@@ -30,7 +30,14 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Switch } from "@/components/ui/switch";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Tabs, TabsList, TabsPanel, TabsTab } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { toastManager } from "@/components/ui/toast";
@@ -102,7 +109,10 @@ function ImportForm({
   const rows = hasHeader ? grid.slice(1) : grid;
   const headersKey = `${hasHeader}|${headers.join("\u0000")}`;
 
-  const auto = useMemo(() => (hasHeader ? matchHeaders(headers, columns) : headers.map(() => null)), [headers, hasHeader, columns]);
+  const auto = useMemo(
+    () => (hasHeader ? matchHeaders(headers, columns) : headers.map(() => null)),
+    [headers, hasHeader, columns],
+  );
   const mapping = headers.map((_, index) =>
     overrides.key === headersKey && index in overrides.map ? overrides.map[index] : auto[index],
   );
@@ -242,7 +252,10 @@ function ImportForm({
               {fileName ? (
                 <div className="flex w-full items-center justify-between gap-3 rounded-lg border px-3 py-2">
                   <span className="flex min-w-0 items-center gap-2 text-sm">
-                    <FileTextIcon aria-hidden="true" className="size-4 shrink-0 text-muted-foreground" />
+                    <FileTextIcon
+                      aria-hidden="true"
+                      className="size-4 shrink-0 text-muted-foreground"
+                    />
                     <span className="truncate">{fileName}</span>
                   </span>
                   <Button type="button" variant="ghost" size="sm" onClick={removeFile}>
@@ -256,7 +269,9 @@ function ImportForm({
                   onChange={(event) => void chooseFile(event.target.files?.[0])}
                 />
               )}
-              <FieldDescription>Dates use YYYY-MM-DD. Link columns take record IDs.</FieldDescription>
+              <FieldDescription>
+                Dates use YYYY-MM-DD. Link columns take record IDs.
+              </FieldDescription>
             </Field>
             {fileError && (
               <Alert variant="error" className="mt-3">
@@ -440,7 +455,12 @@ function ImportForm({
       </SheetPanel>
       <SheetFooter>
         <SheetClose render={<Button type="button" variant="ghost" />}>Cancel</SheetClose>
-        <Button type="button" disabled={!canImport} loading={importRecords.isPending} onClick={submit}>
+        <Button
+          type="button"
+          disabled={!canImport}
+          loading={importRecords.isPending}
+          onClick={submit}
+        >
           <UploadIcon aria-hidden="true" />
           Import {rows.length > 0 ? rows.length : ""}
           <Kbd className="max-sm:hidden">Ctrl ↵</Kbd>

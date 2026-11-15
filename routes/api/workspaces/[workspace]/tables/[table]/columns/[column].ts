@@ -3,6 +3,7 @@ import { requireAuth } from "void/auth";
 import { z } from "zod";
 
 import { requireAdmin } from "@/lib/auth/require-admin";
+import { findFormsUsingColumn } from "@/lib/forms/repository";
 import { conflictOrBadRequest, httpError } from "@/lib/http";
 import { SEARCHABLE_FORMATS } from "@/lib/tables/formats";
 import {
@@ -48,11 +49,18 @@ export const DELETE = defineHandler(
     const column = await findColumn(table.id, params.column);
     if (!column) throw httpError(404, "Column not found.");
 
-    const views = await findViewsUsingColumn(table.id, column.columnName);
-    if (views.length > 0)
+    const [views, forms] = await Promise.all([
+      findViewsUsingColumn(table.id, column.columnName),
+      findFormsUsingColumn(table.id, column.columnName),
+    ]);
+    const users = [
+      ...views.map((view) => `the ${view.deletedAt ? "deleted " : ""}view "${view.name}"`),
+      ...forms.map((form) => `the ${form.deletedAt ? "deleted " : ""}form "${form.name}"`),
+    ];
+    if (users.length > 0)
       throw httpError(
         409,
-        `"${column.name}" is used by ${views.map((view) => (view.deletedAt ? `the deleted view "${view.name}"` : `the view "${view.name}"`)).join(", ")}, so it can't be deleted.`,
+        `"${column.name}" is used by ${users.join(", ")}, so it can't be deleted.`,
       );
 
     const dependents = await findColumnsUsing(table.id, column.columnName);

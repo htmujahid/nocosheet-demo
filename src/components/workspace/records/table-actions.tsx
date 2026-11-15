@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/menu";
 import { DeleteTablesAlert } from "@/components/workspace/tables/delete-tables-dialog";
 import { ViewsMenu } from "@/components/workspace/views/views-menu";
+import { formsQueryOptions } from "@/data/workspace/forms";
 import { workspaceKeys } from "@/data/workspace/keys";
 import { viewsQueryOptions } from "@/data/workspace/views";
 import { useAccess } from "@/hooks/use-access";
@@ -41,7 +42,11 @@ export function TableActions({ workspace, table }: { workspace: string; table: s
   const tableId = Number(table);
   const exportRecords = useExportRecords(workspace, tableId);
   const { data: views } = useQuery(viewsQueryOptions(workspace, tableId));
-  const showViews = access.admin || (views?.length ?? 0) > 0;
+  const { data: forms } = useQuery({
+    ...formsQueryOptions(workspace, tableId),
+    enabled: access.can("create", tableId),
+  });
+  const showViews = access.admin || (views?.length ?? 0) > 0 || (forms?.length ?? 0) > 0;
   const canCreate = access.can("create", tableId);
   const canExport = access.can("export", tableId) && access.can("read", tableId);
 
@@ -133,7 +138,10 @@ export function TableActions({ workspace, table }: { workspace: string; table: s
               {access.admin && (
                 <MenuLinkItem
                   render={
-                    <Link to="/workspaces/$workspace/tables/$table/trash" params={{ workspace, table }} />
+                    <Link
+                      to="/workspaces/$workspace/tables/$table/trash"
+                      params={{ workspace, table }}
+                    />
                   }
                 >
                   <ArchiveRestoreIcon aria-hidden="true" />

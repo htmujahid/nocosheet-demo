@@ -1,4 +1,11 @@
-import { columnTable, favoriteTable, resourceTable, tableTable, viewTable } from "@db/schema";
+import {
+  columnTable,
+  favoriteTable,
+  formTable,
+  resourceTable,
+  tableTable,
+  viewTable,
+} from "@db/schema";
 import {
   and,
   asc,
@@ -535,6 +542,14 @@ export async function dropTables(workspace: string, rows: { id: number; tableNam
         inArray(
           resourceTable.id,
           db.select({ id: viewTable.id }).from(viewTable).where(inArray(viewTable.tableId, ids)),
+        ),
+      ),
+    db
+      .delete(resourceTable)
+      .where(
+        inArray(
+          resourceTable.id,
+          db.select({ id: formTable.id }).from(formTable).where(inArray(formTable.tableId, ids)),
         ),
       ),
     db.delete(resourceTable).where(inArray(resourceTable.id, ids)),

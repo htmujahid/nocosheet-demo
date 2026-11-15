@@ -4,13 +4,12 @@ import { keepPreviousData, useQuery, useSuspenseQuery } from "@tanstack/react-qu
 
 import { CursorPagination } from "@/components/shared/data-table/cursor-pagination";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { tableQueryOptions } from "@/data/workspace/tables";
-import { viewRecordsQueryOptions } from "@/data/workspace/views";
+import { viewQueryOptions, viewRecordsQueryOptions } from "@/data/workspace/views";
 import { useAccess } from "@/hooks/use-access";
 import { RECORD_PAGE_SIZES } from "@/lib/records/query";
 import { cn } from "@/lib/utils";
 
-import { buildViewColumns, type ViewScope } from "../columns";
+import { buildViewerColumns, type ViewScope } from "../columns";
 import { RecordsGrid, type ViewerRow } from "../records-grid";
 import { useUpdateCell } from "../use-update-cell";
 import { GridToolbar } from "./grid-toolbar";
@@ -32,11 +31,8 @@ export function ViewGridView({
   onOpenRecord?: (id: number) => void;
 }) {
   const access = useAccess();
-  const { data: table } = useSuspenseQuery(tableQueryOptions(workspace, tableId));
-  const columns = useMemo(
-    () => buildViewColumns(table, view.selectColumns),
-    [table, view.selectColumns],
-  );
+  const { data: detail } = useSuspenseQuery(viewQueryOptions(workspace, tableId, view.id));
+  const columns = useMemo(() => buildViewerColumns(detail), [detail]);
   const { query, setUrlQuery, setCursor } = useRecordsQuery(columns);
 
   const recordsOptions = viewRecordsQueryOptions(workspace, tableId, view.id, query);

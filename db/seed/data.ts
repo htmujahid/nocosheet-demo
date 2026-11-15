@@ -1178,6 +1178,14 @@ export const tables: SeedTable[] = [
         where: [{ column: "Status", op: "is", value: "Lead" }],
       },
     ],
+    forms: [
+      {
+        name: "Lead intake",
+        icon: "inbox",
+        description: "Tell us about a company that wants to work with us.",
+        columns: ["Company", "Industry", "Contact email", "Website", "Notes"],
+      },
+    ],
   },
   {
     name: "Projects",
@@ -1214,6 +1222,14 @@ export const tables: SeedTable[] = [
         description: "High and urgent projects.",
         columns: ["Name", "Client", "Status", "Due date", "Budget"],
         where: [{ column: "Priority", op: "is_any_of", value: ["High", "Urgent"] }],
+      },
+    ],
+    forms: [
+      {
+        name: "Project proposal",
+        icon: "lightbulb",
+        description: "Propose a new project with its client, budget and timeline.",
+        columns: ["Name", "Client", "Owner", "Budget", "Due date", "Description"],
       },
     ],
   },
@@ -1271,6 +1287,14 @@ export const tables: SeedTable[] = [
         ],
       },
     ],
+    forms: [
+      {
+        name: "Request a task",
+        icon: "clipboard-list",
+        description: "Ask the team to pick up a piece of work.",
+        columns: ["Title", "Project", "Priority", "Due date", "Notes"],
+      },
+    ],
   },
   {
     name: "Invoices",
@@ -1303,6 +1327,14 @@ export const tables: SeedTable[] = [
         description: "Invoices past their due date.",
         columns: ["Number", "Client", "Project", "Amount", "Due"],
         where: [{ column: "Status", op: "is", value: "Overdue" }],
+      },
+    ],
+    forms: [
+      {
+        name: "Invoice request",
+        icon: "receipt",
+        description: "Request a new invoice for a client project.",
+        columns: ["Number", "Client", "Project", "Amount", "Due"],
       },
     ],
   },
@@ -1345,6 +1377,15 @@ export const tables: SeedTable[] = [
         where: [{ column: "Discontinued", op: "is", value: false }],
       },
     ],
+    forms: [
+      {
+        name: "Product suggestion",
+        icon: "package",
+        description: "Suggest a product to add to the catalog.",
+        columns: ["SKU", "Name", "Category", "Price", "Supplier"],
+        open: false,
+      },
+    ],
   },
   {
     name: "Bug Reports",
@@ -1373,6 +1414,14 @@ export const tables: SeedTable[] = [
           { column: "Severity", op: "is_any_of", value: ["High", "Critical"] },
           { column: "Status", op: "is_not", value: "Fixed" },
         ],
+      },
+    ],
+    forms: [
+      {
+        name: "Report a bug",
+        icon: "bug",
+        description: "Tell us what went wrong and how to reproduce it.",
+        columns: ["Title", "Severity", "Project", "Steps to reproduce"],
       },
     ],
   },
@@ -1406,6 +1455,14 @@ export const tables: SeedTable[] = [
         description: "Everything that is already live.",
         columns: ["Title", "Channel", "Author", "Publish date", "URL", "Quality"],
         where: [{ column: "Status", op: "is", value: "Published" }],
+      },
+    ],
+    forms: [
+      {
+        name: "Content idea",
+        icon: "lightbulb",
+        description: "Pitch a post for the content calendar.",
+        columns: ["Title", "Channel", "Author", "Publish date"],
       },
     ],
   },

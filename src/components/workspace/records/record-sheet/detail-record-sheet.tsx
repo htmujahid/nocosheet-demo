@@ -1,18 +1,13 @@
 import { useState } from "react";
 
-import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 
 import { Sheet, SheetPopup } from "@/components/ui/sheet";
 import { recordQueryOptions } from "@/data/workspace/records";
-import { tableQueryOptions } from "@/data/workspace/tables";
 import { toFormValues } from "@/lib/records/form";
 
-import {
-  buildViewColumns,
-  buildViewerColumns,
-  type ViewerColumn,
-  type ViewScope,
-} from "../columns";
+import { type ViewerColumn, type ViewScope } from "../columns";
+import { useRecordScope } from "../use-record-scope";
 import { RecordForm } from "./record-form";
 import { RecordSheetSkeleton } from "./skeleton";
 import { useRecordForm } from "./use-record-form";
@@ -63,7 +58,7 @@ export function DetailRecordSheet({
   onClose: () => void;
 }) {
   const [open, setOpen] = useState(true);
-  const { data: table } = useSuspenseQuery(tableQueryOptions(workspace, tableId));
+  const scope = useRecordScope(workspace, tableId, view);
   const { data: record, error } = useQuery(recordQueryOptions(workspace, tableId, recordId));
 
   return (
@@ -80,13 +75,17 @@ export function DetailRecordSheet({
             key={recordId}
             workspace={workspace}
             tableId={tableId}
-            tableName={table.name}
+            tableName={scope.tableName}
             recordId={recordId}
             record={record}
-            columns={view ? buildViewColumns(table, view.selectColumns) : buildViewerColumns(table)}
+            columns={scope.columns}
           />
         ) : (
-          <RecordSheetSkeleton title={`Record ${recordId}`} tableName={table.name} error={error} />
+          <RecordSheetSkeleton
+            title={`Record ${recordId}`}
+            tableName={scope.tableName}
+            error={error}
+          />
         )}
       </SheetPopup>
     </Sheet>

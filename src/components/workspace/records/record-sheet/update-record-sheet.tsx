@@ -1,22 +1,17 @@
 import { useState } from "react";
 
-import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetClose, SheetFooter, SheetPopup } from "@/components/ui/sheet";
 import { toastManager } from "@/components/ui/toast";
 import { workspaceKeys } from "@/data/workspace/keys";
 import { recordQueryOptions, updateRecordMutationOptions } from "@/data/workspace/records";
-import { tableQueryOptions } from "@/data/workspace/tables";
 import { buildPatch, toFormValues, type FormValues } from "@/lib/records/form";
 
-import {
-  buildViewColumns,
-  buildViewerColumns,
-  type ViewerColumn,
-  type ViewScope,
-} from "../columns";
+import { type ViewerColumn, type ViewScope } from "../columns";
 import { DeleteRecordsDialog } from "../delete-records-dialog";
+import { useRecordScope } from "../use-record-scope";
 import { RecordForm } from "./record-form";
 import { RecordSheetSkeleton } from "./skeleton";
 import { useRecordForm } from "./use-record-form";
@@ -116,7 +111,7 @@ export function UpdateRecordSheet({
   onClose: () => void;
 }) {
   const [open, setOpen] = useState(true);
-  const { data: table } = useSuspenseQuery(tableQueryOptions(workspace, tableId));
+  const scope = useRecordScope(workspace, tableId, view);
   const { data: record, error } = useQuery(recordQueryOptions(workspace, tableId, recordId));
 
   return (
@@ -133,15 +128,19 @@ export function UpdateRecordSheet({
             key={recordId}
             workspace={workspace}
             tableId={tableId}
-            tableName={table.name}
+            tableName={scope.tableName}
             recordId={recordId}
             record={record}
-            columns={view ? buildViewColumns(table, view.selectColumns) : buildViewerColumns(table)}
+            columns={scope.columns}
             canDelete={canDelete}
             onDeleted={() => setOpen(false)}
           />
         ) : (
-          <RecordSheetSkeleton title={`Record ${recordId}`} tableName={table.name} error={error} />
+          <RecordSheetSkeleton
+            title={`Record ${recordId}`}
+            tableName={scope.tableName}
+            error={error}
+          />
         )}
       </SheetPopup>
     </Sheet>

@@ -12,7 +12,9 @@ import {
 import { userTable } from "../.void/better-auth-schema";
 import { PERMISSIONS } from "../src/lib/roles/permissions";
 
-const RESOURCE_KINDS = ["table", "view"] as const;
+const RESOURCE_KINDS = ["table", "view", "form"] as const;
+
+const FORM_VISIBILITIES = ["private", "public"] as const;
 
 const lower = (column: AnySQLiteColumn) => sql`lower(${column})`;
 const live = (column: AnySQLiteColumn) => sql`${column} is null`;
@@ -158,6 +160,39 @@ export const workspaceSchema = <W extends string = "default">(workspaceId: W = "
     ],
   );
 
+  const formTable = sqliteTable(
+    name("form"),
+    {
+      id: integer("id")
+        .primaryKey()
+        .references(() => resourceTable.id, { onDelete: "cascade" }),
+      tableId: integer("table_id")
+        .notNull()
+        .references(() => tableTable.id, { onDelete: "cascade" }),
+      formKey: text("form_key").notNull(),
+      name: text("name").notNull(),
+      description: text("description"),
+      icon: text("icon"),
+      visibility: text("visibility", { enum: FORM_VISIBILITIES }).notNull().default("private"),
+      isOpen: integer("is_open", { mode: "boolean" }).notNull().default(false),
+      selectColumns: json<string[]>("select_columns", []),
+      position: integer("position").notNull().default(0),
+      metadata: json<Record<string, unknown>>("metadata", {}),
+      createdBy: createdBy(),
+      ...timestamps,
+      deletedAt: deletedAt(),
+      deletedBy: deletedBy(),
+    },
+    (t) => [
+      uniqueIndex(name("form_name")).on(t.tableId, lower(t.name)).where(live(t.deletedAt)),
+      uniqueIndex(name("form_form_key")).on(t.formKey),
+      index(name("form_table_position")).on(t.tableId, t.position).where(live(t.deletedAt)),
+      index(name("form_deleted"))
+        .on(t.deletedAt)
+        .where(sql`${t.deletedAt} is not null`),
+    ],
+  );
+
   const favoriteTable = sqliteTable(
     name("favorite"),
     {
@@ -261,6 +296,7 @@ export const workspaceSchema = <W extends string = "default">(workspaceId: W = "
     tableTable,
     columnTable,
     viewTable,
+    formTable,
     favoriteTable,
     trashTable,
     roleTable,
@@ -275,6 +311,7 @@ export const {
   tableTable,
   columnTable,
   viewTable,
+  formTable,
   favoriteTable,
   trashTable,
   roleTable,

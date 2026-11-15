@@ -1,5 +1,7 @@
 import type { SeedContext } from "void/seed";
 
+import { newFormKey } from "../../src/lib/forms/naming";
+import { checkFormDefinition, formInputSchema } from "../../src/lib/forms/validation";
 import type { FilterCondition } from "../../src/lib/records/filters";
 import {
   buildAddColumn,
@@ -74,6 +76,14 @@ export type SeedView = {
   }[];
 };
 
+export type SeedForm = {
+  name: string;
+  icon: string;
+  description: string;
+  columns: string[];
+  open?: boolean;
+};
+
 export type SeedTable = {
   name: string;
   icon: string;
@@ -83,6 +93,7 @@ export type SeedTable = {
   columns: SeedColumn[];
   rows: SeedRow[];
   views?: SeedView[];
+  forms?: SeedForm[];
 };
 
 type Seeded = {
@@ -322,8 +333,44 @@ export async function seedTable(
     db.run(buildCreateView(physicalViewName(WORKSPACE, viewName), physicalName, selected, where));
   }
 
+  for (const [index, form] of (def.forms ?? []).entries()) {
+    const input = formInputSchema.parse({
+      name: form.name,
+      description: form.description,
+      icon: form.icon,
+      isOpen: form.open ?? true,
+      selectColumns: form.columns.map((name) => {
+        const found = columnRows.get(name);
+        if (!found) throw new Error(`${def.name}: form "${form.name}" uses unknown column ${name}`);
+        return found.columnName;
+      }),
+    });
+    const problem = checkFormDefinition(allColumns, input);
+    if (problem) throw new Error(`${def.name}: form "${form.name}": ${problem}`);
+
+    const [formResource] = await db
+      .insert(schema.resourceTable)
+      .values({ kind: "form" })
+      .returning({ id: schema.resourceTable.id });
+    await db.insert(schema.formTable).values({
+      id: formResource.id,
+      tableId: resource.id,
+      formKey: newFormKey(),
+      name: input.name,
+      description: input.description,
+      icon: input.icon,
+      visibility: "private",
+      isOpen: input.isOpen,
+      selectColumns: input.selectColumns,
+      position: index,
+      createdBy: users.admin,
+      createdAt: new Date(at(-30 + position + index)),
+      updatedAt: new Date(at(-30 + position + index)),
+    });
+  }
+
   state.set(def.name, seeded);
   console.log(
-    `  ${def.name}: ${def.columns.length} columns, ${def.rows.length} records, ${def.views?.length ?? 0} views`,
+    `  ${def.name}: ${def.columns.length} columns, ${def.rows.length} records, ${def.views?.length ?? 0} views, ${def.forms?.length ?? 0} forms`,
   );
 }

@@ -59,7 +59,7 @@ function Activity({ record }: { record: RecordData }) {
 const textOf = (value: unknown) =>
   typeof value === "string" || typeof value === "number" ? String(value) : "";
 
-function RecordFields({
+export function RecordFieldList({
   form,
   workspace,
   tableId,
@@ -83,75 +83,79 @@ function RecordFields({
   const fields = columns.filter((column) => !SYSTEM_FORMATS.includes(column.format));
 
   return (
-    <SheetPanel>
-      <div className="flex flex-col gap-4">
-        {error && (
-          <Alert variant="error">
-            <AlertDescription>{error.message}</AlertDescription>
-          </Alert>
-        )}
-        {fields.map((column) => {
-          const label = (
-            <FieldLabel>
-              <NamedIcon
-                name={column.icon}
-                fallback={column.formatIcon}
-                className="size-3.5 text-muted-foreground"
-              />
-              {column.name}
-              {column.required && !column.readOnly && (
-                <span className="text-destructive-foreground">*</span>
-              )}
-            </FieldLabel>
-          );
+    <div className="flex flex-col gap-4">
+      {error && (
+        <Alert variant="error">
+          <AlertDescription>{error.message}</AlertDescription>
+        </Alert>
+      )}
+      {fields.map((column) => {
+        const label = (
+          <FieldLabel>
+            <NamedIcon
+              name={column.icon}
+              fallback={column.formatIcon}
+              className="size-3.5 text-muted-foreground"
+            />
+            {column.name}
+            {column.required && !column.readOnly && (
+              <span className="text-destructive-foreground">*</span>
+            )}
+          </FieldLabel>
+        );
 
-          if (column.readOnly)
-            return (
-              <Field key={column.key} name={column.key}>
-                {label}
-                <div className="flex min-h-9 items-center text-sm sm:min-h-8">
-                  <StaticValue column={column} value={record?.[column.key]} />
-                </div>
-              </Field>
-            );
-
+        if (column.readOnly)
           return (
-            <form.Field key={column.key} name={column.key}>
-              {(field) => {
-                const messages = [
-                  ...(fieldErrors?.[column.key] ? [fieldErrors[column.key]] : []),
-                  ...field.state.meta.errors.map((item) => String(item)),
-                ];
-                const invalid = messages.length > 0;
-                return (
-                  <Field name={field.name} invalid={invalid}>
-                    {label}
-                    <RecordInput
-                      id={`record-${field.name}`}
-                      workspace={workspace}
-                      tableId={tableId}
-                      column={column}
-                      value={field.state.value as FormValue}
-                      current={record?.[column.key]}
-                      disabled={disabled}
-                      onChange={(value) => {
-                        field.handleChange(value);
-                        onFieldEdit?.(column.key);
-                      }}
-                      onBlur={field.handleBlur}
-                    />
-                    {column.description && (
-                      <FieldDescription>{column.description}</FieldDescription>
-                    )}
-                    <FieldError match={invalid}>{messages.join(", ")}</FieldError>
-                  </Field>
-                );
-              }}
-            </form.Field>
+            <Field key={column.key} name={column.key}>
+              {label}
+              <div className="flex min-h-9 items-center text-sm sm:min-h-8">
+                <StaticValue column={column} value={record?.[column.key]} />
+              </div>
+            </Field>
           );
-        })}
-        {record && <Activity record={record} />}
-      </div>
+
+        return (
+          <form.Field key={column.key} name={column.key}>
+            {(field) => {
+              const messages = [
+                ...(fieldErrors?.[column.key] ? [fieldErrors[column.key]] : []),
+                ...field.state.meta.errors.map((item) => String(item)),
+              ];
+              const invalid = messages.length > 0;
+              return (
+                <Field name={field.name} invalid={invalid}>
+                  {label}
+                  <RecordInput
+                    id={`record-${field.name}`}
+                    workspace={workspace}
+                    tableId={tableId}
+                    column={column}
+                    value={field.state.value as FormValue}
+                    current={record?.[column.key]}
+                    disabled={disabled}
+                    onChange={(value) => {
+                      field.handleChange(value);
+                      onFieldEdit?.(column.key);
+                    }}
+                    onBlur={field.handleBlur}
+                  />
+                  {column.description && <FieldDescription>{column.description}</FieldDescription>}
+                  <FieldError match={invalid}>{messages.join(", ")}</FieldError>
+                </Field>
+              );
+            }}
+          </form.Field>
+        );
+      })}
+      {record && <Activity record={record} />}
+    </div>
+  );
+}
+
+function RecordFields(props: React.ComponentProps<typeof RecordFieldList>) {
+  return (
+    <SheetPanel>
+      <RecordFieldList {...props} />
     </SheetPanel>
   );
 }

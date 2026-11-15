@@ -1,16 +1,16 @@
 import { useState } from "react";
 
-import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetClose, SheetFooter, SheetPopup } from "@/components/ui/sheet";
 import { toastManager } from "@/components/ui/toast";
 import { workspaceKeys } from "@/data/workspace/keys";
 import { createRecordMutationOptions } from "@/data/workspace/records";
-import { tableQueryOptions } from "@/data/workspace/tables";
 import { buildCreate, toDefaultFormValues } from "@/lib/records/form";
 
-import { buildViewColumns, buildViewerColumns, type ViewerColumn, type ViewScope } from "../columns";
+import { type ViewerColumn, type ViewScope } from "../columns";
+import { useRecordScope } from "../use-record-scope";
 import { RecordForm } from "./record-form";
 import { useRecordForm } from "./use-record-form";
 
@@ -76,7 +76,7 @@ export function CreateRecordSheet({
   onClose: () => void;
 }) {
   const [open, setOpen] = useState(true);
-  const { data: table } = useSuspenseQuery(tableQueryOptions(workspace, tableId));
+  const scope = useRecordScope(workspace, tableId, view);
 
   return (
     <Sheet
@@ -90,8 +90,8 @@ export function CreateRecordSheet({
         <CreateForm
           workspace={workspace}
           tableId={tableId}
-          tableName={table.name}
-          columns={view ? buildViewColumns(table, view.selectColumns) : buildViewerColumns(table)}
+          tableName={scope.tableName}
+          columns={scope.columns}
           onCreated={() => setOpen(false)}
         />
       </SheetPopup>

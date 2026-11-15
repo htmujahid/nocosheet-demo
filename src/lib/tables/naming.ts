@@ -15,7 +15,7 @@ function randomKey() {
   return Array.from(bytes, (byte) => ALPHABET[byte % ALPHABET.length]).join("");
 }
 
-export const newKey = (prefix: "t" | "c" | "v") => `${prefix}_${randomKey()}`;
+export const newKey = (prefix: "t" | "c" | "v" | "f") => `${prefix}_${randomKey()}`;
 
 export const newTableName = () => newKey("t");
 export const newColumnName = () => newKey("c");

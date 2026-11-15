@@ -22,6 +22,19 @@ export const viewsQueryOptions = (workspace: string, tableId: number) =>
     retry: false,
   });
 
+export const viewQueryOptions = (workspace: string, tableId: number, viewId: number) =>
+  queryOptions({
+    queryKey: workspaceKeys.view(tableId, viewId),
+    queryFn: () =>
+      unwrapFetch(
+        fetch("/api/workspaces/:workspace/tables/:table/views/:view", {
+          params: { workspace, table: String(tableId), view: String(viewId) },
+        }),
+      ),
+    staleTime: 30_000,
+    retry: false,
+  });
+
 export const viewsPageQueryOptions = (workspace: string, tableId: number, query: ViewsQuery) =>
   queryOptions({
     queryKey: workspaceKeys.viewList(tableId, query),
@@ -165,7 +178,7 @@ export const restoreViewMutationOptions = mutationOptions({
     viewId: number;
   }) =>
     unwrapFetch(
-      fetch("/api/workspaces/:workspace/tables/:table/views/trash/:view/restore", {
+      fetch("/api/workspaces/:workspace/tables/:table/views/:view/trash/restore", {
         method: "POST",
         params: { workspace, table: String(tableId), view: String(viewId) },
       }),
@@ -184,7 +197,7 @@ export const purgeViewMutationOptions = mutationOptions({
     viewId: number;
   }) =>
     unwrapFetch(
-      fetch("/api/workspaces/:workspace/tables/:table/views/trash/:view", {
+      fetch("/api/workspaces/:workspace/tables/:table/views/:view/trash", {
         method: "DELETE",
         params: { workspace, table: String(tableId), view: String(viewId) },
       }),
