@@ -4,7 +4,6 @@ import { useQuery } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
 
 import {
-  ArchiveRestoreIcon,
   CheckIcon,
   ChevronDownIcon,
   LayoutGridIcon,
@@ -107,14 +106,6 @@ export function ViewsMenu({
                   </MenuItem>
                 </>
               )}
-              <MenuLinkItem
-                render={
-                  <Link to="/workspaces/$workspace/tables/$table/views/trash" params={{ workspace, table }} />
-                }
-              >
-                <ArchiveRestoreIcon />
-                Deleted views
-              </MenuLinkItem>
             </>
           )}
         </MenuPopup>

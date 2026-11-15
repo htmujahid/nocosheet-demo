@@ -91,7 +91,7 @@ const columns = (
     accessorFn: (row) => row.title,
     header: ({ column }) => <DataTableColumnHeader column={column} title="Record" />,
     cell: ({ row }) => (
-      <div className="flex min-w-0 flex-col">
+      <div className="flex min-w-0 items-baseline gap-2">
         <Link
           to="/workspaces/$workspace/tables/$table/trash/$entry"
           params={{ workspace, table, entry: String(row.original.id) }}
@@ -100,7 +100,7 @@ const columns = (
         >
           {labelOf(row.original)}
         </Link>
-        <span className="truncate font-mono text-muted-foreground text-xs">
+        <span className="shrink-0 font-mono text-muted-foreground text-xs">
           #{row.original.recordId}
         </span>
       </div>
