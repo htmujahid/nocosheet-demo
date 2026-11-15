@@ -52,6 +52,7 @@ import { Route as WorkspacesWorkspaceSettingsMembersRolesIndexRouteImport } from
 import { Route as WorkspacesWorkspaceSettingsMembersRolesRoleIdRouteImport } from './routes/workspaces/$workspace/settings/members/roles/$roleId'
 import { Route as WorkspacesWorkspaceCoreTablesTableViewerIndexRouteImport } from './routes/workspaces/$workspace/_core/tables/$table/_viewer/index'
 import { Route as WorkspacesWorkspaceCoreTablesTableViewerRecordRouteImport } from './routes/workspaces/$workspace/_core/tables/$table/_viewer/$record'
+import { Route as WorkspacesWorkspaceCoreTablesTableViewerImportRouteImport } from './routes/workspaces/$workspace/_core/tables/$table/_viewer/import'
 import { Route as WorkspacesWorkspaceCoreTablesTableViewerNewRouteImport } from './routes/workspaces/$workspace/_core/tables/$table/_viewer/new'
 import { Route as WorkspacesWorkspaceCoreTablesTableTrashEntryRouteImport } from './routes/workspaces/$workspace/_core/tables/$table/trash/$entry'
 import { Route as WorkspacesWorkspaceCoreTablesTableViewsViewRouteRouteImport } from './routes/workspaces/$workspace/_core/tables/$table/views/$view/route'
@@ -304,6 +305,12 @@ const WorkspacesWorkspaceCoreTablesTableViewerRecordRoute =
     path: '/$record',
     getParentRoute: () => WorkspacesWorkspaceCoreTablesTableViewerRouteRoute,
   } as any)
+const WorkspacesWorkspaceCoreTablesTableViewerImportRoute =
+  WorkspacesWorkspaceCoreTablesTableViewerImportRouteImport.update({
+    id: '/import',
+    path: '/import',
+    getParentRoute: () => WorkspacesWorkspaceCoreTablesTableViewerRouteRoute,
+  } as any)
 const WorkspacesWorkspaceCoreTablesTableViewerNewRoute =
   WorkspacesWorkspaceCoreTablesTableViewerNewRouteImport.update({
     id: '/new',
@@ -407,6 +414,7 @@ export interface FileRoutesByFullPath {
   '/workspaces/$workspace/settings/members/roles/': typeof WorkspacesWorkspaceSettingsMembersRolesIndexRoute
   '/workspaces/$workspace/tables/$table/views/$view': typeof WorkspacesWorkspaceCoreTablesTableViewsViewRouteRouteWithChildren
   '/workspaces/$workspace/tables/$table/$record': typeof WorkspacesWorkspaceCoreTablesTableViewerRecordRoute
+  '/workspaces/$workspace/tables/$table/import': typeof WorkspacesWorkspaceCoreTablesTableViewerImportRoute
   '/workspaces/$workspace/tables/$table/new': typeof WorkspacesWorkspaceCoreTablesTableViewerNewRoute
   '/workspaces/$workspace/tables/$table/trash/$entry': typeof WorkspacesWorkspaceCoreTablesTableTrashEntryRoute
   '/workspaces/$workspace/tables/$table/': typeof WorkspacesWorkspaceCoreTablesTableViewerIndexRoute
@@ -451,6 +459,7 @@ export interface FileRoutesByTo {
   '/workspaces/$workspace/settings/members/roles': typeof WorkspacesWorkspaceSettingsMembersRolesIndexRoute
   '/workspaces/$workspace/tables/$table/views/$view': typeof WorkspacesWorkspaceCoreTablesTableViewsViewViewerIndexRoute
   '/workspaces/$workspace/tables/$table/$record': typeof WorkspacesWorkspaceCoreTablesTableViewerRecordRoute
+  '/workspaces/$workspace/tables/$table/import': typeof WorkspacesWorkspaceCoreTablesTableViewerImportRoute
   '/workspaces/$workspace/tables/$table/new': typeof WorkspacesWorkspaceCoreTablesTableViewerNewRoute
   '/workspaces/$workspace/tables/$table/trash/$entry': typeof WorkspacesWorkspaceCoreTablesTableTrashEntryRoute
   '/workspaces/$workspace/tables/$table/views/trash': typeof WorkspacesWorkspaceCoreTablesTableViewsListTrashRoute
@@ -503,6 +512,7 @@ export interface FileRoutesById {
   '/workspaces/$workspace/_core/tables/$table/views/$view': typeof WorkspacesWorkspaceCoreTablesTableViewsViewRouteRouteWithChildren
   '/workspaces/$workspace/_core/tables/$table/views/_list': typeof WorkspacesWorkspaceCoreTablesTableViewsListRouteRouteWithChildren
   '/workspaces/$workspace/_core/tables/$table/_viewer/$record': typeof WorkspacesWorkspaceCoreTablesTableViewerRecordRoute
+  '/workspaces/$workspace/_core/tables/$table/_viewer/import': typeof WorkspacesWorkspaceCoreTablesTableViewerImportRoute
   '/workspaces/$workspace/_core/tables/$table/_viewer/new': typeof WorkspacesWorkspaceCoreTablesTableViewerNewRoute
   '/workspaces/$workspace/_core/tables/$table/trash/$entry': typeof WorkspacesWorkspaceCoreTablesTableTrashEntryRoute
   '/workspaces/$workspace/_core/tables/$table/_viewer/': typeof WorkspacesWorkspaceCoreTablesTableViewerIndexRoute
@@ -556,6 +566,7 @@ export interface FileRouteTypes {
     | '/workspaces/$workspace/settings/members/roles/'
     | '/workspaces/$workspace/tables/$table/views/$view'
     | '/workspaces/$workspace/tables/$table/$record'
+    | '/workspaces/$workspace/tables/$table/import'
     | '/workspaces/$workspace/tables/$table/new'
     | '/workspaces/$workspace/tables/$table/trash/$entry'
     | '/workspaces/$workspace/tables/$table/'
@@ -600,6 +611,7 @@ export interface FileRouteTypes {
     | '/workspaces/$workspace/settings/members/roles'
     | '/workspaces/$workspace/tables/$table/views/$view'
     | '/workspaces/$workspace/tables/$table/$record'
+    | '/workspaces/$workspace/tables/$table/import'
     | '/workspaces/$workspace/tables/$table/new'
     | '/workspaces/$workspace/tables/$table/trash/$entry'
     | '/workspaces/$workspace/tables/$table/views/trash'
@@ -651,6 +663,7 @@ export interface FileRouteTypes {
     | '/workspaces/$workspace/_core/tables/$table/views/$view'
     | '/workspaces/$workspace/_core/tables/$table/views/_list'
     | '/workspaces/$workspace/_core/tables/$table/_viewer/$record'
+    | '/workspaces/$workspace/_core/tables/$table/_viewer/import'
     | '/workspaces/$workspace/_core/tables/$table/_viewer/new'
     | '/workspaces/$workspace/_core/tables/$table/trash/$entry'
     | '/workspaces/$workspace/_core/tables/$table/_viewer/'
@@ -972,6 +985,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WorkspacesWorkspaceCoreTablesTableViewerRecordRouteImport
       parentRoute: typeof WorkspacesWorkspaceCoreTablesTableViewerRouteRoute
     }
+    '/workspaces/$workspace/_core/tables/$table/_viewer/import': {
+      id: '/workspaces/$workspace/_core/tables/$table/_viewer/import'
+      path: '/import'
+      fullPath: '/workspaces/$workspace/tables/$table/import'
+      preLoaderRoute: typeof WorkspacesWorkspaceCoreTablesTableViewerImportRouteImport
+      parentRoute: typeof WorkspacesWorkspaceCoreTablesTableViewerRouteRoute
+    }
     '/workspaces/$workspace/_core/tables/$table/_viewer/new': {
       id: '/workspaces/$workspace/_core/tables/$table/_viewer/new'
       path: '/new'
@@ -1089,6 +1109,7 @@ const AuthRouteRouteWithChildren = AuthRouteRoute._addFileChildren(
 
 interface WorkspacesWorkspaceCoreTablesTableViewerRouteRouteChildren {
   WorkspacesWorkspaceCoreTablesTableViewerRecordRoute: typeof WorkspacesWorkspaceCoreTablesTableViewerRecordRoute
+  WorkspacesWorkspaceCoreTablesTableViewerImportRoute: typeof WorkspacesWorkspaceCoreTablesTableViewerImportRoute
   WorkspacesWorkspaceCoreTablesTableViewerNewRoute: typeof WorkspacesWorkspaceCoreTablesTableViewerNewRoute
   WorkspacesWorkspaceCoreTablesTableViewerIndexRoute: typeof WorkspacesWorkspaceCoreTablesTableViewerIndexRoute
 }
@@ -1097,6 +1118,8 @@ const WorkspacesWorkspaceCoreTablesTableViewerRouteRouteChildren: WorkspacesWork
   {
     WorkspacesWorkspaceCoreTablesTableViewerRecordRoute:
       WorkspacesWorkspaceCoreTablesTableViewerRecordRoute,
+    WorkspacesWorkspaceCoreTablesTableViewerImportRoute:
+      WorkspacesWorkspaceCoreTablesTableViewerImportRoute,
     WorkspacesWorkspaceCoreTablesTableViewerNewRoute:
       WorkspacesWorkspaceCoreTablesTableViewerNewRoute,
     WorkspacesWorkspaceCoreTablesTableViewerIndexRoute:

@@ -25,6 +25,7 @@ function cellText(column: ExportColumn, value: unknown): string {
         .map((item) => choiceLabel(column.options, scalar(item)))
         .join("; ");
     case "relation":
+      return scalar((value as { id?: unknown }).id);
     case "user": {
       const reference = value as { id?: unknown; label?: string | null };
       return reference.label ?? scalar(reference.id);

@@ -321,6 +321,35 @@ export async function findBrokenLink(
   return undefined;
 }
 
+export async function findExistingRecordIds(
+  workspace: string,
+  targetTableId: number,
+  ids: number[],
+) {
+  const existing = new Set<number>();
+  if (!ids.length) return existing;
+  const [target] = await db
+    .select({ tableName: tableTable.tableName })
+    .from(tableTable)
+    .where(and(eq(tableTable.id, targetTableId), isNull(tableTable.deletedAt)))
+    .limit(1);
+  if (!target) return existing;
+
+  const source = raw(quoteIdent(physicalTableName(workspace, target.tableName)));
+  const unique = [...new Set(ids)];
+  for (let start = 0; start < unique.length; start += 50) {
+    const part = unique.slice(start, start + 50);
+    const rows = await db.all<{ id: number }>(
+      sql`select "id" as "id" from ${source} where "id" in (${sql.join(
+        part.map((id) => sql`${id}`),
+        sql`, `,
+      )})`,
+    );
+    for (const row of rows) existing.add(row.id);
+  }
+  return existing;
+}
+
 export function recordsTable(workspace: string, table: Table, names: string[] = []) {
   return sqliteTable(
     physicalTableName(workspace, table.tableName),
@@ -355,6 +384,20 @@ export async function createRecordRow(
     updated_by: userId,
   })) as { id: number }[];
   return created;
+}
+
+export async function createRecordRows(
+  workspace: string,
+  table: Table,
+  rows: ParsedValue<Column>[][],
+  userId: string,
+) {
+  if (!rows.length) return 0;
+  const statements = rows.map((parsed) =>
+    insertRecord(workspace, table, parsed, { created_by: userId, updated_by: userId }),
+  );
+  await db.batch(statements as unknown as Parameters<typeof db.batch>[0]);
+  return rows.length;
 }
 
 export async function updateRecordRow(

@@ -135,6 +135,26 @@ export const createRecordMutationOptions = mutationOptions({
     ),
 });
 
+export const importRecordsMutationOptions = mutationOptions({
+  mutationKey: workspaceKeys.mutation("import-records"),
+  mutationFn: ({
+    workspace,
+    tableId,
+    rows,
+  }: {
+    workspace: string;
+    tableId: number;
+    rows: Record<string, string>[];
+  }) =>
+    unwrapFetch(
+      fetch("/api/workspaces/:workspace/tables/:table/records/import", {
+        method: "POST",
+        params: { workspace, table: String(tableId) },
+        body: { rows },
+      }),
+    ),
+});
+
 export const uploadFileMutationOptions = mutationOptions({
   mutationFn: ({
     workspace,

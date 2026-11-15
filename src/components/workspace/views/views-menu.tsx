@@ -59,7 +59,8 @@ export function ViewsMenu({
           <MenuLinkItem
             render={<Link to="/workspaces/$workspace/tables/$table" params={{ workspace, table }} />}
           >
-            All records
+            <LayoutGridIcon className="size-4 shrink-0 text-muted-foreground" />
+            <span className="truncate">All records</span>
             {!active && <CheckIcon className="ms-auto" />}
           </MenuLinkItem>
           {views.map((view) => (

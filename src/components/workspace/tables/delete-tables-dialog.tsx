@@ -21,20 +21,24 @@ import { workspaceKeys } from "@/data/workspace/keys";
 import { deleteTablesMutationOptions } from "@/data/workspace/tables";
 import { TRASH_RETENTION_DAYS } from "@/lib/records/retention";
 
-export function DeleteTablesDialog({
-  workspace,
-  ids,
-  label,
-  size,
-  onDeleted,
-}: {
+type DeleteTablesProps = {
   workspace: string;
   ids: number[];
-  label?: string;
-  size?: "default" | "sm";
   onDeleted: (count: number) => Promise<unknown> | void;
+};
+
+export function DeleteTablesAlert({
+  workspace,
+  ids,
+  onDeleted,
+  open,
+  onOpenChange,
+  trigger,
+}: DeleteTablesProps & {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  trigger?: React.ReactElement;
 }) {
-  const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
   const count = ids.length;
   const noun = count === 1 ? "table" : "tables";
@@ -42,7 +46,7 @@ export function DeleteTablesDialog({
   const deleteTables = useMutation({
     ...deleteTablesMutationOptions,
     onSuccess: async () => {
-      setOpen(false);
+      onOpenChange(false);
       await onDeleted(count);
       await queryClient.invalidateQueries({ queryKey: workspaceKeys.tables() });
       toastManager.add({ type: "success", title: `${count} ${noun} moved to trash` });
@@ -53,14 +57,11 @@ export function DeleteTablesDialog({
     <AlertDialog
       open={open}
       onOpenChange={(next) => {
-        setOpen(next);
+        onOpenChange(next);
         if (!next) deleteTables.reset();
       }}
     >
-      <AlertDialogTrigger render={<Button variant="destructive-outline" size={size} />}>
-        <TrashIcon />
-        {label ?? `Delete (${count})`}
-      </AlertDialogTrigger>
+      {trigger && <AlertDialogTrigger render={trigger} />}
       <AlertDialogPopup>
         <AlertDialogHeader>
           <AlertDialogTitle>
@@ -91,5 +92,30 @@ export function DeleteTablesDialog({
         </AlertDialogFooter>
       </AlertDialogPopup>
     </AlertDialog>
+  );
+}
+
+export function DeleteTablesDialog({
+  label,
+  size,
+  ...props
+}: DeleteTablesProps & {
+  label?: string;
+  size?: "default" | "sm";
+}) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <DeleteTablesAlert
+      {...props}
+      open={open}
+      onOpenChange={setOpen}
+      trigger={
+        <Button variant="destructive-outline" size={size}>
+          <TrashIcon />
+          {label ?? `Delete (${props.ids.length})`}
+        </Button>
+      }
+    />
   );
 }
