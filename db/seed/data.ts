@@ -1105,57 +1105,6 @@ const col = {
   }),
 };
 
-const timeOff: SeedRow[] = [
-  {
-    Employee: "Maya Chen",
-    Type: "annual_leave",
-    "Start date": day(14),
-    "End date": day(21),
-    Status: "approved",
-    Summary: "Family trip",
-  },
-  {
-    Employee: "Kai Morgan",
-    Type: "sick_leave",
-    "Start date": day(-6),
-    "End date": day(-5),
-    Status: "approved",
-    Summary: "Recovering from flu",
-  },
-  {
-    Employee: "Priya Nair",
-    Type: "annual_leave",
-    "Start date": day(30),
-    "End date": day(40),
-    Status: "pending",
-    Summary: "Visiting family abroad",
-  },
-  {
-    Employee: "Diego Alvarez",
-    Type: "personal",
-    "Start date": day(3),
-    "End date": day(3),
-    Status: "approved",
-    Summary: "Moving apartments",
-  },
-  {
-    Employee: "Hannah Becker",
-    Type: "parental_leave",
-    "Start date": day(60),
-    "End date": day(150),
-    Status: "approved",
-    Summary: "Parental leave",
-  },
-  {
-    Employee: "Yuki Tanaka",
-    Type: "annual_leave",
-    "Start date": day(7),
-    "End date": day(9),
-    Status: "rejected",
-    Summary: "Launch week conflict",
-  },
-];
-
 export const tables: SeedTable[] = [
   {
     name: "Team Members",
@@ -1193,32 +1142,6 @@ export const tables: SeedTable[] = [
         description: "Everyone with the Engineer role.",
         columns: ["Name", "Email", "Location", "Skills"],
         where: [{ column: "Role", op: "is", value: "Engineer" }],
-      },
-    ],
-  },
-  {
-    name: "Time Off",
-    icon: "plane",
-    description: "Leave requests from the team and their approval status.",
-    title: "Summary",
-    columns: [
-      col.text("Summary", { required: true }),
-      col.link("Employee", "Team Members"),
-      col.select("Type", ["Annual leave", "Sick leave", "Personal", "Parental leave"], {
-        default: "annual_leave",
-      }),
-      col.date("Start date"),
-      col.date("End date"),
-      col.select("Status", ["Pending", "Approved", "Rejected"], { default: "pending" }),
-    ],
-    rows: timeOff,
-    views: [
-      {
-        name: "Pending approval",
-        icon: "clock",
-        description: "Leave requests waiting for a decision.",
-        columns: ["Summary", "Employee", "Type", "Start date", "End date"],
-        where: [{ column: "Status", op: "is", value: "Pending" }],
       },
     ],
   },
