@@ -51,7 +51,9 @@
 }
 
 .records-grid .rdg-row:hover .records-row-index,
-.records-grid .records-row-selected .records-row-index {
+.records-grid .rdg-header-row:hover .records-row-index,
+.records-grid .records-row-selected .records-row-index,
+.records-grid .rdg-header-row:has(.records-row-check[data-active]) .records-row-index {
   display: none;
 }
 
@@ -60,7 +62,9 @@
 }
 
 .records-grid .rdg-row:hover .records-row-check,
-.records-grid .records-row-selected .records-row-check {
+.records-grid .rdg-header-row:hover .records-row-check,
+.records-grid .records-row-selected .records-row-check,
+.records-grid .records-row-check[data-active] {
   display: inline-flex;
 }
 

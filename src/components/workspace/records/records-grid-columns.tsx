@@ -52,13 +52,19 @@ export function useRecordsGridColumns<TSelected extends { rowSelection: Record<s
         renderHeaderCell: () => {
           if (!selectable) return null;
           const all = table.getIsAllPageRowsSelected();
+          const some = table.getIsSomePageRowsSelected();
           return (
-            <Checkbox
-              aria-label="Select all"
-              checked={all}
-              indeterminate={table.getIsSomePageRowsSelected() && !all}
-              onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-            />
+            <>
+              <span className="records-row-index">#</span>
+              <Checkbox
+                aria-label="Select all"
+                className="records-row-check"
+                data-active={all || some ? "" : undefined}
+                checked={all}
+                indeterminate={some && !all}
+                onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+              />
+            </>
           );
         },
         renderCell: ({ row }) => (
