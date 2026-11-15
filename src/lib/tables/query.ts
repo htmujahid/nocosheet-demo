@@ -7,6 +7,8 @@ import {
   parseAsStringLiteral,
 } from "nuqs/server";
 
+import { createSearchValidator } from "../search-params";
+
 export const TABLE_SORTS = ["name", "groupName", "columnCount", "updatedAt"] as const;
 export const PAGE_SIZES = [10, 20, 50, 100] as const;
 
@@ -32,13 +34,4 @@ export const resolveTablesQuery = (search: Partial<TablesQuery>): TablesQuery =>
   q: search.q ?? tablesSearchParams.q.defaultValue,
 });
 
-export const validateTablesSearch = (search: Record<string, unknown>): Partial<TablesQuery> => {
-  const result: Record<string, unknown> = {};
-  for (const key of Object.keys(tablesSearchParams) as (keyof TablesQuery)[]) {
-    const raw = search[key];
-    if (typeof raw !== "string" && typeof raw !== "number") continue;
-    const parsed = tablesSearchParams[key].parseServerSide(String(raw));
-    if (parsed !== null) result[key] = parsed;
-  }
-  return result;
-};
+export const validateTablesSearch = createSearchValidator(tablesSearchParams);

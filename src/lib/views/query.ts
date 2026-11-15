@@ -8,6 +8,7 @@ import {
 } from "nuqs/server";
 import { z } from "zod";
 
+import { createSearchValidator } from "../search-params";
 import { PAGE_SIZES } from "../tables/query";
 
 export const VIEW_SORTS = ["name", "columnCount", "createdAt", "updatedAt"] as const;
@@ -34,15 +35,6 @@ export const resolveViewsQuery = (search: Partial<ViewsQuery>): ViewsQuery => ({
   q: search.q ?? viewsSearchParams.q.defaultValue,
 });
 
-export const validateViewsSearch = (search: Record<string, unknown>): Partial<ViewsQuery> => {
-  const result: Record<string, unknown> = {};
-  for (const key of Object.keys(viewsSearchParams) as (keyof ViewsQuery)[]) {
-    const raw = search[key];
-    if (typeof raw !== "string" && typeof raw !== "number") continue;
-    const parsed = viewsSearchParams[key].parseServerSide(String(raw));
-    if (parsed !== null) result[key] = parsed;
-  }
-  return result;
-};
+export const validateViewsSearch = createSearchValidator(viewsSearchParams);
 
 export const viewScopeSchema = z.object({ view: z.coerce.number().int().positive().optional() });

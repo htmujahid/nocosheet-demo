@@ -6,6 +6,7 @@ import {
 } from "nuqs/server";
 import { z } from "zod";
 
+import { createSearchValidator } from "../search-params";
 import type { FilterCondition } from "./filters";
 
 export const RECORD_PAGE_SIZES = [10, 25, 50, 100] as const;
@@ -55,22 +56,7 @@ export function withFilters(
   return { ...rest, filters };
 }
 
-export const validateRecordsSearch = (search: Record<string, unknown>): Partial<RecordsQuery> => {
-  const result: Record<string, unknown> = {};
-  for (const key of Object.keys(recordsSearchParams) as (keyof RecordsQuery)[]) {
-    const raw = search[key];
-    const text =
-      typeof raw === "string" || typeof raw === "number"
-        ? String(raw)
-        : raw && typeof raw === "object"
-          ? JSON.stringify(raw)
-          : undefined;
-    if (text === undefined) continue;
-    const parsed = recordsSearchParams[key].parseServerSide(text);
-    if (parsed !== null) result[key] = parsed;
-  }
-  return result;
-};
+export const validateRecordsSearch = createSearchValidator(recordsSearchParams);
 
 export const recordsApiSchema = z.object({
   cursor: z.string().max(1024).optional(),
