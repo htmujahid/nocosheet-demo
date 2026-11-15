@@ -22,8 +22,7 @@ export const GET = defineHandler.withValidator({ params })(async (c, { params })
   const table = await findTable(params.table);
   if (!table) throw httpError(404, "Table not found.");
   const form = await findForm(table.id, params.form);
-  if (!form || (!isAdmin(user) && (form.visibility !== "private" || !form.isOpen)))
-    throw httpError(404, "Form not found.");
+  if (!form || (!isAdmin(user) && !form.isOpen)) throw httpError(404, "Form not found.");
 
   const columns = (await listColumns(table.id)).filter((column) =>
     form.selectColumns.includes(column.columnName),

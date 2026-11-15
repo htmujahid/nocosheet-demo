@@ -117,7 +117,6 @@ CREATE TABLE `default__form` (
 	`name` text NOT NULL,
 	`description` text,
 	`icon` text,
-	`visibility` text DEFAULT 'private' NOT NULL,
 	`is_open` integer DEFAULT false NOT NULL,
 	`select_columns` text DEFAULT '[]' NOT NULL,
 	`position` integer DEFAULT 0 NOT NULL,

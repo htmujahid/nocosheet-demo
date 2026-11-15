@@ -14,8 +14,6 @@ import { PERMISSIONS } from "../src/lib/roles/permissions";
 
 const RESOURCE_KINDS = ["table", "view", "form"] as const;
 
-const FORM_VISIBILITIES = ["private", "public"] as const;
-
 const lower = (column: AnySQLiteColumn) => sql`lower(${column})`;
 const live = (column: AnySQLiteColumn) => sql`${column} is null`;
 
@@ -173,7 +171,6 @@ export const workspaceSchema = <W extends string = "default">(workspaceId: W = "
       name: text("name").notNull(),
       description: text("description"),
       icon: text("icon"),
-      visibility: text("visibility", { enum: FORM_VISIBILITIES }).notNull().default("private"),
       isOpen: integer("is_open", { mode: "boolean" }).notNull().default(false),
       selectColumns: json<string[]>("select_columns", []),
       position: integer("position").notNull().default(0),

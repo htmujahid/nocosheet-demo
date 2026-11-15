@@ -71,15 +71,14 @@ export async function softDeleteForm(id: number, userId: string) {
     .where(eq(formTable.id, id));
 }
 
-export async function listFormsPage(tableId: number, query: FormsQuery, membersOnly: boolean) {
+export async function listFormsPage(tableId: number, query: FormsQuery, openOnly: boolean) {
   const { page, pageSize, sort, order, q } = query;
   const pattern = q ? `%${q.replaceAll(/[\\%_]/g, "\\$&")}%` : null;
 
   const where = and(
     eq(formTable.tableId, tableId),
     isNull(formTable.deletedAt),
-    membersOnly ? eq(formTable.visibility, "private") : undefined,
-    membersOnly ? eq(formTable.isOpen, true) : undefined,
+    openOnly ? eq(formTable.isOpen, true) : undefined,
     pattern
       ? or(
           sql`${formTable.name} like ${pattern} escape '\\'`,

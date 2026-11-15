@@ -16,7 +16,5 @@ export const GET = defineHandler.withValidator({ params })(async (c, { params })
   const table = await findTable(params.table);
   if (!table) throw httpError(404, "Table not found.");
   const forms = await listForms(table.id);
-  return isAdmin(user)
-    ? forms
-    : forms.filter((form) => form.visibility === "private" && form.isOpen);
+  return isAdmin(user) ? forms : forms.filter((form) => form.isOpen);
 });

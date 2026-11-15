@@ -359,7 +359,6 @@ export async function seedTable(
       name: input.name,
       description: input.description,
       icon: input.icon,
-      visibility: "private",
       isOpen: input.isOpen,
       selectColumns: input.selectColumns,
       position: index,
