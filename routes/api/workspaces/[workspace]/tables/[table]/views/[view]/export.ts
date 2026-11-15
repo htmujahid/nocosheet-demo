@@ -16,7 +16,7 @@ const params = z.object({
 });
 
 export const GET = defineHandler.withValidator({ params })(async (c, { params }) => {
-  const { ownerId } = await authorizeExport(requireAuth(c), params.table);
+  const { ownerId } = await authorizeExport(requireAuth(c), params.table, params.view);
   const table = await findTable(params.table);
   if (!table) throw httpError(404, "Table not found.");
   const view = await findView(table.id, params.view);

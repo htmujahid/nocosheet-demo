@@ -12,12 +12,13 @@ import {
   resolveRecordsQuery,
   withFilters,
 } from "@/lib/records/query";
-import { sortKeyOf } from "@/lib/records/sort-param";
 import { countOwnedRecords, createRecordRow, findRecords } from "@/lib/records/repository";
+import { sortKeyOf } from "@/lib/records/sort-param";
 import { checkRecordsQuery } from "@/lib/records/validation";
 import { findMissingRequired, parseRecordValues, recordPatchSchema } from "@/lib/records/values";
 import { authorize } from "@/lib/roles/guard";
 import { findTable, listColumns } from "@/lib/tables/repository";
+import { viewScopeSchema } from "@/lib/views/query";
 
 const params = z.object({ workspace: z.string(), table: z.coerce.number().int().positive() });
 
@@ -49,12 +50,13 @@ export const GET = defineHandler.withValidator({ params, query: recordsApiSchema
   }
 });
 
-export const POST = defineHandler.withValidator({ params, body: recordPatchSchema })(async (
-  c,
-  { params, body },
-) => {
+export const POST = defineHandler.withValidator({
+  params,
+  query: viewScopeSchema,
+  body: recordPatchSchema,
+})(async (c, { params, query, body }) => {
   const workspace = c.get("workspaceId");
-  await authorize(requireAuth(c), "create", params.table);
+  await authorize(requireAuth(c), "create", params.table, query.view);
   const table = await findTable(params.table);
   if (!table) throw httpError(404, "Table not found.");
   const columns = await listColumns(table.id);
@@ -77,13 +79,14 @@ export const POST = defineHandler.withValidator({ params, body: recordPatchSchem
   }
 });
 
-export const DELETE = defineHandler.withValidator({ params, body: recordsDeleteSchema })(async (
-  c,
-  { params, body },
-) => {
+export const DELETE = defineHandler.withValidator({
+  params,
+  query: viewScopeSchema,
+  body: recordsDeleteSchema,
+})(async (c, { params, query, body }) => {
   const workspace = c.get("workspaceId");
   const user = requireAuth(c);
-  const { ownerId } = await authorize(user, "delete", params.table);
+  const { ownerId } = await authorize(user, "delete", params.table, query.view);
   const table = await findTable(params.table);
   if (!table) throw httpError(404, "Table not found.");
 

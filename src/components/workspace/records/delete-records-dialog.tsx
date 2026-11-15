@@ -30,12 +30,14 @@ export const createDeleteRecordsHandle = () => AlertDialogCreateHandle<DeleteRec
 type DeleteRecordsProps = {
   workspace: string;
   tableId: number;
+  viewId?: number;
   onDeleted: (count: number) => void;
 };
 
 function DeleteRecordsPopup({
   workspace,
   tableId,
+  viewId,
   ids,
   onDeleted,
   onClose,
@@ -87,7 +89,7 @@ function DeleteRecordsPopup({
         <Button
           variant="destructive"
           loading={deleteRecords.isPending}
-          onClick={() => deleteRecords.mutate({ workspace, tableId, ids })}
+          onClick={() => deleteRecords.mutate({ workspace, tableId, viewId, ids })}
         >
           Delete {noun}
         </Button>

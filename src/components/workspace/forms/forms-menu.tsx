@@ -34,10 +34,7 @@ export function FormsMenu({
   const tableId = Number(table);
   const access = useAccess();
   const [creating, setCreating] = useState(false);
-  const { data: forms = [] } = useQuery({
-    ...formsQueryOptions(workspace, tableId),
-    enabled: access.can("create", tableId),
-  });
+  const { data: forms = [] } = useQuery(formsQueryOptions(workspace, tableId));
 
   if (!access.admin && forms.length === 0) return null;
 

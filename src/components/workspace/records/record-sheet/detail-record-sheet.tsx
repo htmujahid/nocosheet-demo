@@ -17,6 +17,7 @@ import { useRecordForm } from "./use-record-form";
 function DetailForm({
   workspace,
   tableId,
+  viewId,
   tableName,
   recordId,
   record,
@@ -26,6 +27,7 @@ function DetailForm({
 }: {
   workspace: string;
   tableId: number;
+  viewId?: number;
   tableName: string;
   recordId: number;
   record: Record<string, unknown>;
@@ -53,6 +55,7 @@ function DetailForm({
             <DeleteRecordsDialog
               workspace={workspace}
               tableId={tableId}
+              viewId={viewId}
               ids={[recordId]}
               label="Delete"
               onDeleted={onDeleted}
@@ -82,7 +85,9 @@ export function DetailRecordSheet({
 }) {
   const [open, setOpen] = useState(true);
   const scope = useRecordScope(workspace, tableId, view);
-  const { data: record, error } = useQuery(recordQueryOptions(workspace, tableId, recordId));
+  const { data: record, error } = useQuery(
+    recordQueryOptions(workspace, tableId, recordId, view?.id),
+  );
 
   return (
     <Sheet
@@ -98,6 +103,7 @@ export function DetailRecordSheet({
             key={recordId}
             workspace={workspace}
             tableId={tableId}
+            viewId={view?.id}
             tableName={scope.tableName}
             recordId={recordId}
             record={record}

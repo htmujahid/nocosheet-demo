@@ -22,7 +22,7 @@ export const POST = defineHandler.withValidator({ params, body: recordPatchSchem
 ) => {
   const workspace = c.get("workspaceId");
   const user = requireAuth(c);
-  await authorize(user, "create", params.table);
+  await authorize(user, "create", params.table, params.form);
   const table = await findTable(params.table);
   if (!table) throw httpError(404, "Table not found.");
   const form = await findForm(table.id, params.form);

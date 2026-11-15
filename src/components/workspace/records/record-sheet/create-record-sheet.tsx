@@ -17,12 +17,14 @@ import { useRecordForm } from "./use-record-form";
 function CreateForm({
   workspace,
   tableId,
+  viewId,
   tableName,
   columns,
   onCreated,
 }: {
   workspace: string;
   tableId: number;
+  viewId?: number;
   tableName: string;
   columns: ViewerColumn[];
   onCreated: () => void;
@@ -42,7 +44,7 @@ function CreateForm({
     initial: toDefaultFormValues(columns),
     validate: (value) => buildCreate(columns, value).errors,
     onSubmit: (value) =>
-      create.mutate({ workspace, tableId, values: buildCreate(columns, value).payload }),
+      create.mutate({ workspace, tableId, viewId, values: buildCreate(columns, value).payload }),
   });
 
   return (
@@ -67,10 +69,12 @@ function CreateForm({
 export function CreateRecordSheet({
   workspace,
   tableId,
+  viewId,
   onClose,
 }: {
   workspace: string;
   tableId: number;
+  viewId?: number;
   onClose: () => void;
 }) {
   const [open, setOpen] = useState(true);
@@ -88,6 +92,7 @@ export function CreateRecordSheet({
         <CreateForm
           workspace={workspace}
           tableId={tableId}
+          viewId={viewId}
           tableName={scope.tableName}
           columns={scope.columns}
           onCreated={() => setOpen(false)}

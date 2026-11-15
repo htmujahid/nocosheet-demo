@@ -30,7 +30,7 @@ function FormPage() {
   const access = useAccess();
   const tableId = Number(table);
 
-  if (!access.can("create", tableId))
+  if (!access.can("create", tableId, Number(formParam)))
     return (
       <Navigate to="/workspaces/$workspace/tables/$table" params={{ workspace, table }} replace />
     );

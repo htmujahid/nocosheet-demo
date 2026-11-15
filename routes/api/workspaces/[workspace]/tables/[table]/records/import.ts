@@ -17,16 +17,18 @@ import type { ParsedValue } from "@/lib/records/values";
 import { findMissingRequired, isEditableColumn, parseRecordValues } from "@/lib/records/values";
 import { authorize } from "@/lib/roles/guard";
 import { type Column, findTable, listColumns } from "@/lib/tables/repository";
+import { viewScopeSchema } from "@/lib/views/query";
 
 const params = z.object({ workspace: z.string(), table: z.coerce.number().int().positive() });
 
-export const POST = defineHandler.withValidator({ params, body: recordsImportSchema })(async (
-  c,
-  { params, body },
-) => {
+export const POST = defineHandler.withValidator({
+  params,
+  query: viewScopeSchema,
+  body: recordsImportSchema,
+})(async (c, { params, query, body }) => {
   const workspace = c.get("workspaceId");
   const user = requireAuth(c);
-  await authorize(user, "create", params.table);
+  await authorize(user, "create", params.table, query.view);
   const table = await findTable(params.table);
   if (!table) throw httpError(404, "Table not found.");
   const columns = await listColumns(table.id);

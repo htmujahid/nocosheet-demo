@@ -14,7 +14,14 @@ export const Route = createFileRoute(
   pendingComponent: () => null,
   loader: ({ context, params }) => {
     void context.queryClient
-      .query(recordQueryOptions(params.workspace, Number(params.table), Number(params.record)))
+      .query(
+        recordQueryOptions(
+          params.workspace,
+          Number(params.table),
+          Number(params.record),
+          Number(params.view),
+        ),
+      )
       .catch(() => undefined);
   },
   component: RecordPage,
@@ -26,10 +33,10 @@ function RecordPage() {
   const navigate = Route.useNavigate();
   const access = useAccess();
   const tableId = Number(table);
-  const { data } = useQuery(recordQueryOptions(workspace, tableId, Number(record)));
+  const { data } = useQuery(recordQueryOptions(workspace, tableId, Number(record), Number(viewId)));
 
   const owner = (data?.created_by as { id?: string } | null | undefined)?.id;
-  const editable = access.canOn("update", tableId, owner);
+  const editable = access.canOn("update", tableId, owner, Number(viewId));
   const sheetProps = {
     workspace,
     tableId,
@@ -43,7 +50,7 @@ function RecordPage() {
       }),
   };
 
-  const canDelete = access.canOn("delete", tableId, owner);
+  const canDelete = access.canOn("delete", tableId, owner, Number(viewId));
 
   return editable ? (
     <UpdateRecordSheet {...sheetProps} canDelete={canDelete} />

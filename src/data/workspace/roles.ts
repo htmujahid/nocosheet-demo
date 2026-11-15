@@ -10,7 +10,17 @@ import { workspaceKeys } from "./keys";
 export const rolesQueryOptions = (workspace: string) =>
   queryOptions({
     queryKey: workspaceKeys.roles(),
-    queryFn: () => unwrapFetch(fetch("/api/workspaces/:workspace/roles", { params: { workspace } })),
+    queryFn: () =>
+      unwrapFetch(fetch("/api/workspaces/:workspace/roles", { params: { workspace } })),
+    staleTime: 15_000,
+    retry: false,
+  });
+
+export const grantTargetsQueryOptions = (workspace: string) =>
+  queryOptions({
+    queryKey: [...workspaceKeys.roles(), "targets"] as const,
+    queryFn: () =>
+      unwrapFetch(fetch("/api/workspaces/:workspace/roles/targets", { params: { workspace } })),
     staleTime: 15_000,
     retry: false,
   });
@@ -27,7 +37,9 @@ export const roleAssignmentsQueryOptions = (workspace: string) =>
 export const createRoleMutationOptions = mutationOptions({
   mutationKey: workspaceKeys.mutation("create-role"),
   mutationFn: ({ workspace, ...body }: { workspace: string } & RoleCreateInput) =>
-    unwrapFetch(fetch("/api/workspaces/:workspace/roles", { method: "POST", params: { workspace }, body })),
+    unwrapFetch(
+      fetch("/api/workspaces/:workspace/roles", { method: "POST", params: { workspace }, body }),
+    ),
 });
 
 export const updateRoleMutationOptions = mutationOptions({

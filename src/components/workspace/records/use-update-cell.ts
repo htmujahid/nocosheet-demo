@@ -17,10 +17,12 @@ const payloadOf = (column: ViewerColumn, value: unknown) => {
 export function useUpdateCell({
   workspace,
   tableId,
+  viewId,
   queryKey,
 }: {
   workspace: string;
   tableId: number;
+  viewId?: number;
   queryKey: readonly unknown[];
 }) {
   const queryClient = useQueryClient();
@@ -48,11 +50,12 @@ export function useUpdateCell({
       await mutation.mutateAsync({
         workspace,
         tableId,
+        viewId,
         recordId,
         values: { [column.key]: value },
       });
       await queryClient.invalidateQueries({
-        queryKey: recordQueryOptions(workspace, tableId, recordId).queryKey,
+        queryKey: recordQueryOptions(workspace, tableId, recordId, viewId).queryKey,
       });
     } catch (error) {
       replaceRow(recordId, original);

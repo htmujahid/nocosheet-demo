@@ -48,15 +48,17 @@ export function ViewsMenu({
         </MenuTrigger>
         <MenuPopup align="start" className="min-w-56">
           <MenuGroup>
-            <MenuLinkItem
-              render={
-                <Link to="/workspaces/$workspace/tables/$table" params={{ workspace, table }} />
-              }
-            >
-              <LayoutGridIcon className="size-4 shrink-0 text-muted-foreground" />
-              <span className="truncate">All records</span>
-              {!active && <CheckIcon className="ms-auto" />}
-            </MenuLinkItem>
+            {access.can("read", tableId) && (
+              <MenuLinkItem
+                render={
+                  <Link to="/workspaces/$workspace/tables/$table" params={{ workspace, table }} />
+                }
+              >
+                <LayoutGridIcon className="size-4 shrink-0 text-muted-foreground" />
+                <span className="truncate">All records</span>
+                {!active && <CheckIcon className="ms-auto" />}
+              </MenuLinkItem>
+            )}
             {views.map((view) => (
               <MenuLinkItem
                 key={view.id}

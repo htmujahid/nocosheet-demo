@@ -32,13 +32,19 @@ export const recordsQueryOptions = (
     retry: false,
   });
 
-export const recordQueryOptions = (workspace: string, tableId: number, recordId: number) =>
+export const recordQueryOptions = (
+  workspace: string,
+  tableId: number,
+  recordId: number,
+  viewId?: number,
+) =>
   queryOptions({
-    queryKey: workspaceKeys.record(tableId, recordId),
+    queryKey: [...workspaceKeys.record(tableId, recordId), viewId ?? null] as const,
     queryFn: () =>
       unwrapFetch(
         fetch("/api/workspaces/:workspace/tables/:table/records/:record", {
           params: { workspace, table: String(tableId), record: String(recordId) },
+          query: viewId ? { view: viewId } : {},
         }),
       ),
     staleTime: 15_000,
@@ -78,16 +84,19 @@ export const deleteRecordsMutationOptions = mutationOptions({
   mutationFn: ({
     workspace,
     tableId,
+    viewId,
     ids,
   }: {
     workspace: string;
     tableId: number;
+    viewId?: number;
     ids: number[];
   }) =>
     unwrapFetch(
       fetch("/api/workspaces/:workspace/tables/:table/records", {
         method: "DELETE",
         params: { workspace, table: String(tableId) },
+        query: viewId ? { view: viewId } : {},
         body: { ids },
       }),
     ),
@@ -98,11 +107,13 @@ export const updateRecordMutationOptions = mutationOptions({
   mutationFn: ({
     workspace,
     tableId,
+    viewId,
     recordId,
     values,
   }: {
     workspace: string;
     tableId: number;
+    viewId?: number;
     recordId: number;
     values: Record<string, unknown>;
   }) =>
@@ -110,6 +121,7 @@ export const updateRecordMutationOptions = mutationOptions({
       fetch("/api/workspaces/:workspace/tables/:table/records/:record", {
         method: "PATCH",
         params: { workspace, table: String(tableId), record: String(recordId) },
+        query: viewId ? { view: viewId } : {},
         body: { values },
       }),
     ),
@@ -120,16 +132,19 @@ export const createRecordMutationOptions = mutationOptions({
   mutationFn: ({
     workspace,
     tableId,
+    viewId,
     values,
   }: {
     workspace: string;
     tableId: number;
+    viewId?: number;
     values: Record<string, unknown>;
   }) =>
     unwrapFetch(
       fetch("/api/workspaces/:workspace/tables/:table/records", {
         method: "POST",
         params: { workspace, table: String(tableId) },
+        query: viewId ? { view: viewId } : {},
         body: { values },
       }),
     ),
@@ -140,16 +155,19 @@ export const importRecordsMutationOptions = mutationOptions({
   mutationFn: ({
     workspace,
     tableId,
+    viewId,
     rows,
   }: {
     workspace: string;
     tableId: number;
+    viewId?: number;
     rows: Record<string, string>[];
   }) =>
     unwrapFetch(
       fetch("/api/workspaces/:workspace/tables/:table/records/import", {
         method: "POST",
         params: { workspace, table: String(tableId) },
+        query: viewId ? { view: viewId } : {},
         body: { rows },
       }),
     ),

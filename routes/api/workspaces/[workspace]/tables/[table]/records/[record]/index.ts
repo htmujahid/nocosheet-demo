@@ -9,6 +9,8 @@ import { countOwnedRecords, findRecord, updateRecordRow } from "@/lib/records/re
 import { parseRecordValues, recordPatchSchema } from "@/lib/records/values";
 import { authorize } from "@/lib/roles/guard";
 import { findTable, listColumns } from "@/lib/tables/repository";
+import { viewScopeSchema } from "@/lib/views/query";
+import { findView } from "@/lib/views/repository";
 
 const params = z.object({
   workspace: z.string(),
@@ -16,31 +18,37 @@ const params = z.object({
   record: z.coerce.number().int().positive(),
 });
 
-export const GET = defineHandler.withValidator({ params })(async (c, { params }) => {
-  const { ownerId } = await authorize(requireAuth(c), "read", params.table);
+export const GET = defineHandler.withValidator({ params, query: viewScopeSchema })(async (
+  c,
+  { params, query },
+) => {
+  const { ownerId } = await authorize(requireAuth(c), "read", params.table, query.view);
   const table = await findTable(params.table);
   if (!table) throw httpError(404, "Table not found.");
-  const record = await findRecord(
-    c.get("workspaceId"),
-    table,
-    await listColumns(table.id),
-    params.record,
-    ownerId,
-  );
+  const all = await listColumns(table.id);
+  const view = query.view ? await findView(table.id, query.view) : undefined;
+  const columns = view
+    ? all.filter((column) => view.selectColumns.includes(column.columnName))
+    : all;
+  const record = await findRecord(c.get("workspaceId"), table, columns, params.record, ownerId);
   if (!record) throw httpError(404, "Record not found.");
   return record;
 });
 
-export const PATCH = defineHandler.withValidator({ params, body: recordPatchSchema })(async (
-  c,
-  { params, body },
-) => {
+export const PATCH = defineHandler.withValidator({
+  params,
+  query: viewScopeSchema,
+  body: recordPatchSchema,
+})(async (c, { params, query, body }) => {
   const workspace = c.get("workspaceId");
   const user = requireAuth(c);
-  const { ownerId } = await authorize(user, "update", params.table);
+  const { ownerId } = await authorize(user, "update", params.table, query.view);
   const table = await findTable(params.table);
   if (!table) throw httpError(404, "Table not found.");
   const columns = await listColumns(table.id);
+  const view = query.view ? await findView(table.id, query.view) : undefined;
+  const stray = view && Object.keys(body.values).find((key) => !view.selectColumns.includes(key));
+  if (stray) throw httpError(400, `"${stray}" isn't part of this view.`);
 
   const parsed = parseRecordValues(columns, body.values);
   if (!parsed.ok) throw httpError(400, parsed.message, parsed.field);
@@ -66,10 +74,13 @@ export const PATCH = defineHandler.withValidator({ params, body: recordPatchSche
   return { ok: true };
 });
 
-export const DELETE = defineHandler.withValidator({ params })(async (c, { params }) => {
+export const DELETE = defineHandler.withValidator({ params, query: viewScopeSchema })(async (
+  c,
+  { params, query },
+) => {
   const workspace = c.get("workspaceId");
   const user = requireAuth(c);
-  const { ownerId } = await authorize(user, "delete", params.table);
+  const { ownerId } = await authorize(user, "delete", params.table, query.view);
   const table = await findTable(params.table);
   if (!table) throw httpError(404, "Table not found.");
 

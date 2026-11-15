@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { conflictOrBadRequest, httpError } from "@/lib/http";
-import { isGuestGrantAllowed } from "@/lib/roles/permissions";
+import { assertGrantable } from "@/lib/roles/guard";
 import {
   countRoleMembers,
   deleteRole,
@@ -15,7 +15,6 @@ import {
   updateRole,
 } from "@/lib/roles/repository";
 import { roleUpdateSchema } from "@/lib/roles/validation";
-import { findTables } from "@/lib/tables/repository";
 
 const params = z.object({ workspace: z.string(), role: z.coerce.number().int().positive() });
 
@@ -45,16 +44,7 @@ export const PATCH = defineHandler(
     if (body.isDefault === false && role.isDefault)
       throw httpError(400, "Make another role the default instead.");
 
-    if (body.grants && role.kind === "guest" && !body.grants.every(isGuestGrantAllowed))
-      throw httpError(400, "Guests can only create or view records, table by table.");
-
-    if (body.grants) {
-      const tableIds = [
-        ...new Set(body.grants.flatMap((grant) => (grant.resourceId ? [grant.resourceId] : []))),
-      ];
-      if (tableIds.length > 0 && (await findTables(tableIds)).length !== tableIds.length)
-        throw httpError(400, "A table in the permissions no longer exists.");
-    }
+    if (body.grants) await assertGrantable(body.grants, role.kind);
 
     try {
       if (body.name !== undefined || body.description !== undefined)

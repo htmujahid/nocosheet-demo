@@ -11,6 +11,7 @@ import type { RecordsPaging } from "./use-records-query";
 export function SelectionBar({
   workspace,
   tableId,
+  viewId,
   select,
   grid,
   selected,
@@ -19,6 +20,7 @@ export function SelectionBar({
 }: {
   workspace: string;
   tableId: number;
+  viewId?: number;
   select: { canExport: boolean; canDelete: (row: ViewerRow) => boolean };
   grid: GridTable;
   selected: ViewerRow[];
@@ -39,6 +41,7 @@ export function SelectionBar({
           <DeleteRecordsDialog
             workspace={workspace}
             tableId={tableId}
+            viewId={viewId}
             ids={selected.map((row) => row.id)}
             onDeleted={(deleted) => {
               grid.resetRowSelection();

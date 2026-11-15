@@ -37,7 +37,12 @@ export function ViewGridView({
   const { query, setUrlQuery, setCursor } = useRecordsQuery(columns);
 
   const recordsOptions = viewRecordsQueryOptions(workspace, tableId, view.id, query);
-  const updateCell = useUpdateCell({ workspace, tableId, queryKey: recordsOptions.queryKey });
+  const updateCell = useUpdateCell({
+    workspace,
+    tableId,
+    viewId: view.id,
+    queryKey: recordsOptions.queryKey,
+  });
   const { data, isFetching, error } = useQuery({
     ...recordsOptions,
     placeholderData: keepPreviousData,
@@ -71,9 +76,10 @@ export function ViewGridView({
         <SelectionBar
           workspace={workspace}
           tableId={tableId}
+          viewId={view.id}
           select={{
             canExport: false,
-            canDelete: (row) => access.canOn("delete", tableId, ownerOf(row)),
+            canDelete: (row) => access.canOn("delete", tableId, ownerOf(row), view.id),
           }}
           grid={grid}
           selected={selectedRows}
@@ -103,11 +109,12 @@ export function ViewGridView({
           columns={columns}
           rows={rows}
           workspace={workspace}
-          canEdit={access.can("update", tableId)}
-          selectable={access.can("delete", tableId)}
+          canEdit={access.can("update", tableId, view.id)}
+          selectable={access.can("delete", tableId, view.id)}
           tableId={tableId}
-          canEditRow={(row) => access.canOn("update", tableId, ownerOf(row))}
-          canDeleteRow={(row) => access.canOn("delete", tableId, ownerOf(row))}
+          viewId={view.id}
+          canEditRow={(row) => access.canOn("update", tableId, ownerOf(row), view.id)}
+          canDeleteRow={(row) => access.canOn("delete", tableId, ownerOf(row), view.id)}
           onDeleted={(deleted) => {
             grid.resetRowSelection();
             if (deleted >= rows.length && paging.hasPrevious) void paging.previous();

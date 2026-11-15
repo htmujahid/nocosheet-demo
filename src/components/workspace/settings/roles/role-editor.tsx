@@ -18,17 +18,20 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { toastManager } from "@/components/ui/toast";
 import { workspaceKeys } from "@/data/workspace/keys";
-import { rolesQueryOptions, updateRoleMutationOptions } from "@/data/workspace/roles";
-import { sidebarQueryOptions } from "@/data/workspace/sidebar";
+import {
+  grantTargetsQueryOptions,
+  rolesQueryOptions,
+  updateRoleMutationOptions,
+} from "@/data/workspace/roles";
 import { grantsToMatrix, type Matrix, matrixToGrants } from "@/lib/roles/matrix";
 import type { PermissionGrant, RoleKind } from "@/lib/roles/permissions";
 
-import { PermissionMatrix } from "./permission-matrix";
+import { type GrantTarget, PermissionMatrix } from "./permission-matrix";
 
 export function RoleEditor({ workspace, roleId }: { workspace: string; roleId: number }) {
   const queryClient = useQueryClient();
   const { data: roles } = useSuspenseQuery(rolesQueryOptions(workspace));
-  const { data: sidebar } = useSuspenseQuery(sidebarQueryOptions(workspace));
+  const { data: targets } = useSuspenseQuery(grantTargetsQueryOptions(workspace));
   const role = roles.find((item) => item.id === roleId);
 
   if (!role)
@@ -43,7 +46,7 @@ export function RoleEditor({ workspace, roleId }: { workspace: string; roleId: n
       key={`${role.id}:${JSON.stringify(role.grants)}:${role.name}:${role.description}`}
       workspace={workspace}
       role={role}
-      tables={sidebar.groups.flatMap((group) => group.tables)}
+      targets={targets}
       onSaved={async () => {
         await Promise.all([
           queryClient.invalidateQueries({ queryKey: workspaceKeys.roles() }),
@@ -57,7 +60,7 @@ export function RoleEditor({ workspace, roleId }: { workspace: string; roleId: n
 function EditorForm({
   workspace,
   role,
-  tables,
+  targets,
   onSaved,
 }: {
   workspace: string;
@@ -71,7 +74,7 @@ function EditorForm({
     memberCount: number;
     grants: PermissionGrant[];
   };
-  tables: { id: number; name: string; icon: string | null }[];
+  targets: GrantTarget[];
   onSaved: () => Promise<unknown>;
 }) {
   const initialGrants = role.grants;
@@ -157,7 +160,7 @@ function EditorForm({
       <PermissionMatrix
         guest={role.kind === "guest"}
         matrix={matrix}
-        tables={tables}
+        targets={targets}
         onChange={setMatrix}
       />
 

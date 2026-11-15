@@ -4,15 +4,16 @@ import { z } from "zod";
 
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { conflictOrBadRequest, httpError } from "@/lib/http";
-import { authorize } from "@/lib/roles/guard";
+import { visibleResources } from "@/lib/roles/guard";
 import { findTable, listColumns } from "@/lib/tables/repository";
+import { resolveViewsQuery, viewsSearchSchema } from "@/lib/views/query";
 import {
   createView,
   findViews,
+  listViews,
   listViewsPage,
   softDeleteViews,
 } from "@/lib/views/repository";
-import { resolveViewsQuery, viewsSearchSchema } from "@/lib/views/query";
 import { checkViewDefinition, viewInputSchema, viewsDeleteSchema } from "@/lib/views/validation";
 import { ViewWhereError } from "@/lib/views/where";
 
@@ -22,10 +23,19 @@ export const GET = defineHandler.withValidator({ params, query: viewsSearchSchem
   c,
   { params, query },
 ) => {
-  await authorize(requireAuth(c), "read", params.table);
   const table = await findTable(params.table);
   if (!table) throw httpError(404, "Table not found.");
-  return listViewsPage(table.id, resolveViewsQuery(query));
+  const visible = await visibleResources(
+    requireAuth(c),
+    "read",
+    table.id,
+    await listViews(table.id),
+  );
+  return listViewsPage(
+    table.id,
+    resolveViewsQuery(query),
+    visible.map((view) => view.id),
+  );
 });
 
 export const POST = defineHandler(

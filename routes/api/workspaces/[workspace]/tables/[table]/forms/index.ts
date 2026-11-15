@@ -5,10 +5,16 @@ import { z } from "zod";
 import { isAdmin } from "@/lib/auth/access";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { resolveFormsQuery, formsSearchSchema } from "@/lib/forms/query";
-import { createForm, findForms, listFormsPage, softDeleteForms } from "@/lib/forms/repository";
+import {
+  createForm,
+  findForms,
+  listForms,
+  listFormsPage,
+  softDeleteForms,
+} from "@/lib/forms/repository";
 import { checkFormDefinition, formInputSchema, formsDeleteSchema } from "@/lib/forms/validation";
 import { conflictOrBadRequest, httpError } from "@/lib/http";
-import { authorize } from "@/lib/roles/guard";
+import { visibleResources } from "@/lib/roles/guard";
 import { findTable, listColumns } from "@/lib/tables/repository";
 
 const params = z.object({ workspace: z.string(), table: z.coerce.number().int().positive() });
@@ -18,10 +24,15 @@ export const GET = defineHandler.withValidator({ params, query: formsSearchSchem
   { params, query },
 ) => {
   const user = requireAuth(c);
-  await authorize(user, "create", params.table);
   const table = await findTable(params.table);
   if (!table) throw httpError(404, "Table not found.");
-  return listFormsPage(table.id, resolveFormsQuery(query), !isAdmin(user));
+  const visible = await visibleResources(user, "create", table.id, await listForms(table.id));
+  return listFormsPage(
+    table.id,
+    resolveFormsQuery(query),
+    !isAdmin(user),
+    visible.map((form) => form.id),
+  );
 });
 
 export const POST = defineHandler(

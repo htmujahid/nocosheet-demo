@@ -23,7 +23,7 @@ export const GET = defineHandler.withValidator({ params, query: recordsApiSchema
   c,
   { params, query },
 ) => {
-  const { ownerId } = await authorize(requireAuth(c), "read", params.table);
+  const { ownerId } = await authorize(requireAuth(c), "read", params.table, params.view);
   const table = await findTable(params.table);
   if (!table) throw httpError(404, "Table not found.");
   const row = await findView(table.id, params.view);

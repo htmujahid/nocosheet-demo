@@ -1,26 +1,23 @@
-import { PlusIcon, XIcon } from "lucide-react";
+import { LayoutGridIcon, TextAlignStartIcon } from "lucide-react";
 
 import { SettingsRow } from "@/components/shared/settings-row";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardFrame,
-  CardFrameAction,
   CardFrameDescription,
   CardFrameHeader,
   CardFrameTitle,
 } from "@/components/ui/card";
-import {
-  Select,
-  SelectItem,
-  SelectPopup,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { NamedIcon } from "@/components/workspace/tables/named-icon";
 import type { Matrix } from "@/lib/roles/matrix";
-import { ACTIONS, type Action, GUEST_ACTIONS, PERMISSION_LABELS } from "@/lib/roles/permissions";
+import {
+  ACTIONS,
+  type Action,
+  FORM_ACTIONS,
+  GUEST_ACTIONS,
+  PERMISSION_LABELS,
+} from "@/lib/roles/permissions";
 
+import { OverrideCard } from "./override-card";
 import { ScopeSelect, type ScopeValue } from "./scope-select";
 
 const DESCRIPTIONS: Record<Action, string> = {
@@ -31,38 +28,38 @@ const DESCRIPTIONS: Record<Action, string> = {
   export: "Download records as a CSV file.",
 };
 
-export type PermissionTable = { id: number; name: string; icon: string | null };
+export type GrantTarget = {
+  id: number;
+  name: string;
+  icon: string | null;
+  views: { id: number; name: string; icon: string | null }[];
+  forms: { id: number; name: string; icon: string | null }[];
+};
 
 export function PermissionMatrix({
   matrix,
-  tables,
+  targets,
   guest,
   onChange,
 }: {
   matrix: Matrix;
+  targets: GrantTarget[];
   guest?: boolean;
-  tables: PermissionTable[];
   onChange: (matrix: Matrix) => void;
 }) {
   const actions = guest ? ACTIONS.filter((action) => GUEST_ACTIONS.includes(action)) : ACTIONS;
-  const overridden = tables.filter((table) => matrix.tables[table.id]);
-  const available = tables.filter((table) => !matrix.tables[table.id]);
+  const inheritLabel = guest ? "" : "Same as workspace";
 
   const setWorkspace = (action: Action, value: ScopeValue) =>
     value !== "inherit" &&
     onChange({ ...matrix, workspace: { ...matrix.workspace, [action]: value } });
 
-  const setTable = (tableId: number, action: Action, value: ScopeValue) => {
-    const row = { ...matrix.tables[tableId] };
-    if (value === "inherit") delete row[action];
-    else row[action] = value;
-    onChange({ ...matrix, tables: { ...matrix.tables, [tableId]: row } });
-  };
-
-  const removeTable = (tableId: number) => {
-    const { [tableId]: _removed, ...rest } = matrix.tables;
-    onChange({ ...matrix, tables: rest });
-  };
+  const views = targets.flatMap((table) =>
+    table.views.map((view) => ({ ...view, group: table.name })),
+  );
+  const forms = targets.flatMap((table) =>
+    table.forms.map((form) => ({ ...form, group: table.name })),
+  );
 
   return (
     <>
@@ -71,8 +68,8 @@ export function PermissionMatrix({
           <CardFrameHeader>
             <CardFrameTitle>Workspace-wide permissions</CardFrameTitle>
             <CardFrameDescription>
-              What this role can do in every table, unless a table below says otherwise. Changing
-              table structure is always for administrators only.
+              What this role can do in every table, unless a table, view or form below says
+              otherwise. Changing table structure is always for administrators only.
             </CardFrameDescription>
           </CardFrameHeader>
           <Card>
@@ -94,83 +91,61 @@ export function PermissionMatrix({
         </CardFrame>
       )}
 
-      <CardFrame>
-        <CardFrameHeader>
-          <CardFrameTitle>Table overrides</CardFrameTitle>
-          <CardFrameDescription>
-            {guest
-              ? "Choose the tables anyone can create records in or view. Everything else stays closed."
-              : 'Give this role different permissions for specific tables. Anything left on "Same as workspace" follows the settings above.'}
-          </CardFrameDescription>
-          <CardFrameAction>
-            <Select
-              value=""
-              disabled={available.length === 0}
-              items={available.map((table) => ({ value: String(table.id), label: table.name }))}
-              onValueChange={(next) => {
-                if (next) onChange({ ...matrix, tables: { ...matrix.tables, [Number(next)]: {} } });
-              }}
-            >
-              <SelectTrigger aria-label="Add a table override" size="sm" className="w-fit">
-                <PlusIcon />
-                <SelectValue placeholder="Add a table" />
-              </SelectTrigger>
-              <SelectPopup>
-                {available.map((table) => (
-                  <SelectItem key={table.id} value={String(table.id)}>
-                    {table.name}
-                  </SelectItem>
-                ))}
-              </SelectPopup>
-            </Select>
-          </CardFrameAction>
-        </CardFrameHeader>
-        <Card>
-          {overridden.length === 0 && (
-            <p className="p-6 text-center text-muted-foreground text-sm">
-              {tables.length === 0
-                ? "There are no tables yet. Create a table to set permissions for it."
-                : "No table overrides yet. Use Add a table to give this role different permissions for a table."}
-            </p>
-          )}
-          {overridden.map((table) => (
-            <div key={table.id} className="flex flex-col gap-3 p-4 not-last:border-b md:px-6">
-              <div className="flex items-center justify-between gap-2">
-                <span className="flex min-w-0 items-center gap-2 font-medium text-sm">
-                  <NamedIcon name={table.icon} className="size-4 shrink-0 text-muted-foreground" />
-                  <span className="truncate">{table.name}</span>
-                </span>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon-sm"
-                  aria-label={`Remove overrides for ${table.name}`}
-                  onClick={() => removeTable(table.id)}
-                >
-                  <XIcon />
-                </Button>
-              </div>
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {actions.map((action) => (
-                  <div key={action} className="flex flex-col gap-1">
-                    <span className="text-muted-foreground text-xs">
-                      {PERMISSION_LABELS[action]}
-                    </span>
-                    <ScopeSelect
-                      inherit={!guest}
-                      action={action}
-                      noOwn={guest}
-                      label={`${PERMISSION_LABELS[action]} in ${table.name}`}
-                      value={matrix.tables[table.id]?.[action] ?? (guest ? "none" : "inherit")}
-                      onValueChange={(value) => setTable(table.id, action, value)}
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
-        </Card>
-      </CardFrame>
+      <OverrideCard
+        title="Table overrides"
+        description={
+          guest
+            ? "Choose the tables anyone can create records in or view. Everything else stays closed."
+            : 'Give this role different permissions for specific tables. Anything left on "Same as workspace" follows the settings above.'
+        }
+        addLabel="Add a table"
+        emptyLabel={
+          targets.length === 0
+            ? "There are no tables yet. Create a table to set permissions for it."
+            : "No table overrides yet. Use Add a table to give this role different permissions for a table."
+        }
+        items={targets}
+        matrix={matrix}
+        actions={actions}
+        inheritLabel={inheritLabel}
+        noOwn={guest}
+        onChange={onChange}
+      />
+
+      <OverrideCard
+        title="View overrides"
+        description='What this role can do through a view. A view only shows its own columns and records. Anything left on "Same as table" follows the table.'
+        addLabel="Add a view"
+        emptyLabel={
+          views.length === 0
+            ? "There are no views yet. Create a view to set permissions for it."
+            : "No view overrides yet. Use Add a view to give this role different permissions through a view."
+        }
+        items={views}
+        matrix={matrix}
+        actions={actions}
+        inheritLabel={guest ? "" : "Same as table"}
+        noOwn={guest}
+        fallback={LayoutGridIcon}
+        onChange={onChange}
+      />
+
+      <OverrideCard
+        title="Form overrides"
+        description='Who can fill in a form. Anything left on "Same as table" follows the table. A form only ever creates records.'
+        addLabel="Add a form"
+        emptyLabel={
+          forms.length === 0
+            ? "There are no forms yet. Create a form to set permissions for it."
+            : "No form overrides yet. Use Add a form to let this role fill in a form."
+        }
+        items={forms}
+        matrix={matrix}
+        actions={FORM_ACTIONS}
+        inheritLabel={guest ? "" : "Same as table"}
+        fallback={TextAlignStartIcon}
+        onChange={onChange}
+      />
     </>
   );
 }

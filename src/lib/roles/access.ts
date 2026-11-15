@@ -6,7 +6,7 @@ export type Access = {
   admin: boolean;
   role: { id: number; name: string; description: string | null } | null;
   grants: PermissionGrant[];
-  scope: (action: Action, resourceId: number | null) => Scope;
+  scope: (action: Action, tableId: number | null, resourceId?: number | null) => Scope;
 };
 
 export async function loadAccess(user: { id: string; role?: string | null }): Promise<Access> {
@@ -25,6 +25,6 @@ export async function loadAccess(user: { id: string; role?: string | null }): Pr
     admin: false,
     role: role ? { id: role.id, name: role.name, description: role.description } : null,
     grants,
-    scope: (action, resourceId) => scopeOf(grants, action, resourceId),
+    scope: (action, tableId, resourceId) => scopeOf(grants, action, tableId, resourceId),
   };
 }

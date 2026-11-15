@@ -20,13 +20,14 @@ export async function listViews(tableId: number) {
     .orderBy(asc(viewTable.position), asc(viewTable.id));
 }
 
-export async function listViewsPage(tableId: number, query: ViewsQuery) {
+export async function listViewsPage(tableId: number, query: ViewsQuery, ids?: number[]) {
   const { page, pageSize, sort, order, q } = query;
   const pattern = q ? `%${q.replaceAll(/[\\%_]/g, "\\$&")}%` : null;
 
   const where = and(
     eq(viewTable.tableId, tableId),
     isNull(viewTable.deletedAt),
+    ids ? inArray(viewTable.id, ids.length > 0 ? ids : [0]) : undefined,
     pattern
       ? or(
           sql`${viewTable.name} like ${pattern} escape '\\'`,

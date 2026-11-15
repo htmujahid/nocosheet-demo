@@ -46,18 +46,32 @@ export const isScopedAction = (action: Action): action is (typeof SCOPED_ACTIONS
 export function levelOf(
   grants: PermissionGrant[],
   action: Action,
-  resourceId: number | null,
+  tableId: number | null,
+  resourceId?: number | null,
 ): Scope | undefined {
   const find = (id: number | null) =>
     grants.find((grant) => grant.resourceId === id && actionOf(grant.permission) === action);
-  const grant = (resourceId !== null ? find(resourceId) : undefined) ?? find(null);
+  const grant =
+    (resourceId != null ? find(resourceId) : undefined) ??
+    (tableId !== null ? find(tableId) : undefined) ??
+    find(null);
   if (!grant) return undefined;
   if (isScopedAction(action)) return grant.permission.split(":")[1] as Scope;
   return grant.permission.endsWith(":none") ? "none" : "all";
 }
 
-export const scopeOf = (grants: PermissionGrant[], action: Action, resourceId: number | null) =>
-  levelOf(grants, action, resourceId) ?? "none";
+export const scopeOf = (
+  grants: PermissionGrant[],
+  action: Action,
+  tableId: number | null,
+  resourceId?: number | null,
+) => levelOf(grants, action, tableId, resourceId) ?? "none";
+
+export const FORM_ACTIONS: readonly Action[] = ["create"];
+
+export function isFormGrantAllowed(grant: PermissionGrant) {
+  return FORM_ACTIONS.includes(actionOf(grant.permission));
+}
 
 export const PERMISSION_LABELS: Record<Action, string> = {
   create: "Create records",

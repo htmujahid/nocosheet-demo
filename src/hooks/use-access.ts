@@ -15,17 +15,24 @@ export function useAccess() {
   const userId = session?.user.id;
 
   return useMemo(() => {
-    const scope = (action: Action, tableId: number): Scope =>
-      data.admin ? "all" : scopeOf(data.grants, action, tableId);
+    const scope = (action: Action, tableId: number, viewId?: number | null): Scope => {
+      return data.admin ? "all" : scopeOf(data.grants, action, tableId, viewId);
+    };
 
     return {
       admin: data.admin,
       role: data.role,
       grants: data.grants,
       scope,
-      can: (action: Action, tableId: number) => scope(action, tableId) !== "none",
-      canOn: (action: Action, tableId: number, ownerId: string | null | undefined) => {
-        const level = scope(action, tableId);
+      can: (action: Action, tableId: number, viewId?: number | null) =>
+        scope(action, tableId, viewId) !== "none",
+      canOn: (
+        action: Action,
+        tableId: number,
+        ownerId: string | null | undefined,
+        viewId?: number | null,
+      ) => {
+        const level = scope(action, tableId, viewId);
         return level === "all" || (level === "own" && !!userId && ownerId === userId);
       },
     };

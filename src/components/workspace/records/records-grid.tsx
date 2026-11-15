@@ -27,6 +27,7 @@ export function RecordsGrid<TSelected extends { rowSelection: Record<string, boo
   empty,
   workspace,
   tableId,
+  viewId,
   canEdit,
   canEditRow,
   canDeleteRow,
@@ -43,6 +44,7 @@ export function RecordsGrid<TSelected extends { rowSelection: Record<string, boo
   empty: string;
   workspace: string;
   tableId: number;
+  viewId?: number;
   canEdit: boolean;
   canEditRow: (row: ViewerRow) => boolean;
   canDeleteRow: (row: ViewerRow) => boolean;
@@ -73,6 +75,7 @@ export function RecordsGrid<TSelected extends { rowSelection: Record<string, boo
     <RecordsContextMenu
       workspace={workspace}
       tableId={tableId}
+      viewId={viewId}
       columns={columns}
       canEditRow={canEditRow}
       canDeleteRow={canDeleteRow}

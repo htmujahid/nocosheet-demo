@@ -6,6 +6,7 @@ import {
   parseAsString,
   parseAsStringLiteral,
 } from "nuqs/server";
+import { z } from "zod";
 
 import { PAGE_SIZES } from "../tables/query";
 
@@ -43,3 +44,5 @@ export const validateViewsSearch = (search: Record<string, unknown>): Partial<Vi
   }
   return result;
 };
+
+export const viewScopeSchema = z.object({ view: z.coerce.number().int().positive().optional() });

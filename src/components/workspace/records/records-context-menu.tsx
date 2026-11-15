@@ -46,6 +46,7 @@ const copy = async (text: string, label: string) => {
 export function RecordsContextMenu({
   workspace,
   tableId,
+  viewId,
   columns,
   canEditRow,
   canDeleteRow,
@@ -55,6 +56,7 @@ export function RecordsContextMenu({
 }: {
   workspace: string;
   tableId: number;
+  viewId?: number;
   columns: ViewerColumn[];
   canEditRow: (row: ViewerRow) => boolean;
   canDeleteRow: (row: ViewerRow) => boolean;
@@ -163,6 +165,7 @@ export function RecordsContextMenu({
         handle={deleteHandle}
         workspace={workspace}
         tableId={tableId}
+        viewId={viewId}
         onDeleted={onDeleted}
       />
     </>
