@@ -8,11 +8,9 @@ import {
   ArrowUpIcon,
   CornerDownLeftIcon,
   CreditCardIcon,
-  DatabaseBackupIcon,
   HomeIcon,
   KeyRoundIcon,
   PaletteIcon,
-  PlugIcon,
   SearchIcon,
   SlidersHorizontalIcon,
   TableIcon,
@@ -52,15 +50,18 @@ type Item = {
 type Group = { value: string; items: Item[] };
 
 const homePage: Item = { value: "home", label: "Home", icon: HomeIcon, path: "" };
-const allTablesPage: Item = { value: "all-tables", label: "All tables", icon: TableIcon, path: "/tables" };
+const allTablesPage: Item = {
+  value: "all-tables",
+  label: "All tables",
+  icon: TableIcon,
+  path: "/tables",
+};
 
 const settings: Item[] = [
   { value: "general", label: "General", icon: SlidersHorizontalIcon, path: "/settings" },
   { value: "members", label: "Members", icon: UsersIcon, path: "/settings/members" },
   { value: "billing", label: "Billing", icon: CreditCardIcon, path: "/settings/billing" },
   { value: "appearance", label: "Appearance", icon: PaletteIcon, path: "/settings/appearance" },
-  { value: "data", label: "Data", icon: DatabaseBackupIcon, path: "/settings/data" },
-  { value: "integrations", label: "Integrations", icon: PlugIcon, path: "/settings/integrations" },
   { value: "api", label: "API", icon: KeyRoundIcon, path: "/settings/api" },
 ];
 

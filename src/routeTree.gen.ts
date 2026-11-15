@@ -32,8 +32,6 @@ import { Route as WorkspacesWorkspaceSettingsIndexRouteImport } from './routes/w
 import { Route as WorkspacesWorkspaceSettingsApiRouteImport } from './routes/workspaces/$workspace/settings/api'
 import { Route as WorkspacesWorkspaceSettingsAppearanceRouteImport } from './routes/workspaces/$workspace/settings/appearance'
 import { Route as WorkspacesWorkspaceSettingsBillingRouteImport } from './routes/workspaces/$workspace/settings/billing'
-import { Route as WorkspacesWorkspaceSettingsDataRouteImport } from './routes/workspaces/$workspace/settings/data'
-import { Route as WorkspacesWorkspaceSettingsIntegrationsRouteImport } from './routes/workspaces/$workspace/settings/integrations'
 import { Route as WorkspacesWorkspaceSettingsMembersRouteRouteImport } from './routes/workspaces/$workspace/settings/members/route'
 import { Route as WorkspacesWorkspaceSettingsRoleRouteImport } from './routes/workspaces/$workspace/settings/role'
 import { Route as WorkspacesWorkspaceCoreTablesTableRouteRouteImport } from './routes/workspaces/$workspace/_core/tables/$table/route'
@@ -190,18 +188,6 @@ const WorkspacesWorkspaceSettingsBillingRoute =
   WorkspacesWorkspaceSettingsBillingRouteImport.update({
     id: '/billing',
     path: '/billing',
-    getParentRoute: () => WorkspacesWorkspaceSettingsRouteRoute,
-  } as any)
-const WorkspacesWorkspaceSettingsDataRoute =
-  WorkspacesWorkspaceSettingsDataRouteImport.update({
-    id: '/data',
-    path: '/data',
-    getParentRoute: () => WorkspacesWorkspaceSettingsRouteRoute,
-  } as any)
-const WorkspacesWorkspaceSettingsIntegrationsRoute =
-  WorkspacesWorkspaceSettingsIntegrationsRouteImport.update({
-    id: '/integrations',
-    path: '/integrations',
     getParentRoute: () => WorkspacesWorkspaceSettingsRouteRoute,
   } as any)
 const WorkspacesWorkspaceSettingsMembersRouteRoute =
@@ -429,8 +415,6 @@ export interface FileRoutesByFullPath {
   '/workspaces/$workspace/settings/api': typeof WorkspacesWorkspaceSettingsApiRoute
   '/workspaces/$workspace/settings/appearance': typeof WorkspacesWorkspaceSettingsAppearanceRoute
   '/workspaces/$workspace/settings/billing': typeof WorkspacesWorkspaceSettingsBillingRoute
-  '/workspaces/$workspace/settings/data': typeof WorkspacesWorkspaceSettingsDataRoute
-  '/workspaces/$workspace/settings/integrations': typeof WorkspacesWorkspaceSettingsIntegrationsRoute
   '/workspaces/$workspace/settings/role': typeof WorkspacesWorkspaceSettingsRoleRoute
   '/workspaces/$workspace/': typeof WorkspacesWorkspaceCoreIndexRoute
   '/workspaces/$workspace/settings/': typeof WorkspacesWorkspaceSettingsIndexRoute
@@ -481,8 +465,6 @@ export interface FileRoutesByTo {
   '/workspaces/$workspace/settings/api': typeof WorkspacesWorkspaceSettingsApiRoute
   '/workspaces/$workspace/settings/appearance': typeof WorkspacesWorkspaceSettingsAppearanceRoute
   '/workspaces/$workspace/settings/billing': typeof WorkspacesWorkspaceSettingsBillingRoute
-  '/workspaces/$workspace/settings/data': typeof WorkspacesWorkspaceSettingsDataRoute
-  '/workspaces/$workspace/settings/integrations': typeof WorkspacesWorkspaceSettingsIntegrationsRoute
   '/workspaces/$workspace/settings/role': typeof WorkspacesWorkspaceSettingsRoleRoute
   '/workspaces/$workspace/settings': typeof WorkspacesWorkspaceSettingsIndexRoute
   '/workspaces/$workspace/tables/$table': typeof WorkspacesWorkspaceCoreTablesTableViewerIndexRoute
@@ -531,8 +513,6 @@ export interface FileRoutesById {
   '/workspaces/$workspace/settings/api': typeof WorkspacesWorkspaceSettingsApiRoute
   '/workspaces/$workspace/settings/appearance': typeof WorkspacesWorkspaceSettingsAppearanceRoute
   '/workspaces/$workspace/settings/billing': typeof WorkspacesWorkspaceSettingsBillingRoute
-  '/workspaces/$workspace/settings/data': typeof WorkspacesWorkspaceSettingsDataRoute
-  '/workspaces/$workspace/settings/integrations': typeof WorkspacesWorkspaceSettingsIntegrationsRoute
   '/workspaces/$workspace/settings/role': typeof WorkspacesWorkspaceSettingsRoleRoute
   '/workspaces/$workspace/_core/': typeof WorkspacesWorkspaceCoreIndexRoute
   '/workspaces/$workspace/settings/': typeof WorkspacesWorkspaceSettingsIndexRoute
@@ -593,8 +573,6 @@ export interface FileRouteTypes {
     | '/workspaces/$workspace/settings/api'
     | '/workspaces/$workspace/settings/appearance'
     | '/workspaces/$workspace/settings/billing'
-    | '/workspaces/$workspace/settings/data'
-    | '/workspaces/$workspace/settings/integrations'
     | '/workspaces/$workspace/settings/role'
     | '/workspaces/$workspace/'
     | '/workspaces/$workspace/settings/'
@@ -645,8 +623,6 @@ export interface FileRouteTypes {
     | '/workspaces/$workspace/settings/api'
     | '/workspaces/$workspace/settings/appearance'
     | '/workspaces/$workspace/settings/billing'
-    | '/workspaces/$workspace/settings/data'
-    | '/workspaces/$workspace/settings/integrations'
     | '/workspaces/$workspace/settings/role'
     | '/workspaces/$workspace/settings'
     | '/workspaces/$workspace/tables/$table'
@@ -694,8 +670,6 @@ export interface FileRouteTypes {
     | '/workspaces/$workspace/settings/api'
     | '/workspaces/$workspace/settings/appearance'
     | '/workspaces/$workspace/settings/billing'
-    | '/workspaces/$workspace/settings/data'
-    | '/workspaces/$workspace/settings/integrations'
     | '/workspaces/$workspace/settings/role'
     | '/workspaces/$workspace/_core/'
     | '/workspaces/$workspace/settings/'
@@ -901,20 +875,6 @@ declare module '@tanstack/react-router' {
       path: '/billing'
       fullPath: '/workspaces/$workspace/settings/billing'
       preLoaderRoute: typeof WorkspacesWorkspaceSettingsBillingRouteImport
-      parentRoute: typeof WorkspacesWorkspaceSettingsRouteRoute
-    }
-    '/workspaces/$workspace/settings/data': {
-      id: '/workspaces/$workspace/settings/data'
-      path: '/data'
-      fullPath: '/workspaces/$workspace/settings/data'
-      preLoaderRoute: typeof WorkspacesWorkspaceSettingsDataRouteImport
-      parentRoute: typeof WorkspacesWorkspaceSettingsRouteRoute
-    }
-    '/workspaces/$workspace/settings/integrations': {
-      id: '/workspaces/$workspace/settings/integrations'
-      path: '/integrations'
-      fullPath: '/workspaces/$workspace/settings/integrations'
-      preLoaderRoute: typeof WorkspacesWorkspaceSettingsIntegrationsRouteImport
       parentRoute: typeof WorkspacesWorkspaceSettingsRouteRoute
     }
     '/workspaces/$workspace/settings/members': {
@@ -1474,8 +1434,6 @@ interface WorkspacesWorkspaceSettingsRouteRouteChildren {
   WorkspacesWorkspaceSettingsApiRoute: typeof WorkspacesWorkspaceSettingsApiRoute
   WorkspacesWorkspaceSettingsAppearanceRoute: typeof WorkspacesWorkspaceSettingsAppearanceRoute
   WorkspacesWorkspaceSettingsBillingRoute: typeof WorkspacesWorkspaceSettingsBillingRoute
-  WorkspacesWorkspaceSettingsDataRoute: typeof WorkspacesWorkspaceSettingsDataRoute
-  WorkspacesWorkspaceSettingsIntegrationsRoute: typeof WorkspacesWorkspaceSettingsIntegrationsRoute
   WorkspacesWorkspaceSettingsRoleRoute: typeof WorkspacesWorkspaceSettingsRoleRoute
   WorkspacesWorkspaceSettingsIndexRoute: typeof WorkspacesWorkspaceSettingsIndexRoute
 }
@@ -1489,9 +1447,6 @@ const WorkspacesWorkspaceSettingsRouteRouteChildren: WorkspacesWorkspaceSettings
       WorkspacesWorkspaceSettingsAppearanceRoute,
     WorkspacesWorkspaceSettingsBillingRoute:
       WorkspacesWorkspaceSettingsBillingRoute,
-    WorkspacesWorkspaceSettingsDataRoute: WorkspacesWorkspaceSettingsDataRoute,
-    WorkspacesWorkspaceSettingsIntegrationsRoute:
-      WorkspacesWorkspaceSettingsIntegrationsRoute,
     WorkspacesWorkspaceSettingsRoleRoute: WorkspacesWorkspaceSettingsRoleRoute,
     WorkspacesWorkspaceSettingsIndexRoute:
       WorkspacesWorkspaceSettingsIndexRoute,
