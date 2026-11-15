@@ -3,19 +3,24 @@ import { z } from "zod";
 
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { httpError } from "@/lib/http";
-import { listTrash } from "@/lib/records/trash-repository";
-import { findTable } from "@/lib/tables/repository";
-import { resolveTrashQuery, trashSearchSchema } from "@/lib/trash/query";
+import { dropTables, findDeletedTable, findLinkingColumns } from "@/lib/tables/repository";
 
 const params = z.object({ workspace: z.string(), table: z.coerce.number().int().positive() });
 
-export const GET = defineHandler(
+export const DELETE = defineHandler(
   requireAdmin,
-  defineHandler.withValidator({ params, query: trashSearchSchema })(
-    async (_c, { params, query }) => {
-      const table = await findTable(params.table);
-      if (!table) throw httpError(404, "Table not found.");
-      return listTrash(table, resolveTrashQuery(query));
-    },
-  ),
+  defineHandler.withValidator({ params })(async (c, { params }) => {
+    const table = await findDeletedTable(params.table);
+    if (!table) throw httpError(404, "This table isn't in the trash.");
+
+    const [link] = await findLinkingColumns([table.id], { liveOnly: false });
+    if (link)
+      throw httpError(
+        409,
+        `"${link.table}" still links to this table. Delete "${link.table}" forever first.`,
+      );
+
+    await dropTables(c.get("workspaceId"), [table]);
+    return { ok: true };
+  }),
 );

@@ -387,13 +387,13 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
-  /workspaces/{workspace}/tables/trash/{table}:
+  /workspaces/{workspace}/tables/{table}/trash:
     delete:
       tags:
       - Trash
       summary: Delete a table forever
       description: Administrators only.
-      operationId: deleteWorkspacesWorkspaceTablesTrashTable
+      operationId: deleteWorkspacesWorkspaceTablesTableTrash
       parameters:
       - $ref: '#/components/parameters/workspace'
       - $ref: '#/components/parameters/table'
@@ -412,13 +412,13 @@ paths:
           $ref: '#/components/responses/NotFound'
         '409':
           $ref: '#/components/responses/Conflict'
-  /workspaces/{workspace}/tables/trash/{table}/restore:
+  /workspaces/{workspace}/tables/{table}/trash/restore:
     post:
       tags:
       - Trash
       summary: Restore a table
       description: Administrators only.
-      operationId: postWorkspacesWorkspaceTablesTrashTableRestore
+      operationId: postWorkspacesWorkspaceTablesTableTrashRestore
       parameters:
       - $ref: '#/components/parameters/workspace'
       - $ref: '#/components/parameters/table'
@@ -692,13 +692,13 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
-  /workspaces/{workspace}/tables/{table}/columns/trash/{column}:
+  /workspaces/{workspace}/tables/{table}/columns/{column}/trash:
     delete:
       tags:
       - Trash
       summary: Delete a column forever
       description: Administrators only.
-      operationId: deleteWorkspacesWorkspaceTablesTableColumnsTrashColumn
+      operationId: deleteWorkspacesWorkspaceTablesTableColumnsColumnTrash
       parameters:
       - $ref: '#/components/parameters/workspace'
       - $ref: '#/components/parameters/table'
@@ -718,13 +718,13 @@ paths:
           $ref: '#/components/responses/NotFound'
         '409':
           $ref: '#/components/responses/Conflict'
-  /workspaces/{workspace}/tables/{table}/columns/trash/{column}/restore:
+  /workspaces/{workspace}/tables/{table}/columns/{column}/trash/restore:
     post:
       tags:
       - Trash
       summary: Restore a column
       description: Administrators only.
-      operationId: postWorkspacesWorkspaceTablesTableColumnsTrashColumnRestore
+      operationId: postWorkspacesWorkspaceTablesTableColumnsColumnTrashRestore
       parameters:
       - $ref: '#/components/parameters/workspace'
       - $ref: '#/components/parameters/table'
@@ -1253,13 +1253,13 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
-  /workspaces/{workspace}/tables/{table}/trash:
+  /workspaces/{workspace}/tables/{table}/records/trash:
     get:
       tags:
       - Trash
       summary: List deleted records
       description: Administrators only.
-      operationId: getWorkspacesWorkspaceTablesTableTrash
+      operationId: getWorkspacesWorkspaceTablesTableRecordsTrash
       parameters:
       - $ref: '#/components/parameters/workspace'
       - $ref: '#/components/parameters/table'
@@ -1319,13 +1319,13 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
-  /workspaces/{workspace}/tables/{table}/trash/{entry}:
+  /workspaces/{workspace}/tables/{table}/records/trash/{entry}:
     get:
       tags:
       - Trash
       summary: Get a deleted record
       description: Administrators only.
-      operationId: getWorkspacesWorkspaceTablesTableTrashEntry
+      operationId: getWorkspacesWorkspaceTablesTableRecordsTrashEntry
       parameters:
       - $ref: '#/components/parameters/workspace'
       - $ref: '#/components/parameters/table'
@@ -1348,7 +1348,7 @@ paths:
       - Trash
       summary: Delete a record forever
       description: Administrators only.
-      operationId: deleteWorkspacesWorkspaceTablesTableTrashEntry
+      operationId: deleteWorkspacesWorkspaceTablesTableRecordsTrashEntry
       parameters:
       - $ref: '#/components/parameters/workspace'
       - $ref: '#/components/parameters/table'
@@ -1366,13 +1366,13 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
-  /workspaces/{workspace}/tables/{table}/trash/{entry}/restore:
+  /workspaces/{workspace}/tables/{table}/records/trash/{entry}/restore:
     post:
       tags:
       - Trash
       summary: Restore a record
       description: Optionally replace some saved values while restoring. Administrators only.
-      operationId: postWorkspacesWorkspaceTablesTableTrashEntryRestore
+      operationId: postWorkspacesWorkspaceTablesTableRecordsTrashEntryRestore
       parameters:
       - $ref: '#/components/parameters/workspace'
       - $ref: '#/components/parameters/table'

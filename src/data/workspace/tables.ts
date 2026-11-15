@@ -93,7 +93,7 @@ export const restoreTableMutationOptions = mutationOptions({
   mutationKey: workspaceKeys.mutation("restore-table"),
   mutationFn: ({ workspace, id }: { workspace: string; id: number }) =>
     unwrapFetch(
-      fetch("/api/workspaces/:workspace/tables/trash/:table/restore", {
+      fetch("/api/workspaces/:workspace/tables/:table/trash/restore", {
         method: "POST",
         params: { workspace, table: String(id) },
       }),
@@ -104,7 +104,7 @@ export const purgeTableMutationOptions = mutationOptions({
   mutationKey: workspaceKeys.mutation("purge-table"),
   mutationFn: ({ workspace, id }: { workspace: string; id: number }) =>
     unwrapFetch(
-      fetch("/api/workspaces/:workspace/tables/trash/:table", {
+      fetch("/api/workspaces/:workspace/tables/:table/trash", {
         method: "DELETE",
         params: { workspace, table: String(id) },
       }),
@@ -203,7 +203,7 @@ export const restoreColumnMutationOptions = mutationOptions({
   mutationKey: workspaceKeys.mutation("restore-column"),
   mutationFn: ({ workspace, id, columnId }: { workspace: string; id: number; columnId: number }) =>
     unwrapFetch(
-      fetch("/api/workspaces/:workspace/tables/:table/columns/trash/:column/restore", {
+      fetch("/api/workspaces/:workspace/tables/:table/columns/:column/trash/restore", {
         method: "POST",
         params: { workspace, table: String(id), column: String(columnId) },
       }),
@@ -214,7 +214,7 @@ export const purgeColumnMutationOptions = mutationOptions({
   mutationKey: workspaceKeys.mutation("purge-column"),
   mutationFn: ({ workspace, id, columnId }: { workspace: string; id: number; columnId: number }) =>
     unwrapFetch(
-      fetch("/api/workspaces/:workspace/tables/:table/columns/trash/:column", {
+      fetch("/api/workspaces/:workspace/tables/:table/columns/:column/trash", {
         method: "DELETE",
         params: { workspace, table: String(id), column: String(columnId) },
       }),
