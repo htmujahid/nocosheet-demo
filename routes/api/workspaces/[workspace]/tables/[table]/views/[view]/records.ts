@@ -2,7 +2,7 @@ import { defineHandler } from "void";
 import { requireAuth } from "void/auth";
 import { z } from "zod";
 
-import { httpError } from "@/lib/http";
+import { httpError, NOT_FOUND } from "@/lib/http";
 import { targetsOfColumns, parseFilters } from "@/lib/records/filter-param";
 import { recordsApiSchema, resolveRecordsQuery, withFilters } from "@/lib/records/query";
 import { findRecords } from "@/lib/records/repository";
@@ -25,9 +25,9 @@ export const GET = defineHandler.withValidator({ params, query: recordsApiSchema
 ) => {
   const { ownerId } = await authorize(requireAuth(c), "read", params.table, params.view);
   const table = await findTable(params.table);
-  if (!table) throw httpError(404, "Table not found.");
+  if (!table) throw httpError(404, NOT_FOUND);
   const row = await findView(table.id, params.view);
-  if (!row) throw httpError(404, "View not found.");
+  if (!row) throw httpError(404, NOT_FOUND);
 
   const all = await listColumns(table.id);
   const shown = all.filter((column) => row.selectColumns.includes(column.columnName));

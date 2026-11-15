@@ -3,7 +3,7 @@ import { requireAuth } from "void/auth";
 import { z } from "zod";
 
 import { classifyDbError } from "@/lib/db-errors";
-import { httpError, writeFailure } from "@/lib/http";
+import { httpError, NOT_FOUND, writeFailure } from "@/lib/http";
 import {
   convertCell,
   type ImportResult,
@@ -30,7 +30,7 @@ export const POST = defineHandler.withValidator({
   const user = requireAuth(c);
   await authorize(user, "create", params.table, query.view);
   const table = await findTable(params.table);
-  if (!table) throw httpError(404, "Table not found.");
+  if (!table) throw httpError(404, NOT_FOUND);
   const columns = await listColumns(table.id);
   const importable = new Map(
     columns

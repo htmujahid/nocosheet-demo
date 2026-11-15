@@ -2,7 +2,7 @@ import { defineHandler } from "void";
 import { z } from "zod";
 
 import { requireAdmin } from "@/lib/auth/require-admin";
-import { httpError } from "@/lib/http";
+import { httpError, NOT_FOUND } from "@/lib/http";
 import { findTable, listColumns, reorderColumns } from "@/lib/tables/repository";
 import { columnOrderSchema } from "@/lib/tables/validation";
 
@@ -12,7 +12,7 @@ export const PUT = defineHandler(
   requireAdmin,
   defineHandler.withValidator({ params, body: columnOrderSchema })(async (_c, { params, body }) => {
     const table = await findTable(params.table);
-    if (!table) throw httpError(404, "Table not found.");
+    if (!table) throw httpError(404, NOT_FOUND);
 
     const current = (await listColumns(table.id)).map((column) => column.id);
     const same =

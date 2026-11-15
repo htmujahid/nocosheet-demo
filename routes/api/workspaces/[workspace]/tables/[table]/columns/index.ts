@@ -2,7 +2,7 @@ import { defineHandler } from "void";
 import { z } from "zod";
 
 import { requireAdmin } from "@/lib/auth/require-admin";
-import { conflictOrBadRequest, httpError } from "@/lib/http";
+import { conflictOrBadRequest, httpError, NOT_FOUND } from "@/lib/http";
 import { DdlError, type RelationTarget } from "@/lib/tables/ddl";
 import {
   createColumn,
@@ -18,7 +18,7 @@ export const POST = defineHandler(
   defineHandler.withValidator({ params, body: columnInputSchema })(async (c, { params, body }) => {
     const workspace = c.get("workspaceId");
     const table = await findTable(params.table);
-    if (!table) throw httpError(404, "Table not found.");
+    if (!table) throw httpError(404, NOT_FOUND);
 
     const targets = new Map<number, RelationTarget>();
     if (body.format === "relation") {

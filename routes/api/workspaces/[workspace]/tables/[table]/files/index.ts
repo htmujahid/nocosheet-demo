@@ -4,7 +4,7 @@ import { storage } from "void/storage";
 import { z } from "zod";
 
 import { FILE_MAX_BYTES, fileKey, fileUrl, isImageType } from "@/lib/files";
-import { httpError } from "@/lib/http";
+import { httpError, NOT_FOUND } from "@/lib/http";
 import { authorizeAny } from "@/lib/roles/guard";
 import { findTable, listColumns } from "@/lib/tables/repository";
 
@@ -13,7 +13,7 @@ const params = z.object({ workspace: z.string(), table: z.coerce.number().int().
 export const POST = defineHandler.withValidator({ params })(async (c, { params }) => {
   await authorizeAny(requireAuth(c), ["update", "create"], params.table);
   const table = await findTable(params.table);
-  if (!table) throw httpError(404, "Table not found.");
+  if (!table) throw httpError(404, NOT_FOUND);
 
   const form = await c.req.formData();
   const file = form.get("file");

@@ -13,7 +13,7 @@ import {
   softDeleteForms,
 } from "@/lib/forms/repository";
 import { checkFormDefinition, formInputSchema, formsDeleteSchema } from "@/lib/forms/validation";
-import { conflictOrBadRequest, httpError } from "@/lib/http";
+import { conflictOrBadRequest, httpError, NOT_FOUND } from "@/lib/http";
 import { visibleResources } from "@/lib/roles/guard";
 import { findTable, listColumns } from "@/lib/tables/repository";
 
@@ -24,11 +24,11 @@ export const GET = defineHandler.withValidator({ params, query: formsSearchSchem
   { params, query },
 ) => {
   const user = requireAuth(c);
-  const table = await findTable(params.table);
-  if (!table) throw httpError(404, "Table not found.");
-  const visible = await visibleResources(user, "create", table.id, await listForms(table.id));
+  const visible = (await findTable(params.table))
+    ? await visibleResources(user, "create", params.table, await listForms(params.table))
+    : [];
   return listFormsPage(
-    table.id,
+    params.table,
     resolveFormsQuery(query),
     !isAdmin(user),
     visible.map((form) => form.id),
@@ -39,7 +39,7 @@ export const POST = defineHandler(
   requireAdmin,
   defineHandler.withValidator({ params, body: formInputSchema })(async (c, { params, body }) => {
     const table = await findTable(params.table);
-    if (!table) throw httpError(404, "Table not found.");
+    if (!table) throw httpError(404, NOT_FOUND);
 
     const problem = checkFormDefinition(await listColumns(table.id), body);
     if (problem) throw httpError(400, problem);
@@ -56,11 +56,11 @@ export const DELETE = defineHandler(
   requireAdmin,
   defineHandler.withValidator({ params, body: formsDeleteSchema })(async (c, { params, body }) => {
     const table = await findTable(params.table);
-    if (!table) throw httpError(404, "Table not found.");
+    if (!table) throw httpError(404, NOT_FOUND);
 
     const ids = [...new Set(body.ids)];
     if ((await findForms(table.id, ids)).length !== ids.length)
-      throw httpError(404, "Form not found.");
+      throw httpError(404, NOT_FOUND);
 
     await softDeleteForms(ids, requireAuth(c).id);
     return { ok: true };

@@ -4,7 +4,7 @@ import { z } from "zod";
 
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { findFormsUsingColumn } from "@/lib/forms/repository";
-import { conflictOrBadRequest, httpError } from "@/lib/http";
+import { conflictOrBadRequest, httpError, NOT_FOUND } from "@/lib/http";
 import { SEARCHABLE_FORMATS } from "@/lib/tables/formats";
 import {
   findColumn,
@@ -26,7 +26,7 @@ export const PATCH = defineHandler(
   requireAdmin,
   defineHandler.withValidator({ params, body: columnPatchSchema })(async (c, { params, body }) => {
     const table = await findTable(params.table);
-    if (!table) throw httpError(404, "Table not found.");
+    if (!table) throw httpError(404, NOT_FOUND);
     const column = await findColumn(table.id, params.column);
     if (!column) throw httpError(404, "Column not found.");
 
@@ -45,7 +45,7 @@ export const DELETE = defineHandler(
   requireAdmin,
   defineHandler.withValidator({ params })(async (c, { params }) => {
     const table = await findTable(params.table);
-    if (!table) throw httpError(404, "Table not found.");
+    if (!table) throw httpError(404, NOT_FOUND);
     const column = await findColumn(table.id, params.column);
     if (!column) throw httpError(404, "Column not found.");
 

@@ -2,6 +2,8 @@ import { HTTPException } from "hono/http-exception";
 
 import { classifyDbError } from "./db-errors";
 
+export const NOT_FOUND = "Not found.";
+
 export function httpError(status: 400 | 403 | 404 | 409, message: string, field?: string) {
   return new HTTPException(
     status,

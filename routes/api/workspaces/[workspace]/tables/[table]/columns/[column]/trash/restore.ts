@@ -2,7 +2,7 @@ import { defineHandler } from "void";
 import { z } from "zod";
 
 import { requireAdmin } from "@/lib/auth/require-admin";
-import { conflictOrBadRequest, httpError } from "@/lib/http";
+import { conflictOrBadRequest, httpError, NOT_FOUND } from "@/lib/http";
 import {
   findDeletedColumn,
   findLiveColumnNamed,
@@ -20,7 +20,7 @@ export const POST = defineHandler(
   requireAdmin,
   defineHandler.withValidator({ params })(async (c, { params }) => {
     const table = await findTable(params.table);
-    if (!table) throw httpError(404, "Table not found.");
+    if (!table) throw httpError(404, NOT_FOUND);
     const column = await findDeletedColumn(table.id, params.column);
     if (!column) throw httpError(404, "This column isn't in the trash.");
 

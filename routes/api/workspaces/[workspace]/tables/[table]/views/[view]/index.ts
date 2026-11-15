@@ -3,7 +3,7 @@ import { requireAuth } from "void/auth";
 import { z } from "zod";
 
 import { requireAdmin } from "@/lib/auth/require-admin";
-import { conflictOrBadRequest, httpError } from "@/lib/http";
+import { conflictOrBadRequest, httpError, NOT_FOUND } from "@/lib/http";
 import { authorize } from "@/lib/roles/guard";
 import { findTable, listColumns } from "@/lib/tables/repository";
 import { findView, softDeleteView, updateView } from "@/lib/views/repository";
@@ -18,9 +18,9 @@ const params = z.object({
 export const GET = defineHandler.withValidator({ params })(async (c, { params }) => {
   await authorize(requireAuth(c), "read", params.table, params.view);
   const table = await findTable(params.table);
-  if (!table) throw httpError(404, "Table not found.");
+  if (!table) throw httpError(404, NOT_FOUND);
   const view = await findView(table.id, params.view);
-  if (!view) throw httpError(404, "View not found.");
+  if (!view) throw httpError(404, NOT_FOUND);
 
   const columns = (await listColumns(table.id)).filter((column) =>
     view.selectColumns.includes(column.columnName),
@@ -36,9 +36,9 @@ export const PATCH = defineHandler(
   requireAdmin,
   defineHandler.withValidator({ params, body: viewPatchSchema })(async (c, { params, body }) => {
     const table = await findTable(params.table);
-    if (!table) throw httpError(404, "Table not found.");
+    if (!table) throw httpError(404, NOT_FOUND);
     const view = await findView(table.id, params.view);
-    if (!view) throw httpError(404, "View not found.");
+    if (!view) throw httpError(404, NOT_FOUND);
 
     try {
       return await updateView(params.view, body);
@@ -51,7 +51,7 @@ export const PATCH = defineHandler(
 export const DELETE = defineHandler(
   requireAdmin,
   defineHandler.withValidator({ params })(async (c, { params }) => {
-    if (!(await findView(params.table, params.view))) throw httpError(404, "View not found.");
+    if (!(await findView(params.table, params.view))) throw httpError(404, NOT_FOUND);
     await softDeleteView(params.view, requireAuth(c).id);
     return { ok: true };
   }),

@@ -3,7 +3,7 @@ import { requireAuth } from "void/auth";
 import { z } from "zod";
 
 import { requireAdmin } from "@/lib/auth/require-admin";
-import { conflictOrBadRequest, httpError } from "@/lib/http";
+import { conflictOrBadRequest, httpError, NOT_FOUND } from "@/lib/http";
 import { authorizeAny } from "@/lib/roles/guard";
 import { TITLE_FORMATS } from "@/lib/tables/formats";
 import {
@@ -19,7 +19,7 @@ const params = z.object({ workspace: z.string(), table: z.coerce.number().int().
 export const GET = defineHandler.withValidator({ params })(async (c, { params }) => {
   await authorizeAny(requireAuth(c), ["read", "create", "update"], params.table);
   const table = await findTable(params.table);
-  if (!table) throw httpError(404, "Table not found.");
+  if (!table) throw httpError(404, NOT_FOUND);
   return { ...table, columns: await listColumns(table.id) };
 });
 
@@ -27,7 +27,7 @@ export const PATCH = defineHandler(
   requireAdmin,
   defineHandler.withValidator({ params, body: tableUpdateSchema })(async (c, { params, body }) => {
     const table = await findTable(params.table);
-    if (!table) throw httpError(404, "Table not found.");
+    if (!table) throw httpError(404, NOT_FOUND);
     const { titleColumn, ...fields } = body;
 
     let titleColumnId: number | null | undefined;

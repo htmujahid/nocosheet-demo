@@ -2,7 +2,7 @@ import { defineHandler } from "void";
 import { requireAuth } from "void/auth";
 import { z } from "zod";
 
-import { httpError, writeFailure } from "@/lib/http";
+import { httpError, NOT_FOUND, writeFailure } from "@/lib/http";
 import { deleteRecords } from "@/lib/records/deletion";
 import { checkLinks } from "@/lib/records/links";
 import { countOwnedRecords, findRecord, updateRecordRow } from "@/lib/records/repository";
@@ -29,14 +29,14 @@ export const GET = defineHandler.withValidator({ params, query: viewScopeSchema 
     query.view,
   );
   const table = await findTable(params.table);
-  if (!table) throw httpError(404, "Table not found.");
+  if (!table) throw httpError(404, NOT_FOUND);
   const all = await listColumns(table.id);
   const view = query.view ? await findView(table.id, query.view) : undefined;
   const columns = view
     ? all.filter((column) => view.selectColumns.includes(column.columnName))
     : all;
   const record = await findRecord(c.get("workspaceId"), table, columns, params.record, ownerId);
-  if (!record) throw httpError(404, "Record not found.");
+  if (!record) throw httpError(404, NOT_FOUND);
   return record;
 });
 
@@ -49,7 +49,7 @@ export const PATCH = defineHandler.withValidator({
   const user = requireAuth(c);
   const { ownerId } = await authorize(user, "update", params.table, query.view);
   const table = await findTable(params.table);
-  if (!table) throw httpError(404, "Table not found.");
+  if (!table) throw httpError(404, NOT_FOUND);
   const columns = await listColumns(table.id);
   const view = query.view ? await findView(table.id, query.view) : undefined;
   const stray = view && Object.keys(body.values).find((key) => !view.selectColumns.includes(key));
@@ -75,7 +75,7 @@ export const PATCH = defineHandler.withValidator({
   } catch (error) {
     writeFailure(error, columns);
   }
-  if (!updated) throw httpError(404, "Record not found.");
+  if (!updated) throw httpError(404, NOT_FOUND);
   return { ok: true };
 });
 
@@ -87,7 +87,7 @@ export const DELETE = defineHandler.withValidator({ params, query: viewScopeSche
   const user = requireAuth(c);
   const { ownerId } = await authorize(user, "delete", params.table, query.view);
   const table = await findTable(params.table);
-  if (!table) throw httpError(404, "Table not found.");
+  if (!table) throw httpError(404, NOT_FOUND);
 
   if (ownerId && (await countOwnedRecords(workspace, table, [params.record], ownerId)) !== 1)
     throw httpError(403, "You can only delete records you created.");

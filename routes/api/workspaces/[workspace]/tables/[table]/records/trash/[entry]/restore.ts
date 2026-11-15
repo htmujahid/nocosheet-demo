@@ -2,7 +2,7 @@ import { defineHandler } from "void";
 import { z } from "zod";
 
 import { requireAdmin } from "@/lib/auth/require-admin";
-import { httpError, writeFailure } from "@/lib/http";
+import { httpError, NOT_FOUND, writeFailure } from "@/lib/http";
 import { checkLinks } from "@/lib/records/links";
 import { restoredSystemValues, mergeSnapshot, snapshotAuthors } from "@/lib/records/restore";
 import { findExistingUserIds, findTrashEntry, restoreRow } from "@/lib/records/trash-repository";
@@ -22,7 +22,7 @@ export const POST = defineHandler(
   defineHandler.withValidator({ params, body })(async (c, { params, body }) => {
     const workspace = c.get("workspaceId");
     const table = await findTable(params.table);
-    if (!table) throw httpError(404, "Table not found.");
+    if (!table) throw httpError(404, NOT_FOUND);
     const entry = await findTrashEntry(table, params.entry);
     if (!entry) throw httpError(404, "This record is no longer in the trash.");
     const columns = await listColumns(table.id);

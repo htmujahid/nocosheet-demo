@@ -2,7 +2,7 @@ import { defineHandler } from "void";
 import { requireAuth } from "void/auth";
 import { z } from "zod";
 
-import { httpError, writeFailure } from "@/lib/http";
+import { httpError, NOT_FOUND, writeFailure } from "@/lib/http";
 import { deleteRecords } from "@/lib/records/deletion";
 import { targetsOfColumns, parseFilters } from "@/lib/records/filter-param";
 import { checkLinks } from "@/lib/records/links";
@@ -28,7 +28,7 @@ export const GET = defineHandler.withValidator({ params, query: recordsApiSchema
 ) => {
   const { ownerId } = await authorize(requireAuth(c), "read", params.table);
   const table = await findTable(params.table);
-  if (!table) throw httpError(404, "Table not found.");
+  if (!table) throw httpError(404, NOT_FOUND);
   const columns = await listColumns(table.id);
   const parsed = parseFilters(resolveRecordsQuery(query).filter, targetsOfColumns(columns));
   if (parsed.errors.length) throw httpError(400, parsed.errors[0]);
@@ -58,7 +58,7 @@ export const POST = defineHandler.withValidator({
   const workspace = c.get("workspaceId");
   await authorize(requireAuth(c), "create", params.table, query.view);
   const table = await findTable(params.table);
-  if (!table) throw httpError(404, "Table not found.");
+  if (!table) throw httpError(404, NOT_FOUND);
   const columns = await listColumns(table.id);
 
   const parsed = parseRecordValues(columns, body.values);
@@ -88,7 +88,7 @@ export const DELETE = defineHandler.withValidator({
   const user = requireAuth(c);
   const { ownerId } = await authorize(user, "delete", params.table, query.view);
   const table = await findTable(params.table);
-  if (!table) throw httpError(404, "Table not found.");
+  if (!table) throw httpError(404, NOT_FOUND);
 
   if (ownerId) {
     const ids = [...new Set(body.ids)];

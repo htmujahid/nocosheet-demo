@@ -3,7 +3,7 @@ import { requireAuth } from "void/auth";
 import { z } from "zod";
 
 import { requireAdmin } from "@/lib/auth/require-admin";
-import { conflictOrBadRequest, httpError } from "@/lib/http";
+import { conflictOrBadRequest, httpError, NOT_FOUND } from "@/lib/http";
 import { visibleResources } from "@/lib/roles/guard";
 import { findTable, listColumns } from "@/lib/tables/repository";
 import { resolveViewsQuery, viewsSearchSchema } from "@/lib/views/query";
@@ -23,16 +23,11 @@ export const GET = defineHandler.withValidator({ params, query: viewsSearchSchem
   c,
   { params, query },
 ) => {
-  const table = await findTable(params.table);
-  if (!table) throw httpError(404, "Table not found.");
-  const visible = await visibleResources(
-    requireAuth(c),
-    "read",
-    table.id,
-    await listViews(table.id),
-  );
+  const visible = (await findTable(params.table))
+    ? await visibleResources(requireAuth(c), "read", params.table, await listViews(params.table))
+    : [];
   return listViewsPage(
-    table.id,
+    params.table,
     resolveViewsQuery(query),
     visible.map((view) => view.id),
   );
@@ -42,7 +37,7 @@ export const POST = defineHandler(
   requireAdmin,
   defineHandler.withValidator({ params, body: viewInputSchema })(async (c, { params, body }) => {
     const table = await findTable(params.table);
-    if (!table) throw httpError(404, "Table not found.");
+    if (!table) throw httpError(404, NOT_FOUND);
 
     const columns = await listColumns(table.id);
     const problem = checkViewDefinition(columns, body);
@@ -61,11 +56,11 @@ export const DELETE = defineHandler(
   requireAdmin,
   defineHandler.withValidator({ params, body: viewsDeleteSchema })(async (c, { params, body }) => {
     const table = await findTable(params.table);
-    if (!table) throw httpError(404, "Table not found.");
+    if (!table) throw httpError(404, NOT_FOUND);
 
     const ids = [...new Set(body.ids)];
     if ((await findViews(table.id, ids)).length !== ids.length)
-      throw httpError(404, "View not found.");
+      throw httpError(404, NOT_FOUND);
 
     await softDeleteViews(ids, requireAuth(c).id);
     return { ok: true };

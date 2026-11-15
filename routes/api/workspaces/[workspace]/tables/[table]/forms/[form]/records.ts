@@ -3,7 +3,7 @@ import { requireAuth } from "void/auth";
 import { z } from "zod";
 
 import { findForm } from "@/lib/forms/repository";
-import { httpError, writeFailure } from "@/lib/http";
+import { httpError, NOT_FOUND, writeFailure } from "@/lib/http";
 import { checkLinks } from "@/lib/records/links";
 import { createRecordRow } from "@/lib/records/repository";
 import { findMissingRequired, parseRecordValues, recordPatchSchema } from "@/lib/records/values";
@@ -24,9 +24,9 @@ export const POST = defineHandler.withValidator({ params, body: recordPatchSchem
   const user = requireAuth(c);
   await authorize(user, "create", params.table, params.form);
   const table = await findTable(params.table);
-  if (!table) throw httpError(404, "Table not found.");
+  if (!table) throw httpError(404, NOT_FOUND);
   const form = await findForm(table.id, params.form);
-  if (!form) throw httpError(404, "Form not found.");
+  if (!form) throw httpError(404, NOT_FOUND);
   if (!form.isOpen) throw httpError(403, "This form isn't accepting responses.");
 
   const stray = Object.keys(body.values).find((key) => !form.selectColumns.includes(key));

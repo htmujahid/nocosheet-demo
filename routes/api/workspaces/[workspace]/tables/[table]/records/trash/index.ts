@@ -2,7 +2,7 @@ import { defineHandler } from "void";
 import { z } from "zod";
 
 import { requireAdmin } from "@/lib/auth/require-admin";
-import { httpError } from "@/lib/http";
+import { httpError, NOT_FOUND } from "@/lib/http";
 import { listTrash } from "@/lib/records/trash-repository";
 import { findTable } from "@/lib/tables/repository";
 import { resolveTrashQuery, trashSearchSchema } from "@/lib/trash/query";
@@ -14,7 +14,7 @@ export const GET = defineHandler(
   defineHandler.withValidator({ params, query: trashSearchSchema })(
     async (_c, { params, query }) => {
       const table = await findTable(params.table);
-      if (!table) throw httpError(404, "Table not found.");
+      if (!table) throw httpError(404, NOT_FOUND);
       return listTrash(table, resolveTrashQuery(query));
     },
   ),

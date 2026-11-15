@@ -1,4 +1,4 @@
-import { httpError } from "../http";
+import { httpError, NOT_FOUND } from "../http";
 import { type Access, loadAccess } from "./access";
 import {
   type Action,
@@ -18,17 +18,23 @@ const DENIED: Record<Action, string> = {
   export: "You don't have permission to export these records.",
 };
 
+const VISIBLE_ACTIONS: Action[] = ["read", "create", "update"];
+
+function denied(access: Access, action: Action, tableId: number, resourceId?: number | null) {
+  const visible = VISIBLE_ACTIONS.some((item) => access.scope(item, tableId, resourceId) !== "none");
+  return visible ? httpError(403, DENIED[action]) : httpError(404, NOT_FOUND);
+}
+
 export async function authorize(
   user: User,
   action: Action,
   tableId: number,
   resourceId?: number | null,
 ) {
-  if (resourceId && !(await resourceInTable(resourceId, tableId)))
-    throw httpError(404, "Not found.");
   const access: Access = await loadAccess(user);
   const scope: Scope = access.scope(action, tableId, resourceId);
-  if (scope === "none") throw httpError(403, DENIED[action]);
+  if (scope === "none") throw denied(access, action, tableId, resourceId);
+  if (resourceId && !(await resourceInTable(resourceId, tableId))) throw httpError(404, NOT_FOUND);
   return { scope, ownerId: scope === "own" ? user.id : undefined };
 }
 
@@ -43,14 +49,13 @@ export async function authorizeAny(
   tableId: number,
   resourceId?: number | null,
 ) {
-  if (resourceId && !(await resourceInTable(resourceId, tableId)))
-    throw httpError(404, "Not found.");
   const access: Access = await loadAccess(user);
   const granted = actions
     .map((action) => ({ action, scope: access.scope(action, tableId, resourceId) }))
     .filter((item) => item.scope !== "none");
   const best = granted.find((item) => item.scope === "all") ?? granted[0];
-  if (!best) throw httpError(403, DENIED[actions[0]]);
+  if (!best) throw denied(access, actions[0], tableId, resourceId);
+  if (resourceId && !(await resourceInTable(resourceId, tableId))) throw httpError(404, NOT_FOUND);
   return { ...best, ownerId: best.scope === "own" ? user.id : undefined };
 }
 

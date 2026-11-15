@@ -1,4 +1,5 @@
 import { classifyDbError } from "../db-errors";
+import { NOT_FOUND } from "../http";
 import type { Column, Table } from "../tables/repository";
 import { listColumns } from "../tables/repository";
 import {
@@ -51,7 +52,7 @@ export async function deleteRecords(
 ): Promise<DeleteResult> {
   const plan = await planDeletion(workspace, table, [...new Set(ids)]);
   const top = plan[0];
-  if (!top) return { ok: false, reason: "not_found", message: "Record not found." };
+  if (!top) return { ok: false, reason: "not_found", message: NOT_FOUND };
 
   try {
     const trash = await trashAndDeleteRows(

@@ -2,7 +2,7 @@ import { defineHandler } from "void";
 import { requireAuth } from "void/auth";
 
 import { requireAdmin } from "@/lib/auth/require-admin";
-import { conflictOrBadRequest, httpError } from "@/lib/http";
+import { conflictOrBadRequest, httpError, NOT_FOUND } from "@/lib/http";
 import { resolveTablesQuery, tablesSearchSchema } from "@/lib/tables/query";
 import {
   createTable,
@@ -40,7 +40,7 @@ export const DELETE = defineHandler(
     const ids = [...new Set(body.ids)];
 
     const tables = await findTables(ids);
-    if (tables.length !== ids.length) throw httpError(404, "Table not found.");
+    if (tables.length !== ids.length) throw httpError(404, NOT_FOUND);
 
     const [link] = await findLinkingColumns(ids, { liveOnly: true });
     if (link)

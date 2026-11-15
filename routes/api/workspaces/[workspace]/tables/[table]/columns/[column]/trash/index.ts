@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { classifyDbError } from "@/lib/db-errors";
-import { httpError } from "@/lib/http";
+import { httpError, NOT_FOUND } from "@/lib/http";
 import { dropColumn, findDeletedColumn, findTable } from "@/lib/tables/repository";
 
 const params = z.object({
@@ -16,7 +16,7 @@ export const DELETE = defineHandler(
   requireAdmin,
   defineHandler.withValidator({ params })(async (c, { params }) => {
     const table = await findTable(params.table);
-    if (!table) throw httpError(404, "Table not found.");
+    if (!table) throw httpError(404, NOT_FOUND);
     const column = await findDeletedColumn(table.id, params.column);
     if (!column) throw httpError(404, "This column isn't in the trash.");
 

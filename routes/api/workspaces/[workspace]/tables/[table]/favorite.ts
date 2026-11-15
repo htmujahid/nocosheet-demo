@@ -2,7 +2,7 @@ import { defineHandler } from "void";
 import { requireAuth } from "void/auth";
 import { z } from "zod";
 
-import { httpError } from "@/lib/http";
+import { httpError, NOT_FOUND } from "@/lib/http";
 import { authorize } from "@/lib/roles/guard";
 import { addFavorite, findTable, removeFavorite } from "@/lib/tables/repository";
 
@@ -12,7 +12,7 @@ export const PUT = defineHandler.withValidator({ params })(async (c, { params })
   const user = requireAuth(c);
   await authorize(user, "read", params.table);
   const table = await findTable(params.table);
-  if (!table) throw httpError(404, "Table not found.");
+  if (!table) throw httpError(404, NOT_FOUND);
   await addFavorite(user.id, table.id);
   return { ok: true };
 });

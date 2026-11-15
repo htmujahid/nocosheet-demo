@@ -2,7 +2,7 @@ import { defineHandler } from "void";
 import { requireAuth } from "void/auth";
 import { z } from "zod";
 
-import { httpError } from "@/lib/http";
+import { httpError, NOT_FOUND } from "@/lib/http";
 import { findExportRecords } from "@/lib/records/repository";
 import { authorizeExport } from "@/lib/roles/guard";
 import { findTable, listColumns } from "@/lib/tables/repository";
@@ -18,9 +18,9 @@ const params = z.object({
 export const GET = defineHandler.withValidator({ params })(async (c, { params }) => {
   const { ownerId } = await authorizeExport(requireAuth(c), params.table, params.view);
   const table = await findTable(params.table);
-  if (!table) throw httpError(404, "Table not found.");
+  if (!table) throw httpError(404, NOT_FOUND);
   const view = await findView(table.id, params.view);
-  if (!view) throw httpError(404, "View not found.");
+  if (!view) throw httpError(404, NOT_FOUND);
 
   const columns = (await listColumns(table.id)).filter((column) =>
     view.selectColumns.includes(column.columnName),
