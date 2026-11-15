@@ -14,8 +14,11 @@ import {
 } from "@/lib/tables/repository";
 import { tableInputSchema, tablesDeleteSchema } from "@/lib/tables/validation";
 
-export const GET = defineHandler.withValidator({ query: tablesSearchSchema })(
-  async (_c, { query }) => listTables(resolveTablesQuery(query)),
+export const GET = defineHandler(
+  requireAdmin,
+  defineHandler.withValidator({ query: tablesSearchSchema })(async (_c, { query }) =>
+    listTables(resolveTablesQuery(query)),
+  ),
 );
 
 export const POST = defineHandler(

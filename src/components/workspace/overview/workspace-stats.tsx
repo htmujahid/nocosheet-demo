@@ -17,13 +17,13 @@ function Stat({
   label: string;
   value: React.ReactNode;
   hint: string;
-  to: "/workspaces/$workspace/tables" | "/workspaces/$workspace/settings/members" | "/workspaces/$workspace/settings/role";
+  to?: "/workspaces/$workspace/tables" | "/workspaces/$workspace/settings/members" | "/workspaces/$workspace/settings/role";
   workspace: string;
 }) {
   return (
     <Card
-      render={<Link to={to} params={{ workspace }} />}
-      className="transition-colors hover:bg-accent/40"
+      render={to ? <Link to={to} params={{ workspace }} /> : undefined}
+      className={to ? "transition-colors hover:bg-accent/40" : undefined}
     >
       <CardPanel className="flex flex-col gap-1">
         <span className="text-muted-foreground text-xs uppercase tracking-wide">{label}</span>
@@ -52,7 +52,7 @@ export function WorkspaceStats({ workspace }: { workspace: string }) {
         label="Tables"
         value={tables}
         hint={groups > 0 ? `${groups} ${groups === 1 ? "group" : "groups"}` : "No groups"}
-        to="/workspaces/$workspace/tables"
+        to={access.admin ? "/workspaces/$workspace/tables" : undefined}
         workspace={workspace}
       />
       <Stat

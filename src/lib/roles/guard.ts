@@ -39,11 +39,21 @@ export async function authorizeExport(user: User, tableId: number, resourceId?: 
   return authorize(user, "read", tableId, resourceId);
 }
 
-export async function authorizeAny(user: User, actions: Action[], tableId: number) {
+export async function authorizeAny(
+  user: User,
+  actions: Action[],
+  tableId: number,
+  resourceId?: number | null,
+) {
+  if (resourceId && !(await resourceInTable(resourceId, tableId)))
+    throw httpError(404, "Not found.");
   const access: Access = await loadAccess(user);
-  const action = actions.find((item) => access.scope(item, tableId) !== "none");
-  if (!action) throw httpError(403, DENIED[actions[0]]);
-  return { action };
+  const granted = actions
+    .map((action) => ({ action, scope: access.scope(action, tableId, resourceId) }))
+    .filter((item) => item.scope !== "none");
+  const best = granted.find((item) => item.scope === "all") ?? granted[0];
+  if (!best) throw httpError(403, DENIED[actions[0]]);
+  return { ...best, ownerId: best.scope === "own" ? user.id : undefined };
 }
 
 export async function visibleResources<T extends { id: number }>(

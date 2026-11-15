@@ -11,12 +11,14 @@ import {
 } from "@/components/ui/sidebar";
 import { toastManager } from "@/components/ui/toast";
 import { useIsActivePath } from "@/hooks/use-is-active-path";
+import { useWorkspace } from "@/hooks/use-workspace";
 
 import { SearchDialog } from "./search-dialog";
 
 /** Search, Ask AI, Home and All tables: the always-visible entries at the top of the sidebar. */
 export function NavMain({ workspace }: { workspace: string }) {
   const isActive = useIsActivePath();
+  const { isAdmin } = useWorkspace();
 
   return (
     <SidebarGroup>
@@ -50,18 +52,20 @@ export function NavMain({ workspace }: { workspace: string }) {
               <span>Home</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              tooltip="All tables"
-              isActive={
-                isActive(`/workspaces/${workspace}/tables`, true) || isActive(`/workspaces/${workspace}/tables/new`)
-              }
-              render={<Link to="/workspaces/$workspace/tables" params={{ workspace }} />}
-            >
-              <TableIcon />
-              <span>All tables</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
+          {isAdmin && (
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                tooltip="All tables"
+                isActive={
+                  isActive(`/workspaces/${workspace}/tables`, true) || isActive(`/workspaces/${workspace}/tables/new`)
+                }
+                render={<Link to="/workspaces/$workspace/tables" params={{ workspace }} />}
+              >
+                <TableIcon />
+                <span>All tables</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          )}
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>

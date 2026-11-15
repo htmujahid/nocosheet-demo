@@ -241,7 +241,7 @@ paths:
       tags:
       - Tables
       summary: List tables
-      description: Signed-in members.
+      description: Administrators only.
       operationId: getWorkspacesWorkspaceTables
       parameters:
       - $ref: '#/components/parameters/workspace'
@@ -297,6 +297,8 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
     post:
       tags:
       - Tables
@@ -440,7 +442,7 @@ paths:
       tags:
       - Tables
       summary: Get a table with its columns
-      description: Signed-in members.
+      description: Members who can view, create or edit records in the table.
       operationId: getWorkspacesWorkspaceTablesTable
       parameters:
       - $ref: '#/components/parameters/workspace'
@@ -454,6 +456,8 @@ paths:
                 $ref: '#/components/schemas/TableDetail'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
     patch:
@@ -493,7 +497,7 @@ paths:
       tags:
       - Tables
       summary: Add the table to your favorites
-      description: Signed-in members.
+      description: Members who can view the table's records.
       operationId: putWorkspacesWorkspaceTablesTableFavorite
       parameters:
       - $ref: '#/components/parameters/workspace'
@@ -507,6 +511,8 @@ paths:
                 $ref: '#/components/schemas/Ok'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
     delete:
@@ -1023,8 +1029,8 @@ paths:
       tags:
       - Records
       summary: Get a record
-      description: With view, only that view's columns are returned. Needs the read permission on the
-        table, or on the view or form it goes through.
+      description: With view, only that view's columns are returned. Needs the read or update
+        permission on the table, or on the view it goes through.
       operationId: getWorkspacesWorkspaceTablesTableRecordsRecord
       parameters:
       - $ref: '#/components/parameters/workspace'
@@ -1227,7 +1233,7 @@ paths:
       tags:
       - Files
       summary: Download a file
-      description: Needs the read permission on the table, or on the view or form it goes through.
+      description: Needs the read, update or create permission on the table.
       operationId: getWorkspacesWorkspaceTablesTableFilesFile
       parameters:
       - $ref: '#/components/parameters/workspace'

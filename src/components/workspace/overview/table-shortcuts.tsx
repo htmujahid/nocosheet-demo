@@ -31,15 +31,17 @@ export function TableShortcuts({ workspace }: { workspace: string }) {
         <CardFrameHeader>
           <CardFrameTitle>Recent tables</CardFrameTitle>
           <CardFrameDescription>Jump back into what changed last.</CardFrameDescription>
-          <CardFrameAction>
-            <Button
-              variant="ghost"
-              size="sm"
-              render={<Link to="/workspaces/$workspace/tables" params={{ workspace }} />}
-            >
-              View all
-            </Button>
-          </CardFrameAction>
+          {access.admin && (
+            <CardFrameAction>
+              <Button
+                variant="ghost"
+                size="sm"
+                render={<Link to="/workspaces/$workspace/tables" params={{ workspace }} />}
+              >
+                View all
+              </Button>
+            </CardFrameAction>
+          )}
         </CardFrameHeader>
         <Card>
           {tables.slice(0, RECENT_SHOWN).map((table) => (

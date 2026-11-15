@@ -40,6 +40,7 @@ import {
 import { Kbd, KbdGroup } from "@/components/ui/kbd";
 import { NamedIcon } from "@/components/workspace/tables/named-icon";
 import { sidebarQueryOptions } from "@/data/workspace/sidebar";
+import { useWorkspace } from "@/hooks/use-workspace";
 
 type Item = {
   value: string;
@@ -50,10 +51,8 @@ type Item = {
 };
 type Group = { value: string; items: Item[] };
 
-const pages: Item[] = [
-  { value: "home", label: "Home", icon: HomeIcon, path: "" },
-  { value: "all-tables", label: "All tables", icon: TableIcon, path: "/tables" },
-];
+const homePage: Item = { value: "home", label: "Home", icon: HomeIcon, path: "" };
+const allTablesPage: Item = { value: "all-tables", label: "All tables", icon: TableIcon, path: "/tables" };
 
 const settings: Item[] = [
   { value: "general", label: "General", icon: SlidersHorizontalIcon, path: "/settings" },
@@ -69,11 +68,12 @@ const settings: Item[] = [
 export function SearchDialog({ workspace }: { workspace: string }) {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
+  const { isAdmin } = useWorkspace();
   const { data: sidebar } = useQuery(sidebarQueryOptions(workspace));
   const tables = sidebar?.groups.flatMap((group) => group.tables) ?? [];
 
   const groups: Group[] = [
-    { value: "Pages", items: pages },
+    { value: "Pages", items: isAdmin ? [homePage, allTablesPage] : [homePage] },
     {
       value: "Tables",
       items: tables.map((table) => ({

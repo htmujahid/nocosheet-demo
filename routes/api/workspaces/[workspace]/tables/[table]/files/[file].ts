@@ -5,7 +5,7 @@ import { z } from "zod";
 
 import { fileKey } from "@/lib/files";
 import { httpError } from "@/lib/http";
-import { authorize } from "@/lib/roles/guard";
+import { authorizeAny } from "@/lib/roles/guard";
 
 const params = z.object({
   workspace: z.string(),
@@ -14,7 +14,7 @@ const params = z.object({
 });
 
 export const GET = defineHandler.withValidator({ params })(async (c, { params }) => {
-  await authorize(requireAuth(c), "read", params.table);
+  await authorizeAny(requireAuth(c), ["read", "update", "create"], params.table);
   const object = await storage.get(fileKey(params.workspace, params.table, params.file));
   if (!object) throw httpError(404, "File not found.");
 

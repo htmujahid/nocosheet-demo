@@ -16,7 +16,9 @@ const searchSchema = z.object({
 export const Route = createFileRoute("/workspaces/$workspace/_core/tables/new")({
   staticData: { crumb: "New table" },
   validateSearch: searchSchema,
-  beforeLoad: ({ search, params }) => {
+  beforeLoad: ({ context, search, params }) => {
+    if (!context.workspace.isAdmin)
+      throw redirect({ to: "/workspaces/$workspace", params: { workspace: params.workspace } });
     if (search.step === 2 && !search.table)
       throw redirect({ to: "/workspaces/$workspace/tables/new", params, search: { step: 1 } });
     if (search.step === 1 && search.table)
