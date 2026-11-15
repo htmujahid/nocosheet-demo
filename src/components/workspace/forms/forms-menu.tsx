@@ -42,7 +42,7 @@ export function FormsMenu({
     <>
       {grouped && <GroupSeparator />}
       <Menu>
-        <MenuTrigger render={<Button size="icon-sm" variant="outline" aria-label="Forms" />}>
+        <MenuTrigger render={<Button size="icon" variant="outline" aria-label="Forms" />}>
           <EllipsisIcon aria-hidden="true" />
         </MenuTrigger>
         <MenuPopup align="end" className="min-w-56">
