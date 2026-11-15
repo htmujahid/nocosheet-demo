@@ -32,7 +32,7 @@ export function TrashSheet({
         if (!next) onClose();
       }}
     >
-      <SheetPopup className="max-w-3xl">
+      <SheetPopup variant="inset" className="max-w-3xl">
         <SheetHeader>
           <SheetTitle>{title}</SheetTitle>
           <SheetDescription>{description}</SheetDescription>

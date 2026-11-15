@@ -129,7 +129,7 @@ export function RestoreRecordSheet({
         if (!next) onClose();
       }}
     >
-      <SheetPopup className="max-w-xl">
+      <SheetPopup variant="inset" className="max-w-xl">
         {entry ? (
           <RestoreForm
             key={entryId}

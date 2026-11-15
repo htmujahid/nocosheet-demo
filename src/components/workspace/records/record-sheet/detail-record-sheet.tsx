@@ -74,7 +74,7 @@ export function DetailRecordSheet({
         if (!next) onClose();
       }}
     >
-      <SheetPopup className="max-w-xl">
+      <SheetPopup variant="inset" className="max-w-xl">
         {record ? (
           <DetailForm
             key={recordId}

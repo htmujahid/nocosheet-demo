@@ -54,7 +54,7 @@ export function DeletedColumnsSheet({
         }
       }}
     >
-      <SheetPopup className="max-w-3xl">
+      <SheetPopup variant="inset" className="max-w-3xl">
         <SheetHeader>
           <SheetTitle>Deleted columns</SheetTitle>
           <SheetDescription>
