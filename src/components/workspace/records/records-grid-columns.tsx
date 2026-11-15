@@ -2,7 +2,7 @@ import { useMemo } from "react";
 
 import type { ReactTable } from "@tanstack/react-table";
 
-import { ArrowDownIcon, ArrowUpIcon, Maximize2Icon } from "lucide-react";
+import { ArrowDownIcon, ArrowUpIcon, HashIcon, Maximize2Icon } from "lucide-react";
 import type { Column, RenderEditCellContentProps } from "react-data-grid";
 
 import type { dataTableFeatures } from "@/components/shared/data-table/features";
@@ -55,7 +55,10 @@ export function useRecordsGridColumns<TSelected extends { rowSelection: Record<s
           const some = table.getIsSomePageRowsSelected();
           return (
             <>
-              <span className="records-row-index">#</span>
+              <span className="records-row-index records-row-index-label">
+                <HashIcon className="size-3.5 shrink-0" />
+                ID
+              </span>
               <Checkbox
                 aria-label="Select all"
                 className="records-row-check"
