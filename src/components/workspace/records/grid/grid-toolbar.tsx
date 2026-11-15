@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 
 import { SearchIcon } from "lucide-react";
 
@@ -15,10 +15,12 @@ export function GridToolbar({
   grid,
   columns,
   query,
+  children,
 }: {
   grid: GridTable;
   columns: ViewerColumn[];
   query: RecordsQuery;
+  children?: ReactNode;
 }) {
   const searchable = columns.some((column) => column.searchable);
   const [search, setSearch] = useState(query.q);
@@ -49,6 +51,7 @@ export function GridToolbar({
         value={query.filters}
         onApply={(filters) => grid.setColumnFilters(toColumnFilters(filters))}
       />
+      {children}
       <div className="ms-auto flex items-center gap-2">
         <DataTableViewOptions table={grid} />
       </div>

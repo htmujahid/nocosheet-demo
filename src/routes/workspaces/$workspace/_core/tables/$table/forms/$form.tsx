@@ -2,8 +2,8 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Navigate, notFound } from "@tanstack/react-router";
 
 import { WorkspaceContent, WorkspaceHeader } from "@/components/layout/workspace-header";
+import { FormActions } from "@/components/workspace/forms/form-actions";
 import { FormFill } from "@/components/workspace/forms/form-fill";
-import { ViewsMenu } from "@/components/workspace/views/views-menu";
 import { formQueryOptions } from "@/data/workspace/forms";
 import { useAccess } from "@/hooks/use-access";
 
@@ -38,7 +38,7 @@ function FormPage() {
   return (
     <>
       <WorkspaceHeader workspace={workspace}>
-        <ViewsMenu workspace={workspace} table={table} activeForm={form.id} />
+        <FormActions workspace={workspace} table={table} form={form} />
       </WorkspaceHeader>
       <WorkspaceContent className="max-w-2xl">
         <FormFill workspace={workspace} tableId={tableId} definition={form} />

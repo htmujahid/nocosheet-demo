@@ -93,7 +93,7 @@ function FormFields({
             {!definition.isOpen && (
               <Alert variant="warning">
                 <AlertDescription>
-                  This form isn't accepting responses. Turn it back on from the views menu.
+                  This form isn't accepting responses. Edit the form to turn it back on.
                 </AlertDescription>
               </Alert>
             )}

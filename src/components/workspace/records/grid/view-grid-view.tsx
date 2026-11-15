@@ -9,6 +9,7 @@ import { useAccess } from "@/hooks/use-access";
 import { RECORD_PAGE_SIZES } from "@/lib/records/query";
 import { cn } from "@/lib/utils";
 
+import { ViewsMenu } from "../../views/views-menu";
 import { buildViewerColumns, type ViewScope } from "../columns";
 import { RecordsGrid, type ViewerRow } from "../records-grid";
 import { useUpdateCell } from "../use-update-cell";
@@ -80,7 +81,9 @@ export function ViewGridView({
           paging={paging}
         />
       ) : (
-        <GridToolbar grid={grid} columns={columns} query={query} />
+        <GridToolbar grid={grid} columns={columns} query={query}>
+          <ViewsMenu workspace={workspace} table={String(tableId)} activeView={view.id} />
+        </GridToolbar>
       )}
 
       {error && (

@@ -1,11 +1,34 @@
-import { Link } from "@tanstack/react-router";
+import { useState } from "react";
 
-import { PlusIcon } from "lucide-react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link, useNavigate } from "@tanstack/react-router";
+
+import {
+  ChevronDownIcon,
+  PencilIcon,
+  PlusIcon,
+  RefreshCwIcon,
+  Settings2Icon,
+  Trash2Icon,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { Group } from "@/components/ui/group";
+import {
+  Menu,
+  MenuGroup,
+  MenuItem,
+  MenuPopup,
+  MenuSeparator,
+  MenuTrigger,
+} from "@/components/ui/menu";
+import { FormsMenu } from "@/components/workspace/forms/forms-menu";
+import { workspaceKeys } from "@/data/workspace/keys";
+import { viewsQueryOptions } from "@/data/workspace/views";
 import { useAccess } from "@/hooks/use-access";
 
-import { ViewsMenu } from "./views-menu";
+import { DeleteViewDialog } from "./delete-view-dialog";
+import { ViewDialog } from "./view-dialog";
 
 export function ViewActions({
   workspace,
@@ -17,27 +40,106 @@ export function ViewActions({
   view: number;
 }) {
   const access = useAccess();
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const [dialog, setDialog] = useState<"edit" | "delete" | null>(null);
+  const tableId = Number(table);
+  const { data: views = [] } = useQuery(viewsQueryOptions(workspace, tableId));
+  const active = views.find((item) => item.id === view);
+  const canCreate = access.can("create", tableId);
 
   return (
     <div className="flex items-center gap-2">
-      <ViewsMenu workspace={workspace} table={table} activeView={view} />
-      {access.can("create", Number(table)) && (
-        <Button
-          size="sm"
-          variant="outline"
-          aria-label="New record"
-          className="max-sm:w-8 max-sm:px-0"
+      <Menu>
+        <MenuTrigger
           render={
-            <Link
-              to="/workspaces/$workspace/tables/$table/views/$view/new"
-              params={{ workspace, table, view: String(view) }}
-              search={(previous) => previous}
+            <Button
+              size="sm"
+              variant="outline"
+              aria-label="View actions"
+              className="max-sm:w-8 max-sm:px-0"
             />
           }
         >
-          <PlusIcon />
-          <span className="max-sm:hidden">New record</span>
-        </Button>
+          <Settings2Icon aria-hidden="true" />
+          <span className="max-sm:hidden">Actions</span>
+          <ChevronDownIcon aria-hidden="true" className="max-sm:hidden" />
+        </MenuTrigger>
+        <MenuPopup align="end">
+          <MenuGroup>
+            <MenuItem
+              onClick={() =>
+                void queryClient.invalidateQueries({ queryKey: workspaceKeys.table(tableId) })
+              }
+            >
+              <RefreshCwIcon aria-hidden="true" />
+              Refresh
+            </MenuItem>
+          </MenuGroup>
+          {access.admin && active && (
+            <>
+              <MenuSeparator />
+              <MenuGroup>
+                <MenuItem onClick={() => setDialog("edit")}>
+                  <PencilIcon aria-hidden="true" />
+                  Edit view
+                </MenuItem>
+              </MenuGroup>
+              <MenuSeparator />
+              <MenuGroup>
+                <MenuItem variant="destructive" onClick={() => setDialog("delete")}>
+                  <Trash2Icon aria-hidden="true" />
+                  Delete view
+                </MenuItem>
+              </MenuGroup>
+            </>
+          )}
+        </MenuPopup>
+      </Menu>
+      <Group>
+        {canCreate && (
+          <Button
+            size="sm"
+            variant="outline"
+            aria-label="New record"
+            className="max-sm:w-8 max-sm:px-0"
+            render={
+              <Link
+                to="/workspaces/$workspace/tables/$table/views/$view/new"
+                params={{ workspace, table, view: String(view) }}
+                search={(previous) => previous}
+              />
+            }
+          >
+            <PlusIcon aria-hidden="true" />
+            <span className="max-sm:hidden">New record</span>
+          </Button>
+        )}
+        <FormsMenu workspace={workspace} table={table} grouped={canCreate} />
+      </Group>
+      {access.admin && active && (
+        <>
+          <ViewDialog
+            workspace={workspace}
+            tableId={tableId}
+            open={dialog === "edit"}
+            onOpenChange={(open) => !open && setDialog(null)}
+            view={active}
+          />
+          <DeleteViewDialog
+            workspace={workspace}
+            tableId={tableId}
+            view={active}
+            open={dialog === "delete"}
+            onOpenChange={(open) => !open && setDialog(null)}
+            onDeleted={() =>
+              void navigate({
+                to: "/workspaces/$workspace/tables/$table",
+                params: { workspace, table },
+              })
+            }
+          />
+        </>
       )}
     </div>
   );
