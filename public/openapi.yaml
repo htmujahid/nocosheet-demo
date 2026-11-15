@@ -1,0 +1,3845 @@
+# Nocosheet API, OpenAPI 3.1. Edit this file when a route in routes/api changes.
+openapi: 3.1.0
+info:
+  title: Nocosheet API
+  version: 1.0.0
+  summary: The API the Nocosheet app uses.
+  description: 'Everything the Nocosheet app does goes through this API.
+
+
+    Requests are authenticated with the Better Auth session cookie. Sign-in, sessions, passkeys and member
+    administration are documented in the Authentication reference, which administrators can open from
+    the same page.
+
+
+    What a member may do with records depends on their role. A permission on a view or a form is checked
+    first, then the table, then the workspace-wide setting.'
+servers:
+- url: /api
+  description: This server
+security:
+- sessionCookie: []
+tags:
+- name: App
+  description: Setup, health and avatars.
+- name: Access
+  description: What the signed-in member may do.
+- name: Tables
+  description: Tables and their sidebar entries.
+- name: Columns
+  description: The fields of a table.
+- name: Records
+  description: Rows of a table.
+- name: Views
+  description: Saved column and filter selections of a table.
+- name: Forms
+  description: Forms that create records.
+- name: Files
+  description: Uploads for file and image columns.
+- name: Roles
+  description: Roles, assignments and permissions.
+- name: Trash
+  description: Deleted records, columns, tables, views and forms.
+paths:
+  /hello:
+    get:
+      tags:
+      - App
+      summary: Example route
+      description: No sign-in needed.
+      operationId: getHello
+      security: []
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  framework:
+                    type: string
+                  database:
+                    type: string
+  /setup:
+    get:
+      tags:
+      - App
+      summary: Check whether the first administrator still has to be created
+      description: No sign-in needed.
+      operationId: getSetup
+      security: []
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  needsSetup:
+                    type: boolean
+                required:
+                - needsSetup
+    post:
+      tags:
+      - App
+      summary: Create the first administrator
+      description: The administrator was created. No sign-in needed.
+      operationId: postSetup
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  minLength: 8
+              required:
+              - name
+              - email
+              - password
+      responses:
+        '201':
+          description: The administrator was created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ok'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /avatar:
+    get:
+      tags:
+      - App
+      summary: Get a member's avatar image
+      description: No sign-in needed.
+      operationId: getAvatar
+      parameters:
+      - name: id
+        in: query
+        required: true
+        schema:
+          type: string
+        description: The member's id.
+      - name: v
+        in: query
+        required: false
+        schema:
+          type: string
+        description: A cache-busting version; when present the image is cached for a year.
+      security: []
+      responses:
+        '200':
+          description: The file.
+          content:
+            image/*:
+              schema:
+                type: string
+                format: binary
+        '404':
+          $ref: '#/components/responses/NotFound'
+    post:
+      tags:
+      - App
+      summary: Upload your avatar
+      description: Signed-in members.
+      operationId: postAvatar
+      security: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: PNG, JPEG, WebP or GIF, up to 2 MB.
+              required:
+              - file
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AvatarUpload'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+    delete:
+      tags:
+      - App
+      summary: Remove your avatar
+      description: Signed-in members.
+      operationId: deleteAvatar
+      security: []
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ok'
+  /workspaces/{workspace}/access:
+    get:
+      tags:
+      - Access
+      summary: Get your access in the workspace
+      description: Signed-in members.
+      operationId: getWorkspacesWorkspaceAccess
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Access'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /workspaces/{workspace}/sidebar:
+    get:
+      tags:
+      - Tables
+      summary: List the tables you can read, for the sidebar
+      description: Signed-in members.
+      operationId: getWorkspacesWorkspaceSidebar
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SidebarTable'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /workspaces/{workspace}/tables:
+    get:
+      tags:
+      - Tables
+      summary: List tables
+      description: Signed-in members.
+      operationId: getWorkspacesWorkspaceTables
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      - name: page
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+      - name: pageSize
+        in: query
+        schema:
+          type: integer
+          enum:
+          - 10
+          - 25
+          - 50
+          - 100
+          default: 10
+      - name: sort
+        in: query
+        schema:
+          type: string
+      - name: order
+        in: query
+        schema:
+          enum:
+          - asc
+          - desc
+      - name: q
+        in: query
+        schema:
+          type: string
+        description: Search text.
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  rows:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TableSummary'
+                  total:
+                    type: integer
+                required:
+                - rows
+                - total
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      tags:
+      - Tables
+      summary: Create a table
+      description: Administrators only.
+      operationId: postWorkspacesWorkspaceTables
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TableInput'
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Table'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+    delete:
+      tags:
+      - Tables
+      summary: Delete tables
+      description: Moves the tables to the trash, or drops them for good when permanent is true. Administrators
+        only.
+      operationId: deleteWorkspacesWorkspaceTables
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TablesDelete'
+      responses:
+        '200':
+          description: Moves the tables to the trash, or drops them for good when permanent is true.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ok'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /workspaces/{workspace}/tables/trash:
+    get:
+      tags:
+      - Trash
+      summary: List deleted tables
+      description: Administrators only.
+      operationId: getWorkspacesWorkspaceTablesTrash
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  rows:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TrashedTable'
+                required:
+                - rows
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /workspaces/{workspace}/tables/trash/{table}:
+    delete:
+      tags:
+      - Trash
+      summary: Delete a table forever
+      description: Administrators only.
+      operationId: deleteWorkspacesWorkspaceTablesTrashTable
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      - $ref: '#/components/parameters/table'
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ok'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /workspaces/{workspace}/tables/trash/{table}/restore:
+    post:
+      tags:
+      - Trash
+      summary: Restore a table
+      description: Administrators only.
+      operationId: postWorkspacesWorkspaceTablesTrashTableRestore
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      - $ref: '#/components/parameters/table'
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Created'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /workspaces/{workspace}/tables/{table}:
+    get:
+      tags:
+      - Tables
+      summary: Get a table with its columns
+      description: Signed-in members.
+      operationId: getWorkspacesWorkspaceTablesTable
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      - $ref: '#/components/parameters/table'
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TableDetail'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      tags:
+      - Tables
+      summary: Update a table
+      description: Administrators only.
+      operationId: patchWorkspacesWorkspaceTablesTable
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      - $ref: '#/components/parameters/table'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TableUpdate'
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Table'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /workspaces/{workspace}/tables/{table}/favorite:
+    put:
+      tags:
+      - Tables
+      summary: Add the table to your favorites
+      description: Signed-in members.
+      operationId: putWorkspacesWorkspaceTablesTableFavorite
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      - $ref: '#/components/parameters/table'
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ok'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags:
+      - Tables
+      summary: Remove the table from your favorites
+      description: Signed-in members.
+      operationId: deleteWorkspacesWorkspaceTablesTableFavorite
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      - $ref: '#/components/parameters/table'
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ok'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /workspaces/{workspace}/tables/{table}/columns:
+    post:
+      tags:
+      - Columns
+      summary: Add a column
+      description: Administrators only.
+      operationId: postWorkspacesWorkspaceTablesTableColumns
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      - $ref: '#/components/parameters/table'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ColumnInput'
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Column'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /workspaces/{workspace}/tables/{table}/columns/order:
+    put:
+      tags:
+      - Columns
+      summary: Reorder columns
+      description: Send every live column id in the new order. A list that no longer matches the table
+        is rejected. Administrators only.
+      operationId: putWorkspacesWorkspaceTablesTableColumnsOrder
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      - $ref: '#/components/parameters/table'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ColumnOrder'
+      responses:
+        '200':
+          description: Send every live column id in the new order. A list that no longer matches the table
+            is rejected.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ok'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /workspaces/{workspace}/tables/{table}/columns/{column}:
+    patch:
+      tags:
+      - Columns
+      summary: Update a column
+      description: Administrators only.
+      operationId: patchWorkspacesWorkspaceTablesTableColumnsColumn
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      - $ref: '#/components/parameters/table'
+      - $ref: '#/components/parameters/column'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ColumnUpdate'
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Column'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+    delete:
+      tags:
+      - Columns
+      summary: Move a column to the trash
+      description: Refused while a view, form or computed column uses it. Administrators only.
+      operationId: deleteWorkspacesWorkspaceTablesTableColumnsColumn
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      - $ref: '#/components/parameters/table'
+      - $ref: '#/components/parameters/column'
+      responses:
+        '200':
+          description: Refused while a view, form or computed column uses it.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ok'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /workspaces/{workspace}/tables/{table}/columns/trash:
+    get:
+      tags:
+      - Trash
+      summary: List deleted columns
+      description: Administrators only.
+      operationId: getWorkspacesWorkspaceTablesTableColumnsTrash
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      - $ref: '#/components/parameters/table'
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  rows:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TrashedColumn'
+                required:
+                - rows
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /workspaces/{workspace}/tables/{table}/columns/trash/{column}:
+    delete:
+      tags:
+      - Trash
+      summary: Delete a column forever
+      description: Administrators only.
+      operationId: deleteWorkspacesWorkspaceTablesTableColumnsTrashColumn
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      - $ref: '#/components/parameters/table'
+      - $ref: '#/components/parameters/column'
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ok'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /workspaces/{workspace}/tables/{table}/columns/trash/{column}/restore:
+    post:
+      tags:
+      - Trash
+      summary: Restore a column
+      description: Administrators only.
+      operationId: postWorkspacesWorkspaceTablesTableColumnsTrashColumnRestore
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      - $ref: '#/components/parameters/table'
+      - $ref: '#/components/parameters/column'
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Created'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /workspaces/{workspace}/tables/{table}/records:
+    get:
+      tags:
+      - Records
+      summary: List records
+      description: 'Keyset pagination: pass nextCursor or prevCursor back as cursor, with dir set to next
+        or prev. Needs the read permission on the table, or on the view or form it goes through.'
+      operationId: getWorkspacesWorkspaceTablesTableRecords
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      - $ref: '#/components/parameters/table'
+      - name: cursor
+        in: query
+        required: false
+        schema:
+          type: string
+          maxLength: 1024
+      - name: dir
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - next
+          - prev
+      - name: pageSize
+        in: query
+        required: false
+        schema:
+          type: number
+      - name: sort
+        in: query
+        required: false
+        schema:
+          type: string
+          maxLength: 64
+      - name: order
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - asc
+          - desc
+      - name: q
+        in: query
+        required: false
+        schema:
+          type: string
+          maxLength: 100
+      - name: filter
+        in: query
+        required: false
+        schema:
+          type: string
+          maxLength: 2000
+      responses:
+        '200':
+          description: 'Keyset pagination: pass nextCursor or prevCursor back as cursor, with dir set
+            to next or prev.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecordsPage'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    post:
+      tags:
+      - Records
+      summary: Create a record
+      description: Needs the create permission on the table, or on the view or form it goes through.
+      operationId: postWorkspacesWorkspaceTablesTableRecords
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      - $ref: '#/components/parameters/table'
+      - name: view
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+        description: Use the permissions you have through this view, and only its columns.
+      - name: cursor
+        in: query
+        required: false
+        schema:
+          type: string
+          maxLength: 1024
+      - name: dir
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - next
+          - prev
+      - name: pageSize
+        in: query
+        required: false
+        schema:
+          type: number
+      - name: sort
+        in: query
+        required: false
+        schema:
+          type: string
+          maxLength: 64
+      - name: order
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - asc
+          - desc
+      - name: q
+        in: query
+        required: false
+        schema:
+          type: string
+          maxLength: 100
+      - name: filter
+        in: query
+        required: false
+        schema:
+          type: string
+          maxLength: 2000
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecordValues'
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Created'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags:
+      - Records
+      summary: Delete records
+      description: Moves the records to the trash. Needs the delete permission on the table, or on the
+        view or form it goes through.
+      operationId: deleteWorkspacesWorkspaceTablesTableRecords
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      - $ref: '#/components/parameters/table'
+      - name: view
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+        description: Use the permissions you have through this view, and only its columns.
+      - name: cursor
+        in: query
+        required: false
+        schema:
+          type: string
+          maxLength: 1024
+      - name: dir
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - next
+          - prev
+      - name: pageSize
+        in: query
+        required: false
+        schema:
+          type: number
+      - name: sort
+        in: query
+        required: false
+        schema:
+          type: string
+          maxLength: 64
+      - name: order
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - asc
+          - desc
+      - name: q
+        in: query
+        required: false
+        schema:
+          type: string
+          maxLength: 100
+      - name: filter
+        in: query
+        required: false
+        schema:
+          type: string
+          maxLength: 2000
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IdsDelete'
+      responses:
+        '200':
+          description: Moves the records to the trash.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Trashed'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /workspaces/{workspace}/tables/{table}/records/import:
+    post:
+      tags:
+      - Records
+      summary: Import records
+      description: Rows are keyed by column name. Either every row is created or none is, and failed rows
+        are listed in errors. Needs the create permission on the table, or on the view or form it goes
+        through.
+      operationId: postWorkspacesWorkspaceTablesTableRecordsImport
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      - $ref: '#/components/parameters/table'
+      - name: view
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+        description: Use the permissions you have through this view, and only its columns.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecordsImport'
+      responses:
+        '200':
+          description: Rows are keyed by column name. Either every row is created or none is, and failed
+            rows are listed in errors.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /workspaces/{workspace}/tables/{table}/records/{record}:
+    get:
+      tags:
+      - Records
+      summary: Get a record
+      description: With view, only that view's columns are returned. Needs the read permission on the
+        table, or on the view or form it goes through.
+      operationId: getWorkspacesWorkspaceTablesTableRecordsRecord
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      - $ref: '#/components/parameters/table'
+      - $ref: '#/components/parameters/record'
+      - name: view
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+        description: Use the permissions you have through this view, and only its columns.
+      responses:
+        '200':
+          description: With view, only that view's columns are returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecordRow'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      tags:
+      - Records
+      summary: Update a record
+      description: With view, only that view's columns can be changed. Needs the update permission on
+        the table, or on the view or form it goes through.
+      operationId: patchWorkspacesWorkspaceTablesTableRecordsRecord
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      - $ref: '#/components/parameters/table'
+      - $ref: '#/components/parameters/record'
+      - name: view
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+        description: Use the permissions you have through this view, and only its columns.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecordValues'
+      responses:
+        '200':
+          description: With view, only that view's columns can be changed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ok'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags:
+      - Records
+      summary: Delete a record
+      description: Moves the record to the trash. Needs the delete permission on the table, or on the
+        view or form it goes through.
+      operationId: deleteWorkspacesWorkspaceTablesTableRecordsRecord
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      - $ref: '#/components/parameters/table'
+      - $ref: '#/components/parameters/record'
+      - name: view
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+        description: Use the permissions you have through this view, and only its columns.
+      responses:
+        '200':
+          description: Moves the record to the trash.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Trashed'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /workspaces/{workspace}/tables/{table}/export:
+    get:
+      tags:
+      - Records
+      summary: Export records
+      description: Up to the export limit; truncated says whether more existed. Needs the export and read
+        permission on the table, or on the view or form it goes through.
+      operationId: getWorkspacesWorkspaceTablesTableExport
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      - $ref: '#/components/parameters/table'
+      responses:
+        '200':
+          description: Up to the export limit; truncated says whether more existed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecordsExport'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /workspaces/{workspace}/tables/{table}/options:
+    get:
+      tags:
+      - Records
+      summary: Search records to link to
+      description: Used by relation columns. Needs the read permission on the table, or on the view or
+        form it goes through.
+      operationId: getWorkspacesWorkspaceTablesTableOptions
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      - $ref: '#/components/parameters/table'
+      - name: q
+        in: query
+        required: false
+        schema:
+          default: ''
+          type: string
+          maxLength: 100
+      responses:
+        '200':
+          description: Used by relation columns.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RecordRef'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /workspaces/{workspace}/tables/{table}/files:
+    post:
+      tags:
+      - Files
+      summary: Upload a file for a file or image column
+      description: Needs the update and create permission on the table, or on the view or form it goes
+        through.
+      operationId: postWorkspacesWorkspaceTablesTableFiles
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      - $ref: '#/components/parameters/table'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Up to 10 MB. Image columns only accept images.
+                column:
+                  type: string
+                  description: The columnName of the file or image column.
+              required:
+              - file
+              - column
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileUpload'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /workspaces/{workspace}/tables/{table}/files/{file}:
+    get:
+      tags:
+      - Files
+      summary: Download a file
+      description: Needs the read permission on the table, or on the view or form it goes through.
+      operationId: getWorkspacesWorkspaceTablesTableFilesFile
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      - $ref: '#/components/parameters/table'
+      - $ref: '#/components/parameters/file'
+      responses:
+        '200':
+          description: The file.
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /workspaces/{workspace}/tables/{table}/trash:
+    get:
+      tags:
+      - Trash
+      summary: List deleted records
+      description: Administrators only.
+      operationId: getWorkspacesWorkspaceTablesTableTrash
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      - $ref: '#/components/parameters/table'
+      - name: page
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+      - name: pageSize
+        in: query
+        schema:
+          type: integer
+          enum:
+          - 10
+          - 25
+          - 50
+          - 100
+          default: 10
+      - name: sort
+        in: query
+        schema:
+          type: string
+      - name: order
+        in: query
+        schema:
+          enum:
+          - asc
+          - desc
+      - name: q
+        in: query
+        schema:
+          type: string
+        description: Search text.
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  rows:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TrashedRecord'
+                  total:
+                    type: integer
+                required:
+                - rows
+                - total
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /workspaces/{workspace}/tables/{table}/trash/{entry}:
+    get:
+      tags:
+      - Trash
+      summary: Get a deleted record
+      description: Administrators only.
+      operationId: getWorkspacesWorkspaceTablesTableTrashEntry
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      - $ref: '#/components/parameters/table'
+      - $ref: '#/components/parameters/entry'
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrashEntry'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags:
+      - Trash
+      summary: Delete a record forever
+      description: Administrators only.
+      operationId: deleteWorkspacesWorkspaceTablesTableTrashEntry
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      - $ref: '#/components/parameters/table'
+      - $ref: '#/components/parameters/entry'
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ok'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /workspaces/{workspace}/tables/{table}/trash/{entry}/restore:
+    post:
+      tags:
+      - Trash
+      summary: Restore a record
+      description: Optionally replace some saved values while restoring. Administrators only.
+      operationId: postWorkspacesWorkspaceTablesTableTrashEntryRestore
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      - $ref: '#/components/parameters/table'
+      - $ref: '#/components/parameters/entry'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecordRestore'
+      responses:
+        '200':
+          description: Optionally replace some saved values while restoring.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Created'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /workspaces/{workspace}/tables/{table}/views/all:
+    get:
+      tags:
+      - Views
+      summary: List the views you can read
+      description: Only views whose read permission resolves for you. Needs the read permission on the
+        table, or on the view or form it goes through.
+      operationId: getWorkspacesWorkspaceTablesTableViewsAll
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      - $ref: '#/components/parameters/table'
+      responses:
+        '200':
+          description: Only views whose read permission resolves for you.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/View'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /workspaces/{workspace}/tables/{table}/views:
+    get:
+      tags:
+      - Views
+      summary: List views (paged)
+      description: Needs the read permission on the table, or on the view or form it goes through.
+      operationId: getWorkspacesWorkspaceTablesTableViews
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      - $ref: '#/components/parameters/table'
+      - name: page
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+      - name: pageSize
+        in: query
+        schema:
+          type: integer
+          enum:
+          - 10
+          - 25
+          - 50
+          - 100
+          default: 10
+      - name: sort
+        in: query
+        schema:
+          type: string
+      - name: order
+        in: query
+        schema:
+          enum:
+          - asc
+          - desc
+      - name: q
+        in: query
+        schema:
+          type: string
+        description: Search text.
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  rows:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ViewSummary'
+                  total:
+                    type: integer
+                required:
+                - rows
+                - total
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    post:
+      tags:
+      - Views
+      summary: Create a view
+      description: Administrators only.
+      operationId: postWorkspacesWorkspaceTablesTableViews
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      - $ref: '#/components/parameters/table'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ViewInput'
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/View'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+    delete:
+      tags:
+      - Views
+      summary: Move views to the trash
+      description: Administrators only.
+      operationId: deleteWorkspacesWorkspaceTablesTableViews
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      - $ref: '#/components/parameters/table'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IdsDelete'
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ok'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /workspaces/{workspace}/tables/{table}/views/trash:
+    get:
+      tags:
+      - Trash
+      summary: List deleted views
+      description: Administrators only.
+      operationId: getWorkspacesWorkspaceTablesTableViewsTrash
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      - $ref: '#/components/parameters/table'
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  rows:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TrashedItem'
+                required:
+                - rows
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /workspaces/{workspace}/tables/{table}/views/{view}:
+    get:
+      tags:
+      - Views
+      summary: Get a view with its columns
+      description: Needs the read permission on the table, or on the view or form it goes through.
+      operationId: getWorkspacesWorkspaceTablesTableViewsView
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      - $ref: '#/components/parameters/table'
+      - $ref: '#/components/parameters/view'
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ViewDetail'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      tags:
+      - Views
+      summary: Update a view
+      description: Administrators only.
+      operationId: patchWorkspacesWorkspaceTablesTableViewsView
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      - $ref: '#/components/parameters/table'
+      - $ref: '#/components/parameters/view'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ViewUpdate'
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/View'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+    delete:
+      tags:
+      - Views
+      summary: Move a view to the trash
+      description: Administrators only.
+      operationId: deleteWorkspacesWorkspaceTablesTableViewsView
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      - $ref: '#/components/parameters/table'
+      - $ref: '#/components/parameters/view'
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ok'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /workspaces/{workspace}/tables/{table}/views/{view}/records:
+    get:
+      tags:
+      - Views
+      summary: List the records of a view
+      description: Needs the read permission on the table, or on the view or form it goes through.
+      operationId: getWorkspacesWorkspaceTablesTableViewsViewRecords
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      - $ref: '#/components/parameters/table'
+      - $ref: '#/components/parameters/view'
+      - name: cursor
+        in: query
+        required: false
+        schema:
+          type: string
+          maxLength: 1024
+      - name: dir
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - next
+          - prev
+      - name: pageSize
+        in: query
+        required: false
+        schema:
+          type: number
+      - name: sort
+        in: query
+        required: false
+        schema:
+          type: string
+          maxLength: 64
+      - name: order
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - asc
+          - desc
+      - name: q
+        in: query
+        required: false
+        schema:
+          type: string
+          maxLength: 100
+      - name: filter
+        in: query
+        required: false
+        schema:
+          type: string
+          maxLength: 2000
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecordsPage'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /workspaces/{workspace}/tables/{table}/views/{view}/export:
+    get:
+      tags:
+      - Views
+      summary: Export a view
+      description: Needs the export and read permission on the table, or on the view or form it goes through.
+      operationId: getWorkspacesWorkspaceTablesTableViewsViewExport
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      - $ref: '#/components/parameters/table'
+      - $ref: '#/components/parameters/view'
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecordsExport'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /workspaces/{workspace}/tables/{table}/views/{view}/trash:
+    delete:
+      tags:
+      - Trash
+      summary: Delete a view forever
+      description: Administrators only.
+      operationId: deleteWorkspacesWorkspaceTablesTableViewsViewTrash
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      - $ref: '#/components/parameters/table'
+      - $ref: '#/components/parameters/view'
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ok'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /workspaces/{workspace}/tables/{table}/views/{view}/trash/restore:
+    post:
+      tags:
+      - Trash
+      summary: Restore a view
+      description: Administrators only.
+      operationId: postWorkspacesWorkspaceTablesTableViewsViewTrashRestore
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      - $ref: '#/components/parameters/table'
+      - $ref: '#/components/parameters/view'
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Created'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /workspaces/{workspace}/tables/{table}/forms/all:
+    get:
+      tags:
+      - Forms
+      summary: List the forms you can fill in
+      description: Only forms whose create permission resolves for you. Members only see open forms. Needs
+        the create permission on the table, or on the view or form it goes through.
+      operationId: getWorkspacesWorkspaceTablesTableFormsAll
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      - $ref: '#/components/parameters/table'
+      responses:
+        '200':
+          description: Only forms whose create permission resolves for you. Members only see open forms.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Form'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /workspaces/{workspace}/tables/{table}/forms:
+    get:
+      tags:
+      - Forms
+      summary: List forms (paged)
+      description: Needs the create permission on the table, or on the view or form it goes through.
+      operationId: getWorkspacesWorkspaceTablesTableForms
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      - $ref: '#/components/parameters/table'
+      - name: page
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+      - name: pageSize
+        in: query
+        schema:
+          type: integer
+          enum:
+          - 10
+          - 25
+          - 50
+          - 100
+          default: 10
+      - name: sort
+        in: query
+        schema:
+          type: string
+      - name: order
+        in: query
+        schema:
+          enum:
+          - asc
+          - desc
+      - name: q
+        in: query
+        schema:
+          type: string
+        description: Search text.
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  rows:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/FormSummary'
+                  total:
+                    type: integer
+                required:
+                - rows
+                - total
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    post:
+      tags:
+      - Forms
+      summary: Create a form
+      description: Administrators only.
+      operationId: postWorkspacesWorkspaceTablesTableForms
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      - $ref: '#/components/parameters/table'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FormInput'
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Form'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+    delete:
+      tags:
+      - Forms
+      summary: Move forms to the trash
+      description: Administrators only.
+      operationId: deleteWorkspacesWorkspaceTablesTableForms
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      - $ref: '#/components/parameters/table'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IdsDelete'
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ok'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /workspaces/{workspace}/tables/{table}/forms/trash:
+    get:
+      tags:
+      - Trash
+      summary: List deleted forms
+      description: Administrators only.
+      operationId: getWorkspacesWorkspaceTablesTableFormsTrash
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      - $ref: '#/components/parameters/table'
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  rows:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TrashedItem'
+                required:
+                - rows
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /workspaces/{workspace}/tables/{table}/forms/{form}:
+    get:
+      tags:
+      - Forms
+      summary: Get a form with its columns
+      description: Needs the create permission on the table, or on the view or form it goes through.
+      operationId: getWorkspacesWorkspaceTablesTableFormsForm
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      - $ref: '#/components/parameters/table'
+      - $ref: '#/components/parameters/form'
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FormDetail'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      tags:
+      - Forms
+      summary: Update a form
+      description: Administrators only.
+      operationId: patchWorkspacesWorkspaceTablesTableFormsForm
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      - $ref: '#/components/parameters/table'
+      - $ref: '#/components/parameters/form'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FormInput'
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Form'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+    delete:
+      tags:
+      - Forms
+      summary: Move a form to the trash
+      description: Administrators only.
+      operationId: deleteWorkspacesWorkspaceTablesTableFormsForm
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      - $ref: '#/components/parameters/table'
+      - $ref: '#/components/parameters/form'
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ok'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /workspaces/{workspace}/tables/{table}/forms/{form}/records:
+    post:
+      tags:
+      - Forms
+      summary: Submit a form
+      description: Creates a record from the columns the form asks for. Other keys are rejected. Needs
+        the create permission on the table, or on the view or form it goes through.
+      operationId: postWorkspacesWorkspaceTablesTableFormsFormRecords
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      - $ref: '#/components/parameters/table'
+      - $ref: '#/components/parameters/form'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecordValues'
+      responses:
+        '200':
+          description: Creates a record from the columns the form asks for. Other keys are rejected.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Created'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /workspaces/{workspace}/tables/{table}/forms/{form}/trash:
+    delete:
+      tags:
+      - Trash
+      summary: Delete a form forever
+      description: Administrators only.
+      operationId: deleteWorkspacesWorkspaceTablesTableFormsFormTrash
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      - $ref: '#/components/parameters/table'
+      - $ref: '#/components/parameters/form'
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ok'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /workspaces/{workspace}/tables/{table}/forms/{form}/trash/restore:
+    post:
+      tags:
+      - Trash
+      summary: Restore a form
+      description: Administrators only.
+      operationId: postWorkspacesWorkspaceTablesTableFormsFormTrashRestore
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      - $ref: '#/components/parameters/table'
+      - $ref: '#/components/parameters/form'
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Created'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /workspaces/{workspace}/roles:
+    get:
+      tags:
+      - Roles
+      summary: List roles with their permissions
+      description: Administrators only.
+      operationId: getWorkspacesWorkspaceRoles
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Role'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      tags:
+      - Roles
+      summary: Create a role
+      description: Administrators only.
+      operationId: postWorkspacesWorkspaceRoles
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoleInput'
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Role'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /workspaces/{workspace}/roles/assignments:
+    get:
+      tags:
+      - Roles
+      summary: List which role each member has
+      description: Members without an entry have the default role. Administrators only.
+      operationId: getWorkspacesWorkspaceRolesAssignments
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      responses:
+        '200':
+          description: Members without an entry have the default role.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RoleAssignment'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    put:
+      tags:
+      - Roles
+      summary: Give a member a role
+      description: Administrators only.
+      operationId: putWorkspacesWorkspaceRolesAssignments
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoleAssign'
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleAssignment'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /workspaces/{workspace}/roles/targets:
+    get:
+      tags:
+      - Roles
+      summary: List the tables, views and forms permissions can be set for
+      description: Administrators only.
+      operationId: getWorkspacesWorkspaceRolesTargets
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GrantTarget'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /workspaces/{workspace}/roles/{role}:
+    get:
+      tags:
+      - Roles
+      summary: Get a role
+      description: Administrators only.
+      operationId: getWorkspacesWorkspaceRolesRole
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      - $ref: '#/components/parameters/role'
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Role'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      tags:
+      - Roles
+      summary: Update a role
+      description: Authenticated and Guest can only change their permissions. Guest can only hold per-table
+        create and read grants. Administrators only.
+      operationId: patchWorkspacesWorkspaceRolesRole
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      - $ref: '#/components/parameters/role'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoleUpdate'
+      responses:
+        '200':
+          description: Authenticated and Guest can only change their permissions. Guest can only hold
+            per-table create and read grants.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Role'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+    delete:
+      tags:
+      - Roles
+      summary: Delete a role
+      description: Built-in roles, the default role and roles still assigned to members can't be deleted.
+        Administrators only.
+      operationId: deleteWorkspacesWorkspaceRolesRole
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      - $ref: '#/components/parameters/role'
+      responses:
+        '200':
+          description: Built-in roles, the default role and roles still assigned to members can't be deleted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ok'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: better-auth.session_token
+      description: Set by signing in through the Authentication endpoints.
+  parameters:
+    workspace:
+      name: workspace
+      in: path
+      required: true
+      schema:
+        type: string
+      description: The workspace id. Always "default" for now.
+    table:
+      name: table
+      in: path
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+    column:
+      name: column
+      in: path
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+    record:
+      name: record
+      in: path
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+    view:
+      name: view
+      in: path
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+    form:
+      name: form
+      in: path
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+    role:
+      name: role
+      in: path
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+    entry:
+      name: entry
+      in: path
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+      description: A record trash entry id.
+    file:
+      name: file
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+  responses:
+    BadRequest:
+      description: The request is invalid. Schema failures return a ValidationError; other problems return
+        a plain text message, or an Error when a field is named.
+      content:
+        application/json:
+          schema:
+            oneOf:
+            - $ref: '#/components/schemas/ValidationError'
+            - $ref: '#/components/schemas/Error'
+        text/plain:
+          schema:
+            type: string
+    Unauthorized:
+      description: Not signed in.
+      content:
+        text/plain:
+          schema:
+            type: string
+    Forbidden:
+      description: You don't have permission to do this.
+      content:
+        text/plain:
+          schema:
+            type: string
+    NotFound:
+      description: The table, record or other item doesn't exist.
+      content:
+        text/plain:
+          schema:
+            type: string
+    Conflict:
+      description: The change conflicts with existing data, for example a name that is already taken.
+      content:
+        text/plain:
+          schema:
+            type: string
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    PayloadTooLarge:
+      description: The file is too large.
+    UnsupportedMediaType:
+      description: The file type isn't allowed.
+  schemas:
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+        field:
+          type: string
+      required:
+      - message
+      description: Returned as JSON when an error names the field it is about. Other errors are a plain
+        text message.
+    ValidationError:
+      type: object
+      properties:
+        error:
+          const: Validation failed
+        issues:
+          type: array
+          items:
+            type: object
+            properties:
+              slot:
+                enum:
+                - params
+                - query
+                - body
+              issues:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                    path:
+                      type: array
+                      items:
+                        type:
+                        - string
+                        - integer
+                  required:
+                  - message
+            required:
+            - slot
+            - issues
+      required:
+      - error
+      - issues
+    Ok:
+      type: object
+      properties:
+        ok:
+          const: true
+      required:
+      - ok
+    Created:
+      type: object
+      properties:
+        id:
+          type: integer
+      required:
+      - id
+    Trashed:
+      type: object
+      properties:
+        trash:
+          type: array
+          items:
+            type: integer
+          description: Trash entry ids. Pass one to restore the record.
+      required:
+      - trash
+    UserRef:
+      type: object
+      properties:
+        id:
+          type: string
+        label:
+          type: string
+      required:
+      - id
+      - label
+    RecordRef:
+      type: object
+      properties:
+        id:
+          type: integer
+        label:
+          type: string
+      required:
+      - id
+      - label
+      description: 'A linked record: its id and the value of its title column.'
+    RecordRow:
+      type: object
+      properties:
+        id:
+          type: integer
+        created_at:
+          type: integer
+          description: Unix time in milliseconds.
+        updated_at:
+          type: integer
+          description: Unix time in milliseconds.
+        created_by:
+          anyOf:
+          - $ref: '#/components/schemas/UserRef'
+          - type: 'null'
+        updated_by:
+          anyOf:
+          - $ref: '#/components/schemas/UserRef'
+          - type: 'null'
+      required:
+      - id
+      additionalProperties: true
+      description: A record. Besides the system fields, every column is a key named after its columnName.
+        Relation columns hold a RecordRef, user columns a UserRef, other columns their plain value.
+    RecordsPage:
+      type: object
+      properties:
+        rows:
+          type: array
+          items:
+            $ref: '#/components/schemas/RecordRow'
+        nextCursor:
+          anyOf:
+          - type: string
+          - type: 'null'
+        prevCursor:
+          anyOf:
+          - type: string
+          - type: 'null'
+        startCursor:
+          anyOf:
+          - type: string
+          - type: 'null'
+      required:
+      - rows
+      - nextCursor
+      - prevCursor
+      - startCursor
+    RecordsExport:
+      type: object
+      properties:
+        rows:
+          type: array
+          items:
+            $ref: '#/components/schemas/RecordRow'
+        truncated:
+          type: boolean
+          description: True when there were more records than the export limit.
+      required:
+      - rows
+      - truncated
+    ImportResult:
+      type: object
+      properties:
+        created:
+          type: integer
+        failed:
+          type: integer
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              row:
+                type: integer
+              message:
+                type: string
+            required:
+            - row
+            - message
+      required:
+      - created
+      - failed
+      - errors
+    Column:
+      type: object
+      properties:
+        id:
+          type: integer
+        tableId:
+          type: integer
+        columnName:
+          type: string
+          description: Physical column name used as the key in record objects.
+        name:
+          type: string
+        icon:
+          anyOf:
+          - type: string
+          - type: 'null'
+        type:
+          type: string
+        format:
+          type: string
+          description: The column format, such as text, integer, relation or single_select.
+        isRequired:
+          type: boolean
+        isFilterable:
+          type: boolean
+        isSortable:
+          type: boolean
+        isSearchable:
+          type: boolean
+        isUnique:
+          type: boolean
+        isHidden:
+          type: boolean
+        checkExpression:
+          anyOf:
+          - type: string
+          - type: 'null'
+        generatedExpression:
+          anyOf:
+          - type: string
+          - type: 'null'
+        defaultValue:
+          anyOf:
+          - type: string
+          - type: 'null'
+        position:
+          type: integer
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+        options:
+          type: object
+          additionalProperties: true
+        metadata:
+          type: object
+          additionalProperties: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        deletedAt:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+        deletedBy:
+          anyOf:
+          - type: string
+          - type: 'null'
+      required:
+      - id
+      - tableId
+      - columnName
+      - name
+      - format
+    Table:
+      type: object
+      properties:
+        id:
+          type: integer
+        tableName:
+          type: string
+        name:
+          type: string
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+        icon:
+          anyOf:
+          - type: string
+          - type: 'null'
+        groupName:
+          anyOf:
+          - type: string
+          - type: 'null'
+        titleColumnId:
+          anyOf:
+          - type: integer
+          - type: 'null'
+        position:
+          type: integer
+        metadata:
+          type: object
+          additionalProperties: true
+        createdBy:
+          anyOf:
+          - type: string
+          - type: 'null'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        deletedAt:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+        deletedBy:
+          anyOf:
+          - type: string
+          - type: 'null'
+      required:
+      - id
+      - name
+    TableSummary:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        icon:
+          anyOf:
+          - type: string
+          - type: 'null'
+        groupName:
+          anyOf:
+          - type: string
+          - type: 'null'
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+        titleColumnId:
+          anyOf:
+          - type: integer
+          - type: 'null'
+        columnCount:
+          type: integer
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+      - id
+      - name
+    TableDetail:
+      allOf:
+      - $ref: '#/components/schemas/Table'
+      - type: object
+        properties:
+          columns:
+            type: array
+            items:
+              $ref: '#/components/schemas/Column'
+        required:
+        - columns
+    View:
+      type: object
+      properties:
+        id:
+          type: integer
+        tableId:
+          type: integer
+        viewName:
+          type: string
+        name:
+          type: string
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+        icon:
+          anyOf:
+          - type: string
+          - type: 'null'
+        type:
+          type: string
+        position:
+          type: integer
+        selectColumns:
+          type: array
+          items:
+            type: string
+        whereExpression:
+          anyOf:
+          - type: string
+          - type: 'null'
+        metadata:
+          type: object
+          additionalProperties: true
+        createdBy:
+          anyOf:
+          - type: string
+          - type: 'null'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        deletedAt:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+        deletedBy:
+          anyOf:
+          - type: string
+          - type: 'null'
+      required:
+      - id
+      - tableId
+      - name
+      - selectColumns
+    ViewSummary:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+        icon:
+          anyOf:
+          - type: string
+          - type: 'null'
+        columnCount:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+      - id
+      - name
+    ViewDetail:
+      allOf:
+      - $ref: '#/components/schemas/View'
+      - type: object
+        properties:
+          table:
+            type: object
+            properties:
+              id:
+                type: integer
+              name:
+                type: string
+              titleColumnId:
+                anyOf:
+                - type: integer
+                - type: 'null'
+            required:
+            - id
+            - name
+            - titleColumnId
+          columns:
+            type: array
+            items:
+              $ref: '#/components/schemas/Column'
+        required:
+        - table
+        - columns
+      description: The view with only the columns it shows.
+    Form:
+      type: object
+      properties:
+        id:
+          type: integer
+        tableId:
+          type: integer
+        formKey:
+          type: string
+        name:
+          type: string
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+        icon:
+          anyOf:
+          - type: string
+          - type: 'null'
+        isOpen:
+          type: boolean
+        selectColumns:
+          type: array
+          items:
+            type: string
+        position:
+          type: integer
+        metadata:
+          type: object
+          additionalProperties: true
+        createdBy:
+          anyOf:
+          - type: string
+          - type: 'null'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        deletedAt:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+        deletedBy:
+          anyOf:
+          - type: string
+          - type: 'null'
+      required:
+      - id
+      - tableId
+      - name
+      - selectColumns
+      - isOpen
+    FormSummary:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+        icon:
+          anyOf:
+          - type: string
+          - type: 'null'
+        isOpen:
+          type: boolean
+        columnCount:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+      - id
+      - name
+    FormDetail:
+      allOf:
+      - $ref: '#/components/schemas/Form'
+      - type: object
+        properties:
+          table:
+            type: object
+            properties:
+              id:
+                type: integer
+              name:
+                type: string
+              titleColumnId:
+                anyOf:
+                - type: integer
+                - type: 'null'
+            required:
+            - id
+            - name
+            - titleColumnId
+          columns:
+            type: array
+            items:
+              $ref: '#/components/schemas/Column'
+        required:
+        - table
+        - columns
+      description: The form with only the columns it asks for.
+    SidebarTable:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        icon:
+          anyOf:
+          - type: string
+          - type: 'null'
+        groupName:
+          anyOf:
+          - type: string
+          - type: 'null'
+        updatedAt:
+          type: string
+          format: date-time
+        favoritedAt:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+      required:
+      - id
+      - name
+    Permission:
+      type: string
+      enum:
+      - create
+      - create:none
+      - export
+      - export:none
+      - read:own
+      - read:all
+      - read:none
+      - update:own
+      - update:all
+      - update:none
+      - delete:own
+      - delete:all
+      - delete:none
+    Grant:
+      type: object
+      properties:
+        resourceId:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          description: A table, view or form id. null means workspace-wide.
+        permission:
+          $ref: '#/components/schemas/Permission'
+      required:
+      - resourceId
+      - permission
+    Role:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+        isSystem:
+          type: boolean
+        isDefault:
+          type: boolean
+        kind:
+          enum:
+          - custom
+          - authenticated
+          - guest
+          description: custom roles can be assigned to members. authenticated applies to every signed-in
+            member and guest to everyone, both on top of a member's own role.
+        position:
+          type: integer
+        memberCount:
+          type: integer
+        grants:
+          type: array
+          items:
+            $ref: '#/components/schemas/Grant'
+      required:
+      - id
+      - name
+      - kind
+      - grants
+    RoleAssignment:
+      type: object
+      properties:
+        userId:
+          type: string
+        roleId:
+          type: integer
+      required:
+      - userId
+      - roleId
+    GrantTarget:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        icon:
+          anyOf:
+          - type: string
+          - type: 'null'
+        views:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+              name:
+                type: string
+              icon:
+                anyOf:
+                - type: string
+                - type: 'null'
+            required:
+            - id
+            - name
+        forms:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+              name:
+                type: string
+              icon:
+                anyOf:
+                - type: string
+                - type: 'null'
+            required:
+            - id
+            - name
+      required:
+      - id
+      - name
+      - views
+      - forms
+      description: A table with the views and forms permissions can be set for.
+    Access:
+      type: object
+      properties:
+        admin:
+          type: boolean
+        role:
+          anyOf:
+          - type: object
+            properties:
+              id:
+                type: integer
+              name:
+                type: string
+              description:
+                anyOf:
+                - type: string
+                - type: 'null'
+            required:
+            - id
+            - name
+          - type: 'null'
+        grants:
+          type: array
+          items:
+            $ref: '#/components/schemas/Grant'
+          description: The member's own role grants, then Authenticated, then Guest. For the same action,
+            the earlier one wins.
+      required:
+      - admin
+      - role
+      - grants
+    TrashedRecord:
+      type: object
+      properties:
+        id:
+          type: integer
+        recordId:
+          type: string
+        title:
+          anyOf:
+          - type: string
+          - type: 'null'
+        deletedAt:
+          type: integer
+          description: Unix time in milliseconds.
+        deletedBy:
+          anyOf:
+          - $ref: '#/components/schemas/UserRef'
+          - type: 'null'
+      required:
+      - id
+      - recordId
+      - deletedAt
+    TrashedItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+        icon:
+          anyOf:
+          - type: string
+          - type: 'null'
+        deletedAt:
+          type: integer
+          description: Unix time in milliseconds.
+        deletedBy:
+          anyOf:
+          - $ref: '#/components/schemas/UserRef'
+          - type: 'null'
+      required:
+      - id
+      - name
+      - deletedAt
+    TrashedColumn:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        icon:
+          anyOf:
+          - type: string
+          - type: 'null'
+        format:
+          type: string
+        deletedAt:
+          type: integer
+          description: Unix time in milliseconds.
+        deletedBy:
+          anyOf:
+          - $ref: '#/components/schemas/UserRef'
+          - type: 'null'
+      required:
+      - id
+      - name
+      - deletedAt
+    TrashedTable:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        icon:
+          anyOf:
+          - type: string
+          - type: 'null'
+        deletedAt:
+          type: integer
+          description: Unix time in milliseconds.
+        deletedBy:
+          anyOf:
+          - $ref: '#/components/schemas/UserRef'
+          - type: 'null'
+      required:
+      - id
+      - name
+      - deletedAt
+    TrashEntry:
+      type: object
+      properties:
+        id:
+          type: integer
+        deletedAt:
+          type: integer
+          description: Unix time in milliseconds.
+        record:
+          $ref: '#/components/schemas/RecordRow'
+      required:
+      - id
+      - deletedAt
+      - record
+    FileUpload:
+      type: object
+      properties:
+        url:
+          type: string
+        name:
+          type: string
+        size:
+          type: integer
+        type:
+          type: string
+      required:
+      - url
+      - name
+      - size
+      - type
+    AvatarUpload:
+      type: object
+      properties:
+        url:
+          type: string
+      required:
+      - url
+    TableInput:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 64
+        icon:
+          anyOf:
+          - type: string
+            maxLength: 64
+            pattern: ^[a-z0-9]+(-[a-z0-9]+)*$
+          - type: 'null'
+        groupName:
+          anyOf:
+          - type: string
+            maxLength: 64
+          - type: 'null'
+        description:
+          anyOf:
+          - type: string
+            maxLength: 500
+          - type: 'null'
+      required:
+      - name
+    TableUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 64
+        icon:
+          anyOf:
+          - type: string
+            maxLength: 64
+            pattern: ^[a-z0-9]+(-[a-z0-9]+)*$
+          - type: 'null'
+        groupName:
+          anyOf:
+          - type: string
+            maxLength: 64
+          - type: 'null'
+        description:
+          anyOf:
+          - type: string
+            maxLength: 500
+          - type: 'null'
+        titleColumn:
+          type:
+          - string
+          - 'null'
+    TablesDelete:
+      type: object
+      properties:
+        ids:
+          minItems: 1
+          maxItems: 100
+          type: array
+          items:
+            type: integer
+            exclusiveMinimum: 0
+            maximum: 9007199254740991
+        permanent:
+          type: boolean
+      required:
+      - ids
+    ColumnInput:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 64
+        description:
+          anyOf:
+          - type: string
+            maxLength: 500
+          - type: 'null'
+        icon:
+          anyOf:
+          - type: string
+            maxLength: 64
+            pattern: ^[a-z0-9]+(-[a-z0-9]+)*$
+          - type: 'null'
+        format:
+          type: string
+          enum:
+          - text
+          - long_text
+          - email
+          - url
+          - phone
+          - color
+          - integer
+          - decimal
+          - percent
+          - currency
+          - rating
+          - duration
+          - checkbox
+          - single_select
+          - multi_select
+          - date
+          - time
+          - datetime
+          - datetime_tz
+          - file
+          - image
+          - relation
+          - json
+          - binary
+        options:
+          default: {}
+          type: object
+          propertyNames:
+            type: string
+          additionalProperties: {}
+        isRequired:
+          default: false
+          type: boolean
+        isFilterable:
+          default: true
+          type: boolean
+        isSortable:
+          default: true
+          type: boolean
+        isSearchable:
+          default: false
+          type: boolean
+        isUnique:
+          default: false
+          type: boolean
+        isHidden:
+          default: false
+          type: boolean
+        defaultValue:
+          anyOf:
+          - type: string
+            maxLength: 500
+          - type: 'null'
+        checkExpression:
+          anyOf:
+          - type: string
+            maxLength: 500
+          - type: 'null'
+        generatedExpression:
+          anyOf:
+          - type: string
+            maxLength: 500
+          - type: 'null'
+        position:
+          type: integer
+          minimum: 0
+          maximum: 9007199254740991
+      required:
+      - name
+      - format
+      - position
+    ColumnUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 64
+        description:
+          anyOf:
+          - type: string
+            maxLength: 500
+          - type: 'null'
+        icon:
+          anyOf:
+          - type: string
+            maxLength: 64
+            pattern: ^[a-z0-9]+(-[a-z0-9]+)*$
+          - type: 'null'
+        isRequired:
+          type: boolean
+        isFilterable:
+          type: boolean
+        isSortable:
+          type: boolean
+        isSearchable:
+          type: boolean
+        isUnique:
+          type: boolean
+        isHidden:
+          type: boolean
+        position:
+          type: integer
+          minimum: 0
+          maximum: 9007199254740991
+    ColumnOrder:
+      type: object
+      properties:
+        ids:
+          minItems: 1
+          maxItems: 500
+          type: array
+          items:
+            type: integer
+            exclusiveMinimum: 0
+            maximum: 9007199254740991
+      required:
+      - ids
+    RecordValues:
+      type: object
+      properties:
+        values:
+          type: object
+          propertyNames:
+            type: string
+          additionalProperties: {}
+      required:
+      - values
+      description: Column values keyed by columnName. Relation columns take the linked record's id.
+    IdsDelete:
+      type: object
+      properties:
+        ids:
+          minItems: 1
+          maxItems: 100
+          type: array
+          items:
+            type: integer
+            exclusiveMinimum: 0
+            maximum: 9007199254740991
+      required:
+      - ids
+    RecordsImport:
+      type: object
+      properties:
+        rows:
+          minItems: 1
+          maxItems: 1000
+          type: array
+          items:
+            type: object
+            propertyNames:
+              type: string
+            additionalProperties:
+              type: string
+      required:
+      - rows
+    RecordRestore:
+      type: object
+      properties:
+        values:
+          type: object
+          propertyNames:
+            type: string
+          additionalProperties: {}
+      description: Values that replace the saved ones while restoring, keyed by columnName.
+    ViewInput:
+      type: object
+      properties:
+        icon:
+          anyOf:
+          - type: string
+            maxLength: 64
+            pattern: ^[a-z0-9]+(-[a-z0-9]+)*$
+          - type: 'null'
+        name:
+          type: string
+          minLength: 1
+          maxLength: 64
+        description:
+          anyOf:
+          - type: string
+            maxLength: 500
+          - type: 'null'
+        selectColumns:
+          minItems: 1
+          maxItems: 200
+          type: array
+          items:
+            type: string
+            minLength: 1
+            maxLength: 64
+        filters:
+          default: []
+          maxItems: 10
+          type: array
+          items:
+            type: object
+            properties:
+              column:
+                type: string
+                minLength: 1
+                maxLength: 64
+              op:
+                type: string
+                enum:
+                - equals
+                - not_equals
+                - is_empty
+                - is_not_empty
+                - eq
+                - neq
+                - gt
+                - gte
+                - lt
+                - lte
+                - is
+                - is_not
+                - is_any_of
+                - is_none_of
+                - has_any_of
+                - has_none_of
+                - before
+                - after
+                - on_or_before
+                - on_or_after
+              value:
+                anyOf:
+                - type: string
+                  maxLength: 200
+                - type: number
+                - type: boolean
+                - maxItems: 50
+                  type: array
+                  items:
+                    type: string
+                    maxLength: 100
+            required:
+            - column
+            - op
+      required:
+      - name
+      - selectColumns
+    ViewUpdate:
+      type: object
+      properties:
+        icon:
+          anyOf:
+          - type: string
+            maxLength: 64
+            pattern: ^[a-z0-9]+(-[a-z0-9]+)*$
+          - type: 'null'
+        name:
+          type: string
+          minLength: 1
+          maxLength: 64
+        description:
+          anyOf:
+          - type: string
+            maxLength: 500
+          - type: 'null'
+      required:
+      - name
+    FormInput:
+      type: object
+      properties:
+        icon:
+          anyOf:
+          - type: string
+            maxLength: 64
+            pattern: ^[a-z0-9]+(-[a-z0-9]+)*$
+          - type: 'null'
+        name:
+          type: string
+          minLength: 1
+          maxLength: 64
+        description:
+          anyOf:
+          - type: string
+            maxLength: 500
+          - type: 'null'
+        selectColumns:
+          minItems: 1
+          maxItems: 200
+          type: array
+          items:
+            type: string
+            minLength: 1
+            maxLength: 64
+        isOpen:
+          default: true
+          type: boolean
+      required:
+      - name
+      - selectColumns
+    RoleInput:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 64
+        description:
+          anyOf:
+          - type: string
+            maxLength: 300
+          - type: 'null'
+        grants:
+          default: []
+          maxItems: 500
+          type: array
+          items:
+            type: object
+            properties:
+              resourceId:
+                anyOf:
+                - type: integer
+                  exclusiveMinimum: 0
+                  maximum: 9007199254740991
+                - type: 'null'
+              permission:
+                type: string
+                enum:
+                - create
+                - create:none
+                - export
+                - export:none
+                - read:own
+                - read:all
+                - read:none
+                - update:own
+                - update:all
+                - update:none
+                - delete:own
+                - delete:all
+                - delete:none
+            required:
+            - resourceId
+            - permission
+      required:
+      - name
+    RoleUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 64
+        description:
+          anyOf:
+          - type: string
+            maxLength: 300
+          - type: 'null'
+        isDefault:
+          type: boolean
+        grants:
+          maxItems: 500
+          type: array
+          items:
+            type: object
+            properties:
+              resourceId:
+                anyOf:
+                - type: integer
+                  exclusiveMinimum: 0
+                  maximum: 9007199254740991
+                - type: 'null'
+              permission:
+                type: string
+                enum:
+                - create
+                - create:none
+                - export
+                - export:none
+                - read:own
+                - read:all
+                - read:none
+                - update:own
+                - update:all
+                - update:none
+                - delete:own
+                - delete:all
+                - delete:none
+            required:
+            - resourceId
+            - permission
+    RoleAssign:
+      type: object
+      properties:
+        userId:
+          type: string
+          minLength: 1
+          maxLength: 64
+        roleId:
+          type: integer
+          exclusiveMinimum: 0
+          maximum: 9007199254740991
+      required:
+      - userId
+      - roleId

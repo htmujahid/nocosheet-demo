@@ -1,13 +1,13 @@
 import { passkey } from "@better-auth/passkey";
 import { APIError } from "better-auth/api";
-import { admin, twoFactor } from "better-auth/plugins";
+import { admin, openAPI, twoFactor } from "better-auth/plugins";
 import { defineAuth } from "void/auth";
 import { storage } from "void/storage";
 
+import { ac, ADMIN_ROLES, DEFAULT_ROLE, isAdmin, roles } from "./src/lib/auth/access";
 import { enqueueEmail } from "./src/lib/auth/mail";
 import { kvSecondaryStorage } from "./src/lib/auth/secondary-storage";
 import { avatarKey, isAvatarUrl } from "./src/lib/avatar";
-import { ac, ADMIN_ROLES, DEFAULT_ROLE, isAdmin, roles } from "./src/lib/auth/access";
 
 const SIGNUP_DISABLED_MESSAGE = "Sign-up is disabled. Ask an administrator for access.";
 const LAST_ADMIN_MESSAGE = "This is the last admin. Make someone else an admin first.";
@@ -21,6 +21,7 @@ export default defineAuth(({ defaults, env }) => ({
     passkey({ rpName: "Nocosheet" }),
     twoFactor({ issuer: "Nocosheet" }),
     admin({ ac, roles, defaultRole: DEFAULT_ROLE, adminRoles: ADMIN_ROLES }),
+    openAPI(),
   ],
   emailAndPassword: {
     ...defaults.emailAndPassword,

@@ -29,8 +29,15 @@ export function SettingsApi() {
               </Badge>
             }
           />
-          <SettingsRow title="Documentation" description="Endpoints, authentication and examples.">
-            <Button variant="outline" disabled className="w-fit">
+          <SettingsRow
+            title="Documentation"
+            description="Every endpoint with its parameters, request bodies and responses, plus the sign-in and member endpoints."
+          >
+            <Button
+              variant="outline"
+              className="w-fit"
+              render={<a href="/api/docs" target="_blank" rel="noreferrer" />}
+            >
               View docs
             </Button>
           </SettingsRow>
