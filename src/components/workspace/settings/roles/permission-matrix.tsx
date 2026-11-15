@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import {
   Card,
   CardFrame,
+  CardFrameAction,
   CardFrameDescription,
   CardFrameHeader,
   CardFrameTitle,
@@ -97,13 +98,40 @@ export function PermissionMatrix({
         <CardFrameHeader>
           <CardFrameTitle>Table overrides</CardFrameTitle>
           <CardFrameDescription>
-            Give this role different permissions for specific tables. Anything left on "Same as
-            workspace" follows the settings above.
+            {guest
+              ? "Choose the tables anyone can create records in or view. Everything else stays closed."
+              : 'Give this role different permissions for specific tables. Anything left on "Same as workspace" follows the settings above.'}
           </CardFrameDescription>
+          <CardFrameAction>
+            <Select
+              value=""
+              disabled={available.length === 0}
+              items={available.map((table) => ({ value: String(table.id), label: table.name }))}
+              onValueChange={(next) => {
+                if (next) onChange({ ...matrix, tables: { ...matrix.tables, [Number(next)]: {} } });
+              }}
+            >
+              <SelectTrigger aria-label="Add a table override" size="sm" className="w-fit">
+                <PlusIcon />
+                <SelectValue placeholder="Add a table" />
+              </SelectTrigger>
+              <SelectPopup>
+                {available.map((table) => (
+                  <SelectItem key={table.id} value={String(table.id)}>
+                    {table.name}
+                  </SelectItem>
+                ))}
+              </SelectPopup>
+            </Select>
+          </CardFrameAction>
         </CardFrameHeader>
         <Card>
           {overridden.length === 0 && (
-            <p className="p-6 text-center text-muted-foreground text-sm">No table overrides yet.</p>
+            <p className="p-6 text-center text-muted-foreground text-sm">
+              {tables.length === 0
+                ? "There are no tables yet. Create a table to set permissions for it."
+                : "No table overrides yet. Use Add a table to give this role different permissions for a table."}
+            </p>
           )}
           {overridden.map((table) => (
             <div key={table.id} className="flex flex-col gap-3 p-4 not-last:border-b md:px-6">
@@ -129,11 +157,11 @@ export function PermissionMatrix({
                       {PERMISSION_LABELS[action]}
                     </span>
                     <ScopeSelect
-                      inherit
+                      inherit={!guest}
                       action={action}
                       noOwn={guest}
                       label={`${PERMISSION_LABELS[action]} in ${table.name}`}
-                      value={matrix.tables[table.id]?.[action] ?? "inherit"}
+                      value={matrix.tables[table.id]?.[action] ?? (guest ? "none" : "inherit")}
                       onValueChange={(value) => setTable(table.id, action, value)}
                     />
                   </div>
@@ -141,30 +169,6 @@ export function PermissionMatrix({
               </div>
             </div>
           ))}
-          {available.length > 0 && (
-            <div className="p-4 md:px-6">
-              <Select
-                value=""
-                items={available.map((table) => ({ value: String(table.id), label: table.name }))}
-                onValueChange={(next) => {
-                  if (next)
-                    onChange({ ...matrix, tables: { ...matrix.tables, [Number(next)]: {} } });
-                }}
-              >
-                <SelectTrigger aria-label="Add a table override" size="sm" className="w-fit">
-                  <PlusIcon />
-                  <SelectValue placeholder="Add a table override" />
-                </SelectTrigger>
-                <SelectPopup>
-                  {available.map((table) => (
-                    <SelectItem key={table.id} value={String(table.id)}>
-                      {table.name}
-                    </SelectItem>
-                  ))}
-                </SelectPopup>
-              </Select>
-            </div>
-          )}
         </Card>
       </CardFrame>
     </>
