@@ -12,7 +12,7 @@ import {
 import { userTable } from "../.void/better-auth-schema";
 import { PERMISSIONS } from "../src/lib/roles/permissions";
 
-const RESOURCE_KINDS = ["table", "view", "widget"] as const;
+const RESOURCE_KINDS = ["table", "view"] as const;
 
 const lower = (column: AnySQLiteColumn) => sql`lower(${column})`;
 const live = (column: AnySQLiteColumn) => sql`${column} is null`;
@@ -158,34 +158,6 @@ export const workspaceSchema = <W extends string = "default">(workspaceId: W = "
     ],
   );
 
-  const widgetTable = sqliteTable(
-    name("widget"),
-    {
-      id: integer("id")
-        .primaryKey()
-        .references(() => resourceTable.id, { onDelete: "cascade" }),
-      tableId: integer("table_id")
-        .notNull()
-        .references(() => tableTable.id, { onDelete: "cascade" }),
-      viewName: text("view_name").notNull(),
-      title: text("title").notNull(),
-      kind: text("kind").notNull(),
-      variant: text("variant").notNull(),
-      definition: json<Record<string, unknown>>("definition", {}),
-      layout: json<Record<string, unknown>>("layout", {}),
-      options: json<Record<string, unknown>>("options", {}),
-      position: integer("position").notNull().default(0),
-      createdBy: createdBy(),
-      ...timestamps,
-      deletedAt: deletedAt(),
-      deletedBy: deletedBy(),
-    },
-    (t) => [
-      uniqueIndex(name("widget_view_name")).on(t.viewName),
-      index(name("widget_table_position")).on(t.tableId, t.position).where(live(t.deletedAt)),
-    ],
-  );
-
   const favoriteTable = sqliteTable(
     name("favorite"),
     {
@@ -289,7 +261,6 @@ export const workspaceSchema = <W extends string = "default">(workspaceId: W = "
     tableTable,
     columnTable,
     viewTable,
-    widgetTable,
     favoriteTable,
     trashTable,
     roleTable,
@@ -304,7 +275,6 @@ export const {
   tableTable,
   columnTable,
   viewTable,
-  widgetTable,
   favoriteTable,
   trashTable,
   roleTable,

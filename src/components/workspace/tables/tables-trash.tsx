@@ -53,7 +53,7 @@ function Actions({ workspace, row }: { workspace: string; row: TrashRow }) {
       </Button>
       <PurgeDialog
         label={row.name}
-        description={`"${row.name}" will be deleted with its columns, views, widgets and every record. This can't be undone.`}
+        description={`"${row.name}" will be deleted with its columns, views and every record. This can't be undone.`}
         pending={purge.isPending}
         error={purge.error}
         onReset={() => purge.reset()}

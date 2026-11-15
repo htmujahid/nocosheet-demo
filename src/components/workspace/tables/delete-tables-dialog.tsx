@@ -68,8 +68,8 @@ export function DeleteTablesDialog({
           </AlertDialogTitle>
           <AlertDialogDescription>
             {count === 1
-              ? `The selected table moves to the trash for ${TRASH_RETENTION_DAYS} days, then it's deleted forever with its columns, views, widgets and every record.`
-              : `The selected tables move to the trash for ${TRASH_RETENTION_DAYS} days, then they're deleted forever with their columns, views, widgets and every record.`}
+              ? `The selected table moves to the trash for ${TRASH_RETENTION_DAYS} days, then it's deleted forever with its columns, views and every record.`
+              : `The selected tables move to the trash for ${TRASH_RETENTION_DAYS} days, then they're deleted forever with their columns, views and every record.`}
           </AlertDialogDescription>
         </AlertDialogHeader>
         {deleteTables.error && (
