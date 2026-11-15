@@ -170,7 +170,7 @@ CREATE TABLE `default__role` (
 	`position` integer DEFAULT 0 NOT NULL,
 	`created_at` integer NOT NULL,
 	`updated_at` integer NOT NULL,
-	CONSTRAINT "default__role_kind_check" CHECK("default__role"."kind" in ('custom', 'authenticated', 'guest'))
+	CONSTRAINT "default__role_kind_check" CHECK("default__role"."kind" in ('custom', 'authenticated'))
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX `default__role_name` ON `default__role` (lower("name"));--> statement-breakpoint
@@ -179,10 +179,9 @@ CREATE UNIQUE INDEX `default__role_kind` ON `default__role` (`kind`) WHERE "defa
 --> statement-breakpoint
 INSERT INTO `default__role` (`name`, `description`, `is_system`, `is_default`, `kind`, `position`, `created_at`, `updated_at`) VALUES
 	('Authenticated', 'Applies to every signed-in member on top of their own role.', 1, 0, 'authenticated', 0, CAST(strftime('%s', 'now') AS INTEGER) * 1000, CAST(strftime('%s', 'now') AS INTEGER) * 1000),
-	('Guest', 'Applies to anyone who is not signed in, and to every member as a floor.', 1, 0, 'guest', 1, CAST(strftime('%s', 'now') AS INTEGER) * 1000, CAST(strftime('%s', 'now') AS INTEGER) * 1000),
-	('Editor', 'Create, read, change and delete every record, and export them.', 1, 0, 'custom', 2, CAST(strftime('%s', 'now') AS INTEGER) * 1000, CAST(strftime('%s', 'now') AS INTEGER) * 1000),
-	('Contributor', 'Create records and read all, but only change or delete their own.', 1, 0, 'custom', 3, CAST(strftime('%s', 'now') AS INTEGER) * 1000, CAST(strftime('%s', 'now') AS INTEGER) * 1000),
-	('Viewer', 'Read and export every record.', 1, 1, 'custom', 4, CAST(strftime('%s', 'now') AS INTEGER) * 1000, CAST(strftime('%s', 'now') AS INTEGER) * 1000);
+	('Editor', 'Create, read, change and delete every record, and export them.', 1, 0, 'custom', 1, CAST(strftime('%s', 'now') AS INTEGER) * 1000, CAST(strftime('%s', 'now') AS INTEGER) * 1000),
+	('Contributor', 'Create records and read all, but only change or delete their own.', 1, 0, 'custom', 2, CAST(strftime('%s', 'now') AS INTEGER) * 1000, CAST(strftime('%s', 'now') AS INTEGER) * 1000),
+	('Viewer', 'Read and export every record.', 1, 1, 'custom', 3, CAST(strftime('%s', 'now') AS INTEGER) * 1000, CAST(strftime('%s', 'now') AS INTEGER) * 1000);
 --> statement-breakpoint
 WITH seed(role_name, permission) AS (VALUES
 	('Editor', 'create'),

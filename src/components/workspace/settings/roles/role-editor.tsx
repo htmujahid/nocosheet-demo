@@ -113,9 +113,7 @@ function EditorForm({
           <CardFrameDescription>
             {role.kind === "authenticated"
               ? "Applies to every signed-in member, on top of their own role. A table setting here is used unless the member's role sets that table itself."
-              : role.kind === "guest"
-                ? "Applies to anyone who isn't signed in, and is the floor for every member. Only creating and viewing records, table by table."
-                : `${role.memberCount} ${role.memberCount === 1 ? "member has" : "members have"} this role.`}
+              : `${role.memberCount} ${role.memberCount === 1 ? "member has" : "members have"} this role.`}
           </CardFrameDescription>
         </CardFrameHeader>
         <Card>
@@ -157,12 +155,7 @@ function EditorForm({
         </Card>
       </CardFrame>
 
-      <PermissionMatrix
-        guest={role.kind === "guest"}
-        matrix={matrix}
-        targets={targets}
-        onChange={setMatrix}
-      />
+      <PermissionMatrix matrix={matrix} targets={targets} onChange={setMatrix} />
 
       {save.error && (
         <Alert variant="error">

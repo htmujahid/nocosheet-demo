@@ -2305,8 +2305,7 @@ paths:
       tags:
       - Roles
       summary: Update a role
-      description: Authenticated and Guest can only change their permissions. Guest can only hold per-table
-        create and read grants. Administrators only.
+      description: Authenticated can only change its permissions. Administrators only.
       operationId: patchWorkspacesWorkspaceRolesRole
       parameters:
       - $ref: '#/components/parameters/workspace'
@@ -2319,8 +2318,7 @@ paths:
               $ref: '#/components/schemas/RoleUpdate'
       responses:
         '200':
-          description: Authenticated and Guest can only change their permissions. Guest can only hold
-            per-table create and read grants.
+          description: Authenticated can only change its permissions.
           content:
             application/json:
               schema:
@@ -3124,9 +3122,8 @@ components:
           enum:
           - custom
           - authenticated
-          - guest
           description: custom roles can be assigned to members. authenticated applies to every signed-in
-            member and guest to everyone, both on top of a member's own role.
+            member, on top of a member's own role.
         position:
           type: integer
         memberCount:
@@ -3224,8 +3221,8 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Grant'
-          description: The member's own role grants, then Authenticated, then Guest. For the same action,
-            the earlier one wins.
+          description: The member's own role grants, then Authenticated. For the same action, the
+            earlier one wins.
       required:
       - admin
       - role

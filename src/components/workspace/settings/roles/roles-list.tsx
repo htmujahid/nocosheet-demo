@@ -67,7 +67,7 @@ export function RolesList({ workspace }: { workspace: string }) {
         <CardFrameTitle>Roles</CardFrameTitle>
         <CardFrameDescription>
           A role decides what a member can do with records. Members without a role get the default
-          one. Authenticated applies to every signed-in member, and Guest to anyone who isn't.
+          one. Authenticated applies to every signed-in member on top of their own role.
         </CardFrameDescription>
       </CardFrameHeader>
       <Card>
@@ -107,7 +107,7 @@ export function RolesList({ workspace }: { workspace: string }) {
                 )}
                 {role.kind !== "custom" && (
                   <Badge variant="info" size="sm">
-                    {role.kind === "guest" ? "Public" : "Everyone"}
+                    Everyone
                   </Badge>
                 )}
                 {role.isDefault && (

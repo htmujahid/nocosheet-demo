@@ -779,7 +779,7 @@
       "checkConstraints": {
         "default__role_kind_check": {
           "name": "default__role_kind_check",
-          "value": "\"default__role\".\"kind\" in ('custom', 'authenticated', 'guest')"
+          "value": "\"default__role\".\"kind\" in ('custom', 'authenticated')"
         }
       }
     },

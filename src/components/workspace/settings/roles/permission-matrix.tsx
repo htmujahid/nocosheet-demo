@@ -13,7 +13,6 @@ import {
   ACTIONS,
   type Action,
   FORM_ACTIONS,
-  GUEST_ACTIONS,
   PERMISSION_LABELS,
 } from "@/lib/roles/permissions";
 
@@ -39,17 +38,12 @@ export type GrantTarget = {
 export function PermissionMatrix({
   matrix,
   targets,
-  guest,
   onChange,
 }: {
   matrix: Matrix;
   targets: GrantTarget[];
-  guest?: boolean;
   onChange: (matrix: Matrix) => void;
 }) {
-  const actions = guest ? ACTIONS.filter((action) => GUEST_ACTIONS.includes(action)) : ACTIONS;
-  const inheritLabel = guest ? "" : "Same as workspace";
-
   const setWorkspace = (action: Action, value: ScopeValue) =>
     value !== "inherit" &&
     onChange({ ...matrix, workspace: { ...matrix.workspace, [action]: value } });
@@ -63,41 +57,35 @@ export function PermissionMatrix({
 
   return (
     <>
-      {!guest && (
-        <CardFrame>
-          <CardFrameHeader>
-            <CardFrameTitle>Workspace-wide permissions</CardFrameTitle>
-            <CardFrameDescription>
-              What this role can do in every table, unless a table, view or form below says
-              otherwise. Changing table structure is always for administrators only.
-            </CardFrameDescription>
-          </CardFrameHeader>
-          <Card>
-            {ACTIONS.map((action) => (
-              <SettingsRow
-                key={action}
-                title={PERMISSION_LABELS[action]}
-                description={DESCRIPTIONS[action]}
-              >
-                <ScopeSelect
-                  action={action}
-                  label={PERMISSION_LABELS[action]}
-                  value={matrix.workspace[action]}
-                  onValueChange={(value) => setWorkspace(action, value)}
-                />
-              </SettingsRow>
-            ))}
-          </Card>
-        </CardFrame>
-      )}
+      <CardFrame>
+        <CardFrameHeader>
+          <CardFrameTitle>Workspace-wide permissions</CardFrameTitle>
+          <CardFrameDescription>
+            What this role can do in every table, unless a table, view or form below says
+            otherwise. Changing table structure is always for administrators only.
+          </CardFrameDescription>
+        </CardFrameHeader>
+        <Card>
+          {ACTIONS.map((action) => (
+            <SettingsRow
+              key={action}
+              title={PERMISSION_LABELS[action]}
+              description={DESCRIPTIONS[action]}
+            >
+              <ScopeSelect
+                action={action}
+                label={PERMISSION_LABELS[action]}
+                value={matrix.workspace[action]}
+                onValueChange={(value) => setWorkspace(action, value)}
+              />
+            </SettingsRow>
+          ))}
+        </Card>
+      </CardFrame>
 
       <OverrideCard
         title="Table overrides"
-        description={
-          guest
-            ? "Choose the tables anyone can create records in or view. Everything else stays closed."
-            : 'Give this role different permissions for specific tables. Anything left on "Same as workspace" follows the settings above.'
-        }
+        description='Give this role different permissions for specific tables. Anything left on "Same as workspace" follows the settings above.'
         addLabel="Add a table"
         emptyLabel={
           targets.length === 0
@@ -106,9 +94,8 @@ export function PermissionMatrix({
         }
         items={targets}
         matrix={matrix}
-        actions={actions}
-        inheritLabel={inheritLabel}
-        noOwn={guest}
+        actions={ACTIONS}
+        inheritLabel="Same as workspace"
         onChange={onChange}
       />
 
@@ -123,9 +110,8 @@ export function PermissionMatrix({
         }
         items={views}
         matrix={matrix}
-        actions={actions}
-        inheritLabel={guest ? "" : "Same as table"}
-        noOwn={guest}
+        actions={ACTIONS}
+        inheritLabel="Same as table"
         fallback={LayoutGridIcon}
         onChange={onChange}
       />
@@ -142,7 +128,7 @@ export function PermissionMatrix({
         items={forms}
         matrix={matrix}
         actions={FORM_ACTIONS}
-        inheritLabel={guest ? "" : "Same as table"}
+        inheritLabel="Same as table"
         fallback={TextAlignStartIcon}
         onChange={onChange}
       />

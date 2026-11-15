@@ -12,13 +12,12 @@ export type Access = {
 export async function loadAccess(user: { id: string; role?: string | null }): Promise<Access> {
   if (isAdmin(user)) return { admin: true, role: null, grants: [], scope: () => "all" };
 
-  const [role, authenticated, guest] = await Promise.all([
+  const [role, authenticated] = await Promise.all([
     findUserRole(user.id),
     findRoleByKind("authenticated"),
-    findRoleByKind("guest"),
   ]);
   const layers = await Promise.all(
-    [role, authenticated, guest].map((item) => (item ? listGrantsForRole(item.id) : [])),
+    [role, authenticated].map((item) => (item ? listGrantsForRole(item.id) : [])),
   );
   const grants = layers.flat();
   return {

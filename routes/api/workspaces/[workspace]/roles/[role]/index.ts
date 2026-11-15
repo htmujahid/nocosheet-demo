@@ -44,7 +44,7 @@ export const PATCH = defineHandler(
     if (body.isDefault === false && role.isDefault)
       throw httpError(400, "Make another role the default instead.");
 
-    if (body.grants) await assertGrantable(body.grants, role.kind);
+    if (body.grants) await assertGrantable(body.grants);
 
     try {
       if (body.name !== undefined || body.description !== undefined)

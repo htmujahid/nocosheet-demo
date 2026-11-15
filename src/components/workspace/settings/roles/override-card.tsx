@@ -35,7 +35,6 @@ export function OverrideCard({
   matrix,
   actions,
   inheritLabel,
-  noOwn,
   fallback,
   onChange,
 }: {
@@ -47,7 +46,6 @@ export function OverrideCard({
   matrix: Matrix;
   actions: readonly Action[];
   inheritLabel: string;
-  noOwn?: boolean;
   fallback?: typeof LayoutGridIcon;
   onChange: (matrix: Matrix) => void;
 }) {
@@ -125,12 +123,11 @@ export function OverrideCard({
                 <div key={action} className="flex flex-col gap-1">
                   <span className="text-muted-foreground text-xs">{PERMISSION_LABELS[action]}</span>
                   <ScopeSelect
-                    inherit={inheritLabel !== ""}
+                    inherit
                     inheritLabel={inheritLabel}
                     action={action}
-                    noOwn={noOwn}
                     label={`${PERMISSION_LABELS[action]} in ${label(item)}`}
-                    value={matrix.tables[item.id]?.[action] ?? (inheritLabel ? "inherit" : "none")}
+                    value={matrix.tables[item.id]?.[action] ?? "inherit"}
                     onValueChange={(value) => setCell(item.id, action, value)}
                   />
                 </div>

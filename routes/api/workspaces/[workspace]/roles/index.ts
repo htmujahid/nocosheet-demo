@@ -20,7 +20,7 @@ export const POST = defineHandler(
     if (await findRoleByName(body.name))
       throw httpError(409, `A role named "${body.name}" already exists.`);
 
-    await assertGrantable(body.grants, "custom");
+    await assertGrantable(body.grants);
 
     const role = await createRole({ name: body.name, description: body.description });
     if (body.grants.length > 0) await replaceGrants(role.id, body.grants);

@@ -3,9 +3,7 @@ import { type Access, loadAccess } from "./access";
 import {
   type Action,
   isFormGrantAllowed,
-  isGuestGrantAllowed,
   type PermissionGrant,
-  type RoleKind,
   type Scope,
 } from "./permissions";
 import { findGrantResourceKinds, resourceInTable } from "./repository";
@@ -66,7 +64,7 @@ export async function visibleResources<T extends { id: number }>(
   return rows.filter((row) => access.scope(action, tableId, row.id) !== "none");
 }
 
-export async function assertGrantable(grants: PermissionGrant[], kind: RoleKind) {
+export async function assertGrantable(grants: PermissionGrant[]) {
   const ids = [...new Set(grants.flatMap((grant) => (grant.resourceId ? [grant.resourceId] : [])))];
   const kinds = await findGrantResourceKinds(ids);
   if (ids.some((id) => !kinds.has(id)))
@@ -81,7 +79,4 @@ export async function assertGrantable(grants: PermissionGrant[], kind: RoleKind)
     )
   )
     throw httpError(400, "A form can only be given the create permission.");
-
-  if (kind === "guest" && !grants.every(isGuestGrantAllowed))
-    throw httpError(400, "Guests can only create or view records, table by table.");
 }
