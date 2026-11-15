@@ -2,11 +2,13 @@ import { useState } from "react";
 
 import { useQuery } from "@tanstack/react-query";
 
-import { Sheet, SheetPopup } from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetClose, SheetFooter, SheetPopup } from "@/components/ui/sheet";
 import { recordQueryOptions } from "@/data/workspace/records";
 import { toFormValues } from "@/lib/records/form";
 
 import { type ViewerColumn, type ViewScope } from "../columns";
+import { DeleteRecordsDialog } from "../delete-records-dialog";
 import { useRecordScope } from "../use-record-scope";
 import { RecordForm } from "./record-form";
 import { RecordSheetSkeleton } from "./skeleton";
@@ -19,6 +21,8 @@ function DetailForm({
   recordId,
   record,
   columns,
+  canDelete,
+  onDeleted,
 }: {
   workspace: string;
   tableId: number;
@@ -26,6 +30,8 @@ function DetailForm({
   recordId: number;
   record: Record<string, unknown>;
   columns: ViewerColumn[];
+  canDelete: boolean;
+  onDeleted: () => void;
 }) {
   const form = useRecordForm({ initial: toFormValues(columns, record) });
 
@@ -40,7 +46,22 @@ function DetailForm({
       recordId={recordId}
       disabled
       status="View only"
-    />
+    >
+      {canDelete && (
+        <SheetFooter>
+          <div className="me-auto">
+            <DeleteRecordsDialog
+              workspace={workspace}
+              tableId={tableId}
+              ids={[recordId]}
+              label="Delete"
+              onDeleted={onDeleted}
+            />
+          </div>
+          <SheetClose render={<Button type="button" variant="ghost" />}>Close</SheetClose>
+        </SheetFooter>
+      )}
+    </RecordForm>
   );
 }
 
@@ -49,12 +70,14 @@ export function DetailRecordSheet({
   tableId,
   recordId,
   view,
+  canDelete = false,
   onClose,
 }: {
   workspace: string;
   tableId: number;
   recordId: number;
   view?: ViewScope;
+  canDelete?: boolean;
   onClose: () => void;
 }) {
   const [open, setOpen] = useState(true);
@@ -79,6 +102,8 @@ export function DetailRecordSheet({
             recordId={recordId}
             record={record}
             columns={scope.columns}
+            canDelete={canDelete}
+            onDeleted={() => setOpen(false)}
           />
         ) : (
           <RecordSheetSkeleton

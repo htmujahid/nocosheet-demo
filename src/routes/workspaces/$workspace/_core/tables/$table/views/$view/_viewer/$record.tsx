@@ -26,7 +26,6 @@ function RecordPage() {
   const navigate = Route.useNavigate();
   const access = useAccess();
   const tableId = Number(table);
-  const view = { id: loaded.id, selectColumns: loaded.selectColumns };
   const { data } = useQuery(recordQueryOptions(workspace, tableId, Number(record)));
 
   const owner = (data?.created_by as { id?: string } | null | undefined)?.id;
@@ -35,7 +34,7 @@ function RecordPage() {
     workspace,
     tableId,
     recordId: Number(record),
-    view,
+    view: { id: loaded.id, selectColumns: loaded.selectColumns },
     onClose: () =>
       navigate({
         to: "/workspaces/$workspace/tables/$table/views/$view",
@@ -44,9 +43,11 @@ function RecordPage() {
       }),
   };
 
+  const canDelete = access.canOn("delete", tableId, owner);
+
   return editable ? (
-    <UpdateRecordSheet {...sheetProps} canDelete={access.canOn("delete", tableId, owner)} />
+    <UpdateRecordSheet {...sheetProps} canDelete={canDelete} />
   ) : (
-    <DetailRecordSheet {...sheetProps} />
+    <DetailRecordSheet {...sheetProps} canDelete={canDelete} />
   );
 }

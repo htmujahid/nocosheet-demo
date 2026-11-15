@@ -25,7 +25,11 @@ export const GET = defineHandler.withValidator({ params })(async (c, { params })
   const columns = (await listColumns(table.id)).filter((column) =>
     view.selectColumns.includes(column.columnName),
   );
-  return { ...view, tableName: table.name, titleColumnId: table.titleColumnId, columns };
+  return {
+    ...view,
+    table: { id: table.id, name: table.name, titleColumnId: table.titleColumnId },
+    columns,
+  };
 });
 
 export const PATCH = defineHandler(

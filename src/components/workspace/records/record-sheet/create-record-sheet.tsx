@@ -9,7 +9,7 @@ import { workspaceKeys } from "@/data/workspace/keys";
 import { createRecordMutationOptions } from "@/data/workspace/records";
 import { buildCreate, toDefaultFormValues } from "@/lib/records/form";
 
-import { type ViewerColumn, type ViewScope } from "../columns";
+import { type ViewerColumn } from "../columns";
 import { useRecordScope } from "../use-record-scope";
 import { RecordForm } from "./record-form";
 import { useRecordForm } from "./use-record-form";
@@ -67,16 +67,14 @@ function CreateForm({
 export function CreateRecordSheet({
   workspace,
   tableId,
-  view,
   onClose,
 }: {
   workspace: string;
   tableId: number;
-  view?: ViewScope;
   onClose: () => void;
 }) {
   const [open, setOpen] = useState(true);
-  const scope = useRecordScope(workspace, tableId, view);
+  const scope = useRecordScope(workspace, tableId);
 
   return (
     <Sheet

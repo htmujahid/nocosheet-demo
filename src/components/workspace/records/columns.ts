@@ -136,4 +136,12 @@ export function buildViewerColumns(table: TableDetail): ViewerColumn[] {
   ];
 }
 
+export const withoutIdColumn = (columns: ViewerColumn[]) =>
+  columns.filter((column) => column.format !== "id");
+
+export const buildScopedColumns = (scope: {
+  table: { titleColumnId: number | null };
+  columns: TableDetail["columns"];
+}) => buildViewerColumns({ titleColumnId: scope.table.titleColumnId, columns: scope.columns });
+
 export type ViewScope = { id: number; selectColumns: string[] };

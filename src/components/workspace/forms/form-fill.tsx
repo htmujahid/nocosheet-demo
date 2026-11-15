@@ -19,7 +19,7 @@ import { submitFormMutationOptions } from "@/data/workspace/forms";
 import { workspaceKeys } from "@/data/workspace/keys";
 import { buildCreate, toDefaultFormValues } from "@/lib/records/form";
 
-import { buildViewerColumns } from "../records/columns";
+import { buildScopedColumns } from "../records/columns";
 import { RecordFieldList } from "../records/record-sheet/record-form";
 import { useRecordForm } from "../records/record-sheet/use-record-form";
 
@@ -29,8 +29,8 @@ type FormDefinition = {
   description: string | null;
   isOpen: boolean;
   selectColumns: string[];
-  titleColumnId: number | null;
-  columns: Parameters<typeof buildViewerColumns>[0]["columns"];
+  table: { titleColumnId: number | null };
+  columns: Parameters<typeof buildScopedColumns>[0]["columns"];
 };
 
 const SYSTEM_FORMATS = ["id", "created_at", "updated_at", "user"];
@@ -47,7 +47,7 @@ function FormFields({
   onSubmitted: () => void;
 }) {
   const queryClient = useQueryClient();
-  const columns = buildViewerColumns(definition)
+  const columns = buildScopedColumns(definition)
     .filter((column) => !SYSTEM_FORMATS.includes(column.format) && !column.readOnly)
     .sort(
       (a, b) => definition.selectColumns.indexOf(a.key) - definition.selectColumns.indexOf(b.key),

@@ -10,7 +10,7 @@ import { RECORD_PAGE_SIZES } from "@/lib/records/query";
 import { cn } from "@/lib/utils";
 
 import { ViewsMenu } from "../../views/views-menu";
-import { buildViewerColumns, type ViewScope } from "../columns";
+import { buildScopedColumns, type ViewScope, withoutIdColumn } from "../columns";
 import { RecordsGrid, type ViewerRow } from "../records-grid";
 import { useUpdateCell } from "../use-update-cell";
 import { GridToolbar } from "./grid-toolbar";
@@ -33,7 +33,7 @@ export function ViewGridView({
 }) {
   const access = useAccess();
   const { data: detail } = useSuspenseQuery(viewQueryOptions(workspace, tableId, view.id));
-  const columns = useMemo(() => buildViewerColumns(detail), [detail]);
+  const columns = useMemo(() => withoutIdColumn(buildScopedColumns(detail)), [detail]);
   const { query, setUrlQuery, setCursor } = useRecordsQuery(columns);
 
   const recordsOptions = viewRecordsQueryOptions(workspace, tableId, view.id, query);

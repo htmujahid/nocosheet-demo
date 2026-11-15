@@ -37,9 +37,11 @@ function RecordPage() {
       }),
   };
 
+  const canDelete = access.canOn("delete", tableId, owner);
+
   return editable ? (
-    <UpdateRecordSheet {...sheetProps} canDelete={access.canOn("delete", tableId, owner)} />
+    <UpdateRecordSheet {...sheetProps} canDelete={canDelete} />
   ) : (
-    <DetailRecordSheet {...sheetProps} />
+    <DetailRecordSheet {...sheetProps} canDelete={canDelete} />
   );
 }
