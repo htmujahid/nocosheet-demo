@@ -4,7 +4,7 @@ import { WorkspaceContent, WorkspaceHeader } from "@/components/layout/workspace
 import { SettingsApi } from "@/components/workspace/settings/api";
 
 export const Route = createFileRoute("/workspaces/$workspace/settings/api")({
-  staticData: { crumb: "API" },
+  staticData: { crumb: "API Keys" },
   component: Page,
 });
 

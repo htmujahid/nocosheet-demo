@@ -31,8 +31,10 @@ import { Route as WorkspacesWorkspaceCoreTablesRouteRouteImport } from './routes
 import { Route as WorkspacesWorkspaceSettingsIndexRouteImport } from './routes/workspaces/$workspace/settings/index'
 import { Route as WorkspacesWorkspaceSettingsApiRouteImport } from './routes/workspaces/$workspace/settings/api'
 import { Route as WorkspacesWorkspaceSettingsAppearanceRouteImport } from './routes/workspaces/$workspace/settings/appearance'
+import { Route as WorkspacesWorkspaceSettingsAuditLogRouteImport } from './routes/workspaces/$workspace/settings/audit-log'
 import { Route as WorkspacesWorkspaceSettingsBillingRouteImport } from './routes/workspaces/$workspace/settings/billing'
 import { Route as WorkspacesWorkspaceSettingsMembersRouteRouteImport } from './routes/workspaces/$workspace/settings/members/route'
+import { Route as WorkspacesWorkspaceSettingsNotificationsRouteImport } from './routes/workspaces/$workspace/settings/notifications'
 import { Route as WorkspacesWorkspaceSettingsRoleRouteImport } from './routes/workspaces/$workspace/settings/role'
 import { Route as WorkspacesWorkspaceCoreTablesTableRouteRouteImport } from './routes/workspaces/$workspace/_core/tables/$table/route'
 import { Route as WorkspacesWorkspaceCoreTablesListRouteRouteImport } from './routes/workspaces/$workspace/_core/tables/_list/route'
@@ -184,6 +186,12 @@ const WorkspacesWorkspaceSettingsAppearanceRoute =
     path: '/appearance',
     getParentRoute: () => WorkspacesWorkspaceSettingsRouteRoute,
   } as any)
+const WorkspacesWorkspaceSettingsAuditLogRoute =
+  WorkspacesWorkspaceSettingsAuditLogRouteImport.update({
+    id: '/audit-log',
+    path: '/audit-log',
+    getParentRoute: () => WorkspacesWorkspaceSettingsRouteRoute,
+  } as any)
 const WorkspacesWorkspaceSettingsBillingRoute =
   WorkspacesWorkspaceSettingsBillingRouteImport.update({
     id: '/billing',
@@ -194,6 +202,12 @@ const WorkspacesWorkspaceSettingsMembersRouteRoute =
   WorkspacesWorkspaceSettingsMembersRouteRouteImport.update({
     id: '/members',
     path: '/members',
+    getParentRoute: () => WorkspacesWorkspaceSettingsRouteRoute,
+  } as any)
+const WorkspacesWorkspaceSettingsNotificationsRoute =
+  WorkspacesWorkspaceSettingsNotificationsRouteImport.update({
+    id: '/notifications',
+    path: '/notifications',
     getParentRoute: () => WorkspacesWorkspaceSettingsRouteRoute,
   } as any)
 const WorkspacesWorkspaceSettingsRoleRoute =
@@ -414,7 +428,9 @@ export interface FileRoutesByFullPath {
   '/workspaces/$workspace/settings/members': typeof WorkspacesWorkspaceSettingsMembersRouteRouteWithChildren
   '/workspaces/$workspace/settings/api': typeof WorkspacesWorkspaceSettingsApiRoute
   '/workspaces/$workspace/settings/appearance': typeof WorkspacesWorkspaceSettingsAppearanceRoute
+  '/workspaces/$workspace/settings/audit-log': typeof WorkspacesWorkspaceSettingsAuditLogRoute
   '/workspaces/$workspace/settings/billing': typeof WorkspacesWorkspaceSettingsBillingRoute
+  '/workspaces/$workspace/settings/notifications': typeof WorkspacesWorkspaceSettingsNotificationsRoute
   '/workspaces/$workspace/settings/role': typeof WorkspacesWorkspaceSettingsRoleRoute
   '/workspaces/$workspace/': typeof WorkspacesWorkspaceCoreIndexRoute
   '/workspaces/$workspace/settings/': typeof WorkspacesWorkspaceSettingsIndexRoute
@@ -464,7 +480,9 @@ export interface FileRoutesByTo {
   '/workspaces/$workspace/tables': typeof WorkspacesWorkspaceCoreTablesListIndexRoute
   '/workspaces/$workspace/settings/api': typeof WorkspacesWorkspaceSettingsApiRoute
   '/workspaces/$workspace/settings/appearance': typeof WorkspacesWorkspaceSettingsAppearanceRoute
+  '/workspaces/$workspace/settings/audit-log': typeof WorkspacesWorkspaceSettingsAuditLogRoute
   '/workspaces/$workspace/settings/billing': typeof WorkspacesWorkspaceSettingsBillingRoute
+  '/workspaces/$workspace/settings/notifications': typeof WorkspacesWorkspaceSettingsNotificationsRoute
   '/workspaces/$workspace/settings/role': typeof WorkspacesWorkspaceSettingsRoleRoute
   '/workspaces/$workspace/settings': typeof WorkspacesWorkspaceSettingsIndexRoute
   '/workspaces/$workspace/tables/$table': typeof WorkspacesWorkspaceCoreTablesTableViewerIndexRoute
@@ -512,7 +530,9 @@ export interface FileRoutesById {
   '/workspaces/$workspace/settings/members': typeof WorkspacesWorkspaceSettingsMembersRouteRouteWithChildren
   '/workspaces/$workspace/settings/api': typeof WorkspacesWorkspaceSettingsApiRoute
   '/workspaces/$workspace/settings/appearance': typeof WorkspacesWorkspaceSettingsAppearanceRoute
+  '/workspaces/$workspace/settings/audit-log': typeof WorkspacesWorkspaceSettingsAuditLogRoute
   '/workspaces/$workspace/settings/billing': typeof WorkspacesWorkspaceSettingsBillingRoute
+  '/workspaces/$workspace/settings/notifications': typeof WorkspacesWorkspaceSettingsNotificationsRoute
   '/workspaces/$workspace/settings/role': typeof WorkspacesWorkspaceSettingsRoleRoute
   '/workspaces/$workspace/_core/': typeof WorkspacesWorkspaceCoreIndexRoute
   '/workspaces/$workspace/settings/': typeof WorkspacesWorkspaceSettingsIndexRoute
@@ -572,7 +592,9 @@ export interface FileRouteTypes {
     | '/workspaces/$workspace/settings/members'
     | '/workspaces/$workspace/settings/api'
     | '/workspaces/$workspace/settings/appearance'
+    | '/workspaces/$workspace/settings/audit-log'
     | '/workspaces/$workspace/settings/billing'
+    | '/workspaces/$workspace/settings/notifications'
     | '/workspaces/$workspace/settings/role'
     | '/workspaces/$workspace/'
     | '/workspaces/$workspace/settings/'
@@ -622,7 +644,9 @@ export interface FileRouteTypes {
     | '/workspaces/$workspace/tables'
     | '/workspaces/$workspace/settings/api'
     | '/workspaces/$workspace/settings/appearance'
+    | '/workspaces/$workspace/settings/audit-log'
     | '/workspaces/$workspace/settings/billing'
+    | '/workspaces/$workspace/settings/notifications'
     | '/workspaces/$workspace/settings/role'
     | '/workspaces/$workspace/settings'
     | '/workspaces/$workspace/tables/$table'
@@ -669,7 +693,9 @@ export interface FileRouteTypes {
     | '/workspaces/$workspace/settings/members'
     | '/workspaces/$workspace/settings/api'
     | '/workspaces/$workspace/settings/appearance'
+    | '/workspaces/$workspace/settings/audit-log'
     | '/workspaces/$workspace/settings/billing'
+    | '/workspaces/$workspace/settings/notifications'
     | '/workspaces/$workspace/settings/role'
     | '/workspaces/$workspace/_core/'
     | '/workspaces/$workspace/settings/'
@@ -870,6 +896,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WorkspacesWorkspaceSettingsAppearanceRouteImport
       parentRoute: typeof WorkspacesWorkspaceSettingsRouteRoute
     }
+    '/workspaces/$workspace/settings/audit-log': {
+      id: '/workspaces/$workspace/settings/audit-log'
+      path: '/audit-log'
+      fullPath: '/workspaces/$workspace/settings/audit-log'
+      preLoaderRoute: typeof WorkspacesWorkspaceSettingsAuditLogRouteImport
+      parentRoute: typeof WorkspacesWorkspaceSettingsRouteRoute
+    }
     '/workspaces/$workspace/settings/billing': {
       id: '/workspaces/$workspace/settings/billing'
       path: '/billing'
@@ -882,6 +915,13 @@ declare module '@tanstack/react-router' {
       path: '/members'
       fullPath: '/workspaces/$workspace/settings/members'
       preLoaderRoute: typeof WorkspacesWorkspaceSettingsMembersRouteRouteImport
+      parentRoute: typeof WorkspacesWorkspaceSettingsRouteRoute
+    }
+    '/workspaces/$workspace/settings/notifications': {
+      id: '/workspaces/$workspace/settings/notifications'
+      path: '/notifications'
+      fullPath: '/workspaces/$workspace/settings/notifications'
+      preLoaderRoute: typeof WorkspacesWorkspaceSettingsNotificationsRouteImport
       parentRoute: typeof WorkspacesWorkspaceSettingsRouteRoute
     }
     '/workspaces/$workspace/settings/role': {
@@ -1433,7 +1473,9 @@ interface WorkspacesWorkspaceSettingsRouteRouteChildren {
   WorkspacesWorkspaceSettingsMembersRouteRoute: typeof WorkspacesWorkspaceSettingsMembersRouteRouteWithChildren
   WorkspacesWorkspaceSettingsApiRoute: typeof WorkspacesWorkspaceSettingsApiRoute
   WorkspacesWorkspaceSettingsAppearanceRoute: typeof WorkspacesWorkspaceSettingsAppearanceRoute
+  WorkspacesWorkspaceSettingsAuditLogRoute: typeof WorkspacesWorkspaceSettingsAuditLogRoute
   WorkspacesWorkspaceSettingsBillingRoute: typeof WorkspacesWorkspaceSettingsBillingRoute
+  WorkspacesWorkspaceSettingsNotificationsRoute: typeof WorkspacesWorkspaceSettingsNotificationsRoute
   WorkspacesWorkspaceSettingsRoleRoute: typeof WorkspacesWorkspaceSettingsRoleRoute
   WorkspacesWorkspaceSettingsIndexRoute: typeof WorkspacesWorkspaceSettingsIndexRoute
 }
@@ -1445,8 +1487,12 @@ const WorkspacesWorkspaceSettingsRouteRouteChildren: WorkspacesWorkspaceSettings
     WorkspacesWorkspaceSettingsApiRoute: WorkspacesWorkspaceSettingsApiRoute,
     WorkspacesWorkspaceSettingsAppearanceRoute:
       WorkspacesWorkspaceSettingsAppearanceRoute,
+    WorkspacesWorkspaceSettingsAuditLogRoute:
+      WorkspacesWorkspaceSettingsAuditLogRoute,
     WorkspacesWorkspaceSettingsBillingRoute:
       WorkspacesWorkspaceSettingsBillingRoute,
+    WorkspacesWorkspaceSettingsNotificationsRoute:
+      WorkspacesWorkspaceSettingsNotificationsRoute,
     WorkspacesWorkspaceSettingsRoleRoute: WorkspacesWorkspaceSettingsRoleRoute,
     WorkspacesWorkspaceSettingsIndexRoute:
       WorkspacesWorkspaceSettingsIndexRoute,

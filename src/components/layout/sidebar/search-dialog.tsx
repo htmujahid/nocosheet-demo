@@ -6,12 +6,15 @@ import { useNavigate } from "@tanstack/react-router";
 import {
   ArrowDownIcon,
   ArrowUpIcon,
+  BellIcon,
   CornerDownLeftIcon,
   CreditCardIcon,
   HomeIcon,
   KeyRoundIcon,
   PaletteIcon,
+  ScrollTextIcon,
   SearchIcon,
+  ShieldCheckIcon,
   SlidersHorizontalIcon,
   TableIcon,
   UsersIcon,
@@ -57,12 +60,28 @@ const allTablesPage: Item = {
   path: "/tables",
 };
 
-const settings: Item[] = [
+type SettingsItem = Item & { adminOnly?: boolean };
+
+const settings: SettingsItem[] = [
   { value: "general", label: "General", icon: SlidersHorizontalIcon, path: "/settings" },
-  { value: "members", label: "Members", icon: UsersIcon, path: "/settings/members" },
-  { value: "billing", label: "Billing", icon: CreditCardIcon, path: "/settings/billing" },
   { value: "appearance", label: "Appearance", icon: PaletteIcon, path: "/settings/appearance" },
-  { value: "api", label: "API", icon: KeyRoundIcon, path: "/settings/api" },
+  {
+    value: "notifications",
+    label: "Notifications",
+    icon: BellIcon,
+    path: "/settings/notifications",
+  },
+  { value: "members", label: "Members", icon: UsersIcon, path: "/settings/members" },
+  { value: "role", label: "Role & Permissions", icon: ShieldCheckIcon, path: "/settings/role" },
+  { value: "api", label: "API Keys", icon: KeyRoundIcon, path: "/settings/api" },
+  {
+    value: "audit-log",
+    label: "Audit Log",
+    icon: ScrollTextIcon,
+    path: "/settings/audit-log",
+    adminOnly: true,
+  },
+  { value: "billing", label: "Billing", icon: CreditCardIcon, path: "/settings/billing" },
 ];
 
 /** Outline trigger plus command palette to jump to a page, table or settings section. */
@@ -84,7 +103,7 @@ export function SearchDialog({ workspace }: { workspace: string }) {
         path: `/tables/${table.id}`,
       })),
     },
-    { value: "Settings", items: settings },
+    { value: "Settings", items: settings.filter((item) => isAdmin || !item.adminOnly) },
   ].filter((group) => group.items.length > 0);
 
   useEffect(() => {
