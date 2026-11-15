@@ -58,10 +58,9 @@ export function ViewActions({
         <MenuTrigger
           render={
             <Button
-              size="sm"
               variant="outline"
               aria-label="View actions"
-              className="max-sm:w-8 max-sm:px-0"
+              className="max-sm:w-9 max-sm:px-0"
             />
           }
         >
@@ -117,10 +116,9 @@ export function ViewActions({
       <Group>
         {canCreate && (
           <Button
-            size="sm"
             variant="outline"
             aria-label="New record"
-            className="max-sm:w-8 max-sm:px-0"
+            className="max-sm:w-9 max-sm:px-0"
             render={
               <Link
                 to="/workspaces/$workspace/tables/$table/views/$view/new"

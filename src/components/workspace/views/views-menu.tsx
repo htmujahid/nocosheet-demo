@@ -41,7 +41,7 @@ export function ViewsMenu({
   return (
     <>
       <Menu>
-        <MenuTrigger render={<Button size="sm" variant="outline" aria-label="Views" />}>
+        <MenuTrigger render={<Button variant="outline" aria-label="Views" />}>
           <LayoutGridIcon />
           <span className="max-w-40 truncate max-sm:hidden">{active?.name ?? "All records"}</span>
           <ChevronDownIcon />
