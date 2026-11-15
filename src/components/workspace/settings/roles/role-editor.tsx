@@ -21,7 +21,7 @@ import { workspaceKeys } from "@/data/workspace/keys";
 import { rolesQueryOptions, updateRoleMutationOptions } from "@/data/workspace/roles";
 import { sidebarQueryOptions } from "@/data/workspace/sidebar";
 import { grantsToMatrix, type Matrix, matrixToGrants } from "@/lib/roles/matrix";
-import type { PermissionGrant } from "@/lib/roles/permissions";
+import type { PermissionGrant, RoleKind } from "@/lib/roles/permissions";
 
 import { PermissionMatrix } from "./permission-matrix";
 
@@ -67,6 +67,7 @@ function EditorForm({
     description: string | null;
     isSystem: boolean;
     isDefault: boolean;
+    kind: RoleKind;
     memberCount: number;
     grants: PermissionGrant[];
   };
@@ -107,7 +108,11 @@ function EditorForm({
             )}
           </div>
           <CardFrameDescription>
-            {role.memberCount} {role.memberCount === 1 ? "member has" : "members have"} this role.
+            {role.kind === "authenticated"
+              ? "Applies to every signed-in member, on top of their own role. A table setting here is used unless the member's role sets that table itself."
+              : role.kind === "guest"
+                ? "Applies to anyone who isn't signed in, and is the floor for every member. Only creating and viewing records, table by table."
+                : `${role.memberCount} ${role.memberCount === 1 ? "member has" : "members have"} this role.`}
           </CardFrameDescription>
         </CardFrameHeader>
         <Card>
@@ -131,23 +136,30 @@ function EditorForm({
               onChange={(event) => setDescription(event.target.value)}
             />
           </SettingsRow>
-          <SettingsRow
-            title="Default role"
-            description="Given to members who have no role of their own, including new ones."
-          >
-            <div>
-              <Switch
-                aria-label="Default role"
-                checked={isDefault}
-                disabled={role.isDefault}
-                onCheckedChange={setIsDefault}
-              />
-            </div>
-          </SettingsRow>
+          {role.kind === "custom" && (
+            <SettingsRow
+              title="Default role"
+              description="Given to members who have no role of their own, including new ones."
+            >
+              <div>
+                <Switch
+                  aria-label="Default role"
+                  checked={isDefault}
+                  disabled={role.isDefault}
+                  onCheckedChange={setIsDefault}
+                />
+              </div>
+            </SettingsRow>
+          )}
         </Card>
       </CardFrame>
 
-      <PermissionMatrix matrix={matrix} tables={tables} onChange={setMatrix} />
+      <PermissionMatrix
+        guest={role.kind === "guest"}
+        matrix={matrix}
+        tables={tables}
+        onChange={setMatrix}
+      />
 
       {save.error && (
         <Alert variant="error">

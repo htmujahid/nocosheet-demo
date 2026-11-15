@@ -717,6 +717,14 @@
           "autoincrement": false,
           "default": false
         },
+        "kind": {
+          "name": "kind",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'custom'"
+        },
         "position": {
           "name": "position",
           "type": "integer",
@@ -755,12 +763,25 @@
           ],
           "isUnique": true,
           "where": "\"default__role\".\"is_default\" = 1"
+        },
+        "default__role_kind": {
+          "name": "default__role_kind",
+          "columns": [
+            "kind"
+          ],
+          "isUnique": true,
+          "where": "\"default__role\".\"kind\" != 'custom'"
         }
       },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
-      "checkConstraints": {}
+      "checkConstraints": {
+        "default__role_kind_check": {
+          "name": "default__role_kind_check",
+          "value": "\"default__role\".\"kind\" in ('custom', 'authenticated', 'guest')"
+        }
+      }
     },
     "default__role_member": {
       "name": "default__role_member",

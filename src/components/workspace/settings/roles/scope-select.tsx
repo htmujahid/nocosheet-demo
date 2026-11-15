@@ -25,6 +25,7 @@ export function ScopeSelect({
   value,
   onValueChange,
   inherit,
+  noOwn,
   disabled,
   label,
 }: {
@@ -32,12 +33,13 @@ export function ScopeSelect({
   value: ScopeValue;
   onValueChange: (value: ScopeValue) => void;
   inherit?: boolean;
+  noOwn?: boolean;
   disabled?: boolean;
   label: string;
 }) {
   const items = [
     ...(inherit ? [{ value: "inherit", label: "Same as workspace" }] : []),
-    ...(isScopedAction(action) ? SCOPED : FLAG),
+    ...(isScopedAction(action) ? SCOPED.filter((item) => !noOwn || item.value !== "own") : FLAG),
   ];
 
   return (

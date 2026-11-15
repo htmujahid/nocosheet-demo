@@ -58,7 +58,9 @@ export function MemberRole({
   });
 
   const admin = isAdmin({ role });
-  const items = (roles ?? []).map((item) => ({ value: String(item.id), label: item.name }));
+  const items = (roles ?? [])
+    .filter((item) => item.kind === "custom")
+    .map((item) => ({ value: String(item.id), label: item.name }));
   const current =
     assignments?.find((item) => item.userId === userId)?.roleId ??
     roles?.find((item) => item.isDefault)?.id;

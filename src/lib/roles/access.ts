@@ -1,6 +1,6 @@
 import { isAdmin } from "../auth/access";
 import { type Action, type PermissionGrant, type Scope, scopeOf } from "./permissions";
-import { findUserRole, listGrantsForRole } from "./repository";
+import { findRoleByKind, findUserRole, listGrantsForRole } from "./repository";
 
 export type Access = {
   admin: boolean;
@@ -12,8 +12,15 @@ export type Access = {
 export async function loadAccess(user: { id: string; role?: string | null }): Promise<Access> {
   if (isAdmin(user)) return { admin: true, role: null, grants: [], scope: () => "all" };
 
-  const role = await findUserRole(user.id);
-  const grants = role ? await listGrantsForRole(role.id) : [];
+  const [role, authenticated, guest] = await Promise.all([
+    findUserRole(user.id),
+    findRoleByKind("authenticated"),
+    findRoleByKind("guest"),
+  ]);
+  const layers = await Promise.all(
+    [role, authenticated, guest].map((item) => (item ? listGrantsForRole(item.id) : [])),
+  );
+  const grants = layers.flat();
   return {
     admin: false,
     role: role ? { id: role.id, name: role.name, description: role.description } : null,

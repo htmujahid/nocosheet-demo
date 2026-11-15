@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { conflictOrBadRequest, httpError } from "@/lib/http";
+import { isGuestGrantAllowed } from "@/lib/roles/permissions";
 import {
   countRoleMembers,
   deleteRole,
@@ -39,8 +40,13 @@ export const PATCH = defineHandler(
       if (existing && existing.id !== role.id)
         throw httpError(409, `A role named "${body.name}" already exists.`);
     }
+    if (role.kind !== "custom" && body.isDefault)
+      throw httpError(400, `The ${role.name} role can't be the default.`);
     if (body.isDefault === false && role.isDefault)
       throw httpError(400, "Make another role the default instead.");
+
+    if (body.grants && role.kind === "guest" && !body.grants.every(isGuestGrantAllowed))
+      throw httpError(400, "Guests can only create or view records, table by table.");
 
     if (body.grants) {
       const tableIds = [

@@ -67,7 +67,7 @@ export function RolesList({ workspace }: { workspace: string }) {
         <CardFrameTitle>Roles</CardFrameTitle>
         <CardFrameDescription>
           A role decides what a member can do with records. Members without a role get the default
-          one.
+          one. Authenticated applies to every signed-in member, and Guest to anyone who isn't.
         </CardFrameDescription>
       </CardFrameHeader>
       <Card>
@@ -105,14 +105,21 @@ export function RolesList({ workspace }: { workspace: string }) {
                     Built-in
                   </Badge>
                 )}
+                {role.kind !== "custom" && (
+                  <Badge variant="info" size="sm">
+                    {role.kind === "guest" ? "Public" : "Everyone"}
+                  </Badge>
+                )}
                 {role.isDefault && (
                   <Badge variant="success" size="sm">
                     Default
                   </Badge>
                 )}
-                <span className="text-muted-foreground text-xs">
-                  {role.memberCount} {role.memberCount === 1 ? "member" : "members"}
-                </span>
+                {role.kind === "custom" && (
+                  <span className="text-muted-foreground text-xs">
+                    {role.memberCount} {role.memberCount === 1 ? "member" : "members"}
+                  </span>
+                )}
               </div>
               {role.description && (
                 <p className="text-muted-foreground text-sm">{role.description}</p>
@@ -120,7 +127,7 @@ export function RolesList({ workspace }: { workspace: string }) {
               <RoleSummary grants={role.grants} />
             </div>
             <div className="flex shrink-0 items-center gap-2">
-              {!role.isDefault && (
+              {!role.isDefault && role.kind === "custom" && (
                 <Button
                   type="button"
                   variant="outline"

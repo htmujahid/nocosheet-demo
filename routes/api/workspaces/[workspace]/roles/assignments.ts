@@ -21,6 +21,8 @@ export const PUT = defineHandler(
     const role = await findRole(body.roleId);
     if (!role) throw httpError(404, "Role not found.");
 
+    if (role.kind !== "custom") throw httpError(400, `The ${role.name} role can't be assigned.`);
+
     await assignRole(member.id, role.id, requireAuth(c).id);
     return { userId: member.id, roleId: role.id };
   }),

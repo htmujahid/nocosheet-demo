@@ -10,7 +10,7 @@ import {
 } from "void/schema-d1";
 
 import { userTable } from "../.void/better-auth-schema";
-import { PERMISSIONS } from "../src/lib/roles/permissions";
+import { PERMISSIONS, ROLE_KINDS } from "../src/lib/roles/permissions";
 
 const RESOURCE_KINDS = ["table", "view", "form"] as const;
 
@@ -230,6 +230,7 @@ export const workspaceSchema = <W extends string = "default">(workspaceId: W = "
       description: text("description"),
       isSystem: integer("is_system", { mode: "boolean" }).notNull().default(false),
       isDefault: integer("is_default", { mode: "boolean" }).notNull().default(false),
+      kind: text("kind", { enum: ROLE_KINDS }).notNull().default("custom"),
       position: integer("position").notNull().default(0),
       ...timestamps,
     },
@@ -238,6 +239,13 @@ export const workspaceSchema = <W extends string = "default">(workspaceId: W = "
       uniqueIndex(name("role_default"))
         .on(t.isDefault)
         .where(sql`${t.isDefault} = 1`),
+      uniqueIndex(name("role_kind"))
+        .on(t.kind)
+        .where(sql`${t.kind} != 'custom'`),
+      check(
+        name("role_kind_check"),
+        sql`${t.kind} in (${sql.raw(ROLE_KINDS.map((kind) => `'${kind}'`).join(", "))})`,
+      ),
     ],
   );
 

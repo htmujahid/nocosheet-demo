@@ -52,8 +52,11 @@ export function SettingsAppearance() {
       </CardFrameHeader>
       <Card>
         <SettingsRow title="Color mode" description="Match your system or pick a fixed mode.">
-          <Select value={preferences.theme}
-            onValueChange={(value) => setPreference("theme", value as Theme)} items={themes}>
+          <Select
+            value={preferences.theme}
+            onValueChange={(value) => setPreference("theme", value as Theme)}
+            items={themes}
+          >
             <SelectTrigger aria-label="Color mode">
               <SelectValue />
             </SelectTrigger>

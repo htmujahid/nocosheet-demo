@@ -27,7 +27,10 @@ export function MemberNotFound() {
         <Button
           variant="outline"
           render={
-            <Link to="/workspaces/$workspace/settings/members" params={{ workspace: DEFAULT_WORKSPACE }} />
+            <Link
+              to="/workspaces/$workspace/settings/members"
+              params={{ workspace: DEFAULT_WORKSPACE }}
+            />
           }
         >
           Back to members

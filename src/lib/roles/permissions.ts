@@ -1,3 +1,15 @@
+export const ROLE_KINDS = ["custom", "authenticated", "guest"] as const;
+export type RoleKind = (typeof ROLE_KINDS)[number];
+
+export const GUEST_ACTIONS: readonly Action[] = ["create", "read"];
+
+export function isGuestGrantAllowed(grant: PermissionGrant) {
+  const action = actionOf(grant.permission);
+  return (
+    grant.resourceId !== null && GUEST_ACTIONS.includes(action) && grant.permission !== "read:own"
+  );
+}
+
 export const ACTIONS = ["create", "read", "update", "delete", "export"] as const;
 export type Action = (typeof ACTIONS)[number];
 

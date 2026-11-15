@@ -1,7 +1,7 @@
 import { roleMemberTable, rolePermissionTable, roleTable } from "@db/schema";
 import { and, asc, count, db, desc, eq, sql } from "void/db";
 
-import type { PermissionGrant } from "./permissions";
+import type { PermissionGrant, RoleKind } from "./permissions";
 
 export type Role = typeof roleTable.$inferSelect;
 
@@ -13,6 +13,7 @@ const roleWithGrants = {
   description: roleTable.description,
   isSystem: roleTable.isSystem,
   isDefault: roleTable.isDefault,
+  kind: roleTable.kind,
   position: roleTable.position,
   memberCount: sql<number>`(select count(*) from ${roleMemberTable} m where m.role_id = ${roleTable}.id)`,
   grants: sql<string>`(select json_group_array(json_object('resourceId', p.resource_id, 'permission', p.permission)) from ${rolePermissionTable} p where p.role_id = ${roleTable}.id)`,
@@ -56,6 +57,11 @@ export async function findRoleByName(name: string) {
 
 export async function findDefaultRole() {
   const [row] = await db.select().from(roleTable).where(eq(roleTable.isDefault, true)).limit(1);
+  return row as Role | undefined;
+}
+
+export async function findRoleByKind(kind: Exclude<RoleKind, "custom">) {
+  const [row] = await db.select().from(roleTable).where(eq(roleTable.kind, kind)).limit(1);
   return row as Role | undefined;
 }
 

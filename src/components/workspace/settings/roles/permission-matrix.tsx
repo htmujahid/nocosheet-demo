@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/select";
 import { NamedIcon } from "@/components/workspace/tables/named-icon";
 import type { Matrix } from "@/lib/roles/matrix";
-import { ACTIONS, type Action, PERMISSION_LABELS } from "@/lib/roles/permissions";
+import { ACTIONS, type Action, GUEST_ACTIONS, PERMISSION_LABELS } from "@/lib/roles/permissions";
 
 import { ScopeSelect, type ScopeValue } from "./scope-select";
 
@@ -35,12 +35,15 @@ export type PermissionTable = { id: number; name: string; icon: string | null };
 export function PermissionMatrix({
   matrix,
   tables,
+  guest,
   onChange,
 }: {
   matrix: Matrix;
+  guest?: boolean;
   tables: PermissionTable[];
   onChange: (matrix: Matrix) => void;
 }) {
+  const actions = guest ? ACTIONS.filter((action) => GUEST_ACTIONS.includes(action)) : ACTIONS;
   const overridden = tables.filter((table) => matrix.tables[table.id]);
   const available = tables.filter((table) => !matrix.tables[table.id]);
 
@@ -62,31 +65,33 @@ export function PermissionMatrix({
 
   return (
     <>
-      <CardFrame>
-        <CardFrameHeader>
-          <CardFrameTitle>Workspace-wide permissions</CardFrameTitle>
-          <CardFrameDescription>
-            What this role can do in every table, unless a table below says otherwise. Changing
-            table structure is always for administrators only.
-          </CardFrameDescription>
-        </CardFrameHeader>
-        <Card>
-          {ACTIONS.map((action) => (
-            <SettingsRow
-              key={action}
-              title={PERMISSION_LABELS[action]}
-              description={DESCRIPTIONS[action]}
-            >
-              <ScopeSelect
-                action={action}
-                label={PERMISSION_LABELS[action]}
-                value={matrix.workspace[action]}
-                onValueChange={(value) => setWorkspace(action, value)}
-              />
-            </SettingsRow>
-          ))}
-        </Card>
-      </CardFrame>
+      {!guest && (
+        <CardFrame>
+          <CardFrameHeader>
+            <CardFrameTitle>Workspace-wide permissions</CardFrameTitle>
+            <CardFrameDescription>
+              What this role can do in every table, unless a table below says otherwise. Changing
+              table structure is always for administrators only.
+            </CardFrameDescription>
+          </CardFrameHeader>
+          <Card>
+            {ACTIONS.map((action) => (
+              <SettingsRow
+                key={action}
+                title={PERMISSION_LABELS[action]}
+                description={DESCRIPTIONS[action]}
+              >
+                <ScopeSelect
+                  action={action}
+                  label={PERMISSION_LABELS[action]}
+                  value={matrix.workspace[action]}
+                  onValueChange={(value) => setWorkspace(action, value)}
+                />
+              </SettingsRow>
+            ))}
+          </Card>
+        </CardFrame>
+      )}
 
       <CardFrame>
         <CardFrameHeader>
@@ -118,7 +123,7 @@ export function PermissionMatrix({
                 </Button>
               </div>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {ACTIONS.map((action) => (
+                {actions.map((action) => (
                   <div key={action} className="flex flex-col gap-1">
                     <span className="text-muted-foreground text-xs">
                       {PERMISSION_LABELS[action]}
@@ -126,6 +131,7 @@ export function PermissionMatrix({
                     <ScopeSelect
                       inherit
                       action={action}
+                      noOwn={guest}
                       label={`${PERMISSION_LABELS[action]} in ${table.name}`}
                       value={matrix.tables[table.id]?.[action] ?? "inherit"}
                       onValueChange={(value) => setTable(table.id, action, value)}
