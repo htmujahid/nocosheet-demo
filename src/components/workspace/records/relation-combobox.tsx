@@ -44,8 +44,8 @@ export function RelationCombobox({
   onClose?: () => void;
 }) {
   const [search, setSearch] = useState("");
-  const { items: results, isFetching } = useRelationItems(workspace, column, search);
-  const items = column.required || search.trim() ? results : [NONE_ITEM, ...results];
+  const { items: results, isFetching, error } = useRelationItems(workspace, column, search);
+  const items = column.required || search.trim() || error ? results : [NONE_ITEM, ...results];
   const picked = useRef<RelationItem | null>(null);
 
   const reference = current as { id: number; label: string | null } | null;
@@ -106,8 +106,14 @@ export function RelationCombobox({
             startAddon={<SearchIcon />}
           />
         </div>
-        <ComboboxStatus>{isFetching ? "Searching…" : null}</ComboboxStatus>
-        <ComboboxEmpty>No records found</ComboboxEmpty>
+        <ComboboxStatus>
+          {error
+            ? "You don't have access to the records of this table."
+            : isFetching
+              ? "Searching…"
+              : null}
+        </ComboboxStatus>
+        {!error && <ComboboxEmpty>No records found</ComboboxEmpty>}
         <ComboboxList>
           {(item: RelationItem) => (
             <ComboboxItem key={item.value} value={item}>

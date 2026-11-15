@@ -17,7 +17,7 @@ export function useRelationItems(workspace: string, column: ViewerColumn, search
     return () => clearTimeout(timeout);
   }, [search]);
 
-  const { data, isFetching } = useQuery({
+  const { data, isFetching, error } = useQuery({
     ...recordOptionsQueryOptions(workspace, targetId, term),
     placeholderData: keepPreviousData,
   });
@@ -28,5 +28,5 @@ export function useRelationItems(workspace: string, column: ViewerColumn, search
     id: row.id,
   }));
 
-  return { items, isFetching };
+  return { items, isFetching, error };
 }
