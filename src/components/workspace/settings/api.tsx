@@ -2,16 +2,20 @@ import { ExternalLinkIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
-  Frame,
-  FrameDescription,
-  FrameHeader,
-  FramePanel,
-  FrameTitle,
-} from "@/components/ui/frame";
+  Card,
+  CardFrame,
+  CardFrameAction,
+  CardFrameDescription,
+  CardFrameHeader,
+  CardFrameTitle,
+} from "@/components/ui/card";
 import { useWorkspace } from "@/hooks/use-workspace";
 import { API_KEY_HEADER } from "@/lib/auth/api-keys";
 
 import { ApiKeysCard } from "./api-keys-card";
+
+const rowClassName = "flex flex-col gap-3 p-4 not-last:border-b md:px-6";
+const codeClassName = "overflow-x-auto rounded-lg bg-muted p-3 font-mono text-xs";
 
 export function SettingsApi() {
   const { id: workspace } = useWorkspace();
@@ -22,43 +26,45 @@ export function SettingsApi() {
   return (
     <div className="flex flex-col gap-6">
       <ApiKeysCard />
-      <Frame>
-        <FrameHeader className="flex-row items-center justify-between gap-4">
-          <div className="flex flex-col">
-            <FrameTitle>Documentation</FrameTitle>
-            <FrameDescription>
-              Two ways to call the workspace API from your own tools.
-            </FrameDescription>
+      <CardFrame>
+        <CardFrameHeader>
+          <CardFrameTitle>Documentation</CardFrameTitle>
+          <CardFrameDescription>
+            Two ways to call the workspace API from your own tools.
+          </CardFrameDescription>
+          <CardFrameAction>
+            <Button
+              variant="outline"
+              render={<a href="/api/docs" target="_blank" rel="noreferrer" />}
+            >
+              View docs
+              <ExternalLinkIcon />
+            </Button>
+          </CardFrameAction>
+        </CardFrameHeader>
+        <Card>
+          <div className={rowClassName}>
+            <div className="flex flex-col gap-0.5">
+              <p className="font-medium text-sm">With an API key</p>
+              <p className="text-muted-foreground text-sm">
+                Send your key in the {API_KEY_HEADER} header. Requests are limited per key, and a
+                key only works with the workspace API, not with sign-in or account endpoints.
+              </p>
+            </div>
+            <pre className={codeClassName}>{example}</pre>
           </div>
-          <Button
-            variant="outline"
-            render={<a href="/api/docs" target="_blank" rel="noreferrer" />}
-          >
-            View docs
-            <ExternalLinkIcon />
-          </Button>
-        </FrameHeader>
-        <FramePanel className="flex flex-col gap-3">
-          <div className="flex flex-col gap-0.5">
-            <h3 className="font-semibold text-sm">With an API key</h3>
-            <p className="text-muted-foreground text-sm">
-              Send your key in the {API_KEY_HEADER} header. Requests are limited per key, and a key
-              only works with the workspace API, not with sign-in or account endpoints.
-            </p>
+          <div className={rowClassName}>
+            <div className="flex flex-col gap-0.5">
+              <p className="font-medium text-sm">Signing in from your own app</p>
+              <p className="text-muted-foreground text-sm">
+                For apps where each person signs in as themselves, such as a mobile app. A token is
+                a full sign-in, so keep it in secure storage. Signing out revokes it.
+              </p>
+            </div>
+            <pre className={codeClassName}>{signIn}</pre>
           </div>
-          <pre className="overflow-x-auto rounded-lg bg-muted p-3 font-mono text-xs">{example}</pre>
-        </FramePanel>
-        <FramePanel className="flex flex-col gap-3">
-          <div className="flex flex-col gap-0.5">
-            <h3 className="font-semibold text-sm">Signing in from your own app</h3>
-            <p className="text-muted-foreground text-sm">
-              For apps where each person signs in as themselves, such as a mobile app. A token is a
-              full sign-in, so keep it in secure storage. Signing out revokes it.
-            </p>
-          </div>
-          <pre className="overflow-x-auto rounded-lg bg-muted p-3 font-mono text-xs">{signIn}</pre>
-        </FramePanel>
-      </Frame>
+        </Card>
+      </CardFrame>
     </div>
   );
 }
