@@ -37,7 +37,15 @@ function useTableData(workspace: string, tableId: number) {
 
 type EditorColumn = ReturnType<typeof useTableData>["data"]["columns"][number];
 
-export function ColumnsEditor({ workspace, tableId }: { workspace: string; tableId: number }) {
+export function ColumnsEditor({
+  workspace,
+  tableId,
+  actions,
+}: {
+  workspace: string;
+  tableId: number;
+  actions?: React.ReactNode;
+}) {
   const queryClient = useQueryClient();
   const { data: table } = useTableData(workspace, tableId);
   const [columns, setColumns] = useOptimistic(
@@ -125,6 +133,7 @@ export function ColumnsEditor({ workspace, tableId }: { workspace: string; table
           {columns.length} {columns.length === 1 ? "column" : "columns"}
         </p>
         <div className="flex items-center gap-2">
+          {actions}
           <Button size="sm" variant="outline" onClick={() => setTrashOpen(true)}>
             <Trash2Icon />
             Deleted columns

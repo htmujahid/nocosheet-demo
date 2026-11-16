@@ -13,11 +13,21 @@ export function FormatSelect({
   value,
   onValueChange,
   disabled,
+  formats,
 }: {
   value: ColumnFormat;
   onValueChange: (value: ColumnFormat) => void;
   disabled?: boolean;
+  formats?: ColumnFormat[];
 }) {
+  const groups = formats
+    ? formatsByGroup
+        .map((item) => ({
+          ...item,
+          formats: item.formats.filter((format) => formats.includes(format)),
+        }))
+        .filter((item) => item.formats.length > 0)
+    : formatsByGroup;
   const items = Object.entries(FORMATS).map(([format, { label }]) => ({ value: format, label }));
 
   return (
@@ -31,7 +41,7 @@ export function FormatSelect({
         <SelectValue />
       </SelectTrigger>
       <SelectPopup>
-        {formatsByGroup.map(({ group, formats }) => (
+        {groups.map(({ group, formats }) => (
           <SelectGroup key={group}>
             <SelectGroupLabel>{group}</SelectGroupLabel>
             {formats.map((format) => {

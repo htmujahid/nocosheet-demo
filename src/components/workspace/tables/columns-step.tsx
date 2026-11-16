@@ -15,6 +15,7 @@ import { useWorkspace } from "@/hooks/use-workspace";
 import { TITLE_FORMATS } from "@/lib/tables/formats";
 
 import { ColumnsEditor } from "./columns-editor";
+import { ImportColumnsSheet } from "./import-columns-sheet";
 import { TitleSelect } from "./title-select";
 import { WizardFooter, WizardPanel } from "./wizard-panel";
 
@@ -76,7 +77,11 @@ export function ColumnsStep({
         title="Columns"
         description="Your table already has its id and tracking columns. Each column is saved as soon as you add it."
       >
-        <ColumnsEditor workspace={workspace} tableId={tableId} />
+        <ColumnsEditor
+          workspace={workspace}
+          tableId={tableId}
+          actions={<ImportColumnsSheet workspace={workspace} tableId={tableId} />}
+        />
         {titleOptions.length > 0 && (
           <TitleSelect options={titleOptions} value={activeTitle} onValueChange={setChoice} />
         )}

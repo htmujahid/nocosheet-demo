@@ -1,17 +1,14 @@
-import { useId, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 
-import { FileTextIcon, UploadIcon } from "lucide-react";
+import { UploadIcon } from "lucide-react";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
 import { Frame, FrameDescription, FrameHeader, FrameTitle } from "@/components/ui/frame";
-import { Input } from "@/components/ui/input";
 import { Kbd } from "@/components/ui/kbd";
-import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectItem,
@@ -29,7 +26,6 @@ import {
   SheetPopup,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { Switch } from "@/components/ui/switch";
 import {
   Table,
   TableBody,
@@ -38,8 +34,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Tabs, TabsList, TabsPanel, TabsTab } from "@/components/ui/tabs";
-import { Textarea } from "@/components/ui/textarea";
 import { toastManager } from "@/components/ui/toast";
 import { workspaceKeys } from "@/data/workspace/keys";
 import { importRecordsMutationOptions } from "@/data/workspace/records";
@@ -50,13 +44,13 @@ import {
   isImportableFormat,
   matchHeaders,
   MAX_IMPORT_ROWS,
-  parseCsv,
 } from "@/lib/records/import";
 
 import { buildViewerColumns } from "./columns";
+import { CsvSourceFields } from "./csv-source-fields";
+import { useCsvSource } from "./use-csv-source";
 
 const SKIP = "__skip";
-const MAX_FILE_BYTES = 5 * 1024 * 1024;
 const PREVIEW_ROWS = 20;
 const PREVIEW_COLUMNS = 20;
 
@@ -70,7 +64,6 @@ function ImportForm({
   onDone: () => void;
 }) {
   const queryClient = useQueryClient();
-  const headerSwitchId = useId();
   const { data: table } = useSuspenseQuery(tableQueryOptions(workspace, tableId));
   const allColumns = buildViewerColumns(table);
   const columns = allColumns.filter(
@@ -82,31 +75,14 @@ function ImportForm({
       .flatMap((column) => [column.name.toLowerCase(), column.key.toLowerCase()]),
   );
 
-  const [source, setSource] = useState<"upload" | "paste">("upload");
-  const [uploadText, setUploadText] = useState("");
-  const [pasteText, setPasteText] = useState("");
-  const [fileName, setFileName] = useState<string>();
-  const [fileError, setFileError] = useState<string>();
-  const [hasHeader, setHasHeader] = useState(true);
   const [overrides, setOverrides] = useState<{ key: string; map: Record<number, string | null> }>({
     key: "",
     map: {},
   });
   const [result, setResult] = useState<ImportResult>();
-  const text = source === "upload" ? uploadText : pasteText;
 
-  const grid = useMemo(() => (text.trim() ? parseCsv(text) : []), [text]);
-  const width = grid.reduce((max, row) => Math.max(max, row.length), 0);
-  const headers = useMemo(
-    () =>
-      grid.length === 0
-        ? []
-        : hasHeader
-          ? Array.from({ length: width }, (_, index) => grid[0][index] ?? "")
-          : Array.from({ length: width }, (_, index) => `Column ${index + 1}`),
-    [grid, hasHeader, width],
-  );
-  const rows = hasHeader ? grid.slice(1) : grid;
+  const csv = useCsvSource(resetResult);
+  const { grid, headers, rows, hasHeader } = csv;
   const headersKey = `${hasHeader}|${headers.join("\u0000")}`;
 
   const auto = useMemo(
@@ -136,30 +112,9 @@ function ImportForm({
     },
   });
 
-  function switchSource(next: "upload" | "paste") {
-    setSource(next);
-    resetResult();
-  }
-
   function resetResult() {
     setResult(undefined);
     importRecords.reset();
-  }
-
-  async function chooseFile(file: File | undefined) {
-    if (!file) return;
-    if (file.size > MAX_FILE_BYTES) return setFileError("The file is larger than 5 MB.");
-    setFileError(undefined);
-    setFileName(file.name);
-    setUploadText(await file.text());
-    resetResult();
-  }
-
-  function removeFile() {
-    setFileName(undefined);
-    setFileError(undefined);
-    setUploadText("");
-    resetResult();
   }
 
   const preview = useMemo(() => {
@@ -241,76 +196,10 @@ function ImportForm({
         </SheetDescription>
       </SheetHeader>
       <SheetPanel className="flex flex-col gap-6">
-        <Tabs value={source} onValueChange={(value) => switchSource(value as "upload" | "paste")}>
-          <TabsList className="w-full">
-            <TabsTab value="upload">Upload file</TabsTab>
-            <TabsTab value="paste">Paste text</TabsTab>
-          </TabsList>
-          <TabsPanel value="upload" className="pt-2">
-            <Field>
-              <FieldLabel>CSV file</FieldLabel>
-              {fileName ? (
-                <div className="flex w-full items-center justify-between gap-3 rounded-lg border px-3 py-2">
-                  <span className="flex min-w-0 items-center gap-2 text-sm">
-                    <FileTextIcon
-                      aria-hidden="true"
-                      className="size-4 shrink-0 text-muted-foreground"
-                    />
-                    <span className="truncate">{fileName}</span>
-                  </span>
-                  <Button type="button" variant="ghost" size="sm" onClick={removeFile}>
-                    Remove
-                  </Button>
-                </div>
-              ) : (
-                <Input
-                  type="file"
-                  accept=".csv,text/csv"
-                  onChange={(event) => void chooseFile(event.target.files?.[0])}
-                />
-              )}
-              <FieldDescription>
-                Dates use YYYY-MM-DD. Link columns take record IDs.
-              </FieldDescription>
-            </Field>
-            {fileError && (
-              <Alert variant="error" className="mt-3">
-                <AlertDescription>{fileError}</AlertDescription>
-              </Alert>
-            )}
-          </TabsPanel>
-          <TabsPanel value="paste" className="pt-2">
-            <Field>
-              <FieldLabel>Data</FieldLabel>
-              <Textarea
-                rows={8}
-                className="font-mono text-xs"
-                placeholder={"Name,Email\nMaya Chen,maya@example.com"}
-                value={pasteText}
-                onChange={(event) => {
-                  setPasteText(event.target.value);
-                  resetResult();
-                }}
-              />
-              <FieldDescription>
-                Paste comma-separated rows, including the header row.
-              </FieldDescription>
-            </Field>
-          </TabsPanel>
-        </Tabs>
+        <CsvSourceFields csv={csv} hint="Dates use YYYY-MM-DD. Link columns take record IDs." />
 
         {grid.length > 0 && (
           <>
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex flex-col gap-1">
-                <Label htmlFor={headerSwitchId}>First row has column names</Label>
-                <p className="text-muted-foreground text-xs">
-                  Turn off if the first row is already data.
-                </p>
-              </div>
-              <Switch id={headerSwitchId} checked={hasHeader} onCheckedChange={setHasHeader} />
-            </div>
-
             <Frame>
               <FrameHeader>
                 <FrameTitle>Match columns</FrameTitle>
