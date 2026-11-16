@@ -4,7 +4,7 @@ import { z } from "zod";
 
 import { FILE_MAX_BYTES, fileKey, fileUrl, isImageType } from "@/lib/files";
 import { httpError, NOT_FOUND } from "@/lib/http";
-import { requireAccessThrough } from "@/lib/roles/require-access";
+import { requireAccessThrough } from "@/lib/access/require-access";
 import { findTable, listColumns } from "@/lib/tables/repository";
 
 const params = z.object({ workspace: z.string(), table: z.coerce.number().int().positive() });

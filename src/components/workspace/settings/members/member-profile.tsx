@@ -5,7 +5,7 @@ import { adminUserQueryOptions } from "@/data/admin/user";
 import { MemberAccount } from "./member-account";
 import { MemberDangerZone } from "./member-danger-zone";
 import { MemberProfileForm } from "./member-profile-form";
-import { MemberRole } from "./member-role";
+import { MemberAccessProfile } from "./member-access-profile";
 
 export function MemberProfile({ userId, isSelf }: { userId: string; isSelf: boolean }) {
   const { data: member } = useSuspenseQuery(adminUserQueryOptions(userId));
@@ -13,7 +13,7 @@ export function MemberProfile({ userId, isSelf }: { userId: string; isSelf: bool
   return (
     <>
       <MemberProfileForm key={member.updatedAt.toString()} member={member} isSelf={isSelf} />
-      <MemberRole userId={member.id} name={member.name} role={member.role} />
+      <MemberAccessProfile userId={member.id} name={member.name} role={member.role} />
       <MemberAccount userId={member.id} />
       {!isSelf && <MemberDangerZone member={member} />}
     </>

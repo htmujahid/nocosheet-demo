@@ -1,7 +1,7 @@
 import { defineHandler } from "void";
 import { requireAuth } from "void/auth";
 
-import { loadAccess } from "@/lib/roles/access";
+import { loadAccess } from "@/lib/access/load-access";
 import { listSidebarRows } from "@/lib/tables/repository";
 
 export const GET = defineHandler(async (c) => {

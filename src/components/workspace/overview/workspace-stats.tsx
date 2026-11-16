@@ -5,7 +5,7 @@ import { Card, CardPanel } from "@/components/ui/card";
 import { membersQueryOptions } from "@/data/workspace/members";
 import { sidebarQueryOptions } from "@/data/workspace/sidebar";
 import { useAccess } from "@/hooks/use-access";
-import { scopeLabel, summarizeGrants } from "@/lib/roles/matrix";
+import { scopeLabel, summarizeGrants } from "@/lib/access/matrix";
 
 function Stat({
   label,
@@ -17,7 +17,7 @@ function Stat({
   label: string;
   value: React.ReactNode;
   hint: string;
-  to?: "/workspaces/$workspace/tables" | "/workspaces/$workspace/settings/members" | "/workspaces/$workspace/settings/role";
+  to?: "/workspaces/$workspace/tables" | "/workspaces/$workspace/settings/members" | "/workspaces/$workspace/settings/access";
   workspace: string;
 }) {
   return (
@@ -64,7 +64,7 @@ export function WorkspaceStats({ workspace }: { workspace: string }) {
       />
       <Stat
         label="Your access"
-        value={access.admin ? "Full access" : (access.role?.name ?? "No role")}
+        value={access.admin ? "Full access" : (access.profile?.name ?? "No access profile")}
         hint={
           access.admin
             ? "Everything, including table structure"
@@ -72,7 +72,7 @@ export function WorkspaceStats({ workspace }: { workspace: string }) {
               ? can.join(", ")
               : scopeLabel("read", "none")
         }
-        to="/workspaces/$workspace/settings/role"
+        to="/workspaces/$workspace/settings/access"
         workspace={workspace}
       />
     </section>

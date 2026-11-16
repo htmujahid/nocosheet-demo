@@ -3,7 +3,7 @@ import { useMemo } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 
 import { accessQueryOptions } from "@/data/workspace/access";
-import { type Action, scopeOf, type Scope } from "@/lib/roles/permissions";
+import { type Action, scopeOf, type Scope } from "@/lib/access/grants";
 
 import { useSession } from "./use-session";
 import { useWorkspace } from "./use-workspace";
@@ -21,7 +21,7 @@ export function useAccess() {
 
     return {
       admin: data.admin,
-      role: data.role,
+      profile: data.profile,
       grants: data.grants,
       scope,
       can: (action: Action, tableId: number, viewId?: number | null) =>

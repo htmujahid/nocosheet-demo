@@ -11,7 +11,7 @@ import {
 
 import { userTable } from "../.void/better-auth-schema";
 import { AUDIT_ACTIONS, type AuditChange } from "../src/lib/audit/actions";
-import { PERMISSIONS, ROLE_KINDS } from "../src/lib/roles/permissions";
+import { GRANTS, PROFILE_KINDS } from "../src/lib/access/grants";
 
 const RESOURCE_KINDS = ["table", "view", "form"] as const;
 
@@ -251,73 +251,73 @@ export const workspaceSchema = <W extends string = "default">(workspaceId: W = "
     ],
   );
 
-  const roleTable = sqliteTable(
-    name("role"),
+  const accessProfileTable = sqliteTable(
+    name("access_profile"),
     {
       id: integer("id").primaryKey({ autoIncrement: true }),
       name: text("name").notNull(),
       description: text("description"),
       isSystem: integer("is_system", { mode: "boolean" }).notNull().default(false),
       isDefault: integer("is_default", { mode: "boolean" }).notNull().default(false),
-      kind: text("kind", { enum: ROLE_KINDS }).notNull().default("custom"),
+      kind: text("kind", { enum: PROFILE_KINDS }).notNull().default("custom"),
       position: integer("position").notNull().default(0),
       ...timestamps,
     },
     (t) => [
-      uniqueIndex(name("role_name")).on(lower(t.name)),
-      uniqueIndex(name("role_default"))
+      uniqueIndex(name("access_profile_name")).on(lower(t.name)),
+      uniqueIndex(name("access_profile_default"))
         .on(t.isDefault)
         .where(sql`${t.isDefault} = 1`),
-      uniqueIndex(name("role_kind"))
+      uniqueIndex(name("access_profile_kind"))
         .on(t.kind)
         .where(sql`${t.kind} != 'custom'`),
       check(
-        name("role_kind_check"),
-        sql`${t.kind} in (${sql.raw(ROLE_KINDS.map((kind) => `'${kind}'`).join(", "))})`,
+        name("access_profile_kind_check"),
+        sql`${t.kind} in (${sql.raw(PROFILE_KINDS.map((kind) => `'${kind}'`).join(", "))})`,
       ),
     ],
   );
 
-  const roleMemberTable = sqliteTable(
-    name("role_member"),
+  const accessProfileMemberTable = sqliteTable(
+    name("access_profile_member"),
     {
       userId: text("user_id")
         .primaryKey()
         .references(() => userTable.id, { onDelete: "cascade" }),
-      roleId: integer("role_id")
+      profileId: integer("profile_id")
         .notNull()
-        .references(() => roleTable.id, { onDelete: "restrict" }),
+        .references(() => accessProfileTable.id, { onDelete: "restrict" }),
       assignedBy: text("assigned_by").references(() => userTable.id, { onDelete: "set null" }),
       assignedAt: integer("assigned_at", { mode: "timestamp_ms" })
         .notNull()
         .$defaultFn(() => new Date()),
     },
-    (t) => [index(name("role_member_role")).on(t.roleId)],
+    (t) => [index(name("access_profile_member_profile")).on(t.profileId)],
   );
 
-  const rolePermissionTable = sqliteTable(
-    name("role_permission"),
+  const accessGrantTable = sqliteTable(
+    name("access_grant"),
     {
       id: integer("id").primaryKey({ autoIncrement: true }),
-      roleId: integer("role_id")
+      profileId: integer("profile_id")
         .notNull()
-        .references(() => roleTable.id, { onDelete: "cascade" }),
+        .references(() => accessProfileTable.id, { onDelete: "cascade" }),
       resourceId: integer("resource_id").references(() => resourceTable.id, {
         onDelete: "cascade",
       }),
-      permission: text("permission", { enum: PERMISSIONS }).notNull(),
+      grant: text("grant", { enum: GRANTS }).notNull(),
       action: text("action").generatedAlwaysAs(
-        sql`(case when instr("permission", ':') > 0 then substr("permission", 1, instr("permission", ':') - 1) else "permission" end)`,
+        sql`(case when instr("grant", ':') > 0 then substr("grant", 1, instr("grant", ':') - 1) else "grant" end)`,
         { mode: "virtual" },
       ),
     },
     (t) => [
       check(
-        name("role_permission_check"),
-        sql`${t.permission} in (${sql.raw(PERMISSIONS.map((item) => `'${item}'`).join(", "))})`,
+        name("access_grant_check"),
+        sql`${t.grant} in (${sql.raw(GRANTS.map((item) => `'${item}'`).join(", "))})`,
       ),
-      uniqueIndex(name("role_permission_unique")).on(
-        t.roleId,
+      uniqueIndex(name("access_grant_unique")).on(
+        t.profileId,
         sql`(case when ${t.resourceId} is null then 0 else ${t.resourceId} end)`,
         t.action,
       ),
@@ -334,9 +334,9 @@ export const workspaceSchema = <W extends string = "default">(workspaceId: W = "
     favoriteTable,
     trashTable,
     auditTable,
-    roleTable,
-    roleMemberTable,
-    rolePermissionTable,
+    accessProfileTable,
+    accessProfileMemberTable,
+    accessGrantTable,
   };
 };
 
@@ -350,7 +350,7 @@ export const {
   favoriteTable,
   trashTable,
   auditTable,
-  roleTable,
-  roleMemberTable,
-  rolePermissionTable,
+  accessProfileTable,
+  accessProfileMemberTable,
+  accessGrantTable,
 } = workspaceSchema();

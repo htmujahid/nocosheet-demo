@@ -9,7 +9,7 @@ info:
 
     Requests are authenticated with the Better Auth session cookie, or with an API key sent in the
     x-api-key header. Any member can create keys under Settings, API Keys. A key acts as its owner, with
-    the same role and permissions, and stops working when it is revoked, expires or its owner is
+    the same role and access profile, and stops working when it is revoked, expires or its owner is
     removed. Keys only work with the workspace endpoints. Each key is limited to 120 requests a minute,
     and requests over the limit get a 429 response with a Retry-After header.
 
@@ -24,7 +24,7 @@ info:
     administrators can open from the same page.
 
 
-    What a member may do with records depends on their role. A permission on a view or a form is checked
+    What a member may do with records depends on their role and access profile. A grant on a view or a form is checked
     first, then the table, then the workspace-wide setting.'
 servers:
 - url: /api
@@ -52,8 +52,8 @@ tags:
   description: Uploads for file and image columns.
 - name: Members
   description: What administrators can see and do for a member.
-- name: Roles
-  description: Roles, assignments and permissions.
+- name: Access profiles
+  description: Access profiles, their grants and which members have them.
 - name: Trash
   description: Deleted records, columns, tables, views and forms.
 - name: Audit log
@@ -846,7 +846,7 @@ paths:
       - Records
       summary: List records
       description: 'Keyset pagination: pass nextCursor or prevCursor back as cursor, with dir set to next
-        or prev. Needs the read permission on the table, or on the view or form it goes through.'
+        or prev. Needs the read grant on the table, or on the view or form it goes through.'
       operationId: getWorkspacesWorkspaceTablesTableRecords
       parameters:
       - $ref: '#/components/parameters/workspace'
@@ -916,7 +916,7 @@ paths:
       tags:
       - Records
       summary: Create a record
-      description: Needs the create permission on the table. Records are always added to the table, never through a view.
+      description: Needs the create grant on the table. Records are always added to the table, never through a view.
       operationId: postWorkspacesWorkspaceTablesTableRecords
       parameters:
       - $ref: '#/components/parameters/workspace'
@@ -991,7 +991,7 @@ paths:
       tags:
       - Records
       summary: Delete records
-      description: Moves the records to the trash. Needs the delete permission on the table, or on the
+      description: Moves the records to the trash. Needs the delete grant on the table, or on the
         view or form it goes through.
       operationId: deleteWorkspacesWorkspaceTablesTableRecords
       parameters:
@@ -1003,7 +1003,7 @@ paths:
         schema:
           type: integer
           minimum: 1
-        description: Use the permissions you have through this view, and only its columns.
+        description: Use the grants you have through this view, and only its columns.
       - name: cursor
         in: query
         required: false
@@ -1078,7 +1078,7 @@ paths:
       - Records
       summary: Import records
       description: Up to 100 rows, keyed by column name. Either every row is created or none is, and failed
-        rows are listed in errors. Needs the create permission on the table.
+        rows are listed in errors. Needs the create grant on the table.
       operationId: postWorkspacesWorkspaceTablesTableRecordsImport
       parameters:
       - $ref: '#/components/parameters/workspace'
@@ -1111,7 +1111,7 @@ paths:
       - Records
       summary: Get a record
       description: With view, only that view's columns are returned. Needs the read or update
-        permission on the table, or on the view it goes through.
+        grant on the table, or on the view it goes through.
       operationId: getWorkspacesWorkspaceTablesTableRecordsRecord
       parameters:
       - $ref: '#/components/parameters/workspace'
@@ -1123,7 +1123,7 @@ paths:
         schema:
           type: integer
           minimum: 1
-        description: Use the permissions you have through this view, and only its columns.
+        description: Use the grants you have through this view, and only its columns.
       responses:
         '200':
           description: With view, only that view's columns are returned.
@@ -1141,7 +1141,7 @@ paths:
       tags:
       - Records
       summary: Update a record
-      description: With view, only that view's columns can be changed. Needs the update permission on
+      description: With view, only that view's columns can be changed. Needs the update grant on
         the table, or on the view or form it goes through.
       operationId: patchWorkspacesWorkspaceTablesTableRecordsRecord
       parameters:
@@ -1154,7 +1154,7 @@ paths:
         schema:
           type: integer
           minimum: 1
-        description: Use the permissions you have through this view, and only its columns.
+        description: Use the grants you have through this view, and only its columns.
       requestBody:
         required: true
         content:
@@ -1180,7 +1180,7 @@ paths:
       tags:
       - Records
       summary: Delete a record
-      description: Moves the record to the trash. Needs the delete permission on the table, or on the
+      description: Moves the record to the trash. Needs the delete grant on the table, or on the
         view or form it goes through.
       operationId: deleteWorkspacesWorkspaceTablesTableRecordsRecord
       parameters:
@@ -1193,7 +1193,7 @@ paths:
         schema:
           type: integer
           minimum: 1
-        description: Use the permissions you have through this view, and only its columns.
+        description: Use the grants you have through this view, and only its columns.
       responses:
         '200':
           description: Moves the record to the trash.
@@ -1215,7 +1215,7 @@ paths:
       - Records
       summary: Export records
       description: Up to the export limit; truncated says whether more existed. Needs the export and read
-        permission on the table, or on the view or form it goes through.
+        grant on the table, or on the view or form it goes through.
       operationId: getWorkspacesWorkspaceTablesTableExport
       parameters:
       - $ref: '#/components/parameters/workspace'
@@ -1238,7 +1238,7 @@ paths:
       tags:
       - Records
       summary: Search records to link to
-      description: Used by relation columns. Needs the read permission on the table, or on the view or
+      description: Used by relation columns. Needs the read grant on the table, or on the view or
         form it goes through.
       operationId: getWorkspacesWorkspaceTablesTableOptions
       parameters:
@@ -1271,7 +1271,7 @@ paths:
       tags:
       - Files
       summary: Upload a file for a file or image column
-      description: Needs the update and create permission on the table, or on the view or form it goes
+      description: Needs the update and create grant on the table, or on the view or form it goes
         through.
       operationId: postWorkspacesWorkspaceTablesTableFiles
       parameters:
@@ -1314,7 +1314,7 @@ paths:
       tags:
       - Files
       summary: Download a file
-      description: Needs the read, update or create permission on the table.
+      description: Needs the read, update or create grant on the table.
       operationId: getWorkspacesWorkspaceTablesTableFilesFile
       parameters:
       - $ref: '#/components/parameters/workspace'
@@ -1484,7 +1484,7 @@ paths:
       tags:
       - Views
       summary: List the views you can read
-      description: Only views whose read permission resolves for you. Needs the read permission on the
+      description: Only views whose read grant resolves for you. Needs the read grant on the
         table, or on the view or form it goes through.
       operationId: getWorkspacesWorkspaceTablesTableViewsAll
       parameters:
@@ -1492,7 +1492,7 @@ paths:
       - $ref: '#/components/parameters/table'
       responses:
         '200':
-          description: Only views whose read permission resolves for you.
+          description: Only views whose read grant resolves for you.
           content:
             application/json:
               schema:
@@ -1510,7 +1510,7 @@ paths:
       tags:
       - Views
       summary: List views (paged)
-      description: Needs the read permission on the table, or on the view or form it goes through.
+      description: Needs the read grant on the table, or on the view or form it goes through.
       operationId: getWorkspacesWorkspaceTablesTableViews
       parameters:
       - $ref: '#/components/parameters/workspace'
@@ -1668,7 +1668,7 @@ paths:
       tags:
       - Views
       summary: Get a view with its columns
-      description: Needs the read permission on the table, or on the view or form it goes through.
+      description: Needs the read grant on the table, or on the view or form it goes through.
       operationId: getWorkspacesWorkspaceTablesTableViewsView
       parameters:
       - $ref: '#/components/parameters/workspace'
@@ -1748,7 +1748,7 @@ paths:
       tags:
       - Views
       summary: List the records of a view
-      description: Needs the read permission on the table, or on the view or form it goes through.
+      description: Needs the read grant on the table, or on the view or form it goes through.
       operationId: getWorkspacesWorkspaceTablesTableViewsViewRecords
       parameters:
       - $ref: '#/components/parameters/workspace'
@@ -1819,7 +1819,7 @@ paths:
       tags:
       - Views
       summary: Export a view
-      description: Needs the export and read permission on the table, or on the view or form it goes through.
+      description: Needs the export and read grant on the table, or on the view or form it goes through.
       operationId: getWorkspacesWorkspaceTablesTableViewsViewExport
       parameters:
       - $ref: '#/components/parameters/workspace'
@@ -1893,15 +1893,15 @@ paths:
       tags:
       - Forms
       summary: List the forms you can fill in
-      description: Only forms whose create permission resolves for you. Members only see open forms. Needs
-        the create permission on the table, or on the view or form it goes through.
+      description: Only forms whose create grant resolves for you. Members only see open forms. Needs
+        the create grant on the table, or on the view or form it goes through.
       operationId: getWorkspacesWorkspaceTablesTableFormsAll
       parameters:
       - $ref: '#/components/parameters/workspace'
       - $ref: '#/components/parameters/table'
       responses:
         '200':
-          description: Only forms whose create permission resolves for you. Members only see open forms.
+          description: Only forms whose create grant resolves for you. Members only see open forms.
           content:
             application/json:
               schema:
@@ -1919,7 +1919,7 @@ paths:
       tags:
       - Forms
       summary: List forms (paged)
-      description: Needs the create permission on the table, or on the view or form it goes through.
+      description: Needs the create grant on the table, or on the view or form it goes through.
       operationId: getWorkspacesWorkspaceTablesTableForms
       parameters:
       - $ref: '#/components/parameters/workspace'
@@ -2077,7 +2077,7 @@ paths:
       tags:
       - Forms
       summary: Get a form with its columns
-      description: Needs the create permission on the table, or on the view or form it goes through.
+      description: Needs the create grant on the table, or on the view or form it goes through.
       operationId: getWorkspacesWorkspaceTablesTableFormsForm
       parameters:
       - $ref: '#/components/parameters/workspace'
@@ -2158,7 +2158,7 @@ paths:
       - Forms
       summary: Submit a form
       description: Creates a record from the columns the form asks for. Other keys are rejected. Needs
-        the create permission on the table, or on the view or form it goes through.
+        the create grant on the table, or on the view or form it goes through.
       operationId: postWorkspacesWorkspaceTablesTableFormsFormRecords
       parameters:
       - $ref: '#/components/parameters/workspace'
@@ -2286,13 +2286,13 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
-  /workspaces/{workspace}/roles:
+  /workspaces/{workspace}/access/profiles:
     get:
       tags:
-      - Roles
-      summary: List roles with their permissions
+      - Access profiles
+      summary: List access profiles with their grants
       description: Administrators only.
-      operationId: getWorkspacesWorkspaceRoles
+      operationId: getWorkspacesWorkspaceAccessProfiles
       parameters:
       - $ref: '#/components/parameters/workspace'
       responses:
@@ -2303,17 +2303,17 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Role'
+                  $ref: '#/components/schemas/AccessProfile'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
     post:
       tags:
-      - Roles
-      summary: Create a role
+      - Access profiles
+      summary: Create an access profile
       description: Administrators only.
-      operationId: postWorkspacesWorkspaceRoles
+      operationId: postWorkspacesWorkspaceAccessProfiles
       parameters:
       - $ref: '#/components/parameters/workspace'
       requestBody:
@@ -2321,14 +2321,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RoleInput'
+              $ref: '#/components/schemas/AccessProfileInput'
       responses:
         '200':
           description: Success.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Role'
+                $ref: '#/components/schemas/AccessProfile'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -2337,34 +2337,34 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '409':
           $ref: '#/components/responses/Conflict'
-  /workspaces/{workspace}/roles/assignments:
+  /workspaces/{workspace}/access/profiles/assignments:
     get:
       tags:
-      - Roles
-      summary: List which role each member has
-      description: Members without an entry have the default role. Administrators only.
-      operationId: getWorkspacesWorkspaceRolesAssignments
+      - Access profiles
+      summary: List which access profile each member has
+      description: Members without an entry have the default profile. Administrators only.
+      operationId: getWorkspacesWorkspaceAccessProfilesAssignments
       parameters:
       - $ref: '#/components/parameters/workspace'
       responses:
         '200':
-          description: Members without an entry have the default role.
+          description: Members without an entry have the default profile.
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/RoleAssignment'
+                  $ref: '#/components/schemas/ProfileAssignment'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
     put:
       tags:
-      - Roles
-      summary: Give a member a role
+      - Access profiles
+      summary: Give a member an access profile
       description: Administrators only.
-      operationId: putWorkspacesWorkspaceRolesAssignments
+      operationId: putWorkspacesWorkspaceAccessProfilesAssignments
       parameters:
       - $ref: '#/components/parameters/workspace'
       requestBody:
@@ -2372,14 +2372,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RoleAssign'
+              $ref: '#/components/schemas/ProfileAssign'
       responses:
         '200':
           description: Success.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RoleAssignment'
+                $ref: '#/components/schemas/ProfileAssignment'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -2388,13 +2388,13 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
-  /workspaces/{workspace}/roles/targets:
+  /workspaces/{workspace}/access/profiles/targets:
     get:
       tags:
-      - Roles
-      summary: List the tables, views and forms permissions can be set for
+      - Access profiles
+      summary: List the tables, views and forms grants can be set for
       description: Administrators only.
-      operationId: getWorkspacesWorkspaceRolesTargets
+      operationId: getWorkspacesWorkspaceAccessProfilesTargets
       parameters:
       - $ref: '#/components/parameters/workspace'
       responses:
@@ -2410,23 +2410,23 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
-  /workspaces/{workspace}/roles/{role}:
+  /workspaces/{workspace}/access/profiles/{profile}:
     get:
       tags:
-      - Roles
-      summary: Get a role
+      - Access profiles
+      summary: Get an access profile
       description: Administrators only.
-      operationId: getWorkspacesWorkspaceRolesRole
+      operationId: getWorkspacesWorkspaceAccessProfilesProfile
       parameters:
       - $ref: '#/components/parameters/workspace'
-      - $ref: '#/components/parameters/role'
+      - $ref: '#/components/parameters/profile'
       responses:
         '200':
           description: Success.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Role'
+                $ref: '#/components/schemas/AccessProfile'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -2435,26 +2435,26 @@ paths:
           $ref: '#/components/responses/NotFound'
     patch:
       tags:
-      - Roles
-      summary: Update a role
-      description: Authenticated can only change its permissions. Administrators only.
-      operationId: patchWorkspacesWorkspaceRolesRole
+      - Access profiles
+      summary: Update an access profile
+      description: Authenticated can only change its grants. Administrators only.
+      operationId: patchWorkspacesWorkspaceAccessProfilesProfile
       parameters:
       - $ref: '#/components/parameters/workspace'
-      - $ref: '#/components/parameters/role'
+      - $ref: '#/components/parameters/profile'
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RoleUpdate'
+              $ref: '#/components/schemas/AccessProfileUpdate'
       responses:
         '200':
-          description: Authenticated can only change its permissions.
+          description: Authenticated can only change its grants.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Role'
+                $ref: '#/components/schemas/AccessProfile'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -2467,17 +2467,17 @@ paths:
           $ref: '#/components/responses/Conflict'
     delete:
       tags:
-      - Roles
-      summary: Delete a role
-      description: Built-in roles, the default role and roles still assigned to members can't be deleted.
+      - Access profiles
+      summary: Delete an access profile
+      description: Built-in access profiles, the default profile and profiles still assigned to members can't be deleted.
         Administrators only.
-      operationId: deleteWorkspacesWorkspaceRolesRole
+      operationId: deleteWorkspacesWorkspaceAccessProfilesProfile
       parameters:
       - $ref: '#/components/parameters/workspace'
-      - $ref: '#/components/parameters/role'
+      - $ref: '#/components/parameters/profile'
       responses:
         '200':
-          description: Built-in roles, the default role and roles still assigned to members can't be deleted.
+          description: Built-in access profiles, the default profile and profiles still assigned to members can't be deleted.
           content:
             application/json:
               schema:
@@ -2568,8 +2568,8 @@ components:
       schema:
         type: string
       description: The API key id, not the key value.
-    role:
-      name: role
+    profile:
+      name: profile
       in: path
       required: true
       schema:
@@ -2607,7 +2607,7 @@ components:
           schema:
             type: string
     Forbidden:
-      description: You don't have permission to do this.
+      description: You don't have access to do this.
       content:
         application/json:
           schema:
@@ -3237,7 +3237,7 @@ components:
       required:
       - id
       - name
-    Permission:
+    Grant:
       type: string
       enum:
       - create
@@ -3253,7 +3253,7 @@ components:
       - delete:own
       - delete:all
       - delete:none
-    Grant:
+    AccessGrant:
       type: object
       properties:
         resourceId:
@@ -3261,11 +3261,11 @@ components:
           - type: integer
           - type: 'null'
           description: A table, view or form id. null means workspace-wide.
-        permission:
-          $ref: '#/components/schemas/Permission'
+        grant:
+          $ref: '#/components/schemas/Grant'
       required:
       - resourceId
-      - permission
+      - grant
     MemberApiKey:
       type: object
       properties:
@@ -3310,7 +3310,7 @@ components:
       - lastRequest
       - requestCount
       - createdAt
-    Role:
+    AccessProfile:
       type: object
       properties:
         id:
@@ -3329,8 +3329,8 @@ components:
           enum:
           - custom
           - authenticated
-          description: custom roles can be assigned to members. authenticated applies to every signed-in
-            member, on top of a member's own role.
+          description: custom profiles can be assigned to members. authenticated applies to every signed-in
+            member, on top of a member's own profile.
         position:
           type: integer
         memberCount:
@@ -3338,22 +3338,22 @@ components:
         grants:
           type: array
           items:
-            $ref: '#/components/schemas/Grant'
+            $ref: '#/components/schemas/AccessGrant'
       required:
       - id
       - name
       - kind
       - grants
-    RoleAssignment:
+    ProfileAssignment:
       type: object
       properties:
         userId:
           type: string
-        roleId:
+        profileId:
           type: integer
       required:
       - userId
-      - roleId
+      - profileId
     GrantTarget:
       type: object
       properties:
@@ -3402,7 +3402,7 @@ components:
       - name
       - views
       - forms
-      description: A table with the views and forms permissions can be set for.
+      description: A table with the views and forms grants can be set for.
     Me:
       type: object
       properties:
@@ -3444,7 +3444,7 @@ components:
       properties:
         admin:
           type: boolean
-        role:
+        profile:
           anyOf:
           - type: object
             properties:
@@ -3463,12 +3463,12 @@ components:
         grants:
           type: array
           items:
-            $ref: '#/components/schemas/Grant'
-          description: The member's own role grants, then Authenticated. For the same action, the
+            $ref: '#/components/schemas/AccessGrant'
+          description: The member's own profile grants, then Authenticated. For the same action, the
             earlier one wins.
       required:
       - admin
-      - role
+      - profile
       - grants
     TrashedRecord:
       type: object
@@ -4051,7 +4051,7 @@ components:
       required:
       - name
       - selectColumns
-    RoleInput:
+    AccessProfileInput:
       type: object
       properties:
         name:
@@ -4076,7 +4076,7 @@ components:
                   exclusiveMinimum: 0
                   maximum: 9007199254740991
                 - type: 'null'
-              permission:
+              grant:
                 type: string
                 enum:
                 - create
@@ -4094,10 +4094,10 @@ components:
                 - delete:none
             required:
             - resourceId
-            - permission
+            - grant
       required:
       - name
-    RoleUpdate:
+    AccessProfileUpdate:
       type: object
       properties:
         name:
@@ -4123,7 +4123,7 @@ components:
                   exclusiveMinimum: 0
                   maximum: 9007199254740991
                 - type: 'null'
-              permission:
+              grant:
                 type: string
                 enum:
                 - create
@@ -4141,18 +4141,18 @@ components:
                 - delete:none
             required:
             - resourceId
-            - permission
-    RoleAssign:
+            - grant
+    ProfileAssign:
       type: object
       properties:
         userId:
           type: string
           minLength: 1
           maxLength: 64
-        roleId:
+        profileId:
           type: integer
           exclusiveMinimum: 0
           maximum: 9007199254740991
       required:
       - userId
-      - roleId
+      - profileId

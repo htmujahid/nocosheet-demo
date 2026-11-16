@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { conflictOrBadRequest, httpError, NOT_FOUND } from "@/lib/http";
-import { requireAccess } from "@/lib/roles/require-access";
+import { requireAccess } from "@/lib/access/require-access";
 import { TITLE_FORMATS } from "@/lib/tables/formats";
 import { findColumnByName, findTable, listColumns, updateTable } from "@/lib/tables/repository";
 import { tableUpdateSchema } from "@/lib/tables/validation";

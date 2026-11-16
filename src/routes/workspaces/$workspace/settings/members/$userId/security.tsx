@@ -1,6 +1,6 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 
-import { MemberAccess } from "@/components/workspace/settings/members/member-access";
+import { MemberStatus } from "@/components/workspace/settings/members/member-status";
 import { MemberSecurity } from "@/components/workspace/settings/members/member-security";
 
 export const Route = createFileRoute("/workspaces/$workspace/settings/members/$userId/security")({
@@ -17,7 +17,7 @@ function SecurityPage() {
   return (
     <>
       <MemberSecurity userId={userId} />
-      <MemberAccess userId={userId} />
+      <MemberStatus userId={userId} />
     </>
   );
 }

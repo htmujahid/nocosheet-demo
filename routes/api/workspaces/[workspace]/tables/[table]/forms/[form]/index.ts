@@ -7,7 +7,7 @@ import { requireAdmin } from "@/lib/auth/require-admin";
 import { findForm, softDeleteForm, updateForm } from "@/lib/forms/repository";
 import { checkFormDefinition, formInputSchema } from "@/lib/forms/validation";
 import { conflictOrBadRequest, httpError, NOT_FOUND } from "@/lib/http";
-import { requireAccess } from "@/lib/roles/require-access";
+import { requireAccess } from "@/lib/access/require-access";
 import { findTable, listColumns } from "@/lib/tables/repository";
 
 const params = z.object({

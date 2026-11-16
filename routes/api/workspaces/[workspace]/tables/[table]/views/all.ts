@@ -2,7 +2,7 @@ import { defineHandler } from "void";
 import { requireAuth } from "void/auth";
 import { z } from "zod";
 
-import { visibleResources } from "@/lib/roles/guard";
+import { visibleResources } from "@/lib/access/guard";
 import { findTable } from "@/lib/tables/repository";
 import { listViews } from "@/lib/views/repository";
 

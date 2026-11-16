@@ -4,7 +4,7 @@ import { z } from "zod";
 
 import { isAdmin } from "@/lib/auth/access";
 import { listForms } from "@/lib/forms/repository";
-import { visibleResources } from "@/lib/roles/guard";
+import { visibleResources } from "@/lib/access/guard";
 import { findTable } from "@/lib/tables/repository";
 
 const params = z.object({ workspace: z.string(), table: z.coerce.number().int().positive() });

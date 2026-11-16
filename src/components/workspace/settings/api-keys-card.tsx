@@ -28,7 +28,7 @@ export function ApiKeysCard() {
         <CardFrameDescription>
           {isAdmin
             ? "Keys act as you, with full administrator access."
-            : "Keys act as you, with your role and table permissions."}
+            : "Keys act as you, with your role and access profile."}
         </CardFrameDescription>
         <CardFrameAction>
           <CreateApiKeyDialog />

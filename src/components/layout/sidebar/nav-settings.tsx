@@ -41,10 +41,10 @@ const items = [
     path: "/members",
   },
   {
-    to: "/workspaces/$workspace/settings/role",
-    label: "Role & Permissions",
+    to: "/workspaces/$workspace/settings/access",
+    label: "Access",
     icon: ShieldCheckIcon,
-    path: "/role",
+    path: "/access",
   },
   {
     to: "/workspaces/$workspace/settings/api",

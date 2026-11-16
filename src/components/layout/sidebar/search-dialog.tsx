@@ -65,7 +65,7 @@ const settings: SettingsItem[] = [
   { value: "general", label: "General", icon: SlidersHorizontalIcon, path: "/settings" },
   { value: "appearance", label: "Appearance", icon: PaletteIcon, path: "/settings/appearance" },
   { value: "members", label: "Members", icon: UsersIcon, path: "/settings/members" },
-  { value: "role", label: "Role & Permissions", icon: ShieldCheckIcon, path: "/settings/role" },
+  { value: "access", label: "Access", icon: ShieldCheckIcon, path: "/settings/access" },
   { value: "api", label: "API Keys", icon: KeyRoundIcon, path: "/settings/api" },
   {
     value: "audit-log",

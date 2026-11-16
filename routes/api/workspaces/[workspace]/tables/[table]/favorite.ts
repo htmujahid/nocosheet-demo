@@ -3,7 +3,7 @@ import { requireAuth } from "void/auth";
 import { z } from "zod";
 
 import { httpError, NOT_FOUND } from "@/lib/http";
-import { requireAccess } from "@/lib/roles/require-access";
+import { requireAccess } from "@/lib/access/require-access";
 import { addFavorite, findTable, removeFavorite } from "@/lib/tables/repository";
 
 const params = z.object({ workspace: z.string(), table: z.coerce.number().int().positive() });

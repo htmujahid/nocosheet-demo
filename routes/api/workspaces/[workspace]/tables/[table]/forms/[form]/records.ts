@@ -8,7 +8,7 @@ import { httpError, NOT_FOUND, writeFailure } from "@/lib/http";
 import { checkLinks } from "@/lib/records/links";
 import { createRecordRow } from "@/lib/records/repository";
 import { findMissingRequired, parseRecordValues, recordPatchSchema } from "@/lib/records/values";
-import { requireAccess } from "@/lib/roles/require-access";
+import { requireAccess } from "@/lib/access/require-access";
 import { findTable, listColumns } from "@/lib/tables/repository";
 
 const params = z.object({

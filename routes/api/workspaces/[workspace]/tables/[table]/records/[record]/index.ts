@@ -13,7 +13,7 @@ import {
   updateRecordRow,
 } from "@/lib/records/repository";
 import { parseRecordValues, recordPatchSchema } from "@/lib/records/values";
-import { requireAccess } from "@/lib/roles/require-access";
+import { requireAccess } from "@/lib/access/require-access";
 import { findTable, listColumns } from "@/lib/tables/repository";
 import { filteredViewSource, physicalViewName } from "@/lib/views/naming";
 import { viewScopeSchema } from "@/lib/views/query";

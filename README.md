@@ -11,7 +11,7 @@ nocosheet is an open-source, fully no-code CMS and spreadsheet-style database. M
 - **File uploads**: attach and manage files on records
 - **Advanced field types**: select and multi-select, dates, currency, attachments and computed fields
 - **Trash and recovery**: deleted tables are soft-deleted, protected by dependency checks and purged after 30 days
-- **Roles and permissions**: dynamic workspace roles, one per member, with workspace-level and per-table grants, own/all record scopes and an admin role above all
+- **Roles and access profiles**: members are administrators or members. Administrators can do everything; each member has one access profile with workspace-level and per-table grants and own/all record scopes
 - **Members**: invite and manage people in your workspace
 - **Self-hosted on Cloudflare**: Workers, D1 and R2 on your own account, with no external services required
 

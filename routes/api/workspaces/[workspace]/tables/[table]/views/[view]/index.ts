@@ -4,7 +4,7 @@ import { z } from "zod";
 
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { conflictOrBadRequest, httpError, NOT_FOUND } from "@/lib/http";
-import { requireAccess } from "@/lib/roles/require-access";
+import { requireAccess } from "@/lib/access/require-access";
 import { findTable, listColumns } from "@/lib/tables/repository";
 import { findView, softDeleteView, updateView } from "@/lib/views/repository";
 import { viewPatchSchema } from "@/lib/views/validation";

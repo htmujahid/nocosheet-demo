@@ -38,7 +38,7 @@ export function MemberApiKeys({ userId, name }: { userId: string; name: string }
       <CardFrameHeader>
         <CardFrameTitle>API keys</CardFrameTitle>
         <CardFrameDescription>
-          Keys {name} created. Each one acts as them, with their role and permissions.
+          Keys {name} created. Each one acts as them, with their role and access profile.
         </CardFrameDescription>
       </CardFrameHeader>
       <Card>

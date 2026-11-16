@@ -121,7 +121,7 @@ export function CreateApiKeyDialog() {
             <DialogHeader>
               <DialogTitle>Create API key</DialogTitle>
               <DialogDescription>
-                The key acts as you, with your role and table permissions.
+                The key acts as you, with your role and access profile.
               </DialogDescription>
             </DialogHeader>
             <DialogPanel>

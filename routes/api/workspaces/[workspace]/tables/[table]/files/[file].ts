@@ -4,7 +4,7 @@ import { z } from "zod";
 
 import { fileKey } from "@/lib/files";
 import { httpError, NOT_FOUND } from "@/lib/http";
-import { requireAccessThrough } from "@/lib/roles/require-access";
+import { requireAccessThrough } from "@/lib/access/require-access";
 
 const params = z.object({
   workspace: z.string(),

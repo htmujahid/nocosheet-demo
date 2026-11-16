@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { httpError, NOT_FOUND } from "@/lib/http";
 import { findExportRecords } from "@/lib/records/repository";
-import { requireAccess } from "@/lib/roles/require-access";
+import { requireAccess } from "@/lib/access/require-access";
 import { findTable, listColumns } from "@/lib/tables/repository";
 import { physicalViewName } from "@/lib/views/naming";
 import { findView } from "@/lib/views/repository";

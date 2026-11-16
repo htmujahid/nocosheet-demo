@@ -23,7 +23,7 @@ export function Welcome({ workspace }: { workspace: string }) {
         <p className="flex flex-wrap items-center gap-2 text-muted-foreground text-sm">
           <span>{name}</span>
           <Badge variant={access.admin ? "info" : "secondary"} size="sm">
-            {access.admin ? "Administrator" : (access.role?.name ?? "Member")}
+            {access.admin ? "Administrator" : (access.profile?.name ?? "Member")}
           </Badge>
         </p>
       </div>
@@ -31,10 +31,10 @@ export function Welcome({ workspace }: { workspace: string }) {
         <Button
           variant="outline"
           size="sm"
-          render={<Link to="/workspaces/$workspace/settings/role" params={{ workspace }} />}
+          render={<Link to="/workspaces/$workspace/settings/access" params={{ workspace }} />}
         >
           <ShieldCheckIcon />
-          Role & Permissions
+          Access
         </Button>
         {access.admin && (
           <Button

@@ -7,7 +7,7 @@ import { recordsApiSchema, resolveRecordsQuery, withFilters } from "@/lib/record
 import { findRecords } from "@/lib/records/repository";
 import { sortKeyOf } from "@/lib/records/sort-param";
 import { checkRecordsQuery } from "@/lib/records/validation";
-import { requireAccess } from "@/lib/roles/require-access";
+import { requireAccess } from "@/lib/access/require-access";
 import { findTable, listColumns } from "@/lib/tables/repository";
 import { physicalViewName } from "@/lib/views/naming";
 import { findView } from "@/lib/views/repository";

@@ -9,8 +9,8 @@ import {
 export type MemberRole = "admin" | "user";
 
 const roles: { value: MemberRole; label: string }[] = [
-  { value: "user", label: "User" },
-  { value: "admin", label: "Admin" },
+  { value: "user", label: "Member" },
+  { value: "admin", label: "Administrator" },
 ];
 
 type RoleSelectProps = {

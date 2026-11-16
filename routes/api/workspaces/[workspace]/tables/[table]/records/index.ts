@@ -22,7 +22,7 @@ import {
 import { sortKeyOf } from "@/lib/records/sort-param";
 import { checkRecordsQuery } from "@/lib/records/validation";
 import { findMissingRequired, parseRecordValues, recordPatchSchema } from "@/lib/records/values";
-import { requireAccess } from "@/lib/roles/require-access";
+import { requireAccess } from "@/lib/access/require-access";
 import { findTable, listColumns } from "@/lib/tables/repository";
 import { filteredViewSource } from "@/lib/views/naming";
 import { viewScopeSchema } from "@/lib/views/query";

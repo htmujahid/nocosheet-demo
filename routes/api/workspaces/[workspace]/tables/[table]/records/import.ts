@@ -16,7 +16,7 @@ import {
 import { createRecordRows, findExistingRecordIds } from "@/lib/records/repository";
 import type { ParsedValue } from "@/lib/records/values";
 import { findMissingRequired, isEditableColumn, parseRecordValues } from "@/lib/records/values";
-import { requireAccess } from "@/lib/roles/require-access";
+import { requireAccess } from "@/lib/access/require-access";
 import { type Column, findTable, listColumns } from "@/lib/tables/repository";
 
 const params = z.object({ workspace: z.string(), table: z.coerce.number().int().positive() });

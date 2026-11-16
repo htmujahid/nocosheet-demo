@@ -8,7 +8,7 @@ export function RoleBadge({ user }: { user: { role?: string | null } }) {
     </Badge>
   ) : (
     <Badge variant="secondary" size="sm">
-      User
+      Member
     </Badge>
   );
 }

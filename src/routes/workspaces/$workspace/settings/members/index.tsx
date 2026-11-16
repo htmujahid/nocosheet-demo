@@ -24,10 +24,10 @@ function MembersPage() {
             <Button
               size="sm"
               variant="outline"
-              render={<Link to="/workspaces/$workspace/settings/members/roles" params={{ workspace }} />}
+              render={<Link to="/workspaces/$workspace/settings/access" params={{ workspace }} />}
             >
               <ShieldCheckIcon />
-              Roles
+              Access profiles
             </Button>
             <AddMemberDialog />
           </>

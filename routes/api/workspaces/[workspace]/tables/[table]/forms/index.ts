@@ -14,7 +14,7 @@ import {
 } from "@/lib/forms/repository";
 import { checkFormDefinition, formInputSchema, formsDeleteSchema } from "@/lib/forms/validation";
 import { conflictOrBadRequest, httpError, NOT_FOUND } from "@/lib/http";
-import { visibleResources } from "@/lib/roles/guard";
+import { visibleResources } from "@/lib/access/guard";
 import { findTable, listColumns } from "@/lib/tables/repository";
 
 const params = z.object({ workspace: z.string(), table: z.coerce.number().int().positive() });

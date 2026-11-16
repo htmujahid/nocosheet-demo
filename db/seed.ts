@@ -35,21 +35,21 @@ export default defineSeed<typeof import("./schema")>(async (context) => {
     { userId: users.member, tableId: tableId("Bug Reports") },
   ]);
 
-  const roles = await db.select().from(schema.roleTable);
-  const roleId = (name: string) => {
-    const role = roles.find((item) => item.name === name);
-    if (!role) throw new Error(`Unknown role ${name}`);
-    return role.id;
+  const profiles = await db.select().from(schema.accessProfileTable);
+  const profileId = (name: string) => {
+    const profile = profiles.find((item) => item.name === name);
+    if (!profile) throw new Error(`Unknown access profile ${name}`);
+    return profile.id;
   };
-  await db.insert(schema.roleMemberTable).values([
+  await db.insert(schema.accessProfileMemberTable).values([
     {
       userId: stableId("user:maya.chen@example.com"),
-      roleId: roleId("Editor"),
+      profileId: profileId("Editor"),
       assignedBy: users.admin,
     },
     {
       userId: stableId("user:kai.morgan@example.com"),
-      roleId: roleId("Contributor"),
+      profileId: profileId("Contributor"),
       assignedBy: users.admin,
     },
   ]);
