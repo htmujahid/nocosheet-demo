@@ -71,7 +71,6 @@ export function TableGridView({
           workspace={workspace}
           tableId={tableId}
           select={{
-            canExport: access.can("export", tableId),
             canDelete: (row) => access.canOn("delete", tableId, ownerOf(row)),
           }}
           grid={grid}

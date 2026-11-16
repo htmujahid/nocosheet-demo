@@ -9,12 +9,7 @@ import {
   CardFrameTitle,
 } from "@/components/ui/card";
 import type { Matrix } from "@/lib/roles/matrix";
-import {
-  ACTIONS,
-  type Action,
-  FORM_ACTIONS,
-  PERMISSION_LABELS,
-} from "@/lib/roles/permissions";
+import { ACTIONS, type Action, FORM_ACTIONS, PERMISSION_LABELS } from "@/lib/roles/permissions";
 
 import { OverrideCard } from "./override-card";
 import { ScopeSelect, type ScopeValue } from "./scope-select";
@@ -24,7 +19,7 @@ const DESCRIPTIONS: Record<Action, string> = {
   read: "See records and open their details.",
   update: "Change the values of records.",
   delete: "Move records to the trash.",
-  export: "Download records as a CSV file.",
+  export: "Download a whole table or view as a CSV file.",
 };
 
 export type GrantTarget = {
@@ -61,8 +56,8 @@ export function PermissionMatrix({
         <CardFrameHeader>
           <CardFrameTitle>Workspace-wide permissions</CardFrameTitle>
           <CardFrameDescription>
-            What this role can do in every table, unless a table, view or form below says
-            otherwise. Changing table structure is always for administrators only.
+            What this role can do in every table, unless a table, view or form below says otherwise.
+            Changing table structure is always for administrators only.
           </CardFrameDescription>
         </CardFrameHeader>
         <Card>

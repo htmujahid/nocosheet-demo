@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { type SelectChoice } from "../tables/formats";
 
-export const MAX_IMPORT_ROWS = 1000;
+export const MAX_IMPORT_ROWS = 100;
 export const MAX_IMPORT_ERRORS = 25;
 
 const SKIPPED_FORMATS = ["file", "image", "binary"];

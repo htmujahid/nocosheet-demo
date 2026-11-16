@@ -1049,8 +1049,8 @@ paths:
       tags:
       - Records
       summary: Import records
-      description: Rows are keyed by column name. Either every row is created or none is, and failed rows
-        are listed in errors. Needs the create permission on the table, or on the view or form it goes
+      description: Up to 100 rows, keyed by column name. Either every row is created or none is, and failed
+        rows are listed in errors. Needs the create permission on the table, or on the view or form it goes
         through.
       operationId: postWorkspacesWorkspaceTablesTableRecordsImport
       parameters:
@@ -3726,7 +3726,7 @@ components:
       properties:
         rows:
           minItems: 1
-          maxItems: 1000
+          maxItems: 100
           type: array
           items:
             type: object

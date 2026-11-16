@@ -8,13 +8,15 @@ import { useExportRecords } from "./use-export-records";
 export function RecordExport({
   workspace,
   tableId,
+  viewId,
   selected,
 }: {
   workspace: string;
   tableId: number;
+  viewId?: number;
   selected: ViewerRow[];
 }) {
-  const exportRecords = useExportRecords(workspace, tableId);
+  const exportRecords = useExportRecords(workspace, tableId, viewId);
 
   return (
     <Button

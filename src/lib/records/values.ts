@@ -79,7 +79,18 @@ function baseSchema(column: ColumnLike): z.ZodType {
   }
 }
 
+const schemaCache = new WeakMap<object, z.ZodType>();
+
 export function valueSchema(column: ColumnLike): z.ZodType {
+  let schema = schemaCache.get(column);
+  if (!schema) {
+    schema = buildValueSchema(column);
+    schemaCache.set(column, schema);
+  }
+  return schema;
+}
+
+function buildValueSchema(column: ColumnLike): z.ZodType {
   const schema = baseSchema(column);
   if (column.isRequired)
     return z.unknown().superRefine((value, ctx) => {
@@ -121,11 +132,22 @@ export type ParseResult<C extends WriteColumn> =
   | { ok: true; values: ParsedValue<C>[] }
   | { ok: false; message: string; field?: string };
 
+const indexCache = new WeakMap<object, Map<string, WriteColumn>>();
+
+function indexByName<C extends WriteColumn>(columns: C[]) {
+  let index = indexCache.get(columns);
+  if (!index) {
+    index = new Map(columns.map((column) => [column.columnName, column]));
+    indexCache.set(columns, index);
+  }
+  return index as Map<string, C>;
+}
+
 export function parseRecordValues<C extends WriteColumn>(
   columns: C[],
   values: Record<string, unknown>,
 ): ParseResult<C> {
-  const byName = new Map(columns.map((column) => [column.columnName, column]));
+  const byName = indexByName(columns);
   const parsed: ParsedValue<C>[] = [];
 
   for (const [key, input] of Object.entries(values)) {

@@ -49,7 +49,7 @@ export function ViewActions({
   const { data: views = [] } = useQuery(viewsQueryOptions(workspace, tableId));
   const active = views.find((item) => item.id === view);
   const canCreate = access.can("create", tableId);
-  const canExport = access.can("export", tableId) && access.can("read", tableId);
+  const canExport = access.can("export", tableId, view) && access.can("read", tableId, view);
   const exportRecords = useExportRecords(workspace, tableId, view);
 
   return (

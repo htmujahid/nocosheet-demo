@@ -360,17 +360,26 @@ export function recordsTable(workspace: string, table: Table, names: string[] = 
   );
 }
 
+type RecordsTable = ReturnType<typeof recordsTable>;
+
 function buildInsert(
   workspace: string,
   table: Table,
   parsed: ParsedValue<Column>[],
   system: Record<string, unknown>,
+  targets?: Map<string, RecordsTable>,
 ) {
   const row = {
     ...Object.fromEntries(parsed.map(({ column, value }) => [column.columnName, value])),
     ...system,
   } as Record<string, string>;
-  const target = recordsTable(workspace, table, Object.keys(row));
+  const names = Object.keys(row);
+  const key = names.join("\0");
+  let target = targets?.get(key);
+  if (!target) {
+    target = recordsTable(workspace, table, names);
+    targets?.set(key, target);
+  }
   return { target, query: db.insert(target).values(row) };
 }
 
@@ -405,9 +414,17 @@ export async function createRecordRows(
   userId: string,
 ) {
   if (!rows.length) return [];
-  const statements = rows.map((parsed) =>
-    insertRecord(workspace, table, parsed, { created_by: userId, updated_by: userId }),
-  );
+  const targets = new Map<string, RecordsTable>();
+  const statements = rows.map((parsed) => {
+    const { target, query } = buildInsert(
+      workspace,
+      table,
+      parsed,
+      { created_by: userId, updated_by: userId },
+      targets,
+    );
+    return query.returning({ id: target.id });
+  });
   const results = (await db.batch(
     statements as unknown as Parameters<typeof db.batch>[0],
   )) as unknown as { id: number }[][];

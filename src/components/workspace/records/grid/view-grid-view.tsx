@@ -78,7 +78,6 @@ export function ViewGridView({
           tableId={tableId}
           viewId={view.id}
           select={{
-            canExport: false,
             canDelete: (row) => access.canOn("delete", tableId, ownerOf(row), view.id),
           }}
           grid={grid}

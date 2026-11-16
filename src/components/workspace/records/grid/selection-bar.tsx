@@ -21,7 +21,7 @@ export function SelectionBar({
   workspace: string;
   tableId: number;
   viewId?: number;
-  select: { canExport: boolean; canDelete: (row: ViewerRow) => boolean };
+  select: { canDelete: (row: ViewerRow) => boolean };
   grid: GridTable;
   selected: ViewerRow[];
   pageRows: number;
@@ -34,9 +34,7 @@ export function SelectionBar({
         {selected.length} selected
       </Button>
       <div className="ms-auto flex items-center gap-2">
-        {select.canExport && (
-          <RecordExport workspace={workspace} tableId={tableId} selected={selected} />
-        )}
+        <RecordExport workspace={workspace} tableId={tableId} viewId={viewId} selected={selected} />
         {selected.every(select.canDelete) && (
           <DeleteRecordsDialog
             workspace={workspace}
