@@ -7,9 +7,13 @@ info:
   description: 'Everything the Nocosheet app does goes through this API.
 
 
-    Requests are authenticated with the Better Auth session cookie. Sign-in, sessions, passkeys and member
-    administration are documented in the Authentication reference, which administrators can open from
-    the same page.
+    Requests are authenticated with the Better Auth session cookie, or with an API key sent in the
+    x-api-key header. Any member can create keys under Settings, API Keys. A key acts as its owner, with
+    the same role and permissions, and stops working when it is revoked, expires or its owner is
+    removed. Keys only work with the workspace endpoints. Each key is limited to 120 requests a minute,
+    and requests over the limit get a 429 response with a Retry-After header. Sign-in,
+    sessions, passkeys and member administration are documented in the Authentication reference, which
+    administrators can open from the same page.
 
 
     What a member may do with records depends on their role. A permission on a view or a form is checked
@@ -19,6 +23,7 @@ servers:
   description: This server
 security:
 - sessionCookie: []
+- apiKey: []
 tags:
 - name: App
   description: Setup and avatars.
@@ -194,6 +199,25 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Access'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /workspaces/{workspace}/me:
+    get:
+      tags:
+      - Access
+      summary: Get the signed-in user
+      description: Signed-in members, with a session or an API key. Handy for checking that a key works.
+        authenticatedWith says which of the two the request used.
+      operationId: getWorkspacesWorkspaceMe
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Me'
         '401':
           $ref: '#/components/responses/Unauthorized'
   /workspaces/{workspace}/sidebar:
@@ -2428,6 +2452,12 @@ components:
       in: cookie
       name: better-auth.session_token
       description: Set by signing in through the Authentication endpoints.
+    apiKey:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: A key created under Settings, API Keys. It acts as its owner. Only the workspace
+        endpoints accept it.
   parameters:
     workspace:
       name: workspace
@@ -3262,6 +3292,41 @@ components:
       - views
       - forms
       description: A table with the views and forms permissions can be set for.
+    Me:
+      type: object
+      properties:
+        user:
+          type: object
+          properties:
+            id:
+              type: string
+            name:
+              type: string
+            email:
+              type: string
+            image:
+              anyOf:
+              - type: string
+              - type: 'null'
+            role:
+              type: string
+              description: The member's own role, such as admin or user.
+            isAdmin:
+              type: boolean
+          required:
+          - id
+          - name
+          - email
+          - image
+          - role
+          - isAdmin
+        authenticatedWith:
+          enum:
+          - session
+          - api-key
+      required:
+      - user
+      - authenticatedWith
     Access:
       type: object
       properties:

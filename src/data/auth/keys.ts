@@ -5,5 +5,6 @@ export const authKeys = {
   accounts: () => [...authKeys.all, "accounts"] as const,
   setupStatus: () => [...authKeys.all, "setup-status"] as const,
   passkeys: () => [...authKeys.all, "passkeys"] as const,
+  apiKeys: () => [...authKeys.all, "api-keys"] as const,
   mutation: (name: string) => [...authKeys.all, name] as const,
 };
