@@ -2,32 +2,39 @@
 
 nocosheet is an open-source, fully no-code CMS and spreadsheet-style database. Model your data, manage records and publish content without writing code. It is self-hostable on Cloudflare and uses Cloudflare services for everything it needs.
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshot-dark.webp">
+  <source media="(prefers-color-scheme: light)" srcset="docs/screenshot-light.webp">
+  <img alt="nocosheet record grid" src="docs/screenshot-light.webp">
+</picture>
+
 ## Features
 
-### Available
+### Data
 
 - **No-code data modeling**: create tables and fields from the UI with a guided new-table wizard; schema changes are applied live
 - **Spreadsheet-style grid**: browse and edit records in a fast, familiar grid
-- **File uploads**: attach and manage files on records
 - **Advanced field types**: select and multi-select, dates, currency, attachments and computed fields
-- **Trash and recovery**: deleted tables are soft-deleted, protected by dependency checks and purged after 30 days
+- **File uploads**: attach and manage files on records and see them in the grid
+- **CSV import**: upload or paste a CSV, match its columns to your fields and preview the records before anything is added
+- **Views**: save a set of columns and filters as its own grid
+- **Forms**: pick the columns a form asks for and let members fill it in; every response becomes a record
+- **Trash and recovery**: deleted tables and views are soft-deleted, protected by dependency checks and purged after 30 days
+
+### Teams and security
+
+- **Members**: invite and manage people in your workspace, and pin your favorite tables
 - **Roles and access profiles**: members are administrators or members. Administrators can do everything; each member has one access profile with workspace-level and per-table grants and own/all record scopes
-- **Members**: invite and manage people in your workspace
+- **Audit log**: turn on auditing per table to log every record created, edited or deleted, with who did it and when. Entries are kept for 30 days
+- **Account security**: sign in with a password or passkey, add an authenticator app and manage your sessions
+
+### Developers
+
+- **REST API and API keys**: read and write records from your own scripts and apps with API keys or bearer tokens, documented with an OpenAPI reference
+
+### Hosting
+
 - **Self-hosted on Cloudflare**: Workers, D1 and R2 on your own account, with no external services required
-
-### Planned
-
-- **Offline-first**: records stay usable without a connection and sync when you are back online
-- **Views**: saved filters, sorting, grouping and hidden columns, plus kanban, gallery, calendar and form layouts
-- **Forms**: shareable forms that write straight into a table
-- **Content publishing**: draft and publish workflow, scheduled publishing and revision history
-- **REST API and API keys**: read and write records programmatically with scoped tokens
-- **Webhooks and automations**: trigger actions when records change
-- **Import and export**: CSV and JSON in and out, with column mapping
-- **Audit log**: a full history of who changed what and when
-- **Comments and activity**: discuss records and follow changes
-- **Multi-workspace**: several workspaces per deployment, powering an optional managed version
-- **Templates**: start from ready-made table and workspace setups
 
 ## Self-hosting
 
