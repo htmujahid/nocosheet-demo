@@ -2,6 +2,7 @@ import { defineHandler } from "void";
 import { requireAuth } from "void/auth";
 import { z } from "zod";
 
+import { auditCreated } from "@/lib/audit/records";
 import { findForm } from "@/lib/forms/repository";
 import { httpError, NOT_FOUND, writeFailure } from "@/lib/http";
 import { checkLinks } from "@/lib/records/links";
@@ -45,6 +46,13 @@ export const POST = defineHandler.withValidator({ params, body: recordPatchSchem
   try {
     const created = await createRecordRow(workspace, table, parsed.values, user.id);
     if (!created) throw httpError(400, "The response could not be saved.");
+    await auditCreated(
+      user,
+      table,
+      columns,
+      parsed.values.map((item) => item.column),
+      created,
+    );
     return { id: created.id };
   } catch (error) {
     writeFailure(error, columns);

@@ -2,6 +2,7 @@ import { defineHandler } from "void";
 import { requireAuth } from "void/auth";
 import { z } from "zod";
 
+import { auditDeleted, auditUpdated, beginAudit } from "@/lib/audit/records";
 import { httpError, NOT_FOUND, writeFailure } from "@/lib/http";
 import { deleteRecords } from "@/lib/records/deletion";
 import { checkLinks } from "@/lib/records/links";
@@ -57,7 +58,8 @@ export const PATCH = defineHandler.withValidator({
   const broken = await checkLinks(workspace, parsed.values);
   if (broken) throw httpError(400, broken.message, broken.field);
 
-  let updated = false;
+  const audit = await beginAudit(workspace, table, params.record);
+  let updated: Awaited<ReturnType<typeof updateRecordRow>>;
   try {
     updated = await updateRecordRow(
       workspace,
@@ -71,6 +73,13 @@ export const PATCH = defineHandler.withValidator({
     writeFailure(error, columns);
   }
   if (!updated) throw httpError(404, NOT_FOUND);
+  await auditUpdated(
+    user,
+    table,
+    audit,
+    parsed.values.map((item) => item.column),
+    updated,
+  );
   return { ok: true };
 });
 
@@ -93,5 +102,6 @@ export const DELETE = defineHandler.withValidator({ params, query: viewScopeSche
       result.reason === "not_found" ? 404 : result.reason === "linked" ? 409 : 400,
       result.message,
     );
+  await auditDeleted(user, table, [params.record]);
   return { trash: result.trash };
 });

@@ -29,6 +29,7 @@ import { tableInputSchema } from "@/lib/tables/validation";
 import { ColumnsEditor } from "./columns-editor";
 import { IconPicker } from "./icon-picker";
 import { TitleSelect } from "./title-select";
+import { ToggleRow } from "./toggle-row";
 
 type DefinitionValues = {
   name: string;
@@ -36,6 +37,7 @@ type DefinitionValues = {
   groupName: string;
   description: string;
   titleColumn: string | null;
+  isAudit: boolean;
 };
 
 const schema = z.object({ name: tableInputSchema.shape.name });
@@ -67,6 +69,7 @@ export function TableDefinition({ workspace, tableId }: { workspace: string; tab
       groupName: table.groupName ?? "",
       description: table.description ?? "",
       titleColumn: savedTitle,
+      isAudit: table.isAudit,
     } as DefinitionValues,
     validators: { onSubmit: formSchema<DefinitionValues>(schema) },
     onSubmit: ({ value }) =>
@@ -79,6 +82,7 @@ export function TableDefinition({ workspace, tableId }: { workspace: string; tab
           groupName: value.groupName,
           description: value.description,
           titleColumn: value.titleColumn,
+          isAudit: value.isAudit,
         },
       }),
   });
@@ -177,6 +181,17 @@ export function TableDefinition({ workspace, tableId }: { workspace: string; tab
                         : null
                     }
                     onValueChange={field.handleChange}
+                  />
+                )}
+              </form.Field>
+
+              <form.Field name="isAudit">
+                {(field) => (
+                  <ToggleRow
+                    title="Audit changes"
+                    description="Record who creates, edits and deletes records in this table in the audit log."
+                    checked={field.state.value}
+                    onCheckedChange={field.handleChange}
                   />
                 )}
               </form.Field>

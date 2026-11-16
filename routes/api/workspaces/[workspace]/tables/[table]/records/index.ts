@@ -2,6 +2,7 @@ import { defineHandler } from "void";
 import { requireAuth } from "void/auth";
 import { z } from "zod";
 
+import { auditCreated, auditDeleted } from "@/lib/audit/records";
 import { httpError, NOT_FOUND, writeFailure } from "@/lib/http";
 import { deleteRecords } from "@/lib/records/deletion";
 import { targetsOfColumns, parseFilters } from "@/lib/records/filter-param";
@@ -70,9 +71,17 @@ export const POST = defineHandler.withValidator({
   const missing = findMissingRequired(columns, parsed.values);
   if (missing) throw httpError(400, `${missing.name}: This field is required`, missing.columnName);
 
+  const user = requireAuth(c);
   try {
-    const created = await createRecordRow(workspace, table, parsed.values, requireAuth(c).id);
+    const created = await createRecordRow(workspace, table, parsed.values, user.id);
     if (!created) throw httpError(400, "The record could not be created.");
+    await auditCreated(
+      user,
+      table,
+      columns,
+      parsed.values.map((item) => item.column),
+      created,
+    );
     return { id: created.id };
   } catch (error) {
     writeFailure(error, columns);
@@ -90,11 +99,9 @@ export const DELETE = defineHandler.withValidator({
   const table = await findTable(params.table);
   if (!table) throw httpError(404, NOT_FOUND);
 
-  if (ownerId) {
-    const ids = [...new Set(body.ids)];
-    if ((await countOwnedRecords(workspace, table, ids, ownerId)) !== ids.length)
-      throw httpError(403, "You can only delete records you created.");
-  }
+  const ids = [...new Set(body.ids)];
+  if (ownerId && (await countOwnedRecords(workspace, table, ids, ownerId)) !== ids.length)
+    throw httpError(403, "You can only delete records you created.");
 
   const result = await deleteRecords(workspace, table, body.ids, user.id);
   if (!result.ok)
@@ -102,5 +109,6 @@ export const DELETE = defineHandler.withValidator({
       result.reason === "not_found" ? 404 : result.reason === "linked" ? 409 : 400,
       result.message,
     );
+  await auditDeleted(user, table, ids);
   return { trash: result.trash };
 });

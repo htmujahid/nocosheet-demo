@@ -1149,6 +1149,7 @@ export const tables: SeedTable[] = [
     name: "Clients",
     icon: "building",
     group: "Sales",
+    audit: true,
     description: "Companies we work with, from first lead to active accounts.",
     title: "Company",
     columns: [
@@ -1191,6 +1192,7 @@ export const tables: SeedTable[] = [
     name: "Projects",
     icon: "kanban",
     group: "Delivery",
+    audit: true,
     description: "Client projects with owner, budget and progress.",
     title: "Name",
     columns: [
@@ -1300,6 +1302,7 @@ export const tables: SeedTable[] = [
     name: "Invoices",
     icon: "receipt",
     group: "Sales",
+    audit: true,
     description: "Invoices issued to clients for project milestones.",
     title: "Number",
     columns: [
@@ -1342,6 +1345,7 @@ export const tables: SeedTable[] = [
     name: "Products",
     icon: "package",
     group: "Sales",
+    audit: true,
     description: "Hardware, software and services we sell, with live stock value.",
     title: "SKU",
     columns: [

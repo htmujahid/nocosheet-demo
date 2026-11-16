@@ -2,6 +2,7 @@ import { defineHandler } from "void";
 import { requireAuth } from "void/auth";
 import { z } from "zod";
 
+import { logRecordAudit } from "@/lib/audit/log";
 import { classifyDbError } from "@/lib/db-errors";
 import { httpError, NOT_FOUND, writeFailure } from "@/lib/http";
 import {
@@ -85,13 +86,14 @@ export const POST = defineHandler.withValidator({
   if (failed) return { created: 0, errors, failed } satisfies ImportResult;
 
   try {
-    const created = await createRecordRows(
+    const ids = await createRecordRows(
       workspace,
       table,
       parsedRows.map((item) => item.values),
       user.id,
     );
-    return { created, errors, failed: 0 } satisfies ImportResult;
+    await logRecordAudit(user, table, { action: "import", recordIds: ids });
+    return { created: ids.length, errors, failed: 0 } satisfies ImportResult;
   } catch (error) {
     if (classifyDbError(error).kind === "foreign_key") {
       const linked = new Map<number, Set<number>>();

@@ -88,6 +88,7 @@ export type SeedTable = {
   name: string;
   icon: string;
   group?: string;
+  audit?: boolean;
   description: string;
   title: string;
   columns: SeedColumn[];
@@ -141,6 +142,7 @@ export async function seedTable(
     description: def.description,
     icon: def.icon,
     groupName: def.group ?? null,
+    isAudit: def.audit ?? false,
     position,
     createdBy: users.admin,
     createdAt: new Date(at(-90 + position)),

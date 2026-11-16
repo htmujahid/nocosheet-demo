@@ -67,6 +67,7 @@ CREATE TABLE `default__table` (
 	`group_name` text,
 	`title_column_id` integer,
 	`position` integer DEFAULT 0 NOT NULL,
+	`is_audit` integer DEFAULT false NOT NULL,
 	`metadata` text DEFAULT '{}' NOT NULL,
 	`created_by` text,
 	`created_at` integer NOT NULL,
@@ -198,3 +199,24 @@ WITH seed(role_name, permission) AS (VALUES
 )
 INSERT INTO `default__role_permission` (`role_id`, `resource_id`, `permission`)
 SELECT r.`id`, NULL, seed.`permission` FROM seed JOIN `default__role` r ON r.`name` = seed.`role_name`;
+--> statement-breakpoint
+CREATE TABLE `default__audit` (
+	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`table_id` integer,
+	`table_label` text NOT NULL,
+	`actor_id` text,
+	`actor_name` text,
+	`action` text NOT NULL,
+	`record_ids` text DEFAULT '[]' NOT NULL,
+	`count` integer DEFAULT 1 NOT NULL,
+	`changes` text DEFAULT '[]' NOT NULL,
+	`created_at` integer NOT NULL,
+	FOREIGN KEY (`table_id`) REFERENCES `default__table`(`id`) ON UPDATE no action ON DELETE set null,
+	FOREIGN KEY (`actor_id`) REFERENCES `user`(`id`) ON UPDATE no action ON DELETE set null,
+	CONSTRAINT "default__audit_action_check" CHECK("default__audit"."action" in ('create', 'update', 'delete', 'restore', 'purge', 'import'))
+);
+--> statement-breakpoint
+CREATE INDEX `default__audit_created` ON `default__audit` (`created_at`);--> statement-breakpoint
+CREATE INDEX `default__audit_table_created` ON `default__audit` (`table_id`,`created_at`);
+--> statement-breakpoint
+CREATE INDEX `default__audit_action_created` ON `default__audit` (`action`,`created_at`);

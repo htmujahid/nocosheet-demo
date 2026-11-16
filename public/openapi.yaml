@@ -21,7 +21,7 @@ security:
 - sessionCookie: []
 tags:
 - name: App
-  description: Setup, health and avatars.
+  description: Setup and avatars.
 - name: Access
   description: What the signed-in member may do.
 - name: Tables
@@ -40,29 +40,9 @@ tags:
   description: Roles, assignments and permissions.
 - name: Trash
   description: Deleted records, columns, tables, views and forms.
+- name: Audit log
+  description: Who created, edited, deleted or imported records in audited tables.
 paths:
-  /hello:
-    get:
-      tags:
-      - App
-      summary: Example route
-      description: No sign-in needed.
-      operationId: getHello
-      security: []
-      responses:
-        '200':
-          description: Success.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                  framework:
-                    type: string
-                  database:
-                    type: string
   /setup:
     get:
       tags:
@@ -236,6 +216,87 @@ paths:
                   $ref: '#/components/schemas/SidebarTable'
         '401':
           $ref: '#/components/responses/Unauthorized'
+  /workspaces/{workspace}/audit-logs:
+    get:
+      tags:
+      - Audit log
+      summary: List audit log entries
+      description: Record creates, edits, deletes, restores, permanent deletes and imports in tables that
+        have Audit changes turned on,
+        newest first. Entries are kept for 30 days. Administrators only.
+      operationId: getWorkspacesWorkspaceAuditLogs
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      - name: pageSize
+        in: query
+        schema:
+          type: integer
+          enum:
+          - 10
+          - 20
+          - 50
+          - 100
+          default: 20
+      - name: cursor
+        in: query
+        description: The nextCursor or prevCursor of a previous page. Leave out for the newest entries.
+        schema:
+          type: string
+          maxLength: 1024
+      - name: dir
+        in: query
+        description: next returns the page after the cursor, older entries. prev returns the page before
+          it, newer entries.
+        schema:
+          enum:
+          - next
+          - prev
+          default: next
+      - name: table
+        in: query
+        description: Only entries for this table.
+        schema:
+          type: integer
+      - name: action
+        in: query
+        schema:
+          enum:
+          - create
+          - update
+          - delete
+          - restore
+          - purge
+          - import
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  rows:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AuditLog'
+                  nextCursor:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                  prevCursor:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                required:
+                - rows
+                - nextCursor
+                - prevCursor
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
   /workspaces/{workspace}/tables:
     get:
       tags:
@@ -2760,6 +2821,9 @@ components:
           - type: 'null'
         position:
           type: integer
+        isAudit:
+          type: boolean
+          description: When true, changes to the records of this table are recorded in the audit log.
         metadata:
           type: object
           additionalProperties: true
@@ -3383,6 +3447,9 @@ components:
           - type: string
             maxLength: 500
           - type: 'null'
+        isAudit:
+          type: boolean
+          default: false
       required:
       - name
     TableUpdate:
@@ -3412,6 +3479,70 @@ components:
           type:
           - string
           - 'null'
+        isAudit:
+          type: boolean
+    AuditChange:
+      type: object
+      properties:
+        column:
+          type: string
+        from: {}
+        to: {}
+      required:
+      - column
+    AuditLog:
+      type: object
+      properties:
+        id:
+          type: integer
+        tableId:
+          anyOf:
+          - type: integer
+          - type: 'null'
+        tableLabel:
+          type: string
+          description: The table's name when the change was made.
+        actorId:
+          anyOf:
+          - type: string
+          - type: 'null'
+        actorName:
+          anyOf:
+          - type: string
+          - type: 'null'
+        action:
+          enum:
+          - create
+          - update
+          - delete
+          - restore
+          - purge
+          - import
+        recordIds:
+          type: array
+          items:
+            type: integer
+          description: The affected record ids, up to 1000, which covers any single operation.
+        count:
+          type: integer
+          description: How many records the operation affected.
+        changes:
+          type: array
+          items:
+            $ref: '#/components/schemas/AuditChange'
+          description: Changed fields with their old and new values, trimmed. Creates, edits and restores
+            have them. Deletes, purges and imports list record ids only.
+        createdAt:
+          type: string
+          format: date-time
+      required:
+      - id
+      - tableLabel
+      - action
+      - recordIds
+      - count
+      - changes
+      - createdAt
     TablesDelete:
       type: object
       properties:

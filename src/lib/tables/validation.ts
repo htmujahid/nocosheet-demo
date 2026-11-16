@@ -33,6 +33,7 @@ export const tableInputSchema = z.object({
   icon: iconName,
   groupName: optionalText(64),
   description: optionalText(500),
+  isAudit: z.boolean().default(false),
 });
 
 export const tablesDeleteSchema = z.object({
@@ -172,6 +173,7 @@ export const tableUpdateSchema = z.object({
   groupName: nullableText(64),
   description: nullableText(500),
   titleColumn: z.string().nullable().optional(),
+  isAudit: z.boolean().optional(),
 });
 
 export type ColumnPatchInput = z.input<typeof columnPatchSchema>;

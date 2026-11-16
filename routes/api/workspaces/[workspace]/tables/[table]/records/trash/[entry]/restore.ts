@@ -1,6 +1,7 @@
 import { defineHandler } from "void";
 import { z } from "zod";
 
+import { auditRestored } from "@/lib/audit/records";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { httpError, NOT_FOUND, writeFailure } from "@/lib/http";
 import { checkLinks } from "@/lib/records/links";
@@ -18,7 +19,7 @@ const params = z.object({
 const body = recordPatchSchema.partial();
 
 export const POST = defineHandler.withValidator({ params, body })(async (c, { params, body }) => {
-  requireAdmin(c);
+  const user = requireAdmin(c);
   const workspace = c.get("workspaceId");
   const table = await findTable(params.table);
   if (!table) throw httpError(404, NOT_FOUND);
@@ -41,5 +42,6 @@ export const POST = defineHandler.withValidator({ params, body })(async (c, { pa
   } catch (error) {
     writeFailure(error, columns);
   }
+  await auditRestored(user, table, columns, parsed, Number(entry.data.id));
   return { id: entry.data.id };
 });

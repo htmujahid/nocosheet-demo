@@ -1,6 +1,7 @@
 import { defineHandler } from "void";
 import { z } from "zod";
 
+import { auditPurged } from "@/lib/audit/records";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { httpError, NOT_FOUND } from "@/lib/http";
 import { shapeRecord } from "@/lib/records/shape";
@@ -36,9 +37,11 @@ export const GET = defineHandler.withValidator({ params })(async (c, { params })
 });
 
 export const DELETE = defineHandler.withValidator({ params })(async (c, { params }) => {
-  requireAdmin(c);
+  const user = requireAdmin(c);
   const table = await findTable(params.table);
   if (!table) throw httpError(404, NOT_FOUND);
-  if (!(await purgeTrashEntry(table, params.entry))) throw httpError(404, NOT_IN_TRASH);
+  const entry = await findTrashEntry(table, params.entry);
+  if (!entry || !(await purgeTrashEntry(table, params.entry))) throw httpError(404, NOT_IN_TRASH);
+  await auditPurged(user, table, Number(entry.recordId));
   return { ok: true };
 });

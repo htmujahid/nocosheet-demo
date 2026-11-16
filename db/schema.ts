@@ -10,6 +10,7 @@ import {
 } from "void/schema-d1";
 
 import { userTable } from "../.void/better-auth-schema";
+import { AUDIT_ACTIONS, type AuditChange } from "../src/lib/audit/actions";
 import { PERMISSIONS, ROLE_KINDS } from "../src/lib/roles/permissions";
 
 const RESOURCE_KINDS = ["table", "view", "form"] as const;
@@ -75,6 +76,7 @@ export const workspaceSchema = <W extends string = "default">(workspaceId: W = "
         onDelete: "set null",
       }),
       position: integer("position").notNull().default(0),
+      isAudit: integer("is_audit", { mode: "boolean" }).notNull().default(false),
       metadata: json<Record<string, unknown>>("metadata", {}),
       createdBy: createdBy(),
       ...timestamps,
@@ -222,6 +224,33 @@ export const workspaceSchema = <W extends string = "default">(workspaceId: W = "
     (t) => [index(name("trash_table_deleted")).on(t.tableId, t.deletedAt)],
   );
 
+  const auditTable = sqliteTable(
+    name("audit"),
+    {
+      id: integer("id").primaryKey({ autoIncrement: true }),
+      tableId: integer("table_id").references(() => tableTable.id, { onDelete: "set null" }),
+      tableLabel: text("table_label").notNull(),
+      actorId: text("actor_id").references(() => userTable.id, { onDelete: "set null" }),
+      actorName: text("actor_name"),
+      action: text("action", { enum: AUDIT_ACTIONS }).notNull(),
+      recordIds: json<number[]>("record_ids", []),
+      count: integer("count").notNull().default(1),
+      changes: json<AuditChange[]>("changes", []),
+      createdAt: integer("created_at", { mode: "timestamp_ms" })
+        .notNull()
+        .$defaultFn(() => new Date()),
+    },
+    (t) => [
+      index(name("audit_created")).on(t.createdAt),
+      index(name("audit_table_created")).on(t.tableId, t.createdAt),
+      index(name("audit_action_created")).on(t.action, t.createdAt),
+      check(
+        name("audit_action_check"),
+        sql`${t.action} in (${sql.raw(AUDIT_ACTIONS.map((item) => `'${item}'`).join(", "))})`,
+      ),
+    ],
+  );
+
   const roleTable = sqliteTable(
     name("role"),
     {
@@ -304,6 +333,7 @@ export const workspaceSchema = <W extends string = "default">(workspaceId: W = "
     formTable,
     favoriteTable,
     trashTable,
+    auditTable,
     roleTable,
     roleMemberTable,
     rolePermissionTable,
@@ -319,6 +349,7 @@ export const {
   formTable,
   favoriteTable,
   trashTable,
+  auditTable,
   roleTable,
   roleMemberTable,
   rolePermissionTable,

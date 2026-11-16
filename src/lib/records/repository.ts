@@ -360,7 +360,7 @@ export function recordsTable(workspace: string, table: Table, names: string[] = 
   );
 }
 
-export function insertRecord(
+function buildInsert(
   workspace: string,
   table: Table,
   parsed: ParsedValue<Column>[],
@@ -371,7 +371,17 @@ export function insertRecord(
     ...system,
   } as Record<string, string>;
   const target = recordsTable(workspace, table, Object.keys(row));
-  return db.insert(target).values(row).returning({ id: target.id });
+  return { target, query: db.insert(target).values(row) };
+}
+
+export function insertRecord(
+  workspace: string,
+  table: Table,
+  parsed: ParsedValue<Column>[],
+  system: Record<string, unknown>,
+) {
+  const { target, query } = buildInsert(workspace, table, parsed, system);
+  return query.returning({ id: target.id });
 }
 
 export async function createRecordRow(
@@ -380,10 +390,11 @@ export async function createRecordRow(
   parsed: ParsedValue<Column>[],
   userId: string,
 ) {
-  const [created] = (await insertRecord(workspace, table, parsed, {
+  const { query } = buildInsert(workspace, table, parsed, {
     created_by: userId,
     updated_by: userId,
-  })) as { id: number }[];
+  });
+  const [created] = (await query.returning()) as (Record<string, unknown> & { id: number })[];
   return created;
 }
 
@@ -393,12 +404,14 @@ export async function createRecordRows(
   rows: ParsedValue<Column>[][],
   userId: string,
 ) {
-  if (!rows.length) return 0;
+  if (!rows.length) return [];
   const statements = rows.map((parsed) =>
     insertRecord(workspace, table, parsed, { created_by: userId, updated_by: userId }),
   );
-  await db.batch(statements as unknown as Parameters<typeof db.batch>[0]);
-  return rows.length;
+  const results = (await db.batch(
+    statements as unknown as Parameters<typeof db.batch>[0],
+  )) as unknown as { id: number }[][];
+  return results.flatMap((inserted) => inserted.map((row) => row.id));
 }
 
 export async function updateRecordRow(
@@ -418,9 +431,9 @@ export async function updateRecordRow(
   );
 
   const updated = await db.all(
-    sql`update ${raw(quoteIdent(physicalTableName(workspace, table.tableName)))} set ${sql.join(assignments, sql`, `)} where "id" = ${recordId} ${ownerId ? sql`and "created_by" = ${ownerId}` : sql``} returning "id"`,
+    sql`update ${raw(quoteIdent(physicalTableName(workspace, table.tableName)))} set ${sql.join(assignments, sql`, `)} where "id" = ${recordId} ${ownerId ? sql`and "created_by" = ${ownerId}` : sql``} returning *`,
   );
-  return updated.length > 0;
+  return updated[0] as Record<string, unknown> | undefined;
 }
 
 export async function countOwnedRecords(
