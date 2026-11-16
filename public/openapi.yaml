@@ -914,18 +914,11 @@ paths:
       tags:
       - Records
       summary: Create a record
-      description: Needs the create permission on the table, or on the view or form it goes through.
+      description: Needs the create permission on the table. Records are always added to the table, never through a view.
       operationId: postWorkspacesWorkspaceTablesTableRecords
       parameters:
       - $ref: '#/components/parameters/workspace'
       - $ref: '#/components/parameters/table'
-      - name: view
-        in: query
-        required: false
-        schema:
-          type: integer
-          minimum: 1
-        description: Use the permissions you have through this view, and only its columns.
       - name: cursor
         in: query
         required: false
@@ -1083,19 +1076,11 @@ paths:
       - Records
       summary: Import records
       description: Up to 100 rows, keyed by column name. Either every row is created or none is, and failed
-        rows are listed in errors. Needs the create permission on the table, or on the view or form it goes
-        through.
+        rows are listed in errors. Needs the create permission on the table.
       operationId: postWorkspacesWorkspaceTablesTableRecordsImport
       parameters:
       - $ref: '#/components/parameters/workspace'
       - $ref: '#/components/parameters/table'
-      - name: view
-        in: query
-        required: false
-        schema:
-          type: integer
-          minimum: 1
-        description: Use the permissions you have through this view, and only its columns.
       requestBody:
         required: true
         content:

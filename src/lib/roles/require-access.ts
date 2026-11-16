@@ -4,7 +4,7 @@ import { type AuthUser, requireAuth } from "void/auth";
 import { httpError, NOT_FOUND } from "../http";
 import { type Access, loadAccess } from "./access";
 import type { Action } from "./permissions";
-import { resourceInTable } from "./repository";
+import { listTableResourceIds, resourceInTable } from "./repository";
 
 const DENIED: Record<Action, string> = {
   create: "You don't have permission to create records here.",
@@ -39,4 +39,17 @@ export async function requireAccess<E extends Env & { Variables: { user: AuthUse
   if (!best) throw denied(access, list[0], tableId, resourceId);
   if (resourceId && !(await resourceInTable(resourceId, tableId))) throw httpError(404, NOT_FOUND);
   return { ...best, ownerId: best.scope === "own" ? user.id : undefined };
+}
+
+export async function requireAccessThrough<
+  E extends Env & { Variables: { user: AuthUser | null } },
+>(c: Context<E>, actions: Action[], tableId: number) {
+  const user = requireAuth(c);
+  const access = await loadAccess(user);
+  const allowed = (resourceId?: number) =>
+    actions.some((action) => access.scope(action, tableId, resourceId) !== "none");
+  if (allowed()) return;
+  const resources = await listTableResourceIds(tableId);
+  if (resources.some((id) => allowed(id))) return;
+  throw denied(access, actions[0], tableId);
 }

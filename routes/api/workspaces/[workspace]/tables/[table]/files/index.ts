@@ -4,13 +4,13 @@ import { z } from "zod";
 
 import { FILE_MAX_BYTES, fileKey, fileUrl, isImageType } from "@/lib/files";
 import { httpError, NOT_FOUND } from "@/lib/http";
-import { requireAccess } from "@/lib/roles/require-access";
+import { requireAccessThrough } from "@/lib/roles/require-access";
 import { findTable, listColumns } from "@/lib/tables/repository";
 
 const params = z.object({ workspace: z.string(), table: z.coerce.number().int().positive() });
 
 export const POST = defineHandler.withValidator({ params })(async (c, { params }) => {
-  await requireAccess(c, ["update", "create"], params.table);
+  await requireAccessThrough(c, ["update", "create"], params.table);
   const table = await findTable(params.table);
   if (!table) throw httpError(404, NOT_FOUND);
 

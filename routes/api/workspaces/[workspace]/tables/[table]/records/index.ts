@@ -13,13 +13,20 @@ import {
   resolveRecordsQuery,
   withFilters,
 } from "@/lib/records/query";
-import { countOwnedRecords, createRecordRow, findRecords } from "@/lib/records/repository";
+import {
+  countOwnedRecords,
+  countRecordsInView,
+  createRecordRow,
+  findRecords,
+} from "@/lib/records/repository";
 import { sortKeyOf } from "@/lib/records/sort-param";
 import { checkRecordsQuery } from "@/lib/records/validation";
 import { findMissingRequired, parseRecordValues, recordPatchSchema } from "@/lib/records/values";
 import { requireAccess } from "@/lib/roles/require-access";
 import { findTable, listColumns } from "@/lib/tables/repository";
+import { filteredViewSource } from "@/lib/views/naming";
 import { viewScopeSchema } from "@/lib/views/query";
+import { findView } from "@/lib/views/repository";
 
 const params = z.object({ workspace: z.string(), table: z.coerce.number().int().positive() });
 
@@ -53,11 +60,10 @@ export const GET = defineHandler.withValidator({ params, query: recordsApiSchema
 
 export const POST = defineHandler.withValidator({
   params,
-  query: viewScopeSchema,
   body: recordPatchSchema,
-})(async (c, { params, query, body }) => {
+})(async (c, { params, body }) => {
   const workspace = c.get("workspaceId");
-  await requireAccess(c, "create", params.table, query.view);
+  await requireAccess(c, "create", params.table);
   const table = await findTable(params.table);
   if (!table) throw httpError(404, NOT_FOUND);
   const columns = await listColumns(table.id);
@@ -100,6 +106,10 @@ export const DELETE = defineHandler.withValidator({
   if (!table) throw httpError(404, NOT_FOUND);
 
   const ids = [...new Set(body.ids)];
+  const view = query.view ? await findView(table.id, query.view) : undefined;
+  const source = filteredViewSource(workspace, view);
+  if (source && (await countRecordsInView(source, ids)) !== ids.length)
+    throw httpError(404, NOT_FOUND);
   if (ownerId && (await countOwnedRecords(workspace, table, ids, ownerId)) !== ids.length)
     throw httpError(403, "You can only delete records you created.");
 

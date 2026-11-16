@@ -132,19 +132,16 @@ export const createRecordMutationOptions = mutationOptions({
   mutationFn: ({
     workspace,
     tableId,
-    viewId,
     values,
   }: {
     workspace: string;
     tableId: number;
-    viewId?: number;
     values: Record<string, unknown>;
   }) =>
     unwrapFetch(
       fetch("/api/workspaces/:workspace/tables/:table/records", {
         method: "POST",
         params: { workspace, table: String(tableId) },
-        query: viewId ? { view: viewId } : {},
         body: { values },
       }),
     ),
@@ -155,19 +152,16 @@ export const importRecordsMutationOptions = mutationOptions({
   mutationFn: ({
     workspace,
     tableId,
-    viewId,
     rows,
   }: {
     workspace: string;
     tableId: number;
-    viewId?: number;
     rows: Record<string, string>[];
   }) =>
     unwrapFetch(
       fetch("/api/workspaces/:workspace/tables/:table/records/import", {
         method: "POST",
         params: { workspace, table: String(tableId) },
-        query: viewId ? { view: viewId } : {},
         body: { rows },
       }),
     ),

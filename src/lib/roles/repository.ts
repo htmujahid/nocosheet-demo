@@ -188,6 +188,20 @@ export async function listGrantsForRole(roleId: number) {
   return rows as PermissionGrant[];
 }
 
+export async function listTableResourceIds(tableId: number) {
+  const [views, forms] = await db.batch([
+    db
+      .select({ id: viewTable.id })
+      .from(viewTable)
+      .where(and(eq(viewTable.tableId, tableId), isNull(viewTable.deletedAt))),
+    db
+      .select({ id: formTable.id })
+      .from(formTable)
+      .where(and(eq(formTable.tableId, tableId), isNull(formTable.deletedAt))),
+  ]);
+  return [...views, ...forms].map((row) => row.id);
+}
+
 export async function resourceInTable(resourceId: number, tableId: number) {
   const [views, forms] = await db.batch([
     db

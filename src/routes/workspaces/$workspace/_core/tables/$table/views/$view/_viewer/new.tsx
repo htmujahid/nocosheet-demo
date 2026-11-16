@@ -15,7 +15,7 @@ function NewRecordPage() {
   const navigate = Route.useNavigate();
   const access = useAccess();
 
-  if (!access.can("create", Number(table), Number(viewId)))
+  if (!access.can("create", Number(table)))
     return (
       <Navigate
         to="/workspaces/$workspace/tables/$table/views/$view"
@@ -29,7 +29,6 @@ function NewRecordPage() {
     <CreateRecordSheet
       workspace={workspace}
       tableId={Number(table)}
-      viewId={Number(viewId)}
       onClose={() =>
         navigate({
           to: "/workspaces/$workspace/tables/$table/views/$view",

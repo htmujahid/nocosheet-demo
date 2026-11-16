@@ -234,8 +234,9 @@ export async function findRecord(
   columns: Column[],
   recordId: number,
   ownerId?: string,
+  source?: string,
 ) {
-  const { select, from } = await recordSource(workspace, table, columns);
+  const { select, from } = await recordSource(workspace, table, columns, source);
   const [row] = await db.all<Record<string, unknown>>(
     sql`select ${select} from ${from} where t."id" = ${recordId} ${ownerId ? sql`and t."created_by" = ${ownerId}` : sql``} limit 1`,
   );
@@ -438,6 +439,7 @@ export async function updateRecordRow(
   parsed: ParsedValue<Column>[],
   userId: string,
   ownerId?: string,
+  viewSource?: string,
 ) {
   const assignments = parsed.map(
     ({ column, value }) => sql`${raw(quoteIdent(column.columnName))} = ${value}`,
@@ -448,9 +450,25 @@ export async function updateRecordRow(
   );
 
   const updated = await db.all(
-    sql`update ${raw(quoteIdent(physicalTableName(workspace, table.tableName)))} set ${sql.join(assignments, sql`, `)} where "id" = ${recordId} ${ownerId ? sql`and "created_by" = ${ownerId}` : sql``} returning *`,
+    sql`update ${raw(quoteIdent(physicalTableName(workspace, table.tableName)))} set ${sql.join(assignments, sql`, `)} where "id" = ${recordId} ${ownerId ? sql`and "created_by" = ${ownerId}` : sql``} ${viewSource ? sql`and "id" in (select "id" from ${raw(quoteIdent(viewSource))})` : sql``} returning *`,
   );
   return updated[0] as Record<string, unknown> | undefined;
+}
+
+export async function countRecordsInView(viewPhysicalName: string, ids: number[]) {
+  const unique = [...new Set(ids)];
+  let found = 0;
+  for (let start = 0; start < unique.length; start += 50) {
+    const part = unique.slice(start, start + 50);
+    const [row] = await db.all<{ n: number }>(
+      sql`select count(*) as n from ${raw(quoteIdent(viewPhysicalName))} where "id" in (${sql.join(
+        part.map((id) => sql`${id}`),
+        sql`, `,
+      )})`,
+    );
+    found += Number(row?.n ?? 0);
+  }
+  return found;
 }
 
 export async function countOwnedRecords(

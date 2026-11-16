@@ -1,6 +1,11 @@
 import { httpError } from "../http";
 import { type Access, loadAccess } from "./access";
-import { type Action, isFormGrantAllowed, type PermissionGrant } from "./permissions";
+import {
+  type Action,
+  isFormGrantAllowed,
+  isViewGrantAllowed,
+  type PermissionGrant,
+} from "./permissions";
 import { findGrantResourceKinds } from "./repository";
 
 type User = { id: string; role?: string | null };
@@ -30,4 +35,14 @@ export async function assertGrantable(grants: PermissionGrant[]) {
     )
   )
     throw httpError(400, "A form can only be given the create permission.");
+
+  if (
+    grants.some(
+      (grant) =>
+        grant.resourceId !== null &&
+        kinds.get(grant.resourceId) === "view" &&
+        !isViewGrantAllowed(grant),
+    )
+  )
+    throw httpError(400, "A view can't be given the create permission. Use the table or a form.");
 }

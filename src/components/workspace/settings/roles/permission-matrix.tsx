@@ -9,7 +9,13 @@ import {
   CardFrameTitle,
 } from "@/components/ui/card";
 import type { Matrix } from "@/lib/roles/matrix";
-import { ACTIONS, type Action, FORM_ACTIONS, PERMISSION_LABELS } from "@/lib/roles/permissions";
+import {
+  ACTIONS,
+  type Action,
+  FORM_ACTIONS,
+  PERMISSION_LABELS,
+  VIEW_ACTIONS,
+} from "@/lib/roles/permissions";
 
 import { OverrideCard } from "./override-card";
 import { ScopeSelect, type ScopeValue } from "./scope-select";
@@ -96,7 +102,7 @@ export function PermissionMatrix({
 
       <OverrideCard
         title="View overrides"
-        description='What this role can do through a view. A view only shows its own columns and records. Anything left on "Same as table" follows the table.'
+        description='What this role can do through a view. A view only shows its own columns and records. New records are always added to the table, so creating follows the table or a form. Anything left on "Same as table" follows the table.'
         addLabel="Add a view"
         emptyLabel={
           views.length === 0
@@ -105,7 +111,7 @@ export function PermissionMatrix({
         }
         items={views}
         matrix={matrix}
-        actions={ACTIONS}
+        actions={VIEW_ACTIONS}
         inheritLabel="Same as table"
         fallback={LayoutGridIcon}
         onChange={onChange}

@@ -6,10 +6,16 @@ import { auditDeleted, auditUpdated, beginAudit } from "@/lib/audit/records";
 import { httpError, NOT_FOUND, writeFailure } from "@/lib/http";
 import { deleteRecords } from "@/lib/records/deletion";
 import { checkLinks } from "@/lib/records/links";
-import { countOwnedRecords, findRecord, updateRecordRow } from "@/lib/records/repository";
+import {
+  countOwnedRecords,
+  countRecordsInView,
+  findRecord,
+  updateRecordRow,
+} from "@/lib/records/repository";
 import { parseRecordValues, recordPatchSchema } from "@/lib/records/values";
 import { requireAccess } from "@/lib/roles/require-access";
 import { findTable, listColumns } from "@/lib/tables/repository";
+import { filteredViewSource, physicalViewName } from "@/lib/views/naming";
 import { viewScopeSchema } from "@/lib/views/query";
 import { findView } from "@/lib/views/repository";
 
@@ -31,7 +37,14 @@ export const GET = defineHandler.withValidator({ params, query: viewScopeSchema 
   const columns = view
     ? all.filter((column) => view.selectColumns.includes(column.columnName))
     : all;
-  const record = await findRecord(c.get("workspaceId"), table, columns, params.record, ownerId);
+  const record = await findRecord(
+    c.get("workspaceId"),
+    table,
+    columns,
+    params.record,
+    ownerId,
+    view && physicalViewName(c.get("workspaceId"), view.viewName),
+  );
   if (!record) throw httpError(404, NOT_FOUND);
   return record;
 });
@@ -68,6 +81,7 @@ export const PATCH = defineHandler.withValidator({
       parsed.values,
       user.id,
       ownerId,
+      filteredViewSource(workspace, view),
     );
   } catch (error) {
     writeFailure(error, columns);
@@ -92,6 +106,10 @@ export const DELETE = defineHandler.withValidator({ params, query: viewScopeSche
   const { ownerId } = await requireAccess(c, "delete", params.table, query.view);
   const table = await findTable(params.table);
   if (!table) throw httpError(404, NOT_FOUND);
+  const view = query.view ? await findView(table.id, query.view) : undefined;
+  const source = filteredViewSource(workspace, view);
+  if (source && (await countRecordsInView(source, [params.record])) !== 1)
+    throw httpError(404, NOT_FOUND);
 
   if (ownerId && (await countOwnedRecords(workspace, table, [params.record], ownerId)) !== 1)
     throw httpError(403, "You can only delete records you created.");

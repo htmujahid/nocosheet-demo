@@ -60,6 +60,12 @@ export const scopeOf = (
 
 export const FORM_ACTIONS: readonly Action[] = ["create"];
 
+export const VIEW_ACTIONS: readonly Action[] = ["read", "update", "delete", "export"];
+
+export function isViewGrantAllowed(grant: PermissionGrant) {
+  return VIEW_ACTIONS.includes(actionOf(grant.permission));
+}
+
 export function isFormGrantAllowed(grant: PermissionGrant) {
   return FORM_ACTIONS.includes(actionOf(grant.permission));
 }
