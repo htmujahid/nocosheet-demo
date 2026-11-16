@@ -6,7 +6,6 @@ import { useNavigate } from "@tanstack/react-router";
 import {
   ArrowDownIcon,
   ArrowUpIcon,
-  BellIcon,
   CornerDownLeftIcon,
   CreditCardIcon,
   HomeIcon,
@@ -65,12 +64,6 @@ type SettingsItem = Item & { adminOnly?: boolean };
 const settings: SettingsItem[] = [
   { value: "general", label: "General", icon: SlidersHorizontalIcon, path: "/settings" },
   { value: "appearance", label: "Appearance", icon: PaletteIcon, path: "/settings/appearance" },
-  {
-    value: "notifications",
-    label: "Notifications",
-    icon: BellIcon,
-    path: "/settings/notifications",
-  },
   { value: "members", label: "Members", icon: UsersIcon, path: "/settings/members" },
   { value: "role", label: "Role & Permissions", icon: ShieldCheckIcon, path: "/settings/role" },
   { value: "api", label: "API Keys", icon: KeyRoundIcon, path: "/settings/api" },

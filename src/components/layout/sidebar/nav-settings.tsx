@@ -1,7 +1,6 @@
 import { Link } from "@tanstack/react-router";
 
 import {
-  BellIcon,
   CreditCardIcon,
   KeyRoundIcon,
   PaletteIcon,
@@ -34,12 +33,6 @@ const items = [
     label: "Appearance",
     icon: PaletteIcon,
     path: "/appearance",
-  },
-  {
-    to: "/workspaces/$workspace/settings/notifications",
-    label: "Notifications",
-    icon: BellIcon,
-    path: "/notifications",
   },
   {
     to: "/workspaces/$workspace/settings/members",
