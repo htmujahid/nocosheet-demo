@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 
-import { BookOpenIcon, LogOutIcon, UserIcon } from "lucide-react";
+import { LogOutIcon, UserIcon } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,6 @@ import {
 } from "@/components/ui/menu";
 import { useSignOut } from "@/hooks/use-sign-out";
 import { getInitials } from "@/lib/initials";
-import { REPO_URL } from "@/lib/links";
 
 type UserMenuProps = {
   user: { name: string; email: string; image?: string | null };
@@ -51,13 +50,6 @@ export function UserMenu({ user }: UserMenuProps) {
           <MenuLinkItem render={<Link to="/account" />}>
             <UserIcon />
             Account
-          </MenuLinkItem>
-        </MenuGroup>
-        <MenuSeparator />
-        <MenuGroup>
-          <MenuLinkItem href={`${REPO_URL}#readme`} target="_blank" rel="noreferrer">
-            <BookOpenIcon />
-            Documentation
           </MenuLinkItem>
         </MenuGroup>
         <MenuSeparator />
