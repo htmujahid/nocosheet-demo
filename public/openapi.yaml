@@ -11,7 +11,15 @@ info:
     x-api-key header. Any member can create keys under Settings, API Keys. A key acts as its owner, with
     the same role and permissions, and stops working when it is revoked, expires or its owner is
     removed. Keys only work with the workspace endpoints. Each key is limited to 120 requests a minute,
-    and requests over the limit get a 429 response with a Retry-After header. Sign-in,
+    and requests over the limit get a 429 response with a Retry-After header.
+
+
+    To build your own client, such as a mobile app, where each person signs in as themselves, call
+    POST /api/auth/sign-in/email. Clients that send no Origin header, like native apps and scripts,
+    get a signed session token in the set-auth-token response header. A browser app on another origin
+    can ask for it with an x-return-auth-token header. Send the token as Authorization: Bearer on later
+    requests, and keep it in secure storage such as the system keychain. A token is a full sign-in for
+    that person, so it can do everything the web app can, and signing out revokes it. Sign-in,
     sessions, passkeys and member administration are documented in the Authentication reference, which
     administrators can open from the same page.
 
@@ -23,6 +31,7 @@ servers:
   description: This server
 security:
 - sessionCookie: []
+- bearerAuth: []
 - apiKey: []
 tags:
 - name: App
@@ -206,8 +215,8 @@ paths:
       tags:
       - Access
       summary: Get the signed-in user
-      description: Signed-in members, with a session or an API key. Handy for checking that a key works.
-        authenticatedWith says which of the two the request used.
+      description: Signed-in members, with a session, a bearer token or an API key. Handy for checking
+        that a credential works. authenticatedWith says which one the request used.
       operationId: getWorkspacesWorkspaceMe
       parameters:
       - $ref: '#/components/parameters/workspace'
@@ -2452,6 +2461,12 @@ components:
       in: cookie
       name: better-auth.session_token
       description: Set by signing in through the Authentication endpoints.
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: The signed token from the set-auth-token header of a sign-in response. Native clients
+        receive it automatically, and browser apps on another origin by sending x-return-auth-token.
+        It is a full sign-in for that person.
     apiKey:
       type: apiKey
       in: header
@@ -3323,6 +3338,7 @@ components:
         authenticatedWith:
           enum:
           - session
+          - bearer
           - api-key
       required:
       - user

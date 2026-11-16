@@ -1,7 +1,7 @@
 import { apiKey } from "@better-auth/api-key";
 import { passkey } from "@better-auth/passkey";
 import { APIError } from "better-auth/api";
-import { admin, openAPI, twoFactor } from "better-auth/plugins";
+import { admin, bearer, openAPI, twoFactor } from "better-auth/plugins";
 import { defineAuth } from "void/auth";
 import { storage } from "void/storage";
 
@@ -40,6 +40,7 @@ export default defineAuth(({ defaults, env }) => ({
       },
       rateLimit: { enabled: true, ...API_KEY_RATE_LIMIT },
     }),
+    bearer({ requireSignature: true }),
     openAPI(),
   ],
   emailAndPassword: {
