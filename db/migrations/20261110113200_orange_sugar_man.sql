@@ -249,3 +249,6 @@ CREATE TABLE `apikey` (
 CREATE INDEX `apikey_configId_idx` ON `apikey` (`configId`);--> statement-breakpoint
 CREATE INDEX `apikey_referenceId_idx` ON `apikey` (`referenceId`);--> statement-breakpoint
 CREATE INDEX `apikey_key_idx` ON `apikey` (`key`);
+--> statement-breakpoint
+ALTER TABLE `user` ADD `username` text;--> statement-breakpoint
+CREATE UNIQUE INDEX `user_username_unique` ON `user` (`username`);

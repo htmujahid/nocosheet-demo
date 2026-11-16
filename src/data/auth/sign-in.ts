@@ -7,6 +7,10 @@ import { authKeys } from "./keys";
 
 export const signInMutationOptions = mutationOptions({
   mutationKey: authKeys.mutation("sign-in"),
-  mutationFn: async (values: { email: string; password: string }) =>
-    unwrapAuthResult(await auth.signIn.email(values)),
+  mutationFn: async ({ identifier, password }: { identifier: string; password: string }) =>
+    unwrapAuthResult(
+      identifier.includes("@")
+        ? await auth.signIn.email({ email: identifier, password })
+        : await auth.signIn.username({ username: identifier, password }),
+    ),
 });

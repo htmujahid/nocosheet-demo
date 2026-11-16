@@ -27,10 +27,24 @@ import { ProfilePhoto } from "./profile-photo";
 const schema = z.object({
   name: z.string().min(1, "Name is required"),
   email: z.email("Enter a valid email address"),
+  username: z.union([
+    z.literal(""),
+    z
+      .string()
+      .min(3, "Use at least 3 characters")
+      .max(30, "Use at most 30 characters")
+      .regex(/^[a-zA-Z0-9_.]+$/, "Use letters, numbers, underscores and dots only"),
+  ]),
 });
 
 type ProfileDetailsFormProps = {
-  user: { name: string; email: string; emailVerified: boolean; image?: string | null };
+  user: {
+    name: string;
+    email: string;
+    emailVerified: boolean;
+    image?: string | null;
+    username?: string | null;
+  };
 };
 
 export function ProfileDetailsForm({ user }: ProfileDetailsFormProps) {
@@ -39,15 +53,21 @@ export function ProfileDetailsForm({ user }: ProfileDetailsFormProps) {
   const changeEmail = useMutation(changeEmailMutationOptions);
 
   const form = useForm({
-    defaultValues: { name: user.name, email: user.email },
+    defaultValues: { name: user.name, email: user.email, username: user.username ?? "" },
     validators: { onSubmit: schema },
     onSubmit: async ({ value }) => {
       try {
         if (value.name !== user.name) await updateUser.mutateAsync({ name: value.name });
+        if (value.username && value.username !== (user.username ?? ""))
+          await updateUser.mutateAsync({ username: value.username });
         if (value.email !== user.email) await changeEmail.mutateAsync({ newEmail: value.email });
         await refreshSession();
         // The address only changes once the new one is verified, so keep showing the current one.
-        form.reset({ name: value.name, email: user.email });
+        form.reset({
+          name: value.name,
+          email: user.email,
+          username: value.username || (user.username ?? ""),
+        });
       } catch {
         // Errors are surfaced from the mutation state below.
       }
@@ -84,6 +104,30 @@ export function ProfileDetailsForm({ user }: ProfileDetailsFormProps) {
                 <Input
                   type="text"
                   autoComplete="name"
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(event) => field.handleChange(event.target.value)}
+                />
+                <FieldError match={field.state.meta.isTouched && !field.state.meta.isValid}>
+                  {field.state.meta.errors.map((error) => error?.message).join(", ")}
+                </FieldError>
+              </SettingsRow>
+            )}
+          </form.Field>
+          <form.Field name="username">
+            {(field) => (
+              <SettingsRow
+                field={{
+                  name: field.name,
+                  invalid: field.state.meta.isTouched && !field.state.meta.isValid,
+                }}
+                title="Username"
+                description="Optional. Use it instead of your email to sign in."
+              >
+                <Input
+                  type="text"
+                  autoComplete="username"
+                  placeholder="Not set"
                   value={field.state.value}
                   onBlur={field.handleBlur}
                   onChange={(event) => field.handleChange(event.target.value)}

@@ -7,6 +7,6 @@ import { authKeys } from "./keys";
 
 export const updateUserMutationOptions = mutationOptions({
   mutationKey: authKeys.mutation("update-user"),
-  mutationFn: async (values: { name?: string; image?: string | null }) =>
+  mutationFn: async (values: { name?: string; image?: string | null; username?: string }) =>
     unwrapAuthResult(await auth.updateUser(values)),
 });

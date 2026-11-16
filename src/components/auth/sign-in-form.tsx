@@ -18,7 +18,7 @@ import { useCompleteSignIn } from "@/hooks/use-complete-sign-in";
 import { AuthErrorAlert } from "./auth-error-alert";
 
 const schema = z.object({
-  email: z.email("Enter a valid email address"),
+  identifier: z.string().trim().min(1, "Enter your email or username"),
   password: z.string().min(1, "Password is required"),
 });
 
@@ -36,9 +36,13 @@ export function SignInForm() {
       }
       await completeSignIn();
     },
-    onError: (error, { email }) => {
-      if (error instanceof AuthError && error.code === "EMAIL_NOT_VERIFIED") {
-        navigate({ to: "/auth/verify-email", search: { email } });
+    onError: (error, { identifier }) => {
+      if (
+        error instanceof AuthError &&
+        error.code === "EMAIL_NOT_VERIFIED" &&
+        identifier.includes("@")
+      ) {
+        navigate({ to: "/auth/verify-email", search: { email: identifier } });
       }
     },
   });
@@ -58,9 +62,9 @@ export function SignInForm() {
   }, [startAutofill]);
 
   const form = useForm({
-    defaultValues: { email: "", password: "" },
+    defaultValues: { identifier: "", password: "" },
     validators: { onSubmit: schema },
-    onSubmit: ({ value }) => mutation.mutate(value),
+    onSubmit: ({ value }) => mutation.mutate({ ...value, identifier: value.identifier.trim() }),
   });
 
   return (
@@ -71,15 +75,15 @@ export function SignInForm() {
         form.handleSubmit();
       }}
     >
-      <form.Field name="email">
+      <form.Field name="identifier">
         {(field) => (
           <Field
             name={field.name}
             invalid={field.state.meta.isTouched && !field.state.meta.isValid}
           >
-            <FieldLabel>Email</FieldLabel>
+            <FieldLabel>Email or username</FieldLabel>
             <Input
-              type="email"
+              type="text"
               autoComplete="username webauthn"
               value={field.state.value}
               onBlur={field.handleBlur}

@@ -2119,6 +2119,13 @@
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
+        },
+        "username": {
+          "name": "username",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
         }
       },
       "indexes": {
@@ -2126,6 +2133,13 @@
           "name": "user_email_unique",
           "columns": [
             "email"
+          ],
+          "isUnique": true
+        },
+        "user_username_unique": {
+          "name": "user_username_unique",
+          "columns": [
+            "username"
           ],
           "isUnique": true
         }
