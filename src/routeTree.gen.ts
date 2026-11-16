@@ -39,7 +39,7 @@ import { Route as WorkspacesWorkspaceCoreTablesTableRouteRouteImport } from './r
 import { Route as WorkspacesWorkspaceCoreTablesListRouteRouteImport } from './routes/workspaces/$workspace/_core/tables/_list/route'
 import { Route as WorkspacesWorkspaceCoreTablesNewRouteImport } from './routes/workspaces/$workspace/_core/tables/new'
 import { Route as WorkspacesWorkspaceSettingsMembersIndexRouteImport } from './routes/workspaces/$workspace/settings/members/index'
-import { Route as WorkspacesWorkspaceSettingsMembersUserIdRouteImport } from './routes/workspaces/$workspace/settings/members/$userId'
+import { Route as WorkspacesWorkspaceSettingsMembersUserIdRouteRouteImport } from './routes/workspaces/$workspace/settings/members/$userId/route'
 import { Route as WorkspacesWorkspaceSettingsMembersRolesRouteRouteImport } from './routes/workspaces/$workspace/settings/members/roles/route'
 import { Route as WorkspacesWorkspaceCoreTablesTableViewerRouteRouteImport } from './routes/workspaces/$workspace/_core/tables/$table/_viewer/route'
 import { Route as WorkspacesWorkspaceCoreTablesTableDefinitionRouteImport } from './routes/workspaces/$workspace/_core/tables/$table/definition'
@@ -48,6 +48,9 @@ import { Route as WorkspacesWorkspaceCoreTablesTableTrashRouteRouteImport } from
 import { Route as WorkspacesWorkspaceCoreTablesTableViewsRouteRouteImport } from './routes/workspaces/$workspace/_core/tables/$table/views/route'
 import { Route as WorkspacesWorkspaceCoreTablesListIndexRouteImport } from './routes/workspaces/$workspace/_core/tables/_list/index'
 import { Route as WorkspacesWorkspaceCoreTablesListTrashRouteImport } from './routes/workspaces/$workspace/_core/tables/_list/trash'
+import { Route as WorkspacesWorkspaceSettingsMembersUserIdIndexRouteImport } from './routes/workspaces/$workspace/settings/members/$userId/index'
+import { Route as WorkspacesWorkspaceSettingsMembersUserIdDevicesRouteImport } from './routes/workspaces/$workspace/settings/members/$userId/devices'
+import { Route as WorkspacesWorkspaceSettingsMembersUserIdSecurityRouteImport } from './routes/workspaces/$workspace/settings/members/$userId/security'
 import { Route as WorkspacesWorkspaceSettingsMembersRolesIndexRouteImport } from './routes/workspaces/$workspace/settings/members/roles/index'
 import { Route as WorkspacesWorkspaceSettingsMembersRolesRoleIdRouteImport } from './routes/workspaces/$workspace/settings/members/roles/$roleId'
 import { Route as WorkspacesWorkspaceCoreTablesTableViewerIndexRouteImport } from './routes/workspaces/$workspace/_core/tables/$table/_viewer/index'
@@ -232,8 +235,8 @@ const WorkspacesWorkspaceSettingsMembersIndexRoute =
     path: '/',
     getParentRoute: () => WorkspacesWorkspaceSettingsMembersRouteRoute,
   } as any)
-const WorkspacesWorkspaceSettingsMembersUserIdRoute =
-  WorkspacesWorkspaceSettingsMembersUserIdRouteImport.update({
+const WorkspacesWorkspaceSettingsMembersUserIdRouteRoute =
+  WorkspacesWorkspaceSettingsMembersUserIdRouteRouteImport.update({
     id: '/$userId',
     path: '/$userId',
     getParentRoute: () => WorkspacesWorkspaceSettingsMembersRouteRoute,
@@ -284,6 +287,24 @@ const WorkspacesWorkspaceCoreTablesListTrashRoute =
     id: '/trash',
     path: '/trash',
     getParentRoute: () => WorkspacesWorkspaceCoreTablesListRouteRoute,
+  } as any)
+const WorkspacesWorkspaceSettingsMembersUserIdIndexRoute =
+  WorkspacesWorkspaceSettingsMembersUserIdIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => WorkspacesWorkspaceSettingsMembersUserIdRouteRoute,
+  } as any)
+const WorkspacesWorkspaceSettingsMembersUserIdDevicesRoute =
+  WorkspacesWorkspaceSettingsMembersUserIdDevicesRouteImport.update({
+    id: '/devices',
+    path: '/devices',
+    getParentRoute: () => WorkspacesWorkspaceSettingsMembersUserIdRouteRoute,
+  } as any)
+const WorkspacesWorkspaceSettingsMembersUserIdSecurityRoute =
+  WorkspacesWorkspaceSettingsMembersUserIdSecurityRouteImport.update({
+    id: '/security',
+    path: '/security',
+    getParentRoute: () => WorkspacesWorkspaceSettingsMembersUserIdRouteRoute,
   } as any)
 const WorkspacesWorkspaceSettingsMembersRolesIndexRoute =
   WorkspacesWorkspaceSettingsMembersRolesIndexRouteImport.update({
@@ -427,17 +448,20 @@ export interface FileRoutesByFullPath {
   '/workspaces/$workspace/': typeof WorkspacesWorkspaceCoreIndexRoute
   '/workspaces/$workspace/settings/': typeof WorkspacesWorkspaceSettingsIndexRoute
   '/workspaces/$workspace/tables/$table': typeof WorkspacesWorkspaceCoreTablesTableRouteRouteWithChildren
+  '/workspaces/$workspace/settings/members/$userId': typeof WorkspacesWorkspaceSettingsMembersUserIdRouteRouteWithChildren
   '/workspaces/$workspace/settings/members/roles': typeof WorkspacesWorkspaceSettingsMembersRolesRouteRouteWithChildren
   '/workspaces/$workspace/tables/new': typeof WorkspacesWorkspaceCoreTablesNewRoute
-  '/workspaces/$workspace/settings/members/$userId': typeof WorkspacesWorkspaceSettingsMembersUserIdRoute
   '/workspaces/$workspace/settings/members/': typeof WorkspacesWorkspaceSettingsMembersIndexRoute
   '/workspaces/$workspace/tables/$table/forms': typeof WorkspacesWorkspaceCoreTablesTableFormsRouteRouteWithChildren
   '/workspaces/$workspace/tables/$table/trash': typeof WorkspacesWorkspaceCoreTablesTableTrashRouteRouteWithChildren
   '/workspaces/$workspace/tables/$table/views': typeof WorkspacesWorkspaceCoreTablesTableViewsRouteRouteWithChildren
   '/workspaces/$workspace/tables/$table/definition': typeof WorkspacesWorkspaceCoreTablesTableDefinitionRoute
   '/workspaces/$workspace/tables/trash': typeof WorkspacesWorkspaceCoreTablesListTrashRoute
+  '/workspaces/$workspace/settings/members/$userId/devices': typeof WorkspacesWorkspaceSettingsMembersUserIdDevicesRoute
+  '/workspaces/$workspace/settings/members/$userId/security': typeof WorkspacesWorkspaceSettingsMembersUserIdSecurityRoute
   '/workspaces/$workspace/settings/members/roles/$roleId': typeof WorkspacesWorkspaceSettingsMembersRolesRoleIdRoute
   '/workspaces/$workspace/tables/': typeof WorkspacesWorkspaceCoreTablesListIndexRoute
+  '/workspaces/$workspace/settings/members/$userId/': typeof WorkspacesWorkspaceSettingsMembersUserIdIndexRoute
   '/workspaces/$workspace/settings/members/roles/': typeof WorkspacesWorkspaceSettingsMembersRolesIndexRoute
   '/workspaces/$workspace/tables/$table/views/$view': typeof WorkspacesWorkspaceCoreTablesTableViewsViewRouteRouteWithChildren
   '/workspaces/$workspace/tables/$table/$record': typeof WorkspacesWorkspaceCoreTablesTableViewerRecordRoute
@@ -478,14 +502,16 @@ export interface FileRoutesByTo {
   '/workspaces/$workspace/settings': typeof WorkspacesWorkspaceSettingsIndexRoute
   '/workspaces/$workspace/tables/$table': typeof WorkspacesWorkspaceCoreTablesTableViewerIndexRoute
   '/workspaces/$workspace/tables/new': typeof WorkspacesWorkspaceCoreTablesNewRoute
-  '/workspaces/$workspace/settings/members/$userId': typeof WorkspacesWorkspaceSettingsMembersUserIdRoute
   '/workspaces/$workspace/settings/members': typeof WorkspacesWorkspaceSettingsMembersIndexRoute
   '/workspaces/$workspace/tables/$table/forms': typeof WorkspacesWorkspaceCoreTablesTableFormsListIndexRoute
   '/workspaces/$workspace/tables/$table/trash': typeof WorkspacesWorkspaceCoreTablesTableTrashRouteRouteWithChildren
   '/workspaces/$workspace/tables/$table/views': typeof WorkspacesWorkspaceCoreTablesTableViewsListIndexRoute
   '/workspaces/$workspace/tables/$table/definition': typeof WorkspacesWorkspaceCoreTablesTableDefinitionRoute
   '/workspaces/$workspace/tables/trash': typeof WorkspacesWorkspaceCoreTablesListTrashRoute
+  '/workspaces/$workspace/settings/members/$userId/devices': typeof WorkspacesWorkspaceSettingsMembersUserIdDevicesRoute
+  '/workspaces/$workspace/settings/members/$userId/security': typeof WorkspacesWorkspaceSettingsMembersUserIdSecurityRoute
   '/workspaces/$workspace/settings/members/roles/$roleId': typeof WorkspacesWorkspaceSettingsMembersRolesRoleIdRoute
+  '/workspaces/$workspace/settings/members/$userId': typeof WorkspacesWorkspaceSettingsMembersUserIdIndexRoute
   '/workspaces/$workspace/settings/members/roles': typeof WorkspacesWorkspaceSettingsMembersRolesIndexRoute
   '/workspaces/$workspace/tables/$table/views/$view': typeof WorkspacesWorkspaceCoreTablesTableViewsViewViewerIndexRoute
   '/workspaces/$workspace/tables/$table/$record': typeof WorkspacesWorkspaceCoreTablesTableViewerRecordRoute
@@ -528,9 +554,9 @@ export interface FileRoutesById {
   '/workspaces/$workspace/settings/': typeof WorkspacesWorkspaceSettingsIndexRoute
   '/workspaces/$workspace/_core/tables/$table': typeof WorkspacesWorkspaceCoreTablesTableRouteRouteWithChildren
   '/workspaces/$workspace/_core/tables/_list': typeof WorkspacesWorkspaceCoreTablesListRouteRouteWithChildren
+  '/workspaces/$workspace/settings/members/$userId': typeof WorkspacesWorkspaceSettingsMembersUserIdRouteRouteWithChildren
   '/workspaces/$workspace/settings/members/roles': typeof WorkspacesWorkspaceSettingsMembersRolesRouteRouteWithChildren
   '/workspaces/$workspace/_core/tables/new': typeof WorkspacesWorkspaceCoreTablesNewRoute
-  '/workspaces/$workspace/settings/members/$userId': typeof WorkspacesWorkspaceSettingsMembersUserIdRoute
   '/workspaces/$workspace/settings/members/': typeof WorkspacesWorkspaceSettingsMembersIndexRoute
   '/workspaces/$workspace/_core/tables/$table/_viewer': typeof WorkspacesWorkspaceCoreTablesTableViewerRouteRouteWithChildren
   '/workspaces/$workspace/_core/tables/$table/forms': typeof WorkspacesWorkspaceCoreTablesTableFormsRouteRouteWithChildren
@@ -538,8 +564,11 @@ export interface FileRoutesById {
   '/workspaces/$workspace/_core/tables/$table/views': typeof WorkspacesWorkspaceCoreTablesTableViewsRouteRouteWithChildren
   '/workspaces/$workspace/_core/tables/$table/definition': typeof WorkspacesWorkspaceCoreTablesTableDefinitionRoute
   '/workspaces/$workspace/_core/tables/_list/trash': typeof WorkspacesWorkspaceCoreTablesListTrashRoute
+  '/workspaces/$workspace/settings/members/$userId/devices': typeof WorkspacesWorkspaceSettingsMembersUserIdDevicesRoute
+  '/workspaces/$workspace/settings/members/$userId/security': typeof WorkspacesWorkspaceSettingsMembersUserIdSecurityRoute
   '/workspaces/$workspace/settings/members/roles/$roleId': typeof WorkspacesWorkspaceSettingsMembersRolesRoleIdRoute
   '/workspaces/$workspace/_core/tables/_list/': typeof WorkspacesWorkspaceCoreTablesListIndexRoute
+  '/workspaces/$workspace/settings/members/$userId/': typeof WorkspacesWorkspaceSettingsMembersUserIdIndexRoute
   '/workspaces/$workspace/settings/members/roles/': typeof WorkspacesWorkspaceSettingsMembersRolesIndexRoute
   '/workspaces/$workspace/_core/tables/$table/forms/_list': typeof WorkspacesWorkspaceCoreTablesTableFormsListRouteRouteWithChildren
   '/workspaces/$workspace/_core/tables/$table/views/$view': typeof WorkspacesWorkspaceCoreTablesTableViewsViewRouteRouteWithChildren
@@ -588,17 +617,20 @@ export interface FileRouteTypes {
     | '/workspaces/$workspace/'
     | '/workspaces/$workspace/settings/'
     | '/workspaces/$workspace/tables/$table'
+    | '/workspaces/$workspace/settings/members/$userId'
     | '/workspaces/$workspace/settings/members/roles'
     | '/workspaces/$workspace/tables/new'
-    | '/workspaces/$workspace/settings/members/$userId'
     | '/workspaces/$workspace/settings/members/'
     | '/workspaces/$workspace/tables/$table/forms'
     | '/workspaces/$workspace/tables/$table/trash'
     | '/workspaces/$workspace/tables/$table/views'
     | '/workspaces/$workspace/tables/$table/definition'
     | '/workspaces/$workspace/tables/trash'
+    | '/workspaces/$workspace/settings/members/$userId/devices'
+    | '/workspaces/$workspace/settings/members/$userId/security'
     | '/workspaces/$workspace/settings/members/roles/$roleId'
     | '/workspaces/$workspace/tables/'
+    | '/workspaces/$workspace/settings/members/$userId/'
     | '/workspaces/$workspace/settings/members/roles/'
     | '/workspaces/$workspace/tables/$table/views/$view'
     | '/workspaces/$workspace/tables/$table/$record'
@@ -639,14 +671,16 @@ export interface FileRouteTypes {
     | '/workspaces/$workspace/settings'
     | '/workspaces/$workspace/tables/$table'
     | '/workspaces/$workspace/tables/new'
-    | '/workspaces/$workspace/settings/members/$userId'
     | '/workspaces/$workspace/settings/members'
     | '/workspaces/$workspace/tables/$table/forms'
     | '/workspaces/$workspace/tables/$table/trash'
     | '/workspaces/$workspace/tables/$table/views'
     | '/workspaces/$workspace/tables/$table/definition'
     | '/workspaces/$workspace/tables/trash'
+    | '/workspaces/$workspace/settings/members/$userId/devices'
+    | '/workspaces/$workspace/settings/members/$userId/security'
     | '/workspaces/$workspace/settings/members/roles/$roleId'
+    | '/workspaces/$workspace/settings/members/$userId'
     | '/workspaces/$workspace/settings/members/roles'
     | '/workspaces/$workspace/tables/$table/views/$view'
     | '/workspaces/$workspace/tables/$table/$record'
@@ -688,9 +722,9 @@ export interface FileRouteTypes {
     | '/workspaces/$workspace/settings/'
     | '/workspaces/$workspace/_core/tables/$table'
     | '/workspaces/$workspace/_core/tables/_list'
+    | '/workspaces/$workspace/settings/members/$userId'
     | '/workspaces/$workspace/settings/members/roles'
     | '/workspaces/$workspace/_core/tables/new'
-    | '/workspaces/$workspace/settings/members/$userId'
     | '/workspaces/$workspace/settings/members/'
     | '/workspaces/$workspace/_core/tables/$table/_viewer'
     | '/workspaces/$workspace/_core/tables/$table/forms'
@@ -698,8 +732,11 @@ export interface FileRouteTypes {
     | '/workspaces/$workspace/_core/tables/$table/views'
     | '/workspaces/$workspace/_core/tables/$table/definition'
     | '/workspaces/$workspace/_core/tables/_list/trash'
+    | '/workspaces/$workspace/settings/members/$userId/devices'
+    | '/workspaces/$workspace/settings/members/$userId/security'
     | '/workspaces/$workspace/settings/members/roles/$roleId'
     | '/workspaces/$workspace/_core/tables/_list/'
+    | '/workspaces/$workspace/settings/members/$userId/'
     | '/workspaces/$workspace/settings/members/roles/'
     | '/workspaces/$workspace/_core/tables/$table/forms/_list'
     | '/workspaces/$workspace/_core/tables/$table/views/$view'
@@ -943,7 +980,7 @@ declare module '@tanstack/react-router' {
       id: '/workspaces/$workspace/settings/members/$userId'
       path: '/$userId'
       fullPath: '/workspaces/$workspace/settings/members/$userId'
-      preLoaderRoute: typeof WorkspacesWorkspaceSettingsMembersUserIdRouteImport
+      preLoaderRoute: typeof WorkspacesWorkspaceSettingsMembersUserIdRouteRouteImport
       parentRoute: typeof WorkspacesWorkspaceSettingsMembersRouteRoute
     }
     '/workspaces/$workspace/settings/members/roles': {
@@ -1001,6 +1038,27 @@ declare module '@tanstack/react-router' {
       fullPath: '/workspaces/$workspace/tables/trash'
       preLoaderRoute: typeof WorkspacesWorkspaceCoreTablesListTrashRouteImport
       parentRoute: typeof WorkspacesWorkspaceCoreTablesListRouteRoute
+    }
+    '/workspaces/$workspace/settings/members/$userId/': {
+      id: '/workspaces/$workspace/settings/members/$userId/'
+      path: '/'
+      fullPath: '/workspaces/$workspace/settings/members/$userId/'
+      preLoaderRoute: typeof WorkspacesWorkspaceSettingsMembersUserIdIndexRouteImport
+      parentRoute: typeof WorkspacesWorkspaceSettingsMembersUserIdRouteRoute
+    }
+    '/workspaces/$workspace/settings/members/$userId/devices': {
+      id: '/workspaces/$workspace/settings/members/$userId/devices'
+      path: '/devices'
+      fullPath: '/workspaces/$workspace/settings/members/$userId/devices'
+      preLoaderRoute: typeof WorkspacesWorkspaceSettingsMembersUserIdDevicesRouteImport
+      parentRoute: typeof WorkspacesWorkspaceSettingsMembersUserIdRouteRoute
+    }
+    '/workspaces/$workspace/settings/members/$userId/security': {
+      id: '/workspaces/$workspace/settings/members/$userId/security'
+      path: '/security'
+      fullPath: '/workspaces/$workspace/settings/members/$userId/security'
+      preLoaderRoute: typeof WorkspacesWorkspaceSettingsMembersUserIdSecurityRouteImport
+      parentRoute: typeof WorkspacesWorkspaceSettingsMembersUserIdRouteRoute
     }
     '/workspaces/$workspace/settings/members/roles/': {
       id: '/workspaces/$workspace/settings/members/roles/'
@@ -1410,6 +1468,27 @@ const WorkspacesWorkspaceCoreRouteRouteWithChildren =
     WorkspacesWorkspaceCoreRouteRouteChildren,
   )
 
+interface WorkspacesWorkspaceSettingsMembersUserIdRouteRouteChildren {
+  WorkspacesWorkspaceSettingsMembersUserIdDevicesRoute: typeof WorkspacesWorkspaceSettingsMembersUserIdDevicesRoute
+  WorkspacesWorkspaceSettingsMembersUserIdSecurityRoute: typeof WorkspacesWorkspaceSettingsMembersUserIdSecurityRoute
+  WorkspacesWorkspaceSettingsMembersUserIdIndexRoute: typeof WorkspacesWorkspaceSettingsMembersUserIdIndexRoute
+}
+
+const WorkspacesWorkspaceSettingsMembersUserIdRouteRouteChildren: WorkspacesWorkspaceSettingsMembersUserIdRouteRouteChildren =
+  {
+    WorkspacesWorkspaceSettingsMembersUserIdDevicesRoute:
+      WorkspacesWorkspaceSettingsMembersUserIdDevicesRoute,
+    WorkspacesWorkspaceSettingsMembersUserIdSecurityRoute:
+      WorkspacesWorkspaceSettingsMembersUserIdSecurityRoute,
+    WorkspacesWorkspaceSettingsMembersUserIdIndexRoute:
+      WorkspacesWorkspaceSettingsMembersUserIdIndexRoute,
+  }
+
+const WorkspacesWorkspaceSettingsMembersUserIdRouteRouteWithChildren =
+  WorkspacesWorkspaceSettingsMembersUserIdRouteRoute._addFileChildren(
+    WorkspacesWorkspaceSettingsMembersUserIdRouteRouteChildren,
+  )
+
 interface WorkspacesWorkspaceSettingsMembersRolesRouteRouteChildren {
   WorkspacesWorkspaceSettingsMembersRolesRoleIdRoute: typeof WorkspacesWorkspaceSettingsMembersRolesRoleIdRoute
   WorkspacesWorkspaceSettingsMembersRolesIndexRoute: typeof WorkspacesWorkspaceSettingsMembersRolesIndexRoute
@@ -1429,17 +1508,17 @@ const WorkspacesWorkspaceSettingsMembersRolesRouteRouteWithChildren =
   )
 
 interface WorkspacesWorkspaceSettingsMembersRouteRouteChildren {
+  WorkspacesWorkspaceSettingsMembersUserIdRouteRoute: typeof WorkspacesWorkspaceSettingsMembersUserIdRouteRouteWithChildren
   WorkspacesWorkspaceSettingsMembersRolesRouteRoute: typeof WorkspacesWorkspaceSettingsMembersRolesRouteRouteWithChildren
-  WorkspacesWorkspaceSettingsMembersUserIdRoute: typeof WorkspacesWorkspaceSettingsMembersUserIdRoute
   WorkspacesWorkspaceSettingsMembersIndexRoute: typeof WorkspacesWorkspaceSettingsMembersIndexRoute
 }
 
 const WorkspacesWorkspaceSettingsMembersRouteRouteChildren: WorkspacesWorkspaceSettingsMembersRouteRouteChildren =
   {
+    WorkspacesWorkspaceSettingsMembersUserIdRouteRoute:
+      WorkspacesWorkspaceSettingsMembersUserIdRouteRouteWithChildren,
     WorkspacesWorkspaceSettingsMembersRolesRouteRoute:
       WorkspacesWorkspaceSettingsMembersRolesRouteRouteWithChildren,
-    WorkspacesWorkspaceSettingsMembersUserIdRoute:
-      WorkspacesWorkspaceSettingsMembersUserIdRoute,
     WorkspacesWorkspaceSettingsMembersIndexRoute:
       WorkspacesWorkspaceSettingsMembersIndexRoute,
   }

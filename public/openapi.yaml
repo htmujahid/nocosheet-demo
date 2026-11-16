@@ -50,6 +50,8 @@ tags:
   description: Forms that create records.
 - name: Files
   description: Uploads for file and image columns.
+- name: Members
+  description: What administrators can see and do for a member.
 - name: Roles
   description: Roles, assignments and permissions.
 - name: Trash
@@ -2233,6 +2235,57 @@ paths:
           $ref: '#/components/responses/NotFound'
         '409':
           $ref: '#/components/responses/Conflict'
+  /workspaces/{workspace}/members/{member}/api-keys:
+    get:
+      tags:
+      - Members
+      summary: List a member's API keys
+      description: Every key the member created, newest first, without the key values. Administrators
+        only, with a session or bearer token. API keys can't manage keys.
+      operationId: getWorkspacesWorkspaceMembersMemberApiKeys
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      - $ref: '#/components/parameters/member'
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MemberApiKey'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /workspaces/{workspace}/members/{member}/api-keys/{key}:
+    delete:
+      tags:
+      - Members
+      summary: Revoke a member's API key
+      description: Anything using the key stops working immediately. Administrators only, with a session
+        or bearer token.
+      operationId: deleteWorkspacesWorkspaceMembersMemberApiKeysKey
+      parameters:
+      - $ref: '#/components/parameters/workspace'
+      - $ref: '#/components/parameters/member'
+      - $ref: '#/components/parameters/key'
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ok'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
   /workspaces/{workspace}/roles:
     get:
       tags:
@@ -2501,6 +2554,20 @@ components:
       schema:
         type: integer
         minimum: 1
+    member:
+      name: member
+      in: path
+      required: true
+      schema:
+        type: string
+      description: The member's user id.
+    key:
+      name: key
+      in: path
+      required: true
+      schema:
+        type: string
+      description: The API key id, not the key value.
     role:
       name: role
       in: path
@@ -3199,6 +3266,50 @@ components:
       required:
       - resourceId
       - permission
+    MemberApiKey:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          anyOf:
+          - type: string
+          - type: 'null'
+        start:
+          description: The first characters of the key, for recognizing it.
+          anyOf:
+          - type: string
+          - type: 'null'
+        enabled:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+        expiresAt:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+        lastRequest:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+        requestCount:
+          anyOf:
+          - type: integer
+          - type: 'null'
+        createdAt:
+          type: string
+          format: date-time
+      required:
+      - id
+      - name
+      - start
+      - enabled
+      - expiresAt
+      - lastRequest
+      - requestCount
+      - createdAt
     Role:
       type: object
       properties:

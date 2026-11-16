@@ -1,10 +1,9 @@
-import { createFileRoute, notFound, redirect } from "@tanstack/react-router";
+import { createFileRoute, notFound, Outlet, redirect } from "@tanstack/react-router";
 
 import { WorkspaceContent, WorkspaceHeader } from "@/components/layout/workspace-header";
-import { MemberDetail } from "@/components/workspace/settings/members/member-detail";
 import { MemberNotFound } from "@/components/workspace/settings/members/member-not-found";
+import { MemberTabs } from "@/components/workspace/settings/members/member-tabs";
 import { adminUserQueryOptions } from "@/data/admin/user";
-import { adminUserSessionsQueryOptions } from "@/data/admin/user-sessions";
 import { membersQueryOptions } from "@/data/workspace/members";
 
 export const Route = createFileRoute("/workspaces/$workspace/settings/members/$userId")({
@@ -15,6 +14,7 @@ export const Route = createFileRoute("/workspaces/$workspace/settings/members/$u
         params: { workspace: params.workspace },
       });
     }
+    return { isSelf: context.session?.user.id === params.userId };
   },
   loader: async ({ context, params }) => {
     const members = await context.queryClient.query({
@@ -25,13 +25,9 @@ export const Route = createFileRoute("/workspaces/$workspace/settings/members/$u
     const member = members.find((item) => item.id === params.userId);
     if (!member) throw notFound();
 
-    await Promise.allSettled([
-      context.queryClient.query({ ...adminUserQueryOptions(params.userId), staleTime: "static" }),
-      context.queryClient.query({
-        ...adminUserSessionsQueryOptions(params.userId),
-        staleTime: "static",
-      }),
-    ]);
+    await context.queryClient
+      .query({ ...adminUserQueryOptions(params.userId), staleTime: "static" })
+      .catch(() => undefined);
 
     return { memberName: member.name };
   },
@@ -40,16 +36,18 @@ export const Route = createFileRoute("/workspaces/$workspace/settings/members/$u
       (loaderData as { memberName?: string } | undefined)?.memberName ?? "Member",
   },
   notFoundComponent: MemberNotFound,
-  component: MemberPage,
+  component: MemberLayout,
 });
 
-function MemberPage() {
+function MemberLayout() {
   const { workspace, userId } = Route.useParams();
+  const { isSelf } = Route.useRouteContext();
   return (
     <>
       <WorkspaceHeader workspace={workspace} />
-      <WorkspaceContent className="max-w-3xl">
-        <MemberDetail userId={userId} />
+      <WorkspaceContent className="flex max-w-3xl flex-col gap-6">
+        {!isSelf && <MemberTabs workspace={workspace} userId={userId} />}
+        <Outlet />
       </WorkspaceContent>
     </>
   );
