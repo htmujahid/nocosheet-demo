@@ -1,7 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 
 import { LockIcon } from "lucide-react";
-import { env } from "void/env";
 
 import { AuthDivider } from "@/components/auth/auth-divider";
 import { AuthFooter } from "@/components/auth/auth-footer";
@@ -23,7 +22,7 @@ export const Route = createFileRoute("/auth/sign-up")({
 });
 
 function SignUpPage() {
-  const signupEnabled = String(env.VITE_ENABLE_SIGNUP) === "true";
+  const signupEnabled = String(import.meta.env.VITE_ENABLE_SIGNUP) === "true";
 
   if (!signupEnabled) {
     return (
