@@ -146,6 +146,7 @@ CREATE TABLE `default__table` (
 	`title_column_id` integer,
 	`position` integer DEFAULT 0 NOT NULL,
 	`is_audit` integer DEFAULT false NOT NULL,
+	`is_hidden` integer DEFAULT false NOT NULL,
 	`metadata` text DEFAULT '{}' NOT NULL,
 	`created_by` text,
 	`created_at` integer NOT NULL,

@@ -5,6 +5,7 @@ import { TrashSheet } from "@/components/workspace/trash/trash-sheet";
 import { deletedFormsQueryOptions } from "@/data/workspace/forms";
 import { useWorkspace } from "@/hooks/use-workspace";
 import { TRASH_RETENTION_DAYS } from "@/lib/records/retention";
+import { ALL_VIEW } from "@/lib/views/constants";
 
 export const Route = createFileRoute(
   "/workspaces/$workspace/_core/tables/$table/forms/_list/trash",
@@ -26,7 +27,11 @@ function FormsTrashSheet() {
 
   if (!isAdmin)
     return (
-      <Navigate to="/workspaces/$workspace/tables/$table" params={{ workspace, table }} replace />
+      <Navigate
+        to="/workspaces/$workspace/tables/$table/views/$view"
+        params={{ workspace, table, view: ALL_VIEW }}
+        replace
+      />
     );
 
   return (

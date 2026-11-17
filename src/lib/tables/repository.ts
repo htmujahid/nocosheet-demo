@@ -264,6 +264,7 @@ export async function createTable(workspace: string, body: TableValues, userId: 
         icon: body.icon,
         groupName: body.groupName,
         isAudit: body.isAudit,
+        isHidden: body.isHidden,
         position: sql`(select coalesce(max(position), -1) + 1 from ${tableTable})`,
         createdBy: userId,
       })
@@ -281,6 +282,7 @@ export async function updateTable(
     description?: string | null;
     titleColumnId?: number | null;
     isAudit?: boolean;
+    isHidden?: boolean;
   },
 ) {
   const [updated] = await db

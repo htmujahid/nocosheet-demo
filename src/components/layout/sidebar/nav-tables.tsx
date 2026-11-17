@@ -35,7 +35,11 @@ export function NavTables({ workspace }: { workspace: string }) {
                 tooltip="New table"
                 className="text-sidebar-foreground/70"
                 render={
-                  <Link to="/workspaces/$workspace/tables/new" params={{ workspace }} search={{ step: 1 }} />
+                  <Link
+                    to="/workspaces/$workspace/tables/new"
+                    params={{ workspace }}
+                    search={{ step: 1 }}
+                  />
                 }
               >
                 <PlusIcon />

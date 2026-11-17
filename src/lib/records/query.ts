@@ -11,8 +11,10 @@ import type { FilterCondition } from "./filters";
 
 export const RECORD_PAGE_SIZES = [10, 25, 50, 100] as const;
 
+export const RECORD_QUERY_PAGE_SIZES = [5, ...RECORD_PAGE_SIZES] as const;
+
 export const recordsSearchParams = {
-  pageSize: parseAsNumberLiteral(RECORD_PAGE_SIZES).withDefault(25),
+  pageSize: parseAsNumberLiteral(RECORD_QUERY_PAGE_SIZES).withDefault(25),
   sort: parseAsString,
   order: parseAsStringLiteral(["asc", "desc"] as const).withDefault("asc"),
   q: parseAsString.withDefault(""),
@@ -63,7 +65,7 @@ export const recordsApiSchema = z.object({
   dir: z.enum(["next", "prev"]).optional(),
   pageSize: z.coerce
     .number()
-    .pipe(z.union([z.literal(10), z.literal(25), z.literal(50), z.literal(100)]))
+    .pipe(z.union([z.literal(5), z.literal(10), z.literal(25), z.literal(50), z.literal(100)]))
     .optional(),
   sort: z.string().max(64).optional(),
   order: z.enum(["asc", "desc"]).optional(),
@@ -74,3 +76,5 @@ export const recordsApiSchema = z.object({
 export const recordsDeleteSchema = z.object({
   ids: z.array(z.number().int().positive()).min(1).max(100),
 });
+
+export const RECORDS_COUNT_LIMIT = 1000;

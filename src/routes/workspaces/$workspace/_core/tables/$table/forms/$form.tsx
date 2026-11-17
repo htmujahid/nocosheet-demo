@@ -6,6 +6,7 @@ import { FormActions } from "@/components/workspace/forms/form-actions";
 import { FormFill } from "@/components/workspace/forms/form-fill";
 import { formQueryOptions } from "@/data/workspace/forms";
 import { useAccess } from "@/hooks/use-access";
+import { ALL_VIEW } from "@/lib/views/constants";
 
 export const Route = createFileRoute("/workspaces/$workspace/_core/tables/$table/forms/$form")({
   staticData: { crumb: (loaderData) => (loaderData as { name?: string } | undefined)?.name },
@@ -32,7 +33,11 @@ function FormPage() {
 
   if (!access.can("create", tableId, Number(formParam)))
     return (
-      <Navigate to="/workspaces/$workspace/tables/$table" params={{ workspace, table }} replace />
+      <Navigate
+        to="/workspaces/$workspace/tables/$table/views/$view"
+        params={{ workspace, table, view: ALL_VIEW }}
+        replace
+      />
     );
 
   return (

@@ -30,10 +30,23 @@ import { FormsMenu } from "@/components/workspace/forms/forms-menu";
 import { DeleteTablesAlert } from "@/components/workspace/tables/delete-tables-dialog";
 import { workspaceKeys } from "@/data/workspace/keys";
 import { useAccess } from "@/hooks/use-access";
+import { ALL_VIEW } from "@/lib/views/constants";
 
 import { useExportRecords } from "./use-export-records";
 
-export function TableActions({ workspace, table }: { workspace: string; table: string }) {
+/**
+ * Header actions for a table. `newRecord` picks where New record goes: a sheet over the grid
+ * (default) or the full-page form.
+ */
+export function TableActions({
+  workspace,
+  table,
+  newRecord = "sheet",
+}: {
+  workspace: string;
+  table: string;
+  newRecord?: "sheet" | "page";
+}) {
   const access = useAccess();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -78,8 +91,8 @@ export function TableActions({ workspace, table }: { workspace: string; table: s
                   <MenuLinkItem
                     render={
                       <Link
-                        to="/workspaces/$workspace/tables/$table/import"
-                        params={{ workspace, table }}
+                        to="/workspaces/$workspace/tables/$table/views/$view/import"
+                        params={{ workspace, table, view: ALL_VIEW }}
                         search={(previous) => previous}
                       />
                     }
@@ -145,11 +158,15 @@ export function TableActions({ workspace, table }: { workspace: string; table: s
             aria-label="New record"
             className="max-sm:w-9 max-sm:px-0"
             render={
-              <Link
-                to="/workspaces/$workspace/tables/$table/new"
-                params={{ workspace, table }}
-                search={(previous) => previous}
-              />
+              newRecord === "page" ? (
+                <Link to="/workspaces/$workspace/tables/$table/new" params={{ workspace, table }} />
+              ) : (
+                <Link
+                  to="/workspaces/$workspace/tables/$table/views/$view/new"
+                  params={{ workspace, table, view: ALL_VIEW }}
+                  search={(previous) => previous}
+                />
+              )
             }
           >
             <PlusIcon aria-hidden="true" />

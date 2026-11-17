@@ -1083,6 +1083,14 @@
           "autoincrement": false,
           "default": false
         },
+        "is_hidden": {
+          "name": "is_hidden",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
         "metadata": {
           "name": "metadata",
           "type": "text",

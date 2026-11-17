@@ -11,6 +11,7 @@ import {
   RefreshCwIcon,
   Settings2Icon,
   Trash2Icon,
+  UploadIcon,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,7 @@ import {
   Menu,
   MenuGroup,
   MenuItem,
+  MenuLinkItem,
   MenuPopup,
   MenuSeparator,
   MenuTrigger,
@@ -28,6 +30,7 @@ import { useExportRecords } from "@/components/workspace/records/use-export-reco
 import { workspaceKeys } from "@/data/workspace/keys";
 import { viewsQueryOptions } from "@/data/workspace/views";
 import { useAccess } from "@/hooks/use-access";
+import { ALL_VIEW } from "@/lib/views/constants";
 
 import { DeleteViewDialog } from "./delete-view-dialog";
 import { ViewDialog } from "./view-dialog";
@@ -79,17 +82,33 @@ export function ViewActions({
               Refresh
             </MenuItem>
           </MenuGroup>
-          {canExport && (
+          {(canCreate || canExport) && (
             <>
               <MenuSeparator />
               <MenuGroup>
-                <MenuItem
-                  disabled={exportRecords.isPending}
-                  onClick={() => exportRecords.mutate(undefined)}
-                >
-                  <DownloadIcon aria-hidden="true" />
-                  Export
-                </MenuItem>
+                {canCreate && (
+                  <MenuLinkItem
+                    render={
+                      <Link
+                        to="/workspaces/$workspace/tables/$table/views/$view/import"
+                        params={{ workspace, table, view: String(view) }}
+                        search={(previous) => previous}
+                      />
+                    }
+                  >
+                    <UploadIcon aria-hidden="true" />
+                    Import
+                  </MenuLinkItem>
+                )}
+                {canExport && (
+                  <MenuItem
+                    disabled={exportRecords.isPending}
+                    onClick={() => exportRecords.mutate(undefined)}
+                  >
+                    <DownloadIcon aria-hidden="true" />
+                    Export
+                  </MenuItem>
+                )}
               </MenuGroup>
             </>
           )}
@@ -150,8 +169,8 @@ export function ViewActions({
             onOpenChange={(open) => !open && setDialog(null)}
             onDeleted={() =>
               void navigate({
-                to: "/workspaces/$workspace/tables/$table",
-                params: { workspace, table },
+                to: "/workspaces/$workspace/tables/$table/views/$view",
+                params: { workspace, table, view: ALL_VIEW },
               })
             }
           />

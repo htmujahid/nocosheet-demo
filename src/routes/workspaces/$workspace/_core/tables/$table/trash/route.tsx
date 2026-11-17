@@ -5,6 +5,7 @@ import { TrashList } from "@/components/workspace/records/trash-list";
 import { trashQueryOptions } from "@/data/workspace/trash";
 import { useWorkspace } from "@/hooks/use-workspace";
 import { resolveTrashQuery } from "@/lib/trash/query";
+import { ALL_VIEW } from "@/lib/views/constants";
 
 export const Route = createFileRoute("/workspaces/$workspace/_core/tables/$table/trash")({
   staticData: { crumb: "Trash" },
@@ -24,8 +25,8 @@ function RecordsTrashPage() {
   if (!isAdmin)
     return (
       <Navigate
-        to="/workspaces/$workspace/tables/$table"
-        params={{ workspace, table }}
+        to="/workspaces/$workspace/tables/$table/views/$view"
+        params={{ workspace, table, view: ALL_VIEW }}
         replace
       />
     );

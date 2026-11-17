@@ -455,6 +455,19 @@ export async function updateRecordRow(
   return updated[0] as Record<string, unknown> | undefined;
 }
 
+export async function countRecordsUpTo(
+  workspace: string,
+  table: Table,
+  limit: number,
+  ownerId?: string,
+) {
+  const owner = ownerId ? sql`where "created_by" = ${ownerId}` : sql``;
+  const [row] = await db.all<{ n: number }>(
+    sql`select count(*) as n from (select 1 from ${raw(quoteIdent(physicalTableName(workspace, table.tableName)))} ${owner} limit ${limit})`,
+  );
+  return Number(row?.n ?? 0);
+}
+
 export async function countRecordsInView(viewPhysicalName: string, ids: number[]) {
   const unique = [...new Set(ids)];
   let found = 0;

@@ -28,8 +28,8 @@ import { tableInputSchema } from "@/lib/tables/validation";
 
 import { ColumnsEditor } from "./columns-editor";
 import { IconPicker } from "./icon-picker";
+import { TABLE_FLAGS, TableFlag } from "./table-flags";
 import { TitleSelect } from "./title-select";
-import { ToggleRow } from "./toggle-row";
 
 type DefinitionValues = {
   name: string;
@@ -38,6 +38,7 @@ type DefinitionValues = {
   description: string;
   titleColumn: string | null;
   isAudit: boolean;
+  isHidden: boolean;
 };
 
 const schema = z.object({ name: tableInputSchema.shape.name });
@@ -70,6 +71,7 @@ export function TableDefinition({ workspace, tableId }: { workspace: string; tab
       description: table.description ?? "",
       titleColumn: savedTitle,
       isAudit: table.isAudit,
+      isHidden: table.isHidden,
     } as DefinitionValues,
     validators: { onSubmit: formSchema<DefinitionValues>(schema) },
     onSubmit: ({ value }) =>
@@ -83,6 +85,7 @@ export function TableDefinition({ workspace, tableId }: { workspace: string; tab
           description: value.description,
           titleColumn: value.titleColumn,
           isAudit: value.isAudit,
+          isHidden: value.isHidden,
         },
       }),
   });
@@ -185,16 +188,19 @@ export function TableDefinition({ workspace, tableId }: { workspace: string; tab
                 )}
               </form.Field>
 
-              <form.Field name="isAudit">
-                {(field) => (
-                  <ToggleRow
-                    title="Audit changes"
-                    description="Record who creates, edits and deletes records in this table in the audit log."
-                    checked={field.state.value}
-                    onCheckedChange={field.handleChange}
-                  />
-                )}
-              </form.Field>
+              <div className="flex flex-wrap gap-x-6 gap-y-3">
+                {TABLE_FLAGS.map((flag) => (
+                  <form.Field key={flag.name} name={flag.name}>
+                    {(field) => (
+                      <TableFlag
+                        label={flag.label}
+                        checked={field.state.value}
+                        onChange={field.handleChange}
+                      />
+                    )}
+                  </form.Field>
+                ))}
+              </div>
 
               {updateTable.error && (
                 <Alert variant="error">

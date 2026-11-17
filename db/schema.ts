@@ -77,6 +77,7 @@ export const workspaceSchema = <W extends string = "default">(workspaceId: W = "
       }),
       position: integer("position").notNull().default(0),
       isAudit: integer("is_audit", { mode: "boolean" }).notNull().default(false),
+      isHidden: integer("is_hidden", { mode: "boolean" }).notNull().default(false),
       metadata: json<Record<string, unknown>>("metadata", {}),
       createdBy: createdBy(),
       ...timestamps,
