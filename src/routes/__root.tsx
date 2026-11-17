@@ -11,7 +11,7 @@ import { sessionQueryOptions } from "@/data/auth/session";
 // Only included in dev builds; tree-shaken from production.
 const Devtools = import.meta.env.DEV ? lazy(() => import("@/components/devtools")) : null;
 
-export const Route =createRootRouteWithContext<{ queryClient: QueryClient }>()({
+export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   beforeLoad: async ({ context }) => ({
     session: await context.queryClient.query(sessionQueryOptions),
   }),
