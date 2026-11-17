@@ -59,7 +59,10 @@ export const tablesColumns: ColumnDef<typeof dataTableFeatures, TablesRow>[] = [
       <div className="flex items-center gap-3">
         <NamedIcon name={row.original.icon} className="size-4 shrink-0 text-muted-foreground" />
         <div className="flex min-w-0 flex-col">
-          <TableName id={row.original.id} name={row.original.name} />
+          <div className="flex min-w-0 items-center gap-2">
+            <TableName id={row.original.id} name={row.original.name} />
+            {row.original.isHidden && <Badge variant="outline">Hidden</Badge>}
+          </div>
           {row.original.description && (
             <span className="truncate text-muted-foreground text-xs">
               {row.original.description}

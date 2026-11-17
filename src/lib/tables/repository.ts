@@ -204,6 +204,7 @@ export async function listTables(query: TablesQuery) {
         groupName: tableTable.groupName,
         description: tableTable.description,
         titleColumnId: tableTable.titleColumnId,
+        isHidden: tableTable.isHidden,
         columnCount,
         updatedAt: tableTable.updatedAt,
       })
@@ -233,7 +234,7 @@ export async function listSidebarRows(userId: string) {
       favoriteTable,
       and(eq(favoriteTable.tableId, tableTable.id), eq(favoriteTable.userId, userId)),
     )
-    .where(isNull(tableTable.deletedAt))
+    .where(and(isNull(tableTable.deletedAt), eq(tableTable.isHidden, false)))
     .orderBy(asc(tableTable.position), asc(tableTable.id));
 }
 
