@@ -20,9 +20,9 @@ export function WorkspaceHeader({
 }) {
   return (
     <header className="flex h-14 shrink-0 items-center justify-between gap-2 px-4">
-      <div className="flex min-w-0 items-center gap-2">
+      <div className="flex min-w-0 flex-1 items-center gap-2">
         <SidebarTrigger className="-ms-1" />
-        <Separator orientation="vertical" className="me-2 h-4" />
+        <Separator orientation="vertical" className="me-2 h-4 shrink-0" />
         <WorkspaceBreadcrumbs workspace={workspace} />
       </div>
       <div className="flex shrink-0 items-center gap-2">{children}</div>

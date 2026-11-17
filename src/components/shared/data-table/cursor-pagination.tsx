@@ -36,7 +36,6 @@ export function CursorPagination<
     <div className="flex items-center justify-between gap-2">
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2 whitespace-nowrap">
-          <p className="text-muted-foreground text-sm">Rows per page</p>
           <Select
             items={pageSizes.map((size) => ({ value: size, label: String(size) }))}
             value={pageSize}

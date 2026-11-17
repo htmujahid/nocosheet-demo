@@ -34,9 +34,9 @@ export function WorkspaceBreadcrumbs({ workspace }: { workspace: string }) {
   const atHome = crumbs.length === 0;
 
   return (
-    <Breadcrumb>
-      <BreadcrumbList>
-        <BreadcrumbItem>
+    <Breadcrumb className="min-w-0">
+      <BreadcrumbList className="flex-nowrap">
+        <BreadcrumbItem className="shrink-0">
           {atHome ? (
             <BreadcrumbPage aria-label="Home">
               <HomeIcon className="size-4" />
@@ -54,10 +54,11 @@ export function WorkspaceBreadcrumbs({ workspace }: { workspace: string }) {
           const last = index === crumbs.length - 1;
           return (
             <Fragment key={crumb.id}>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
+              {/* On small screens only the current page is shown after the home icon (below lg). */}
+              <BreadcrumbSeparator className={last ? undefined : "hidden lg:block"} />
+              <BreadcrumbItem className={last ? "min-w-0" : "hidden lg:inline-flex"}>
                 {last ? (
-                  <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
+                  <BreadcrumbPage className="truncate">{crumb.label}</BreadcrumbPage>
                 ) : (
                   <BreadcrumbLink render={<Link to={crumb.pathname} />}>
                     {crumb.label}
