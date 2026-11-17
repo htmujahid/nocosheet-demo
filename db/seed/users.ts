@@ -26,7 +26,7 @@ const MEMBERS_WITH_ACCOUNTS = new Set([
 export const stableId = (key: string) =>
   createHash("sha256").update(key).digest("hex").slice(0, 32);
 
-async function createAccount(db: SeedDb, account: Account) {
+async function createAccount(db: SeedDb, account: Account, passwordHash: string) {
   const id = stableId(`user:${account.email}`);
 
   await db.insert(userTable).values({
@@ -45,7 +45,7 @@ async function createAccount(db: SeedDb, account: Account) {
     accountId: id,
     providerId: "credential",
     userId: id,
-    password: await hashPassword(SEED_PASSWORD),
+    password: passwordHash,
     createdAt: account.joined,
     updatedAt: account.joined,
   });
@@ -54,30 +54,45 @@ async function createAccount(db: SeedDb, account: Account) {
 }
 
 export async function seedUsers(db: SeedDb, team: SeedRow[]): Promise<SeedUsers> {
-  const admin = await createAccount(db, {
-    name: "Admin User",
-    email: "admin@example.com",
-    role: "admin",
-    joined: new Date(at(-400)),
-  });
-  const member = await createAccount(db, {
-    name: "Member User",
-    email: "member@example.com",
-    role: "user",
-    joined: new Date(at(-150)),
-  });
+  // One scrypt hash shared by every seeded account keeps the demo cron well inside Worker CPU limits.
+  const passwordHash = await hashPassword(SEED_PASSWORD);
+
+  const admin = await createAccount(
+    db,
+    {
+      name: "Admin User",
+      email: "admin@example.com",
+      role: "admin",
+      joined: new Date(at(-400)),
+    },
+    passwordHash,
+  );
+  const member = await createAccount(
+    db,
+    {
+      name: "Member User",
+      email: "member@example.com",
+      role: "user",
+      joined: new Date(at(-150)),
+    },
+    passwordHash,
+  );
 
   const others: string[] = [];
   const people = team.filter((person) => MEMBERS_WITH_ACCOUNTS.has(String(person.Email)));
   for (const person of people) {
     const active = person.Active !== false;
-    const id = await createAccount(db, {
-      name: String(person.Name),
-      email: String(person.Email),
-      role: "user",
-      joined: new Date(`${String(person.Joined)}T09:00:00Z`),
-      banned: !active,
-    });
+    const id = await createAccount(
+      db,
+      {
+        name: String(person.Name),
+        email: String(person.Email),
+        role: "user",
+        joined: new Date(`${String(person.Joined)}T09:00:00Z`),
+        banned: !active,
+      },
+      passwordHash,
+    );
     if (active) others.push(id);
   }
 

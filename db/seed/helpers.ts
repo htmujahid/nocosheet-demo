@@ -32,13 +32,21 @@ export type SeedSchema = SqliteContext["schema"];
 
 export const WORKSPACE = "default";
 
-const DAY = 86_400_000;
-const NOW = Date.now();
+/** Runs raw SQL statements in order. The CLI seed runs them one by one; the demo cron batches them. */
+export type SeedExec = (statements: string[]) => Promise<void>;
 
-export const day = (offset: number) => new Date(NOW + offset * DAY).toISOString().slice(0, 10);
+export const cliExec =
+  (db: SeedDb): SeedExec =>
+  async (statements) => {
+    for (const statement of statements) db.run(statement);
+  };
+
+const DAY = 86_400_000;
+
+export const day = (offset: number) => new Date(Date.now() + offset * DAY).toISOString().slice(0, 10);
 
 export const at = (offset: number, hour = 9) => {
-  const date = new Date(NOW + offset * DAY);
+  const date = new Date(Date.now() + offset * DAY);
   date.setUTCHours(hour, 0, 0, 0);
   return date.getTime();
 };
@@ -126,7 +134,9 @@ export async function seedTable(
   def: SeedTable,
   position: number,
   users: SeedUsers,
+  exec: SeedExec = cliExec(db),
 ) {
+  const pending: string[] = [];
   const tableName = newTableName();
   const physicalName = physicalTableName(WORKSPACE, tableName);
 
@@ -149,7 +159,7 @@ export async function seedTable(
     updatedAt: new Date(at(-3 - position)),
   });
 
-  db.run(buildCreateTable(physicalName));
+  pending.push(buildCreateTable(physicalName));
 
   const targets = new Map<number, RelationTarget>();
   for (const seeded of state.values())
@@ -217,7 +227,7 @@ export async function seedTable(
       targets,
       references,
     ))
-      db.run(statement);
+      pending.push(statement);
     columnIds.set(column.name, created.id);
     columnRows.set(column.name, created);
     columnNames.set(column.name, columnName);
@@ -225,7 +235,7 @@ export async function seedTable(
 
   const titleId = columnIds.get(def.title);
   if (titleId === undefined) throw new Error(`${def.name}: missing title column ${def.title}`);
-  db.run(
+  pending.push(
     `UPDATE ${quoteIdent(`${WORKSPACE}__table`)} SET title_column_id = ${titleId} WHERE id = ${resource.id}`,
   );
 
@@ -264,7 +274,7 @@ export async function seedTable(
       }
     }
 
-    db.run(
+    pending.push(
       `INSERT INTO ${quoteIdent(physicalName)} (${names.map(quoteIdent).join(", ")}) VALUES (${values.map(literal).join(", ")})`,
     );
     seeded.titles.set(text(row[def.title]), id);
@@ -332,7 +342,9 @@ export async function seedTable(
       createdAt: new Date(at(-45 + position + index)),
       updatedAt: new Date(at(-45 + position + index)),
     });
-    db.run(buildCreateView(physicalViewName(WORKSPACE, viewName), physicalName, selected, where));
+    pending.push(
+      buildCreateView(physicalViewName(WORKSPACE, viewName), physicalName, selected, where),
+    );
   }
 
   for (const [index, form] of (def.forms ?? []).entries()) {
@@ -370,6 +382,7 @@ export async function seedTable(
     });
   }
 
+  await exec(pending);
   state.set(def.name, seeded);
   console.log(
     `  ${def.name}: ${def.columns.length} columns, ${def.rows.length} records, ${def.views?.length ?? 0} views, ${def.forms?.length ?? 0} forms`,
