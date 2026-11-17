@@ -17,7 +17,7 @@ function TwoFactorPage() {
       />
       <TwoFactorChallenge />
       <AuthFooter>
-        <Link to="/auth/sign-in" className="text-foreground underline underline-offset-4">
+        <Link to="/auth/sign-in" search={(prev) => prev} className="text-foreground underline underline-offset-4">
           Back to sign in
         </Link>
       </AuthFooter>

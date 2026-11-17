@@ -38,7 +38,7 @@ function SignUpPage() {
           </EmptyDescription>
         </EmptyHeader>
         <EmptyContent>
-          <Button variant="outline" render={<Link to="/auth/sign-in" />}>
+          <Button variant="outline" render={<Link to="/auth/sign-in" search={(prev) => prev} />}>
             Back to sign in
           </Button>
         </EmptyContent>
@@ -56,7 +56,7 @@ function SignUpPage() {
       </div>
       <AuthFooter>
         Already have an account?{" "}
-        <Link to="/auth/sign-in" className="text-foreground underline underline-offset-4">
+        <Link to="/auth/sign-in" search={(prev) => prev} className="text-foreground underline underline-offset-4">
           Sign in
         </Link>
       </AuthFooter>

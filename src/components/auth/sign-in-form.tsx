@@ -31,7 +31,7 @@ export function SignInForm() {
     onSuccess: async (data) => {
       // Accounts with two-factor enabled get a pending challenge instead of a session.
       if ("twoFactorRedirect" in data && data.twoFactorRedirect) {
-        await navigate({ to: "/auth/two-factor" });
+        await navigate({ to: "/auth/two-factor", search: (prev) => prev });
         return;
       }
       await completeSignIn();

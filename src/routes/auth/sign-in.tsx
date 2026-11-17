@@ -25,7 +25,7 @@ function SignInPage() {
       </div>
       <AuthFooter>
         Don't have an account?{" "}
-        <Link to="/auth/sign-up" className="text-foreground underline underline-offset-4">
+        <Link to="/auth/sign-up" search={(prev) => prev} className="text-foreground underline underline-offset-4">
           Sign up
         </Link>
       </AuthFooter>

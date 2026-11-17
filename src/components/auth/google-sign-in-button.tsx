@@ -1,4 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
+import { useSearch } from "@tanstack/react-router";
 
 import { Button } from "@/components/ui/button";
 import { socialSignInMutationOptions } from "@/data/auth/social-sign-in";
@@ -30,6 +31,7 @@ function GoogleIcon() {
 
 export function GoogleSignInButton({ collapsed = false }: { collapsed?: boolean }) {
   const mutation = useMutation(socialSignInMutationOptions);
+  const { redirect } = useSearch({ from: "/auth" });
 
   return (
     <div className="flex flex-col gap-3">
@@ -38,7 +40,7 @@ export function GoogleSignInButton({ collapsed = false }: { collapsed?: boolean 
         variant="outline"
         className="w-full"
         loading={mutation.isPending}
-        onClick={() => mutation.mutate({ provider: "google", callbackURL: "/" })}
+        onClick={() => mutation.mutate({ provider: "google", callbackURL: redirect ?? "/" })}
       >
         <GoogleIcon />
         {collapsed ? "Google" : "Continue with Google"}

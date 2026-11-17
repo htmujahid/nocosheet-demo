@@ -7,8 +7,8 @@ import { DEFAULT_ROLE, isAdmin } from "@/lib/auth/access";
 import { DEFAULT_WORKSPACE, DEFAULT_WORKSPACE_NAME } from "@/lib/workspace";
 
 export const Route = createFileRoute("/workspaces/$workspace")({
-  beforeLoad: ({ context, params }) => {
-    if (!context.session) throw redirect({ to: "/auth/sign-in" });
+  beforeLoad: ({ context, location, params }) => {
+    if (!context.session) throw redirect({ to: "/auth/sign-in", search: { redirect: location.href } });
     // One workspace per instance: any other slug resolves to the default one.
     if (params.workspace !== DEFAULT_WORKSPACE) {
       throw redirect({ to: "/workspaces/$workspace", params: { workspace: DEFAULT_WORKSPACE } });
