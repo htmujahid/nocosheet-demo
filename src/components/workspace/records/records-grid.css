@@ -16,6 +16,11 @@
   border-block-start: 1px solid var(--border);
   font-family: inherit;
   scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+
+.records-grid:hover {
+  scrollbar-color: color-mix(in srgb, var(--foreground) 25%, transparent) transparent;
 }
 
 .records-grid .rdg-header-row {
