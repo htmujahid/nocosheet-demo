@@ -16,7 +16,7 @@ import { sidebarQueryOptions } from "@/data/workspace/sidebar";
 import { useAccess } from "@/hooks/use-access";
 import { formatRelativeTime } from "@/lib/format-relative-time";
 
-const RECENT_SHOWN = 6;
+const RECENT_SHOWN = 5;
 
 export function TableShortcuts({ workspace }: { workspace: string }) {
   const { data: sidebar } = useSuspenseQuery(sidebarQueryOptions(workspace));
