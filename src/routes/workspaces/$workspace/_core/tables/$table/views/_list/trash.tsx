@@ -5,8 +5,11 @@ import { ViewsTrash } from "@/components/workspace/views/views-trash";
 import { deletedViewsQueryOptions } from "@/data/workspace/views";
 import { useWorkspace } from "@/hooks/use-workspace";
 import { TRASH_RETENTION_DAYS } from "@/lib/records/retention";
+import { ALL_VIEW } from "@/lib/views/constants";
 
-export const Route = createFileRoute("/workspaces/$workspace/_core/tables/$table/views/_list/trash")({
+export const Route = createFileRoute(
+  "/workspaces/$workspace/_core/tables/$table/views/_list/trash",
+)({
   staticData: { crumb: "Deleted views" },
   pendingComponent: () => null,
   loader: ({ context, params }) => {
@@ -23,7 +26,13 @@ function ViewsTrashSheet() {
   const { isAdmin } = useWorkspace();
 
   if (!isAdmin)
-    return <Navigate to="/workspaces/$workspace/tables/$table" params={{ workspace, table }} replace />;
+    return (
+      <Navigate
+        to="/workspaces/$workspace/tables/$table/views/$view"
+        params={{ workspace, table, view: ALL_VIEW }}
+        replace
+      />
+    );
 
   return (
     <TrashSheet

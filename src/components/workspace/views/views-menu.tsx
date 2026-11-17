@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/menu";
 import { viewsQueryOptions } from "@/data/workspace/views";
 import { useAccess } from "@/hooks/use-access";
+import { ALL_VIEW } from "@/lib/views/constants";
 
 import { NamedIcon } from "../tables/named-icon";
 import { ViewDialog } from "./view-dialog";
@@ -51,7 +52,10 @@ export function ViewsMenu({
             {access.can("read", tableId) && (
               <MenuLinkItem
                 render={
-                  <Link to="/workspaces/$workspace/tables/$table" params={{ workspace, table }} />
+                  <Link
+                    to="/workspaces/$workspace/tables/$table/views/$view"
+                    params={{ workspace, table, view: ALL_VIEW }}
+                  />
                 }
               >
                 <LayoutGridIcon className="size-4 shrink-0 text-muted-foreground" />

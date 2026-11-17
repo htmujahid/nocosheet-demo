@@ -11,7 +11,7 @@ export const Route = createFileRoute(
 });
 
 function NewRecordPage() {
-  const { workspace, table, view: viewId } = Route.useParams();
+  const { workspace, table, view } = Route.useParams();
   const navigate = Route.useNavigate();
   const access = useAccess();
 
@@ -19,7 +19,7 @@ function NewRecordPage() {
     return (
       <Navigate
         to="/workspaces/$workspace/tables/$table/views/$view"
-        params={{ workspace, table, view: viewId }}
+        params={{ workspace, table, view }}
         search={(previous) => previous}
         replace
       />
@@ -32,7 +32,7 @@ function NewRecordPage() {
       onClose={() =>
         navigate({
           to: "/workspaces/$workspace/tables/$table/views/$view",
-          params: { workspace, table, view: viewId },
+          params: { workspace, table, view },
           search: (previous) => previous,
         })
       }

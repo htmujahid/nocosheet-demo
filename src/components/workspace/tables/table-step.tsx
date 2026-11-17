@@ -17,6 +17,7 @@ import { DEFAULT_TABLE_ICON } from "@/lib/tables/icons";
 import { tableInputSchema } from "@/lib/tables/validation";
 
 import { IconPicker } from "./icon-picker";
+import { TABLE_FLAGS, TableFlag } from "./table-flags";
 import { WizardFooter, WizardPanel } from "./wizard-panel";
 
 type TableFormValues = {
@@ -24,6 +25,8 @@ type TableFormValues = {
   icon: string;
   groupName: string;
   description: string;
+  isAudit: boolean;
+  isHidden: boolean;
 };
 
 export function TableStep({ onDone }: { onDone: (tableId: number) => void }) {
@@ -44,6 +47,8 @@ export function TableStep({ onDone }: { onDone: (tableId: number) => void }) {
       icon: DEFAULT_TABLE_ICON,
       groupName: "",
       description: "",
+      isAudit: false,
+      isHidden: false,
     } as TableFormValues,
     validators: { onSubmit: formSchema<TableFormValues>(tableInputSchema) },
     onSubmit: ({ value }) => createTable.mutate({ workspace, ...value }),
@@ -132,6 +137,20 @@ export function TableStep({ onDone }: { onDone: (tableId: number) => void }) {
               </Field>
             )}
           </form.Field>
+
+          <div className="flex flex-wrap gap-x-6 gap-y-3">
+            {TABLE_FLAGS.map((flag) => (
+              <form.Field key={flag.name} name={flag.name}>
+                {(field) => (
+                  <TableFlag
+                    label={flag.label}
+                    checked={field.state.value}
+                    onChange={field.handleChange}
+                  />
+                )}
+              </form.Field>
+            ))}
+          </div>
 
           {createTable.error && (
             <Alert variant="error">

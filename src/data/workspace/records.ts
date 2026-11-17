@@ -32,6 +32,19 @@ export const recordsQueryOptions = (
     retry: false,
   });
 
+export const recordsCountQueryOptions = (workspace: string, tableId: number) =>
+  queryOptions({
+    queryKey: [...workspaceKeys.table(tableId), "records-count"] as const,
+    queryFn: () =>
+      unwrapFetch(
+        fetch("/api/workspaces/:workspace/tables/:table/records/count", {
+          params: { workspace, table: String(tableId) },
+        }),
+      ),
+    staleTime: 30_000,
+    retry: false,
+  });
+
 export const recordQueryOptions = (
   workspace: string,
   tableId: number,

@@ -1,18 +1,12 @@
 import { useState } from "react";
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetClose, SheetFooter, SheetPopup } from "@/components/ui/sheet";
-import { toastManager } from "@/components/ui/toast";
-import { workspaceKeys } from "@/data/workspace/keys";
-import { createRecordMutationOptions } from "@/data/workspace/records";
-import { buildCreate, toDefaultFormValues } from "@/lib/records/form";
 
 import { type ViewerColumn } from "../columns";
 import { useRecordScope } from "../use-record-scope";
 import { RecordForm } from "./record-form";
-import { useRecordForm } from "./use-record-form";
+import { useCreateRecord } from "./use-create-record";
 
 function CreateForm({
   workspace,
@@ -27,23 +21,7 @@ function CreateForm({
   columns: ViewerColumn[];
   onCreated: () => void;
 }) {
-  const queryClient = useQueryClient();
-
-  const create = useMutation({
-    ...createRecordMutationOptions,
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: workspaceKeys.table(tableId) });
-      toastManager.add({ type: "success", title: "Record created" });
-      onCreated();
-    },
-  });
-
-  const form = useRecordForm({
-    initial: toDefaultFormValues(columns),
-    validate: (value) => buildCreate(columns, value).errors,
-    onSubmit: (value) =>
-      create.mutate({ workspace, tableId, values: buildCreate(columns, value).payload }),
-  });
+  const { form, create } = useCreateRecord({ workspace, tableId, columns, onCreated });
 
   return (
     <RecordForm
