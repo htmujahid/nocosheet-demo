@@ -47,6 +47,7 @@ export default defineAuth(({ defaults, env }) => ({
   emailAndPassword: {
     ...defaults.emailAndPassword,
     enabled: true,
+    revokeSessionsOnPasswordReset: true,
     get disableSignUp() {
       return !env.VITE_ENABLE_SIGNUP;
     },
