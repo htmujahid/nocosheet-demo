@@ -80,6 +80,7 @@
   display: inline-flex;
 }
 
+.records-grid .records-row-draft,
 .records-grid .records-row-selected {
   --rdg-background-color: color-mix(in srgb, var(--primary) 6%, var(--background));
 }

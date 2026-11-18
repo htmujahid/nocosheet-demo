@@ -25,6 +25,7 @@ import { cellMode } from "./cells";
 import type { ViewerColumn } from "./columns";
 import { createDeleteRecordsHandle, DetachedDeleteRecordsDialog } from "./delete-records-dialog";
 import type { SummaryRow, ViewerRow } from "./records-grid-columns";
+import { isDraft } from "./use-draft-row";
 
 type Target = {
   row: ViewerRow;
@@ -70,6 +71,10 @@ export function RecordsContextMenu({
   const pending = useRef<Target | null>(null);
 
   const handleCell: CellContextMenuHandler = ({ row, column, setActivePosition }) => {
+    if (isDraft(row)) {
+      pending.current = null;
+      return;
+    }
     pending.current = {
       row,
       column: columns.find((item) => item.key === column.key) ?? null,

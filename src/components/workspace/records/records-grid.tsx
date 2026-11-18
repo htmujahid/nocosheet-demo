@@ -1,8 +1,8 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 
 import type { ReactTable } from "@tanstack/react-table";
 
-import { DataGrid, type SortColumn } from "react-data-grid";
+import { DataGrid, type DataGridHandle, type SortColumn } from "react-data-grid";
 
 import type { dataTableFeatures } from "@/components/shared/data-table/features";
 
@@ -14,6 +14,7 @@ import type { ViewerColumn } from "./columns";
 import { RecordsContextMenu } from "./records-context-menu";
 import { aggregate } from "@/lib/records/aggregates";
 import { type SummaryRow, type ViewerRow, useRecordsGridColumns } from "./records-grid-columns";
+import { type DraftRow, isDraft } from "./use-draft-row";
 
 export type { ViewerRow };
 
@@ -36,6 +37,7 @@ export function RecordsGrid<TSelected extends { rowSelection: Record<string, boo
   onCellChange,
   onDeleted,
   selectable = true,
+  draft,
 }: {
   table: ReactTable<typeof dataTableFeatures, ViewerRow, TSelected>;
   columns: ViewerColumn[];
@@ -53,19 +55,36 @@ export function RecordsGrid<TSelected extends { rowSelection: Record<string, boo
   onCellChange: (original: ViewerRow, draft: ViewerRow, column: ViewerColumn) => void;
   onDeleted: (count: number) => void;
   selectable?: boolean;
+  draft?: DraftRow;
 }) {
   const byKey = useMemo(() => new Map(columns.map((column) => [column.key, column])), [columns]);
   const selection = table.state.rowSelection;
+  const gridRef = useRef<DataGridHandle>(null);
+  const draftRow = draft?.row ?? null;
+  const gridRows = useMemo(() => (draftRow ? [draftRow, ...rows] : rows), [rows, draftRow]);
+  const drafting = draftRow !== null;
+
+  useEffect(() => {
+    if (!drafting) return;
+    gridRef.current?.scrollToCell({ idx: 1, rowIdx: 0 });
+    gridRef.current?.setActivePosition({ idx: 1, rowIdx: 0 }, { shouldFocus: true });
+  }, [drafting]);
+
+  const changeCell = (original: ViewerRow, next: ViewerRow, column: ViewerColumn) => {
+    if (isDraft(original)) draft?.change(next[column.key], column);
+    else onCellChange(original, next, column);
+  };
 
   const gridColumns = useRecordsGridColumns({
     table,
     byKey,
     workspace,
-    canEdit,
-    canEditRow,
+    canEdit: canEdit || !!draft,
+    canEditRow: (row) => isDraft(row) || canEditRow(row),
     onOpenRecord,
-    onCellChange,
+    onCellChange: changeCell,
     selectable,
+    draft,
   });
 
   const summaryRows = useMemo<SummaryRow[]>(
@@ -107,23 +126,34 @@ export function RecordsGrid<TSelected extends { rowSelection: Record<string, boo
         <DataGrid
           className="records-grid"
           aria-label="Records"
+          ref={gridRef}
           columns={gridColumns}
-          rows={rows}
+          rows={gridRows}
           bottomSummaryRows={summaryRows}
           getRowKey={(row) => row.id}
-          rowClass={(row) => (selection[String(row.id)] ? "records-row-selected" : undefined)}
+          rowClass={(row) =>
+            isDraft(row)
+              ? "records-row-draft"
+              : selection[String(row.id)]
+                ? "records-row-selected"
+                : undefined
+          }
           onRowsChange={(next, { indexes, column }) => {
             const meta = byKey.get(String(column.key));
             const index = indexes[0];
             if (!meta || index === undefined) return;
-            const original = rows[index];
-            const draft = next[index];
-            onCellChange(original, draft, meta);
+            changeCell(gridRows[index], next[index], meta);
+          }}
+          onCellKeyDown={(args, event) => {
+            if (args.mode !== "ACTIVE" || event.key !== "Enter" || !args.row || !isDraft(args.row))
+              return;
+            event.preventGridDefault();
+            draft?.save();
           }}
           onCellContextMenu={onCellContextMenu}
           onCellDoubleClick={({ row, column }) => {
             const meta = byKey.get(String(column.key));
-            if (!meta) return;
+            if (!meta || isDraft(row)) return;
             const mode = canEdit ? cellMode(meta) : "readonly";
             if (mode === "readonly" || mode === "sheet") onOpenRecord?.(row.id);
           }}

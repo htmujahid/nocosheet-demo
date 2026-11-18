@@ -1,6 +1,6 @@
 import { type ReactNode, useEffect, useState } from "react";
 
-import { SearchIcon } from "lucide-react";
+import { PlusIcon, SearchIcon } from "lucide-react";
 
 import { DataTableViewOptions } from "@/components/shared/data-table/data-table-view-options";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { toColumnFilters } from "@/lib/records/column-filters";
 
 import type { ViewerColumn } from "../columns";
 import { RecordFilters } from "../record-filters";
+import type { DraftRow } from "../use-draft-row";
 import type { GridTable } from "./use-grid-table";
 import type { RecordsQuery } from "./use-records-query";
 
@@ -16,11 +17,13 @@ export function GridToolbar({
   grid,
   columns,
   query,
+  draft,
   children,
 }: {
   grid: GridTable;
   columns: ViewerColumn[];
   query: RecordsQuery;
+  draft?: DraftRow;
   children?: ReactNode;
 }) {
   const searchable = columns.some((column) => column.searchable);
@@ -63,6 +66,12 @@ export function GridToolbar({
       />
       {children}
       <div className="ms-auto flex items-center gap-2">
+        {draft && (
+          <Button variant="outline" disabled={draft.row !== null} onClick={() => draft.new()}>
+            <PlusIcon aria-hidden="true" />
+            New row
+          </Button>
+        )}
         <DataTableViewOptions table={grid} />
       </div>
     </div>

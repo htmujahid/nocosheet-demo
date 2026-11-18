@@ -2,7 +2,7 @@ import { useMemo } from "react";
 
 import type { ReactTable } from "@tanstack/react-table";
 
-import { ArrowDownIcon, ArrowUpIcon, HashIcon, Maximize2Icon } from "lucide-react";
+import { ArrowDownIcon, ArrowUpIcon, CheckIcon, HashIcon, Maximize2Icon, XIcon } from "lucide-react";
 import type { Column, RenderEditCellContentProps } from "react-data-grid";
 
 import type { dataTableFeatures } from "@/components/shared/data-table/features";
@@ -14,6 +14,7 @@ import type { Aggregate } from "@/lib/records/aggregates";
 import { CellEditor, CellValue, cellMode } from "./cells";
 import { AggregateCell } from "./cells/aggregate-cell";
 import type { ViewerColumn } from "./columns";
+import { type DraftRow, isDraft } from "./use-draft-row";
 
 export type ViewerRow = Record<string, unknown> & { id: number };
 
@@ -28,6 +29,7 @@ export function useRecordsGridColumns<TSelected extends { rowSelection: Record<s
   onOpenRecord,
   onCellChange,
   selectable,
+  draft,
 }: {
   table: ReactTable<typeof dataTableFeatures, ViewerRow, TSelected>;
   byKey: ReadonlyMap<string, ViewerColumn>;
@@ -37,6 +39,7 @@ export function useRecordsGridColumns<TSelected extends { rowSelection: Record<s
   onOpenRecord?: (id: number) => void;
   onCellChange: (original: ViewerRow, draft: ViewerRow, column: ViewerColumn) => void;
   selectable: boolean;
+  draft?: DraftRow;
 }) {
   const visible = table.getVisibleLeafColumns();
   const visibleKey = visible.map((column) => column.id).join("|");
@@ -76,11 +79,33 @@ export function useRecordsGridColumns<TSelected extends { rowSelection: Record<s
         },
         summaryCellClass: "records-row-number",
         renderSummaryCell: () => (
-          <span className="truncate" title="Calculated from the records on this page">
-            Total
-          </span>
+            <span className="truncate" title="Calculated from the records on this page">
+              Total
+            </span>
         ),
-        renderCell: ({ row }) => (
+        renderCell: ({ row }) =>
+          isDraft(row) ? (
+            <span className="flex items-center gap-0.5">
+              <Button
+                variant="ghost"
+                size="icon-xs"
+                aria-label="Save row"
+                loading={draft?.saving}
+                onClick={draft?.save}
+              >
+                <CheckIcon />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon-xs"
+                aria-label="Discard row"
+                disabled={draft?.saving}
+                onClick={draft?.discard}
+              >
+                <XIcon />
+              </Button>
+            </span>
+          ) : (
           <>
             <span className="records-row-index">{row.id}</span>
             {selectable && (
@@ -103,7 +128,7 @@ export function useRecordsGridColumns<TSelected extends { rowSelection: Record<s
               </Button>
             )}
           </>
-        ),
+          ),
       },
       ...visible.flatMap((column): Column<ViewerRow, SummaryRow>[] => {
         const meta = byKey.get(column.id);
@@ -174,6 +199,7 @@ export function useRecordsGridColumns<TSelected extends { rowSelection: Record<s
       onCellChange,
       onOpenRecord,
       selectable,
+      draft,
     ],
   );
 }

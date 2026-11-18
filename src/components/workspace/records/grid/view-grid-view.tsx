@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import { ViewsMenu } from "../../views/views-menu";
 import { buildScopedColumns, type ViewScope, withoutIdColumn } from "../columns";
 import { RecordsGrid, type ViewerRow } from "../records-grid";
+import { useDraftRow } from "../use-draft-row";
 import { useUpdateCell } from "../use-update-cell";
 import { GridToolbar } from "./grid-toolbar";
 import { SelectionBar } from "./selection-bar";
@@ -48,6 +49,7 @@ export function ViewGridView({
     placeholderData: keepPreviousData,
   });
   const rows = (data?.rows ?? []) as ViewerRow[];
+  const draft = useDraftRow({ workspace, tableId, columns });
   const paging = useRecordsPaging({
     data,
     query,
@@ -84,9 +86,15 @@ export function ViewGridView({
           selected={selectedRows}
           pageRows={rows.length}
           paging={paging}
+          draft={access.can("create", tableId) ? draft : undefined}
         />
       ) : (
-        <GridToolbar grid={grid} columns={columns} query={query}>
+        <GridToolbar
+          grid={grid}
+          columns={columns}
+          query={query}
+          draft={access.can("create", tableId) ? draft : undefined}
+        >
           <ViewsMenu workspace={workspace} table={String(tableId)} activeView={view.id} />
         </GridToolbar>
       )}
@@ -118,6 +126,7 @@ export function ViewGridView({
             grid.resetRowSelection();
             if (deleted >= rows.length && paging.hasPrevious) void paging.previous();
           }}
+          draft={access.can("create", tableId) ? draft : undefined}
           onOpenRecord={onOpenRecord}
           onCellChange={(original, draft, column) => void updateCell(original, draft, column)}
           sort={query.sortKey}
