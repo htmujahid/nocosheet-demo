@@ -22,7 +22,11 @@ const LAST_ADMIN_MESSAGE = "This is the last admin. Make someone else an admin f
 export default defineAuth(({ defaults, env }) => ({
   ...defaults,
   secondaryStorage: kvSecondaryStorage,
-  rateLimit: { ...defaults.rateLimit, storage: "secondary-storage" },
+  rateLimit: {
+    ...defaults.rateLimit,
+    storage: "secondary-storage",
+    customRules: { "/get-session": false },
+  },
   plugins: [
     ...(defaults.plugins ?? []),
     passkey({ rpName: "Nocosheet" }),
