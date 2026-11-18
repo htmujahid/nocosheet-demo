@@ -83,3 +83,17 @@
 .records-grid .records-row-selected {
   --rdg-background-color: color-mix(in srgb, var(--primary) 6%, var(--background));
 }
+
+.records-grid {
+  --rdg-summary-border-width: 1px;
+  --rdg-summary-border-color: var(--border);
+}
+
+.records-grid .rdg-summary-row,
+.records-grid .rdg-summary-row .rdg-cell {
+  background-color: var(--rdg-header-background-color);
+}
+
+.records-grid .rdg-bottom-summary-row[style*="top:"] {
+  top: auto !important;
+}

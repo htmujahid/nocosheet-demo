@@ -18,20 +18,20 @@ function formatDuration(seconds: number, display: unknown) {
     : `${hours}:${pad(minutes)}`;
 }
 
-export function NumberCell({ column, value }: CellProps) {
+export function NumberCell({ column, value, digits }: CellProps & { digits?: number }) {
   switch (column.format) {
     case "integer":
-      return <span className="tabular-nums">{formatNumber(Number(value), 0)}</span>;
+      return <span className="tabular-nums">{formatNumber(Number(value), digits ?? 0)}</span>;
     case "decimal":
       return (
         <span className="tabular-nums">
-          {formatNumber(Number(value), precisionOf(column.options, 2))}
+          {formatNumber(Number(value), digits ?? precisionOf(column.options, 2))}
         </span>
       );
     case "percent":
       return (
         <span className="tabular-nums">
-          {formatNumber(Number(value), precisionOf(column.options, 0))}%
+          {formatNumber(Number(value), digits ?? precisionOf(column.options, 0))}%
         </span>
       );
     case "currency":
@@ -40,8 +40,8 @@ export function NumberCell({ column, value }: CellProps) {
           {new Intl.NumberFormat(undefined, {
             style: "currency",
             currency: text(column.options.currency) || "USD",
-            minimumFractionDigits: precisionOf(column.options, 2),
-            maximumFractionDigits: precisionOf(column.options, 2),
+            minimumFractionDigits: digits ?? precisionOf(column.options, 2),
+            maximumFractionDigits: digits ?? precisionOf(column.options, 2),
           }).format(Number(value))}
         </span>
       );
@@ -52,6 +52,10 @@ export function NumberCell({ column, value }: CellProps) {
         </span>
       );
     default:
-      return <span className="tabular-nums">{text(value)}</span>;
+      return (
+        <span className="tabular-nums">
+          {digits === undefined ? text(value) : formatNumber(Number(value), digits)}
+        </span>
+      );
   }
 }
