@@ -1,8 +1,7 @@
 import { formTable, resourceTable } from "@db/schema";
-import { and, asc, db, desc, eq, inArray, isNotNull, isNull, lt, sql } from "void/db";
+import { and, asc, db, eq, inArray, sql } from "void/db";
 
 import type { Table } from "../tables/repository";
-import { TRASH_LIST_LIMIT } from "../trash/query";
 import { newFormKey } from "./naming";
 import type { FormValues } from "./validation";
 
@@ -12,7 +11,7 @@ export async function listForms(tableId: number) {
   return db
     .select()
     .from(formTable)
-    .where(and(eq(formTable.tableId, tableId), isNull(formTable.deletedAt)))
+    .where(eq(formTable.tableId, tableId))
     .orderBy(asc(formTable.position), asc(formTable.id));
 }
 
@@ -20,7 +19,7 @@ export async function findForm(tableId: number, id: number) {
   const [row] = await db
     .select()
     .from(formTable)
-    .where(and(eq(formTable.tableId, tableId), eq(formTable.id, id), isNull(formTable.deletedAt)))
+    .where(and(eq(formTable.tableId, tableId), eq(formTable.id, id)))
     .limit(1);
   return row;
 }
@@ -63,80 +62,15 @@ export async function updateForm(id: number, body: FormValues) {
   return updated;
 }
 
-export async function softDeleteForm(id: number, userId: string) {
-  await db
-    .update(formTable)
-    .set({ deletedAt: new Date(), deletedBy: userId })
-    .where(eq(formTable.id, id));
-}
-
 export async function findForms(tableId: number, ids: number[]) {
   return db
     .select({ id: formTable.id, name: formTable.name })
     .from(formTable)
-    .where(
-      and(eq(formTable.tableId, tableId), inArray(formTable.id, ids), isNull(formTable.deletedAt)),
-    );
+    .where(and(eq(formTable.tableId, tableId), inArray(formTable.id, ids)));
 }
 
-export async function softDeleteForms(ids: number[], userId: string) {
-  await db
-    .update(formTable)
-    .set({ deletedAt: new Date(), deletedBy: userId })
-    .where(inArray(formTable.id, ids));
-}
-
-export async function findDeletedForm(tableId: number, id: number) {
-  const [row] = await db
-    .select()
-    .from(formTable)
-    .where(
-      and(eq(formTable.tableId, tableId), eq(formTable.id, id), isNotNull(formTable.deletedAt)),
-    )
-    .limit(1);
-  return row;
-}
-
-export async function restoreForm(id: number) {
-  await db.update(formTable).set({ deletedAt: null, deletedBy: null }).where(eq(formTable.id, id));
-}
-
-export async function purgeForm(id: number) {
-  await db.delete(resourceTable).where(eq(resourceTable.id, id));
-}
-
-export async function purgeExpiredForms(cutoff: Date) {
-  const expired = await db
-    .select({ id: formTable.id })
-    .from(formTable)
-    .where(and(isNotNull(formTable.deletedAt), lt(formTable.deletedAt, cutoff)));
-  for (const form of expired) await purgeForm(form.id);
-  return expired.length;
-}
-
-export async function listDeletedForms(tableId: number) {
-  const rows = await db
-    .select({
-      id: formTable.id,
-      name: formTable.name,
-      description: formTable.description,
-      icon: formTable.icon,
-      deletedAt: formTable.deletedAt,
-      deletedBy: formTable.deletedBy,
-      deletedByName: sql<
-        string | null
-      >`(select u."name" from "user" u where u."id" = ${formTable.deletedBy})`,
-    })
-    .from(formTable)
-    .where(and(eq(formTable.tableId, tableId), isNotNull(formTable.deletedAt)))
-    .orderBy(desc(formTable.deletedAt), asc(formTable.id))
-    .limit(TRASH_LIST_LIMIT);
-
-  return rows.map(({ deletedBy, deletedByName, ...row }) => ({
-    ...row,
-    deletedAt: row.deletedAt?.getTime() ?? 0,
-    deletedBy: deletedBy ? { id: deletedBy, label: deletedByName } : null,
-  }));
+export async function deleteForms(ids: number[]) {
+  await db.delete(resourceTable).where(inArray(resourceTable.id, ids));
 }
 
 export async function findFormsUsingColumn(tableId: number, columnName: string) {

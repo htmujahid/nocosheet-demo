@@ -838,20 +838,6 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
-        },
-        "deleted_at": {
-          "name": "deleted_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "deleted_by": {
-          "name": "deleted_by",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
         }
       },
       "indexes": {
@@ -861,8 +847,7 @@
             "table_id",
             "lower(\"name\")"
           ],
-          "isUnique": true,
-          "where": "\"default__form\".\"deleted_at\" is null"
+          "isUnique": true
         },
         "default__form_form_key": {
           "name": "default__form_form_key",
@@ -877,16 +862,7 @@
             "table_id",
             "position"
           ],
-          "isUnique": false,
-          "where": "\"default__form\".\"deleted_at\" is null"
-        },
-        "default__form_deleted": {
-          "name": "default__form_deleted",
-          "columns": [
-            "deleted_at"
-          ],
-          "isUnique": false,
-          "where": "\"default__form\".\"deleted_at\" is not null"
+          "isUnique": false
         }
       },
       "foreignKeys": {
@@ -922,19 +898,6 @@
           "tableTo": "user",
           "columnsFrom": [
             "created_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
-        },
-        "default__form_deleted_by_user_id_fk": {
-          "name": "default__form_deleted_by_user_id_fk",
-          "tableFrom": "default__form",
-          "tableTo": "user",
-          "columnsFrom": [
-            "deleted_by"
           ],
           "columnsTo": [
             "id"
@@ -1341,13 +1304,6 @@
           "notNull": true,
           "autoincrement": false
         },
-        "view_name": {
-          "name": "view_name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
         "name": {
           "name": "name",
           "type": "text",
@@ -1396,8 +1352,9 @@
           "name": "where_expression",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'[]'"
         },
         "metadata": {
           "name": "metadata",
@@ -1427,20 +1384,6 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
-        },
-        "deleted_at": {
-          "name": "deleted_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "deleted_by": {
-          "name": "deleted_by",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
         }
       },
       "indexes": {
@@ -1450,14 +1393,6 @@
             "table_id",
             "lower(\"name\")"
           ],
-          "isUnique": true,
-          "where": "\"default__view\".\"deleted_at\" is null"
-        },
-        "default__view_view_name": {
-          "name": "default__view_view_name",
-          "columns": [
-            "view_name"
-          ],
           "isUnique": true
         },
         "default__view_table_position": {
@@ -1466,8 +1401,7 @@
             "table_id",
             "position"
           ],
-          "isUnique": false,
-          "where": "\"default__view\".\"deleted_at\" is null"
+          "isUnique": false
         }
       },
       "foreignKeys": {
@@ -1503,19 +1437,6 @@
           "tableTo": "user",
           "columnsFrom": [
             "created_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
-        },
-        "default__view_deleted_by_user_id_fk": {
-          "name": "default__view_deleted_by_user_id_fk",
-          "tableFrom": "default__view",
-          "tableTo": "user",
-          "columnsFrom": [
-            "deleted_by"
           ],
           "columnsTo": [
             "id"

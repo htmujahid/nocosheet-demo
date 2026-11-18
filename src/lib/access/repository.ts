@@ -193,11 +193,11 @@ export async function listTableResourceIds(tableId: number) {
     db
       .select({ id: viewTable.id })
       .from(viewTable)
-      .where(and(eq(viewTable.tableId, tableId), isNull(viewTable.deletedAt))),
+      .where(eq(viewTable.tableId, tableId)),
     db
       .select({ id: formTable.id })
       .from(formTable)
-      .where(and(eq(formTable.tableId, tableId), isNull(formTable.deletedAt))),
+      .where(eq(formTable.tableId, tableId)),
   ]);
   return [...views, ...forms].map((row) => row.id);
 }
@@ -211,7 +211,6 @@ export async function resourceInTable(resourceId: number, tableId: number) {
         and(
           eq(viewTable.id, resourceId),
           eq(viewTable.tableId, tableId),
-          isNull(viewTable.deletedAt),
         ),
       )
       .limit(1),
@@ -222,7 +221,6 @@ export async function resourceInTable(resourceId: number, tableId: number) {
         and(
           eq(formTable.id, resourceId),
           eq(formTable.tableId, tableId),
-          isNull(formTable.deletedAt),
         ),
       )
       .limit(1),
@@ -242,14 +240,14 @@ export async function findGrantResourceKinds(ids: number[]) {
       .from(viewTable)
       .innerJoin(tableTable, eq(viewTable.tableId, tableTable.id))
       .where(
-        and(inArray(viewTable.id, ids), isNull(viewTable.deletedAt), isNull(tableTable.deletedAt)),
+        and(inArray(viewTable.id, ids), isNull(tableTable.deletedAt)),
       ),
     db
       .select({ id: formTable.id })
       .from(formTable)
       .innerJoin(tableTable, eq(formTable.tableId, tableTable.id))
       .where(
-        and(inArray(formTable.id, ids), isNull(formTable.deletedAt), isNull(tableTable.deletedAt)),
+        and(inArray(formTable.id, ids), isNull(tableTable.deletedAt)),
       ),
   ]);
   const kinds = new Map<number, "table" | "view" | "form">();
@@ -275,7 +273,7 @@ export async function listGrantTargets() {
       })
       .from(viewTable)
       .innerJoin(tableTable, eq(viewTable.tableId, tableTable.id))
-      .where(and(isNull(viewTable.deletedAt), isNull(tableTable.deletedAt)))
+      .where(isNull(tableTable.deletedAt))
       .orderBy(asc(viewTable.position), asc(viewTable.id)),
     db
       .select({
@@ -286,7 +284,7 @@ export async function listGrantTargets() {
       })
       .from(formTable)
       .innerJoin(tableTable, eq(formTable.tableId, tableTable.id))
-      .where(and(isNull(formTable.deletedAt), isNull(tableTable.deletedAt)))
+      .where(isNull(tableTable.deletedAt))
       .orderBy(asc(formTable.position), asc(formTable.id)),
   ]);
   return tables.map((table) => ({

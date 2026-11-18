@@ -1,13 +1,8 @@
 import { resourceTable, viewTable } from "@db/schema";
-import { and, asc, db, desc, eq, inArray, isNotNull, isNull, lt, sql } from "void/db";
+import { and, asc, db, eq, inArray, sql } from "void/db";
 
-import { physicalTableName } from "../tables/naming";
 import type { Column, Table } from "../tables/repository";
-import { TRASH_LIST_LIMIT } from "../trash/query";
-import { buildCreateView, buildDropView } from "./ddl";
-import { newViewName, physicalViewName } from "./naming";
 import type { ViewPatchValues, ViewValues } from "./validation";
-import { buildViewWhere } from "./where";
 
 export type View = typeof viewTable.$inferSelect;
 
@@ -15,7 +10,7 @@ export async function listViews(tableId: number) {
   return db
     .select()
     .from(viewTable)
-    .where(and(eq(viewTable.tableId, tableId), isNull(viewTable.deletedAt)))
+    .where(eq(viewTable.tableId, tableId))
     .orderBy(asc(viewTable.position), asc(viewTable.id));
 }
 
@@ -23,34 +18,14 @@ export async function findViews(tableId: number, ids: number[]) {
   return db
     .select({ id: viewTable.id, name: viewTable.name })
     .from(viewTable)
-    .where(
-      and(eq(viewTable.tableId, tableId), inArray(viewTable.id, ids), isNull(viewTable.deletedAt)),
-    );
-}
-
-export async function softDeleteViews(ids: number[], userId: string) {
-  await db
-    .update(viewTable)
-    .set({ deletedAt: new Date(), deletedBy: userId })
-    .where(inArray(viewTable.id, ids));
+    .where(and(eq(viewTable.tableId, tableId), inArray(viewTable.id, ids)));
 }
 
 export async function findView(tableId: number, id: number) {
   const [row] = await db
     .select()
     .from(viewTable)
-    .where(and(eq(viewTable.tableId, tableId), eq(viewTable.id, id), isNull(viewTable.deletedAt)))
-    .limit(1);
-  return row;
-}
-
-export async function findDeletedView(tableId: number, id: number) {
-  const [row] = await db
-    .select()
-    .from(viewTable)
-    .where(
-      and(eq(viewTable.tableId, tableId), eq(viewTable.id, id), isNotNull(viewTable.deletedAt)),
-    )
+    .where(and(eq(viewTable.tableId, tableId), eq(viewTable.id, id)))
     .limit(1);
   return row;
 }
@@ -59,48 +34,29 @@ export async function findViewsUsingColumn(tableId: number, columnName: string) 
   const views = await db.select().from(viewTable).where(eq(viewTable.tableId, tableId));
   return views.filter(
     (view) =>
-      view.selectColumns.includes(columnName) || view.whereExpression?.includes(`"${columnName}"`),
+      view.selectColumns.includes(columnName) || view.whereExpression.some((condition) => condition.column === columnName),
   );
 }
 
-export async function createView(
-  workspace: string,
-  table: Table,
-  columns: Column[],
-  body: ViewValues,
-  userId: string,
-) {
-  const viewName = newViewName();
+export async function createView(table: Table, columns: Column[], body: ViewValues, userId: string) {
   const selected = columns
     .filter((column) => body.selectColumns.includes(column.columnName))
     .map((column) => column.columnName);
-  const where = buildViewWhere(columns, body.filters);
 
-  const [, , inserted] = await db.batch([
-    db.run(
-      sql.raw(
-        buildCreateView(
-          physicalViewName(workspace, viewName),
-          physicalTableName(workspace, table.tableName),
-          selected,
-          where,
-        ),
-      ),
-    ),
+  const [, inserted] = await db.batch([
     db.insert(resourceTable).values({ kind: "view" }),
     db
       .insert(viewTable)
       .values({
         id: sql`last_insert_rowid()`,
         tableId: table.id,
-        viewName,
         name: body.name,
         description: body.description,
         icon: body.icon,
         type: "grid",
         position: sql`(select coalesce(max(position), -1) + 1 from ${viewTable} where ${viewTable.tableId} = ${table.id})`,
         selectColumns: selected,
-        whereExpression: where,
+        whereExpression: body.filters,
         createdBy: userId,
       })
       .returning(),
@@ -122,54 +78,6 @@ export async function updateView(id: number, body: ViewPatchValues) {
   return updated;
 }
 
-export async function softDeleteView(id: number, userId: string) {
-  await db
-    .update(viewTable)
-    .set({ deletedAt: new Date(), deletedBy: userId })
-    .where(eq(viewTable.id, id));
-}
-
-export async function restoreView(id: number) {
-  await db.update(viewTable).set({ deletedAt: null, deletedBy: null }).where(eq(viewTable.id, id));
-}
-
-export async function purgeView(workspace: string, view: Pick<View, "id" | "viewName">) {
-  await db.batch([
-    db.run(sql.raw(buildDropView(physicalViewName(workspace, view.viewName)))),
-    db.delete(resourceTable).where(eq(resourceTable.id, view.id)),
-  ]);
-}
-
-export async function purgeExpiredViews(workspace: string, cutoff: Date) {
-  const expired = await db
-    .select({ id: viewTable.id, viewName: viewTable.viewName })
-    .from(viewTable)
-    .where(and(isNotNull(viewTable.deletedAt), lt(viewTable.deletedAt, cutoff)));
-  for (const view of expired) await purgeView(workspace, view);
-  return expired.length;
-}
-
-export async function listDeletedViews(tableId: number) {
-  const rows = await db
-    .select({
-      id: viewTable.id,
-      name: viewTable.name,
-      description: viewTable.description,
-      icon: viewTable.icon,
-      deletedAt: viewTable.deletedAt,
-      deletedBy: viewTable.deletedBy,
-      deletedByName: sql<
-        string | null
-      >`(select u."name" from "user" u where u."id" = ${viewTable.deletedBy})`,
-    })
-    .from(viewTable)
-    .where(and(eq(viewTable.tableId, tableId), isNotNull(viewTable.deletedAt)))
-    .orderBy(desc(viewTable.deletedAt), asc(viewTable.id))
-    .limit(TRASH_LIST_LIMIT);
-
-  return rows.map(({ deletedBy, deletedByName, ...row }) => ({
-    ...row,
-    deletedAt: row.deletedAt?.getTime() ?? 0,
-    deletedBy: deletedBy ? { id: deletedBy, label: deletedByName } : null,
-  }));
+export async function deleteViews(ids: number[]) {
+  await db.delete(resourceTable).where(inArray(resourceTable.id, ids));
 }

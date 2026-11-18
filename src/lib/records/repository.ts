@@ -22,7 +22,7 @@ const raw = (text: string) => sql.raw(text);
 const col = (name: string) => raw(`t.${quoteIdent(name)}`);
 const like = (value: string) => `%${value.replaceAll(/[\\%_]/g, "\\$&")}%`;
 
-async function recordSource(workspace: string, table: Table, columns: Column[], source?: string) {
+async function recordSource(workspace: string, table: Table, columns: Column[]) {
   const targetIds = columns
     .filter((column) => column.format === "relation")
     .map((column) => Number((column.options as { tableId?: number }).tableId));
@@ -61,11 +61,11 @@ async function recordSource(workspace: string, table: Table, columns: Column[], 
 
   return {
     select: raw(selects.join(", ")),
-    from: sql`${raw(quoteIdent(source ?? physicalTableName(workspace, table.tableName)))} t`,
+    from: sql`${raw(quoteIdent(physicalTableName(workspace, table.tableName)))} t`,
   };
 }
 
-function conditionsWhere(columns: Column[], filters: FilterCondition[]) {
+function conditionsWhere(columns: Column[], filters: FilterCondition[], strict = false) {
   const byName = new Map(columns.map((column) => [column.columnName, column]));
   const params: (string | number)[] = [];
   const bind = (value: string | number) => {
@@ -78,6 +78,7 @@ function conditionsWhere(columns: Column[], filters: FilterCondition[]) {
     const column = byName.get(condition.column);
     const kind = column ? filterKind(column.format) : null;
     if (column && kind) conditions.push(conditionText(column, kind, condition, bind));
+    else if (strict) conditions.push("1 = 0");
   }
   if (!conditions.length) return undefined;
 
@@ -90,8 +91,19 @@ function conditionsWhere(columns: Column[], filters: FilterCondition[]) {
   );
 }
 
-function filterWhere(columns: Column[], query: TypedRecordsQuery, ownerId?: string) {
+export const viewScope = (columns: Column[], filters: FilterCondition[]) =>
+  conditionsWhere(columns, filters, true);
+
+export type ViewScope = ReturnType<typeof viewScope>;
+
+function filterWhere(
+  columns: Column[],
+  query: TypedRecordsQuery,
+  ownerId?: string,
+  scope?: ViewScope,
+) {
   const where: Fragment[] = ownerId ? [sql`t."created_by" = ${ownerId}`] : [];
+  if (scope) where.push(scope);
 
   const filtered = conditionsWhere(columns, query.filters);
   if (filtered) where.push(filtered);
@@ -175,10 +187,10 @@ export async function findRecords(
   columns: Column[],
   query: TypedRecordsQuery,
   ownerId?: string,
-  source?: string,
+  scope?: ViewScope,
 ) {
-  const { select, from } = await recordSource(workspace, table, columns, source);
-  const condition = filterWhere(columns, query, ownerId);
+  const { select, from } = await recordSource(workspace, table, columns);
+  const condition = filterWhere(columns, query, ownerId, scope);
   const forward = sortSpec(columns, query);
   const backward = query.dir === "prev";
   const spec: SortSpec = backward
@@ -234,13 +246,19 @@ export async function findRecord(
   columns: Column[],
   recordId: number,
   ownerId?: string,
-  source?: string,
+  scope?: ViewScope,
 ) {
-  const { select, from } = await recordSource(workspace, table, columns, source);
+  const { select, from } = await recordSource(workspace, table, columns);
   const [row] = await db.all<Record<string, unknown>>(
-    sql`select ${select} from ${from} where t."id" = ${recordId} ${ownerId ? sql`and t."created_by" = ${ownerId}` : sql``} limit 1`,
+    sql`select ${select} from ${from} where t."id" = ${recordId} ${ownerId ? sql`and t."created_by" = ${ownerId}` : sql``} ${scope ? sql`and ${scope}` : sql``} limit 1`,
   );
   return row ? shapeRecord(row, columns) : undefined;
+}
+
+function exportWhere(ownerId?: string, scope?: ViewScope) {
+  const where: Fragment[] = ownerId ? [sql`t."created_by" = ${ownerId}`] : [];
+  if (scope) where.push(scope);
+  return where.length ? sql`where ${sql.join(where, sql` and `)}` : sql``;
 }
 
 export async function findExportRecords(
@@ -248,7 +266,7 @@ export async function findExportRecords(
   table: Table,
   columns: Column[],
   ownerId?: string,
-  source?: string,
+  scope?: ViewScope,
 ) {
   const exported = columns.filter((column) => column.format !== "binary");
   const names = [
@@ -261,7 +279,7 @@ export async function findExportRecords(
   ];
 
   const rows = await db.all<Record<string, unknown>>(
-    sql`select ${raw(names.map((name) => `t.${quoteIdent(name)} as ${quoteIdent(name)}`).join(", "))} from ${raw(quoteIdent(source ?? physicalTableName(workspace, table.tableName)))} t ${ownerId ? sql`where t."created_by" = ${ownerId}` : sql``} order by t."id" limit ${EXPORT_LIMIT + 1}`,
+    sql`select ${raw(names.map((name) => `t.${quoteIdent(name)} as ${quoteIdent(name)}`).join(", "))} from ${raw(quoteIdent(physicalTableName(workspace, table.tableName)))} t ${exportWhere(ownerId, scope)} order by t."id" limit ${EXPORT_LIMIT + 1}`,
   );
 
   return {
@@ -439,7 +457,7 @@ export async function updateRecordRow(
   parsed: ParsedValue<Column>[],
   userId: string,
   ownerId?: string,
-  viewSource?: string,
+  scope?: ViewScope,
 ) {
   const assignments = parsed.map(
     ({ column, value }) => sql`${raw(quoteIdent(column.columnName))} = ${value}`,
@@ -450,7 +468,7 @@ export async function updateRecordRow(
   );
 
   const updated = await db.all(
-    sql`update ${raw(quoteIdent(physicalTableName(workspace, table.tableName)))} set ${sql.join(assignments, sql`, `)} where "id" = ${recordId} ${ownerId ? sql`and "created_by" = ${ownerId}` : sql``} ${viewSource ? sql`and "id" in (select "id" from ${raw(quoteIdent(viewSource))})` : sql``} returning *`,
+    sql`update ${raw(quoteIdent(physicalTableName(workspace, table.tableName)))} set ${sql.join(assignments, sql`, `)} where "id" = ${recordId} ${ownerId ? sql`and "created_by" = ${ownerId}` : sql``} ${scope ? sql`and "id" in (select t."id" from ${raw(quoteIdent(physicalTableName(workspace, table.tableName)))} t where ${scope})` : sql``} returning *`,
   );
   return updated[0] as Record<string, unknown> | undefined;
 }
@@ -468,16 +486,21 @@ export async function countRecordsUpTo(
   return Number(row?.n ?? 0);
 }
 
-export async function countRecordsInView(viewPhysicalName: string, ids: number[]) {
+export async function countRecordsInView(
+  workspace: string,
+  table: Table,
+  scope: NonNullable<ViewScope>,
+  ids: number[],
+) {
   const unique = [...new Set(ids)];
   let found = 0;
   for (let start = 0; start < unique.length; start += 50) {
     const part = unique.slice(start, start + 50);
     const [row] = await db.all<{ n: number }>(
-      sql`select count(*) as n from ${raw(quoteIdent(viewPhysicalName))} where "id" in (${sql.join(
+      sql`select count(*) as n from ${raw(quoteIdent(physicalTableName(workspace, table.tableName)))} t where t."id" in (${sql.join(
         part.map((id) => sql`${id}`),
         sql`, `,
-      )})`,
+      )}) and ${scope}`,
     );
     found += Number(row?.n ?? 0);
   }

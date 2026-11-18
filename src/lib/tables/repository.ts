@@ -23,8 +23,6 @@ import {
 } from "void/db";
 
 import { TRASH_LIST_LIMIT } from "../trash/query";
-import { buildDropView } from "../views/ddl";
-import { physicalViewName } from "../views/naming";
 import {
   buildAddColumn,
   buildCreateIndex,
@@ -500,7 +498,13 @@ export async function dropColumn(workspace: string, table: Table, column: Column
     ),
     db.run(sql.raw(buildDropColumn(physicalName, column.columnName))),
     db.delete(columnTable).where(eq(columnTable.id, column.id)),
-    db.update(tableTable).set({ updatedAt: new Date() }).where(eq(tableTable.id, table.id)),
+    db
+      .update(tableTable)
+      .set({
+        updatedAt: new Date(),
+        ...(table.titleColumnId === column.id ? { titleColumnId: null } : {}),
+      })
+      .where(eq(tableTable.id, table.id)),
   ]);
 }
 
@@ -528,16 +532,8 @@ export async function softDeleteTables(ids: number[], userId: string) {
 
 export async function dropTables(workspace: string, rows: { id: number; tableName: string }[]) {
   const ids = rows.map((row) => row.id);
-  const views = await db
-    .select({ viewName: viewTable.viewName })
-    .from(viewTable)
-    .where(inArray(viewTable.tableId, ids));
-
   await db.batch([
     db.run(sql`pragma defer_foreign_keys = on`),
-    ...views.map((view) =>
-      db.run(sql.raw(buildDropView(physicalViewName(workspace, view.viewName)))),
-    ),
     ...rows.map((row) =>
       db.run(sql.raw(buildDropTable(physicalTableName(workspace, row.tableName)))),
     ),

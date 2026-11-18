@@ -19,7 +19,6 @@ import { Button } from "@/components/ui/button";
 import { toastManager } from "@/components/ui/toast";
 import { deleteFormsMutationOptions } from "@/data/workspace/forms";
 import { workspaceKeys } from "@/data/workspace/keys";
-import { TRASH_RETENTION_DAYS } from "@/lib/records/retention";
 
 export function DeleteFormsDialog({
   workspace,
@@ -43,7 +42,7 @@ export function DeleteFormsDialog({
       setOpen(false);
       await onDeleted(count);
       await queryClient.invalidateQueries({ queryKey: workspaceKeys.forms(tableId) });
-      toastManager.add({ type: "success", title: `${count} ${noun} moved to trash` });
+      toastManager.add({ type: "success", title: `${count} ${noun} deleted` });
     },
   });
 
@@ -66,8 +65,8 @@ export function DeleteFormsDialog({
           </AlertDialogTitle>
           <AlertDialogDescription>
             {count === 1
-              ? `The selected form moves to the trash for ${TRASH_RETENTION_DAYS} days, then it's deleted forever.`
-              : `The selected forms move to the trash for ${TRASH_RETENTION_DAYS} days, then they're deleted forever.`}{" "}
+              ? `The selected form will be deleted permanently.`
+              : `The selected forms will be deleted permanently.`}{" "}
             The records in the table are not affected.
           </AlertDialogDescription>
         </AlertDialogHeader>

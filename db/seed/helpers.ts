@@ -19,10 +19,7 @@ import {
   toSlug,
 } from "../../src/lib/tables/naming";
 import { columnInputSchema } from "../../src/lib/tables/validation";
-import { buildCreateView } from "../../src/lib/views/ddl";
-import { newViewName, physicalViewName } from "../../src/lib/views/naming";
 import { checkViewDefinition, viewInputSchema } from "../../src/lib/views/validation";
-import { buildViewWhere } from "../../src/lib/views/where";
 import type { SeedUsers } from "./users";
 
 type Schema = typeof import("../schema");
@@ -320,8 +317,6 @@ export async function seedTable(
     const selected = allColumns
       .filter((item) => input.selectColumns.includes(item.columnName))
       .map((item) => item.columnName);
-    const where = buildViewWhere(allColumns, input.filters);
-    const viewName = newViewName();
 
     const [viewResource] = await db
       .insert(schema.resourceTable)
@@ -330,21 +325,17 @@ export async function seedTable(
     await db.insert(schema.viewTable).values({
       id: viewResource.id,
       tableId: resource.id,
-      viewName,
       name: input.name,
       description: input.description,
       icon: input.icon,
       type: "grid",
       position: index,
       selectColumns: selected,
-      whereExpression: where,
+      whereExpression: input.filters,
       createdBy: users.admin,
       createdAt: new Date(at(-45 + position + index)),
       updatedAt: new Date(at(-45 + position + index)),
     });
-    pending.push(
-      buildCreateView(physicalViewName(WORKSPACE, viewName), physicalName, selected, where),
-    );
   }
 
   for (const [index, form] of (def.forms ?? []).entries()) {

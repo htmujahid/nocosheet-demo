@@ -11,6 +11,7 @@ import {
 
 import { userTable } from "../.void/better-auth-schema";
 import { AUDIT_ACTIONS, type AuditChange } from "../src/lib/audit/actions";
+import type { FilterCondition } from "../src/lib/records/filters";
 import { GRANTS, PROFILE_KINDS } from "../src/lib/access/grants";
 
 const RESOURCE_KINDS = ["table", "view", "form"] as const;
@@ -140,24 +141,20 @@ export const workspaceSchema = <W extends string = "default">(workspaceId: W = "
       tableId: integer("table_id")
         .notNull()
         .references(() => tableTable.id, { onDelete: "cascade" }),
-      viewName: text("view_name").notNull(),
       name: text("name").notNull(),
       description: text("description"),
       icon: text("icon"),
       type: text("type"),
       position: integer("position").notNull().default(0),
       selectColumns: json<string[]>("select_columns", []),
-      whereExpression: text("where_expression"),
+      whereExpression: json<FilterCondition[]>("where_expression", []),
       metadata: json<Record<string, unknown>>("metadata", {}),
       createdBy: createdBy(),
       ...timestamps,
-      deletedAt: deletedAt(),
-      deletedBy: deletedBy(),
     },
     (t) => [
-      uniqueIndex(name("view_name")).on(t.tableId, lower(t.name)).where(live(t.deletedAt)),
-      uniqueIndex(name("view_view_name")).on(t.viewName),
-      index(name("view_table_position")).on(t.tableId, t.position).where(live(t.deletedAt)),
+      uniqueIndex(name("view_name")).on(t.tableId, lower(t.name)),
+      index(name("view_table_position")).on(t.tableId, t.position),
     ],
   );
 
@@ -180,16 +177,11 @@ export const workspaceSchema = <W extends string = "default">(workspaceId: W = "
       metadata: json<Record<string, unknown>>("metadata", {}),
       createdBy: createdBy(),
       ...timestamps,
-      deletedAt: deletedAt(),
-      deletedBy: deletedBy(),
     },
     (t) => [
-      uniqueIndex(name("form_name")).on(t.tableId, lower(t.name)).where(live(t.deletedAt)),
+      uniqueIndex(name("form_name")).on(t.tableId, lower(t.name)),
       uniqueIndex(name("form_form_key")).on(t.formKey),
-      index(name("form_table_position")).on(t.tableId, t.position).where(live(t.deletedAt)),
-      index(name("form_deleted"))
-        .on(t.deletedAt)
-        .where(sql`${t.deletedAt} is not null`),
+      index(name("form_table_position")).on(t.tableId, t.position),
     ],
   );
 

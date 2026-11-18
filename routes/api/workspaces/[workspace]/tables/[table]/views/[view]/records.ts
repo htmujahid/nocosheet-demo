@@ -4,12 +4,11 @@ import { z } from "zod";
 import { httpError, NOT_FOUND } from "@/lib/http";
 import { targetsOfColumns, parseFilters } from "@/lib/records/filter-param";
 import { recordsApiSchema, resolveRecordsQuery, withFilters } from "@/lib/records/query";
-import { findRecords } from "@/lib/records/repository";
+import { findRecords, viewScope } from "@/lib/records/repository";
 import { sortKeyOf } from "@/lib/records/sort-param";
 import { checkRecordsQuery } from "@/lib/records/validation";
 import { requireAccess } from "@/lib/access/require-access";
 import { findTable, listColumns } from "@/lib/tables/repository";
-import { physicalViewName } from "@/lib/views/naming";
 import { findView } from "@/lib/views/repository";
 
 const params = z.object({
@@ -48,7 +47,7 @@ export const GET = defineHandler.withValidator({ params, query: recordsApiSchema
       shown,
       resolved,
       ownerId,
-      physicalViewName(workspace, row.viewName),
+      viewScope(all, row.whereExpression),
     );
   } catch (error) {
     throw httpError(

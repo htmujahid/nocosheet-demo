@@ -1,16 +1,13 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 
-import { FormsTrash } from "@/components/workspace/forms/forms-trash";
+import { ColumnsTrash } from "@/components/workspace/tables/columns-trash";
 import { TrashSheet } from "@/components/workspace/trash/trash-sheet";
-import { deletedFormsQueryOptions } from "@/data/workspace/forms";
+import { deletedColumnsQueryOptions } from "@/data/workspace/tables";
 import { TRASH_RETENTION_DAYS } from "@/lib/records/retention";
 import { ALL_VIEW } from "@/lib/views/constants";
 
-export const Route = createFileRoute(
-  "/workspaces/$workspace/_core/tables/$table/forms/_list/trash",
-)({
-  staticData: { crumb: "Deleted forms" },
-  pendingComponent: () => null,
+export const Route = createFileRoute("/workspaces/$workspace/_core/tables/$table/definition/trash")({
+  staticData: { crumb: "Trash" },
   beforeLoad: ({ context, params }) => {
     if (!context.workspace.isAdmin)
       throw redirect({
@@ -19,27 +16,28 @@ export const Route = createFileRoute(
         replace: true,
       });
   },
+  pendingComponent: () => null,
   loader: ({ context, params }) => {
     void context.queryClient
-      .query(deletedFormsQueryOptions(params.workspace, Number(params.table)))
+      .query(deletedColumnsQueryOptions(params.workspace, Number(params.table)))
       .catch(() => undefined);
   },
-  component: FormsTrashSheet,
+  component: ColumnsTrashSheet,
 });
 
-function FormsTrashSheet() {
+function ColumnsTrashSheet() {
   const { workspace, table } = Route.useParams();
   const navigate = Route.useNavigate();
 
   return (
     <TrashSheet
-      title="Deleted forms"
-      description={`Deleted forms are kept for ${TRASH_RETENTION_DAYS} days.`}
+      title="Deleted columns"
+      description={`Deleted columns keep their values for ${TRASH_RETENTION_DAYS} days. Restore one to bring it back with its data.`}
       onClose={() =>
-        navigate({ to: "/workspaces/$workspace/tables/$table/forms", params: { workspace, table } })
+        navigate({ to: "/workspaces/$workspace/tables/$table/definition", params: { workspace, table } })
       }
     >
-      <FormsTrash workspace={workspace} tableId={Number(table)} />
+      <ColumnsTrash workspace={workspace} tableId={Number(table)} />
     </TrashSheet>
   );
 }

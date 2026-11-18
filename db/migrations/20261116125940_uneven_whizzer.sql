@@ -112,18 +112,14 @@ CREATE TABLE `default__form` (
 	`created_by` text,
 	`created_at` integer NOT NULL,
 	`updated_at` integer NOT NULL,
-	`deleted_at` integer,
-	`deleted_by` text,
 	FOREIGN KEY (`id`) REFERENCES `default__resource`(`id`) ON UPDATE no action ON DELETE cascade,
 	FOREIGN KEY (`table_id`) REFERENCES `default__table`(`id`) ON UPDATE no action ON DELETE cascade,
-	FOREIGN KEY (`created_by`) REFERENCES `user`(`id`) ON UPDATE no action ON DELETE set null,
-	FOREIGN KEY (`deleted_by`) REFERENCES `user`(`id`) ON UPDATE no action ON DELETE set null
+	FOREIGN KEY (`created_by`) REFERENCES `user`(`id`) ON UPDATE no action ON DELETE set null
 );
 --> statement-breakpoint
-CREATE UNIQUE INDEX `default__form_name` ON `default__form` (`table_id`,lower("name")) WHERE "default__form"."deleted_at" is null;--> statement-breakpoint
+CREATE UNIQUE INDEX `default__form_name` ON `default__form` (`table_id`,lower("name"));--> statement-breakpoint
 CREATE UNIQUE INDEX `default__form_form_key` ON `default__form` (`form_key`);--> statement-breakpoint
-CREATE INDEX `default__form_table_position` ON `default__form` (`table_id`,`position`) WHERE "default__form"."deleted_at" is null;--> statement-breakpoint
-CREATE INDEX `default__form_deleted` ON `default__form` (`deleted_at`) WHERE "default__form"."deleted_at" is not null;--> statement-breakpoint
+CREATE INDEX `default__form_table_position` ON `default__form` (`table_id`,`position`);--> statement-breakpoint
 CREATE TABLE `default__resource` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`kind` text NOT NULL,
@@ -179,29 +175,24 @@ CREATE INDEX `default__trash_table_deleted` ON `default__trash` (`table_id`,`del
 CREATE TABLE `default__view` (
 	`id` integer PRIMARY KEY NOT NULL,
 	`table_id` integer NOT NULL,
-	`view_name` text NOT NULL,
 	`name` text NOT NULL,
 	`description` text,
 	`icon` text,
 	`type` text,
 	`position` integer DEFAULT 0 NOT NULL,
 	`select_columns` text DEFAULT '[]' NOT NULL,
-	`where_expression` text,
+	`where_expression` text DEFAULT '[]' NOT NULL,
 	`metadata` text DEFAULT '{}' NOT NULL,
 	`created_by` text,
 	`created_at` integer NOT NULL,
 	`updated_at` integer NOT NULL,
-	`deleted_at` integer,
-	`deleted_by` text,
 	FOREIGN KEY (`id`) REFERENCES `default__resource`(`id`) ON UPDATE no action ON DELETE cascade,
 	FOREIGN KEY (`table_id`) REFERENCES `default__table`(`id`) ON UPDATE no action ON DELETE cascade,
-	FOREIGN KEY (`created_by`) REFERENCES `user`(`id`) ON UPDATE no action ON DELETE set null,
-	FOREIGN KEY (`deleted_by`) REFERENCES `user`(`id`) ON UPDATE no action ON DELETE set null
+	FOREIGN KEY (`created_by`) REFERENCES `user`(`id`) ON UPDATE no action ON DELETE set null
 );
 --> statement-breakpoint
-CREATE UNIQUE INDEX `default__view_name` ON `default__view` (`table_id`,lower("name")) WHERE "default__view"."deleted_at" is null;--> statement-breakpoint
-CREATE UNIQUE INDEX `default__view_view_name` ON `default__view` (`view_name`);--> statement-breakpoint
-CREATE INDEX `default__view_table_position` ON `default__view` (`table_id`,`position`) WHERE "default__view"."deleted_at" is null;
+CREATE UNIQUE INDEX `default__view_name` ON `default__view` (`table_id`,lower("name"));--> statement-breakpoint
+CREATE INDEX `default__view_table_position` ON `default__view` (`table_id`,`position`);
 --> statement-breakpoint
 INSERT INTO `default__access_profile` (`name`, `description`, `is_system`, `is_default`, `kind`, `position`, `created_at`, `updated_at`) VALUES
 	('Authenticated', 'Applies to every signed-in member on top of their own profile.', 1, 0, 'authenticated', 0, CAST(strftime('%s', 'now') AS INTEGER) * 1000, CAST(strftime('%s', 'now') AS INTEGER) * 1000),

@@ -5,11 +5,13 @@ import { z } from "zod";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { findFormsUsingColumn } from "@/lib/forms/repository";
 import { conflictOrBadRequest, httpError, NOT_FOUND } from "@/lib/http";
+import { countRecordsUpTo } from "@/lib/records/repository";
 import { SEARCHABLE_FORMATS } from "@/lib/tables/formats";
 import {
   findColumn,
   findColumnsUsing,
   findTable,
+  dropColumn,
   softDeleteColumn,
   updateColumn,
 } from "@/lib/tables/repository";
@@ -54,8 +56,8 @@ export const DELETE = defineHandler.withValidator({ params })(async (c, { params
     findFormsUsingColumn(table.id, column.columnName),
   ]);
   const users = [
-    ...views.map((view) => `the ${view.deletedAt ? "deleted " : ""}view "${view.name}"`),
-    ...forms.map((form) => `the ${form.deletedAt ? "deleted " : ""}form "${form.name}"`),
+    ...views.map((view) => `the view "${view.name}"`),
+    ...forms.map((form) => `the form "${form.name}"`),
   ];
   if (users.length > 0)
     throw httpError(
@@ -70,6 +72,10 @@ export const DELETE = defineHandler.withValidator({ params })(async (c, { params
       `"${column.name}" is used by the computed value or check of ${dependents.map((item) => `"${item.name}"`).join(", ")}, so it can't be deleted.`,
     );
 
-  await softDeleteColumn(c.get("workspaceId"), table, column, requireAuth(c).id);
-  return { ok: true };
+  // With no records there is nothing to restore, so the column is removed outright.
+  const workspace = c.get("workspaceId");
+  const empty = (await countRecordsUpTo(workspace, table, 1)) === 0;
+  if (empty) await dropColumn(workspace, table, column);
+  else await softDeleteColumn(workspace, table, column, requireAuth(c).id);
+  return { ok: true, trashed: !empty };
 });

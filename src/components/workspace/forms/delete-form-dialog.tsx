@@ -14,9 +14,6 @@ import { Button } from "@/components/ui/button";
 import { toastManager } from "@/components/ui/toast";
 import { deleteFormMutationOptions } from "@/data/workspace/forms";
 import { workspaceKeys } from "@/data/workspace/keys";
-import { TRASH_RETENTION_DAYS } from "@/lib/records/retention";
-
-import { useRestoreForm } from "./use-restore-form";
 
 export function DeleteFormDialog({
   workspace,
@@ -34,7 +31,6 @@ export function DeleteFormDialog({
   onDeleted: () => void;
 }) {
   const queryClient = useQueryClient();
-  const restore = useRestoreForm(workspace, tableId);
 
   const deleteForm = useMutation({
     ...deleteFormMutationOptions,
@@ -42,11 +38,7 @@ export function DeleteFormDialog({
       onOpenChange(false);
       onDeleted();
       await queryClient.invalidateQueries({ queryKey: workspaceKeys.forms(tableId) });
-      toastManager.add({
-        type: "success",
-        title: `${form.name} moved to trash`,
-        actionProps: { children: "Undo", onClick: () => void restore(form.id, form.name) },
-      });
+      toastManager.add({ type: "success", title: `${form.name} deleted` });
     },
   });
 
@@ -62,8 +54,7 @@ export function DeleteFormDialog({
         <AlertDialogHeader>
           <AlertDialogTitle>Delete {form.name}?</AlertDialogTitle>
           <AlertDialogDescription>
-            {form.name} will move to the trash, where you can restore it for {TRASH_RETENTION_DAYS}{" "}
-            days. Records already submitted through it are not affected.
+            {form.name} will be deleted permanently. Records already submitted through it are not affected.
           </AlertDialogDescription>
         </AlertDialogHeader>
         {deleteForm.error && (

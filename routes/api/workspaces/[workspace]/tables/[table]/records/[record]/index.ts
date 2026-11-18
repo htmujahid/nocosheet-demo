@@ -11,11 +11,11 @@ import {
   countRecordsInView,
   findRecord,
   updateRecordRow,
+  viewScope,
 } from "@/lib/records/repository";
 import { parseRecordValues, recordPatchSchema } from "@/lib/records/values";
 import { requireAccess } from "@/lib/access/require-access";
 import { findTable, listColumns } from "@/lib/tables/repository";
-import { filteredViewSource, physicalViewName } from "@/lib/views/naming";
 import { viewScopeSchema } from "@/lib/views/query";
 import { findView } from "@/lib/views/repository";
 
@@ -43,7 +43,7 @@ export const GET = defineHandler.withValidator({ params, query: viewScopeSchema 
     columns,
     params.record,
     ownerId,
-    view && physicalViewName(c.get("workspaceId"), view.viewName),
+    view && viewScope(all, view.whereExpression),
   );
   if (!record) throw httpError(404, NOT_FOUND);
   return record;
@@ -81,7 +81,7 @@ export const PATCH = defineHandler.withValidator({
       parsed.values,
       user.id,
       ownerId,
-      filteredViewSource(workspace, view),
+      view && viewScope(columns, view.whereExpression),
     );
   } catch (error) {
     writeFailure(error, columns);
@@ -107,8 +107,8 @@ export const DELETE = defineHandler.withValidator({ params, query: viewScopeSche
   const table = await findTable(params.table);
   if (!table) throw httpError(404, NOT_FOUND);
   const view = query.view ? await findView(table.id, query.view) : undefined;
-  const source = filteredViewSource(workspace, view);
-  if (source && (await countRecordsInView(source, [params.record])) !== 1)
+  const scope = view && viewScope(await listColumns(table.id), view.whereExpression);
+  if (scope && (await countRecordsInView(workspace, table, scope, [params.record])) !== 1)
     throw httpError(404, NOT_FOUND);
 
   if (ownerId && (await countOwnedRecords(workspace, table, [params.record], ownerId)) !== 1)

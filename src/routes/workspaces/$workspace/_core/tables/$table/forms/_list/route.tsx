@@ -1,8 +1,8 @@
 import { useState } from "react";
 
-import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
+import { createFileRoute, Outlet } from "@tanstack/react-router";
 
-import { PlusIcon, Trash2Icon } from "lucide-react";
+import { PlusIcon } from "lucide-react";
 
 import { WorkspaceContent, WorkspaceHeader } from "@/components/layout/workspace-header";
 import { Button } from "@/components/ui/button";
@@ -27,19 +27,6 @@ function FormsPage() {
       <WorkspaceHeader workspace={workspace}>
         {isAdmin && (
           <>
-            <Button
-              size="sm"
-              variant="outline"
-              render={
-                <Link
-                  to="/workspaces/$workspace/tables/$table/forms/trash"
-                  params={{ workspace, table }}
-                />
-              }
-            >
-              <Trash2Icon />
-              Trash
-            </Button>
             <Button size="sm" onClick={() => setCreating(true)}>
               <PlusIcon />
               New form

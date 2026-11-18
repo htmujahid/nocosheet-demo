@@ -18,13 +18,13 @@ import {
   countRecordsInView,
   createRecordRow,
   findRecords,
+  viewScope,
 } from "@/lib/records/repository";
 import { sortKeyOf } from "@/lib/records/sort-param";
 import { checkRecordsQuery } from "@/lib/records/validation";
 import { findMissingRequired, parseRecordValues, recordPatchSchema } from "@/lib/records/values";
 import { requireAccess } from "@/lib/access/require-access";
 import { findTable, listColumns } from "@/lib/tables/repository";
-import { filteredViewSource } from "@/lib/views/naming";
 import { viewScopeSchema } from "@/lib/views/query";
 import { findView } from "@/lib/views/repository";
 
@@ -107,8 +107,8 @@ export const DELETE = defineHandler.withValidator({
 
   const ids = [...new Set(body.ids)];
   const view = query.view ? await findView(table.id, query.view) : undefined;
-  const source = filteredViewSource(workspace, view);
-  if (source && (await countRecordsInView(source, ids)) !== ids.length)
+  const scope = view && viewScope(await listColumns(table.id), view.whereExpression);
+  if (scope && (await countRecordsInView(workspace, table, scope, ids)) !== ids.length)
     throw httpError(404, NOT_FOUND);
   if (ownerId && (await countOwnedRecords(workspace, table, ids, ownerId)) !== ids.length)
     throw httpError(403, "You can only delete records you created.");

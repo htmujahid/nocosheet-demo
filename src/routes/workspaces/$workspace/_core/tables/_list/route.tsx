@@ -34,7 +34,7 @@ function TablesPage() {
           render={<Link to="/workspaces/$workspace/tables/trash" params={{ workspace }} />}
         >
           <Trash2Icon />
-          Trash
+          Deleted tables
         </Button>
         <Button
           size="sm"

@@ -1,12 +1,11 @@
 import { defineHandler } from "void";
-import { requireAuth } from "void/auth";
 import { z } from "zod";
 
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { conflictOrBadRequest, httpError, NOT_FOUND } from "@/lib/http";
 import { requireAccess } from "@/lib/access/require-access";
 import { findTable, listColumns } from "@/lib/tables/repository";
-import { findView, softDeleteView, updateView } from "@/lib/views/repository";
+import { deleteViews, findView, updateView } from "@/lib/views/repository";
 import { viewPatchSchema } from "@/lib/views/validation";
 
 const params = z.object({
@@ -52,6 +51,6 @@ export const PATCH = defineHandler.withValidator({ params, body: viewPatchSchema
 export const DELETE = defineHandler.withValidator({ params })(async (c, { params }) => {
   requireAdmin(c);
   if (!(await findView(params.table, params.view))) throw httpError(404, NOT_FOUND);
-  await softDeleteView(params.view, requireAuth(c).id);
+  await deleteViews([params.view]);
   return { ok: true };
 });

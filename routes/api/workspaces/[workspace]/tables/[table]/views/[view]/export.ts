@@ -2,10 +2,9 @@ import { defineHandler } from "void";
 import { z } from "zod";
 
 import { httpError, NOT_FOUND } from "@/lib/http";
-import { findExportRecords } from "@/lib/records/repository";
+import { findExportRecords, viewScope } from "@/lib/records/repository";
 import { requireAccess } from "@/lib/access/require-access";
 import { findTable, listColumns } from "@/lib/tables/repository";
-import { physicalViewName } from "@/lib/views/naming";
 import { findView } from "@/lib/views/repository";
 
 const params = z.object({
@@ -22,15 +21,14 @@ export const GET = defineHandler.withValidator({ params })(async (c, { params })
   const view = await findView(table.id, params.view);
   if (!view) throw httpError(404, NOT_FOUND);
 
-  const columns = (await listColumns(table.id)).filter((column) =>
-    view.selectColumns.includes(column.columnName),
-  );
+  const all = await listColumns(table.id);
+  const columns = all.filter((column) => view.selectColumns.includes(column.columnName));
   const workspace = c.get("workspaceId");
   return findExportRecords(
     workspace,
     table,
     columns,
     ownerId,
-    physicalViewName(workspace, view.viewName),
+    viewScope(all, view.whereExpression),
   );
 });

@@ -9,7 +9,7 @@ import {
   createForm,
   findForms,
   listForms,
-  softDeleteForms,
+  deleteForms,
 } from "@/lib/forms/repository";
 import { checkFormDefinition, formInputSchema, formsDeleteSchema } from "@/lib/forms/validation";
 import { conflictOrBadRequest, httpError, NOT_FOUND } from "@/lib/http";
@@ -58,6 +58,6 @@ export const DELETE = defineHandler.withValidator({ params, body: formsDeleteSch
   const ids = [...new Set(body.ids)];
   if ((await findForms(table.id, ids)).length !== ids.length) throw httpError(404, NOT_FOUND);
 
-  await softDeleteForms(ids, requireAuth(c).id);
+  await deleteForms(ids);
   return { ok: true };
 });

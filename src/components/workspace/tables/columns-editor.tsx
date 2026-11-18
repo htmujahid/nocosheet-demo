@@ -2,7 +2,7 @@ import { useOptimistic, useState, useTransition } from "react";
 
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 
-import { PlusIcon, Trash2Icon } from "lucide-react";
+import { PlusIcon } from "lucide-react";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
@@ -29,7 +29,6 @@ import { TRASH_RETENTION_DAYS } from "@/lib/records/retention";
 import { ColumnDialog } from "./column-dialog";
 import { columnToDraft, type ColumnDraft } from "./column-draft";
 import { ColumnsList } from "./columns-list";
-import { DeletedColumnsSheet } from "./deleted-columns-sheet";
 
 function useTableData(workspace: string, tableId: number) {
   return useSuspenseQuery(tableQueryOptions(workspace, tableId));
@@ -58,7 +57,6 @@ export function ColumnsEditor({
     { open: false, column: null, key: 0 },
   );
   const [removing, setRemoving] = useState<EditorColumn | null>(null);
-  const [trashOpen, setTrashOpen] = useState(false);
 
   const refresh = () => queryClient.invalidateQueries({ queryKey: workspaceKeys.tables() });
 
@@ -67,7 +65,10 @@ export function ColumnsEditor({
   const deleteColumn = useMutation({
     ...deleteColumnMutationOptions,
     onSuccess: async () => {
-      await refresh();
+      await Promise.all([
+        refresh(),
+        queryClient.invalidateQueries({ queryKey: workspaceKeys.columnsTrash(tableId) }),
+      ]);
       setRemoving(null);
     },
   });
@@ -134,10 +135,6 @@ export function ColumnsEditor({
         </p>
         <div className="flex items-center gap-2">
           {actions}
-          <Button size="sm" variant="outline" onClick={() => setTrashOpen(true)}>
-            <Trash2Icon />
-            Deleted columns
-          </Button>
           <Button size="sm" onClick={() => openDialog(null)}>
             <PlusIcon />
             Add column
@@ -163,13 +160,6 @@ export function ColumnsEditor({
         onSave={save}
       />
 
-      <DeletedColumnsSheet
-        workspace={workspace}
-        tableId={tableId}
-        open={trashOpen}
-        onOpenChange={setTrashOpen}
-      />
-
       <AlertDialog
         open={removing !== null}
         onOpenChange={(open) => {
@@ -183,8 +173,9 @@ export function ColumnsEditor({
           <AlertDialogHeader>
             <AlertDialogTitle>Delete {removing?.name}?</AlertDialogTitle>
             <AlertDialogDescription>
-              The column is hidden and moved to Deleted columns. Its values are kept and it can be
-              restored for {TRASH_RETENTION_DAYS} days before it is deleted for good.
+              The column is removed from the table. If the table has records, its values are kept in
+              Deleted columns and it can be restored for {TRASH_RETENTION_DAYS} days before it is
+              deleted for good.
             </AlertDialogDescription>
           </AlertDialogHeader>
           {deleteColumn.error && (

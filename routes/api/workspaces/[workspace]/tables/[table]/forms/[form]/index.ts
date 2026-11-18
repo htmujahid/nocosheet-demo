@@ -4,7 +4,7 @@ import { z } from "zod";
 
 import { isAdmin } from "@/lib/auth/access";
 import { requireAdmin } from "@/lib/auth/require-admin";
-import { findForm, softDeleteForm, updateForm } from "@/lib/forms/repository";
+import { deleteForms, findForm, updateForm } from "@/lib/forms/repository";
 import { checkFormDefinition, formInputSchema } from "@/lib/forms/validation";
 import { conflictOrBadRequest, httpError, NOT_FOUND } from "@/lib/http";
 import { requireAccess } from "@/lib/access/require-access";
@@ -56,6 +56,6 @@ export const PATCH = defineHandler.withValidator({ params, body: formInputSchema
 export const DELETE = defineHandler.withValidator({ params })(async (c, { params }) => {
   requireAdmin(c);
   if (!(await findForm(params.table, params.form))) throw httpError(404, NOT_FOUND);
-  await softDeleteForm(params.form, requireAuth(c).id);
+  await deleteForms([params.form]);
   return { ok: true };
 });

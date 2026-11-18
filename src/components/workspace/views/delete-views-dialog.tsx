@@ -19,7 +19,6 @@ import { Button } from "@/components/ui/button";
 import { toastManager } from "@/components/ui/toast";
 import { workspaceKeys } from "@/data/workspace/keys";
 import { deleteViewsMutationOptions } from "@/data/workspace/views";
-import { TRASH_RETENTION_DAYS } from "@/lib/records/retention";
 
 export function DeleteViewsDialog({
   workspace,
@@ -43,7 +42,7 @@ export function DeleteViewsDialog({
       setOpen(false);
       await onDeleted(count);
       await queryClient.invalidateQueries({ queryKey: workspaceKeys.views(tableId) });
-      toastManager.add({ type: "success", title: `${count} ${noun} moved to trash` });
+      toastManager.add({ type: "success", title: `${count} ${noun} deleted` });
     },
   });
 
@@ -66,8 +65,8 @@ export function DeleteViewsDialog({
           </AlertDialogTitle>
           <AlertDialogDescription>
             {count === 1
-              ? `The selected view moves to the trash for ${TRASH_RETENTION_DAYS} days, then it's deleted forever.`
-              : `The selected views move to the trash for ${TRASH_RETENTION_DAYS} days, then they're deleted forever.`}{" "}
+              ? `The selected view will be deleted permanently.`
+              : `The selected views will be deleted permanently.`}{" "}
             The records in the table are not affected.
           </AlertDialogDescription>
         </AlertDialogHeader>
