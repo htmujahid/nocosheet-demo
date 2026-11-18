@@ -62,7 +62,7 @@ export function SignInForm() {
   }, [startAutofill]);
 
   const form = useForm({
-    defaultValues: { identifier: "", password: "" },
+    defaultValues: { identifier: "admin@example.com", password: "password123" },
     validators: { onSubmit: schema },
     onSubmit: ({ value }) => mutation.mutate({ ...value, identifier: value.identifier.trim() }),
   });
