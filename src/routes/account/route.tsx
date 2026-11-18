@@ -29,10 +29,7 @@ function AccountLayout() {
             </p>
           </div>
           <AccountTabs />
-          {/* Demo: account settings are read-only; a disabled fieldset disables every control inside. */}
-          <fieldset disabled className="m-0 flex min-w-0 flex-col gap-6 border-0 p-0">
-            <Outlet />
-          </fieldset>
+          <Outlet />
         </div>
       </main>
     </div>
