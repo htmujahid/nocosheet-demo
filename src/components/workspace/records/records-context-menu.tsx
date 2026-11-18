@@ -24,7 +24,7 @@ import { cellText } from "./cell-text";
 import { cellMode } from "./cells";
 import type { ViewerColumn } from "./columns";
 import { createDeleteRecordsHandle, DetachedDeleteRecordsDialog } from "./delete-records-dialog";
-import type { ViewerRow } from "./records-grid-columns";
+import type { SummaryRow, ViewerRow } from "./records-grid-columns";
 
 type Target = {
   row: ViewerRow;
@@ -32,7 +32,7 @@ type Target = {
   edit: () => void;
 };
 
-export type CellContextMenuHandler = (args: CellMouseArgs<ViewerRow>) => void;
+export type CellContextMenuHandler = (args: CellMouseArgs<ViewerRow, SummaryRow>) => void;
 
 const copy = async (text: string, label: string) => {
   try {

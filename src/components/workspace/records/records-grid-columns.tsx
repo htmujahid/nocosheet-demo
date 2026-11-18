@@ -9,11 +9,15 @@ import type { dataTableFeatures } from "@/components/shared/data-table/features"
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { NamedIcon } from "@/components/workspace/tables/named-icon";
+import type { Aggregate } from "@/lib/records/aggregates";
 
 import { CellEditor, CellValue, cellMode } from "./cells";
+import { AggregateCell } from "./cells/aggregate-cell";
 import type { ViewerColumn } from "./columns";
 
 export type ViewerRow = Record<string, unknown> & { id: number };
+
+export type SummaryRow = { aggregates: ReadonlyMap<string, Aggregate> };
 
 export function useRecordsGridColumns<TSelected extends { rowSelection: Record<string, boolean> }>({
   table,
@@ -38,7 +42,7 @@ export function useRecordsGridColumns<TSelected extends { rowSelection: Record<s
   const visibleKey = visible.map((column) => column.id).join("|");
   const selection = table.state.rowSelection;
 
-  return useMemo<Column<ViewerRow>[]>(
+  return useMemo<Column<ViewerRow, SummaryRow>[]>(
     () => [
       {
         key: "__row",
@@ -70,6 +74,12 @@ export function useRecordsGridColumns<TSelected extends { rowSelection: Record<s
             </>
           );
         },
+        summaryCellClass: "records-row-number",
+        renderSummaryCell: () => (
+          <span className="truncate" title="Calculated from the records on this page">
+            Total
+          </span>
+        ),
         renderCell: ({ row }) => (
           <>
             <span className="records-row-index">{row.id}</span>
@@ -95,7 +105,7 @@ export function useRecordsGridColumns<TSelected extends { rowSelection: Record<s
           </>
         ),
       },
-      ...visible.flatMap((column): Column<ViewerRow>[] => {
+      ...visible.flatMap((column): Column<ViewerRow, SummaryRow>[] => {
         const meta = byKey.get(column.id);
         if (!meta) return [];
         const mode = canEdit ? cellMode(meta) : "readonly";
@@ -121,6 +131,10 @@ export function useRecordsGridColumns<TSelected extends { rowSelection: Record<s
                   <ArrowDownIcon className="ms-auto size-3.5 shrink-0" />
                 )}
               </span>
+            ),
+            summaryCellClass: "records-summary-cell",
+            renderSummaryCell: ({ row }) => (
+              <AggregateCell column={meta} aggregate={row.aggregates.get(meta.key)} />
             ),
             editable: inline ? (row) => canEditRow(row) : false,
             editorOptions: { commitOnOutsideClick: mode === "input" },

@@ -12,7 +12,8 @@ import "./records-grid.css";
 import { cellMode } from "./cells";
 import type { ViewerColumn } from "./columns";
 import { RecordsContextMenu } from "./records-context-menu";
-import { type ViewerRow, useRecordsGridColumns } from "./records-grid-columns";
+import { aggregate } from "@/lib/records/aggregates";
+import { type SummaryRow, type ViewerRow, useRecordsGridColumns } from "./records-grid-columns";
 
 export type { ViewerRow };
 
@@ -67,6 +68,26 @@ export function RecordsGrid<TSelected extends { rowSelection: Record<string, boo
     selectable,
   });
 
+  const summaryRows = useMemo<SummaryRow[]>(
+    () =>
+      rows.length === 0
+        ? []
+        : [
+            {
+              aggregates: new Map(
+                columns.map((column) => [
+                  column.key,
+                  aggregate(
+                    column.format,
+                    rows.map((row) => row[column.key]),
+                  ),
+                ]),
+              ),
+            },
+          ],
+    [rows, columns],
+  );
+
   const sortColumns: SortColumn[] = sort
     ? [{ columnKey: sort, direction: order === "desc" ? "DESC" : "ASC" }]
     : [];
@@ -88,6 +109,7 @@ export function RecordsGrid<TSelected extends { rowSelection: Record<string, boo
           aria-label="Records"
           columns={gridColumns}
           rows={rows}
+          bottomSummaryRows={summaryRows}
           getRowKey={(row) => row.id}
           rowClass={(row) => (selection[String(row.id)] ? "records-row-selected" : undefined)}
           onRowsChange={(next, { indexes, column }) => {
@@ -106,6 +128,7 @@ export function RecordsGrid<TSelected extends { rowSelection: Record<string, boo
             if (mode === "readonly" || mode === "sheet") onOpenRecord?.(row.id);
           }}
           rowHeight={ROW_HEIGHT}
+          summaryRowHeight={ROW_HEIGHT}
           headerRowHeight={ROW_HEIGHT}
           sortColumns={sortColumns}
           onSortColumnsChange={(next) => {
