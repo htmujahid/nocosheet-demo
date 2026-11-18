@@ -86,7 +86,7 @@
 }
 
 .records-grid {
-  --rdg-summary-border-width: 1px;
+  --rdg-summary-border-width: 0px;
   --rdg-summary-border-color: var(--border);
 }
 
