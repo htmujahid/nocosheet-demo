@@ -1,0 +1,6944 @@
+{
+  "version": 1,
+  "id": "demo",
+  "name": "Demo",
+  "description": "A fully populated demo workspace: team, clients, projects, tasks, invoices, bug reports and more.",
+  "icon": "sparkles",
+  "tags": [
+    "demo",
+    "sample"
+  ],
+  "tables": [
+    {
+      "name": "Team Members",
+      "icon": "users",
+      "description": "Everyone who works on projects, with role and skills.",
+      "title": "Name",
+      "columns": [
+        {
+          "name": "Name",
+          "format": "text",
+          "required": true,
+          "searchable": true
+        },
+        {
+          "name": "Email",
+          "format": "email",
+          "required": true,
+          "unique": true
+        },
+        {
+          "name": "Role",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Engineer",
+                "value": "engineer"
+              },
+              {
+                "label": "Designer",
+                "value": "designer"
+              },
+              {
+                "label": "Product Manager",
+                "value": "product_manager"
+              },
+              {
+                "label": "Marketing",
+                "value": "marketing"
+              },
+              {
+                "label": "Sales",
+                "value": "sales"
+              },
+              {
+                "label": "Operations",
+                "value": "operations"
+              }
+            ]
+          },
+          "filterable": true,
+          "sortable": true
+        },
+        {
+          "name": "Location",
+          "format": "text"
+        },
+        {
+          "name": "Joined",
+          "format": "date"
+        },
+        {
+          "name": "Active",
+          "format": "checkbox",
+          "filterable": true,
+          "sortable": true,
+          "default": "true"
+        },
+        {
+          "name": "Skills",
+          "format": "multi_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Frontend",
+                "value": "frontend"
+              },
+              {
+                "label": "Backend",
+                "value": "backend"
+              },
+              {
+                "label": "Design",
+                "value": "design"
+              },
+              {
+                "label": "Data",
+                "value": "data"
+              },
+              {
+                "label": "DevOps",
+                "value": "devops"
+              },
+              {
+                "label": "Writing",
+                "value": "writing"
+              }
+            ]
+          }
+        }
+      ],
+      "views": [
+        {
+          "name": "Active team",
+          "icon": "users",
+          "description": "Team members who are currently active.",
+          "columns": [
+            "Name",
+            "Role",
+            "Location",
+            "Skills"
+          ],
+          "filters": [
+            {
+              "column": "Active",
+              "op": "is",
+              "value": true
+            }
+          ]
+        },
+        {
+          "name": "Engineers",
+          "icon": "code",
+          "description": "Everyone with the Engineer role.",
+          "columns": [
+            "Name",
+            "Email",
+            "Location",
+            "Skills"
+          ],
+          "filters": [
+            {
+              "column": "Role",
+              "op": "is",
+              "value": "engineer"
+            }
+          ]
+        }
+      ],
+      "rows": [
+        {
+          "Name": "Maya Chen",
+          "Email": "maya.chen@example.com",
+          "Role": "engineer",
+          "Location": "Lisbon, Portugal",
+          "Joined": {
+            "$days": -720
+          },
+          "Active": true,
+          "Skills": [
+            "backend",
+            "devops"
+          ]
+        },
+        {
+          "Name": "Kai Morgan",
+          "Email": "kai.morgan@example.com",
+          "Role": "designer",
+          "Location": "Berlin, Germany",
+          "Joined": {
+            "$days": -610
+          },
+          "Active": true,
+          "Skills": [
+            "design",
+            "frontend"
+          ]
+        },
+        {
+          "Name": "Priya Nair",
+          "Email": "priya.nair@example.com",
+          "Role": "product_manager",
+          "Location": "Bengaluru, India",
+          "Joined": {
+            "$days": -540
+          },
+          "Active": true,
+          "Skills": [
+            "data",
+            "writing"
+          ]
+        },
+        {
+          "Name": "Diego Alvarez",
+          "Email": "diego.alvarez@example.com",
+          "Role": "engineer",
+          "Location": "Mexico City, Mexico",
+          "Joined": {
+            "$days": -430
+          },
+          "Active": true,
+          "Skills": [
+            "frontend"
+          ]
+        },
+        {
+          "Name": "Hannah Becker",
+          "Email": "hannah.becker@example.com",
+          "Role": "marketing",
+          "Location": "Hamburg, Germany",
+          "Joined": {
+            "$days": -380
+          },
+          "Active": true,
+          "Skills": [
+            "writing"
+          ]
+        },
+        {
+          "Name": "Omar Haddad",
+          "Email": "omar.haddad@example.com",
+          "Role": "sales",
+          "Location": "Dubai, UAE",
+          "Joined": {
+            "$days": -300
+          },
+          "Active": true,
+          "Skills": []
+        },
+        {
+          "Name": "Sofia Rossi",
+          "Email": "sofia.rossi@example.com",
+          "Role": "operations",
+          "Location": "Milan, Italy",
+          "Joined": {
+            "$days": -260
+          },
+          "Active": true,
+          "Skills": [
+            "data"
+          ]
+        },
+        {
+          "Name": "Liam O'Connor",
+          "Email": "liam.oconnor@example.com",
+          "Role": "engineer",
+          "Location": "Dublin, Ireland",
+          "Joined": {
+            "$days": -200
+          },
+          "Active": false,
+          "Skills": [
+            "backend",
+            "data"
+          ]
+        },
+        {
+          "Name": "Yuki Tanaka",
+          "Email": "yuki.tanaka@example.com",
+          "Role": "designer",
+          "Location": "Tokyo, Japan",
+          "Joined": {
+            "$days": -120
+          },
+          "Active": true,
+          "Skills": [
+            "design"
+          ]
+        },
+        {
+          "Name": "Zara Ahmed",
+          "Email": "zara.ahmed@example.com",
+          "Role": "sales",
+          "Location": "London, UK",
+          "Joined": {
+            "$days": -60
+          },
+          "Active": true,
+          "Skills": []
+        }
+      ]
+    },
+    {
+      "name": "Clients",
+      "icon": "building",
+      "group": "Sales",
+      "description": "Companies we work with, from first lead to active accounts.",
+      "title": "Company",
+      "audit": true,
+      "columns": [
+        {
+          "name": "Company",
+          "format": "text",
+          "required": true,
+          "searchable": true
+        },
+        {
+          "name": "Industry",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "SaaS",
+                "value": "saas"
+              },
+              {
+                "label": "Retail",
+                "value": "retail"
+              },
+              {
+                "label": "Healthcare",
+                "value": "healthcare"
+              },
+              {
+                "label": "Finance",
+                "value": "finance"
+              },
+              {
+                "label": "Education",
+                "value": "education"
+              },
+              {
+                "label": "Logistics",
+                "value": "logistics"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Status",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Lead",
+                "value": "lead"
+              },
+              {
+                "label": "Active",
+                "value": "active"
+              },
+              {
+                "label": "Churned",
+                "value": "churned"
+              }
+            ]
+          },
+          "filterable": true,
+          "sortable": true,
+          "default": "lead"
+        },
+        {
+          "name": "Website",
+          "format": "url"
+        },
+        {
+          "name": "Contact email",
+          "format": "email"
+        },
+        {
+          "name": "Annual revenue",
+          "format": "currency",
+          "options": {
+            "currency": "USD",
+            "precision": 2
+          },
+          "check": "{Annual revenue} >= 0"
+        },
+        {
+          "name": "Onboarded",
+          "format": "date"
+        },
+        {
+          "name": "Notes",
+          "format": "long_text"
+        }
+      ],
+      "views": [
+        {
+          "name": "Active clients",
+          "icon": "badge-check",
+          "description": "Accounts we are currently working with.",
+          "columns": [
+            "Company",
+            "Industry",
+            "Contact email",
+            "Annual revenue"
+          ],
+          "filters": [
+            {
+              "column": "Status",
+              "op": "is",
+              "value": "active"
+            }
+          ]
+        },
+        {
+          "name": "Open leads",
+          "icon": "target",
+          "description": "Prospects that have not signed yet.",
+          "columns": [
+            "Company",
+            "Industry",
+            "Contact email",
+            "Website"
+          ],
+          "filters": [
+            {
+              "column": "Status",
+              "op": "is",
+              "value": "lead"
+            }
+          ]
+        }
+      ],
+      "forms": [
+        {
+          "name": "Lead intake",
+          "icon": "inbox",
+          "description": "Tell us about a company that wants to work with us.",
+          "columns": [
+            "Company",
+            "Industry",
+            "Contact email",
+            "Website",
+            "Notes"
+          ]
+        }
+      ],
+      "rows": [
+        {
+          "Company": "Northwind Traders",
+          "Industry": "retail",
+          "Status": "active",
+          "Website": "https://northwind.example.com",
+          "Contact email": "orders@northwind.example.com",
+          "Annual revenue": 4200000,
+          "Onboarded": {
+            "$days": -410
+          },
+          "Notes": "Long-standing retail partner. Prefers quarterly planning calls and written summaries."
+        },
+        {
+          "Company": "Globex Health",
+          "Industry": "healthcare",
+          "Status": "active",
+          "Website": "https://globex-health.example.com",
+          "Contact email": "it@globex-health.example.com",
+          "Annual revenue": 18500000,
+          "Onboarded": {
+            "$days": -250
+          },
+          "Notes": "Compliance-heavy. All designs need accessibility sign-off before delivery."
+        },
+        {
+          "Company": "Initech Software",
+          "Industry": "saas",
+          "Status": "active",
+          "Website": "https://initech.example.com",
+          "Contact email": "product@initech.example.com",
+          "Annual revenue": 9800000,
+          "Onboarded": {
+            "$days": -330
+          },
+          "Notes": "Fast-moving product team; ships weekly."
+        },
+        {
+          "Company": "Umbrella Logistics",
+          "Industry": "logistics",
+          "Status": "churned",
+          "Website": "https://umbrella-logistics.example.com",
+          "Contact email": "ops@umbrella-logistics.example.com",
+          "Annual revenue": 31000000,
+          "Onboarded": {
+            "$days": -520
+          },
+          "Notes": "Contract ended after the fleet API launch. Open to future work."
+        },
+        {
+          "Company": "Stark Finance",
+          "Industry": "finance",
+          "Status": "active",
+          "Website": "https://stark-finance.example.com",
+          "Contact email": "data@stark-finance.example.com",
+          "Annual revenue": 76000000,
+          "Onboarded": {
+            "$days": -190
+          },
+          "Notes": "Strict change-management process; plan releases two weeks ahead."
+        },
+        {
+          "Company": "Wayne Education",
+          "Industry": "education",
+          "Status": "active",
+          "Website": "https://wayne-edu.example.com",
+          "Contact email": "learning@wayne-edu.example.com",
+          "Annual revenue": 2300000,
+          "Onboarded": {
+            "$days": -95
+          },
+          "Notes": "Pilot with the autumn cohort."
+        },
+        {
+          "Company": "Acme Retail",
+          "Industry": "retail",
+          "Status": "active",
+          "Website": "https://acme-retail.example.com",
+          "Contact email": "brand@acme-retail.example.com",
+          "Annual revenue": 5600000,
+          "Onboarded": {
+            "$days": -280
+          },
+          "Notes": "Brand refresh finished; maintenance retainer discussed."
+        },
+        {
+          "Company": "Hooli Cloud",
+          "Industry": "saas",
+          "Status": "lead",
+          "Website": "https://hooli-cloud.example.com",
+          "Contact email": "partnerships@hooli-cloud.example.com",
+          "Annual revenue": 120000000,
+          "Onboarded": {
+            "$days": -12
+          },
+          "Notes": "Warm lead from the spring conference. Proposal due next month."
+        }
+      ]
+    },
+    {
+      "name": "Projects",
+      "icon": "kanban",
+      "group": "Delivery",
+      "description": "Client projects with owner, budget and progress.",
+      "title": "Name",
+      "audit": true,
+      "columns": [
+        {
+          "name": "Name",
+          "format": "text",
+          "required": true,
+          "searchable": true
+        },
+        {
+          "name": "Client",
+          "format": "relation",
+          "options": {
+            "onDelete": "set null"
+          },
+          "relation": "Clients"
+        },
+        {
+          "name": "Owner",
+          "format": "relation",
+          "options": {
+            "onDelete": "set null"
+          },
+          "relation": "Team Members"
+        },
+        {
+          "name": "Status",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Planning",
+                "value": "planning"
+              },
+              {
+                "label": "In progress",
+                "value": "in_progress"
+              },
+              {
+                "label": "On hold",
+                "value": "on_hold"
+              },
+              {
+                "label": "Completed",
+                "value": "completed"
+              }
+            ]
+          },
+          "filterable": true,
+          "sortable": true,
+          "default": "planning"
+        },
+        {
+          "name": "Priority",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Low",
+                "value": "low"
+              },
+              {
+                "label": "Medium",
+                "value": "medium"
+              },
+              {
+                "label": "High",
+                "value": "high"
+              },
+              {
+                "label": "Urgent",
+                "value": "urgent"
+              }
+            ]
+          },
+          "filterable": true,
+          "sortable": true,
+          "default": "medium"
+        },
+        {
+          "name": "Budget",
+          "format": "currency",
+          "options": {
+            "currency": "USD",
+            "precision": 2
+          },
+          "check": "{Budget} >= 0"
+        },
+        {
+          "name": "Start date",
+          "format": "date"
+        },
+        {
+          "name": "Due date",
+          "format": "date"
+        },
+        {
+          "name": "Progress",
+          "format": "percent",
+          "options": {
+            "precision": 0
+          },
+          "check": "{Progress} between 0 and 100"
+        },
+        {
+          "name": "Description",
+          "format": "long_text"
+        }
+      ],
+      "views": [
+        {
+          "name": "In progress",
+          "icon": "loader",
+          "description": "Projects being worked on right now.",
+          "columns": [
+            "Name",
+            "Client",
+            "Owner",
+            "Priority",
+            "Due date",
+            "Progress"
+          ],
+          "filters": [
+            {
+              "column": "Status",
+              "op": "is",
+              "value": "in_progress"
+            }
+          ]
+        },
+        {
+          "name": "High priority",
+          "icon": "flag",
+          "description": "High and urgent projects.",
+          "columns": [
+            "Name",
+            "Client",
+            "Status",
+            "Due date",
+            "Budget"
+          ],
+          "filters": [
+            {
+              "column": "Priority",
+              "op": "is_any_of",
+              "value": [
+                "high",
+                "urgent"
+              ]
+            }
+          ]
+        }
+      ],
+      "forms": [
+        {
+          "name": "Project proposal",
+          "icon": "lightbulb",
+          "description": "Propose a new project with its client, budget and timeline.",
+          "columns": [
+            "Name",
+            "Client",
+            "Owner",
+            "Budget",
+            "Due date",
+            "Description"
+          ]
+        }
+      ],
+      "rows": [
+        {
+          "Name": "Website Redesign",
+          "Client": "Northwind Traders",
+          "Owner": "Kai Morgan",
+          "Status": "in_progress",
+          "Priority": "high",
+          "Budget": 48000,
+          "Start date": {
+            "$days": -45
+          },
+          "Due date": {
+            "$days": 20
+          },
+          "Progress": 62,
+          "Description": "New storefront with faster product pages, redesigned navigation and a cleaner checkout."
+        },
+        {
+          "Name": "Mobile App v2",
+          "Client": "Initech Software",
+          "Owner": "Diego Alvarez",
+          "Status": "in_progress",
+          "Priority": "urgent",
+          "Budget": 120000,
+          "Start date": {
+            "$days": -80
+          },
+          "Due date": {
+            "$days": 35
+          },
+          "Progress": 41,
+          "Description": "Rebuild of the iOS and Android apps with offline sync and push notifications."
+        },
+        {
+          "Name": "Customer Portal",
+          "Client": "Globex Health",
+          "Owner": "Maya Chen",
+          "Status": "planning",
+          "Priority": "medium",
+          "Budget": 85000,
+          "Start date": {
+            "$days": 5
+          },
+          "Due date": {
+            "$days": 120
+          },
+          "Progress": 5,
+          "Description": "Patient-facing portal for appointments, documents and secure messaging."
+        },
+        {
+          "Name": "Data Warehouse Migration",
+          "Client": "Stark Finance",
+          "Owner": "Liam O'Connor",
+          "Status": "on_hold",
+          "Priority": "high",
+          "Budget": 150000,
+          "Start date": {
+            "$days": -120
+          },
+          "Due date": {
+            "$days": 60
+          },
+          "Progress": 33,
+          "Description": "Move reporting workloads off the legacy warehouse. Paused pending the client's change freeze."
+        },
+        {
+          "Name": "Brand Refresh",
+          "Client": "Acme Retail",
+          "Owner": "Hannah Becker",
+          "Status": "completed",
+          "Priority": "medium",
+          "Budget": 22000,
+          "Start date": {
+            "$days": -150
+          },
+          "Due date": {
+            "$days": -30
+          },
+          "Progress": 100,
+          "Description": "New logo system, colour palette and brand guidelines."
+        },
+        {
+          "Name": "Analytics Dashboard",
+          "Client": "Hooli Cloud",
+          "Owner": "Priya Nair",
+          "Status": "planning",
+          "Priority": "low",
+          "Budget": 40000,
+          "Start date": {
+            "$days": 14
+          },
+          "Due date": {
+            "$days": 90
+          },
+          "Progress": 0,
+          "Description": "Self-serve dashboard for usage and revenue metrics."
+        },
+        {
+          "Name": "Onboarding Revamp",
+          "Client": "Wayne Education",
+          "Owner": "Kai Morgan",
+          "Status": "in_progress",
+          "Priority": "medium",
+          "Budget": 30000,
+          "Start date": {
+            "$days": -30
+          },
+          "Due date": {
+            "$days": 25
+          },
+          "Progress": 55,
+          "Description": "Redesigned onboarding journey for new students, from first email to first lesson."
+        },
+        {
+          "Name": "Fleet Tracking API",
+          "Client": "Umbrella Logistics",
+          "Owner": "Maya Chen",
+          "Status": "completed",
+          "Priority": "high",
+          "Budget": 95000,
+          "Start date": {
+            "$days": -200
+          },
+          "Due date": {
+            "$days": -60
+          },
+          "Progress": 100,
+          "Description": "Public API for live vehicle positions and delivery events."
+        },
+        {
+          "Name": "Internal Tools",
+          "Owner": "Sofia Rossi",
+          "Status": "in_progress",
+          "Priority": "low",
+          "Budget": 18000,
+          "Start date": {
+            "$days": -20
+          },
+          "Due date": {
+            "$days": 45
+          },
+          "Progress": 25,
+          "Description": "Automations and dashboards for the operations team."
+        }
+      ]
+    },
+    {
+      "name": "Tasks",
+      "icon": "clipboard-list",
+      "group": "Delivery",
+      "description": "Work items across every project.",
+      "title": "Title",
+      "columns": [
+        {
+          "name": "Title",
+          "format": "text",
+          "required": true,
+          "searchable": true
+        },
+        {
+          "name": "Project",
+          "format": "relation",
+          "options": {
+            "onDelete": "set null"
+          },
+          "relation": "Projects"
+        },
+        {
+          "name": "Assignee",
+          "format": "relation",
+          "options": {
+            "onDelete": "set null"
+          },
+          "relation": "Team Members"
+        },
+        {
+          "name": "Status",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Backlog",
+                "value": "backlog"
+              },
+              {
+                "label": "To do",
+                "value": "to_do"
+              },
+              {
+                "label": "In progress",
+                "value": "in_progress"
+              },
+              {
+                "label": "In review",
+                "value": "in_review"
+              },
+              {
+                "label": "Done",
+                "value": "done"
+              }
+            ]
+          },
+          "default": "backlog"
+        },
+        {
+          "name": "Priority",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Low",
+                "value": "low"
+              },
+              {
+                "label": "Medium",
+                "value": "medium"
+              },
+              {
+                "label": "High",
+                "value": "high"
+              },
+              {
+                "label": "Urgent",
+                "value": "urgent"
+              }
+            ]
+          },
+          "filterable": true,
+          "sortable": true,
+          "default": "medium"
+        },
+        {
+          "name": "Estimate (hours)",
+          "format": "decimal",
+          "options": {
+            "precision": 1
+          },
+          "check": "{Estimate (hours)} >= 0"
+        },
+        {
+          "name": "Due date",
+          "format": "date"
+        },
+        {
+          "name": "Done",
+          "format": "checkbox",
+          "filterable": true,
+          "sortable": true,
+          "default": "false"
+        },
+        {
+          "name": "Tags",
+          "format": "multi_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Frontend",
+                "value": "frontend"
+              },
+              {
+                "label": "Backend",
+                "value": "backend"
+              },
+              {
+                "label": "Mobile",
+                "value": "mobile"
+              },
+              {
+                "label": "Design",
+                "value": "design"
+              },
+              {
+                "label": "Research",
+                "value": "research"
+              },
+              {
+                "label": "Content",
+                "value": "content"
+              },
+              {
+                "label": "Data",
+                "value": "data"
+              },
+              {
+                "label": "DevOps",
+                "value": "devops"
+              },
+              {
+                "label": "QA",
+                "value": "qa"
+              },
+              {
+                "label": "Docs",
+                "value": "docs"
+              },
+              {
+                "label": "Security",
+                "value": "security"
+              },
+              {
+                "label": "Automation",
+                "value": "automation"
+              },
+              {
+                "label": "Launch",
+                "value": "launch"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Notes",
+          "format": "long_text"
+        }
+      ],
+      "views": [
+        {
+          "name": "Open tasks",
+          "icon": "list-todo",
+          "description": "Tasks that are not done yet.",
+          "columns": [
+            "Title",
+            "Project",
+            "Assignee",
+            "Status",
+            "Priority",
+            "Due date"
+          ],
+          "filters": [
+            {
+              "column": "Done",
+              "op": "is",
+              "value": false
+            }
+          ]
+        },
+        {
+          "name": "Urgent and open",
+          "icon": "siren",
+          "description": "Urgent tasks still to do.",
+          "columns": [
+            "Title",
+            "Assignee",
+            "Status",
+            "Due date",
+            "Estimate (hours)"
+          ],
+          "filters": [
+            {
+              "column": "Priority",
+              "op": "is",
+              "value": "urgent"
+            },
+            {
+              "column": "Done",
+              "op": "is",
+              "value": false
+            }
+          ]
+        }
+      ],
+      "forms": [
+        {
+          "name": "Request a task",
+          "icon": "clipboard-list",
+          "description": "Ask the team to pick up a piece of work.",
+          "columns": [
+            "Title",
+            "Project",
+            "Priority",
+            "Due date",
+            "Notes"
+          ]
+        }
+      ],
+      "rows": [
+        {
+          "Title": "Audit existing sitemap",
+          "Project": "Website Redesign",
+          "Assignee": "Hannah Becker",
+          "Status": "done",
+          "Priority": "medium",
+          "Estimate (hours)": 6,
+          "Due date": {
+            "$days": -38
+          },
+          "Done": true,
+          "Tags": [
+            "research"
+          ]
+        },
+        {
+          "Title": "Design new homepage layout",
+          "Project": "Website Redesign",
+          "Assignee": "Kai Morgan",
+          "Status": "done",
+          "Priority": "high",
+          "Estimate (hours)": 16,
+          "Due date": {
+            "$days": -24
+          },
+          "Done": true,
+          "Tags": [
+            "design"
+          ],
+          "Notes": "Approved in the second review round."
+        },
+        {
+          "Title": "Implement responsive navigation",
+          "Project": "Website Redesign",
+          "Assignee": "Diego Alvarez",
+          "Status": "in_review",
+          "Priority": "high",
+          "Estimate (hours)": 12,
+          "Due date": {
+            "$days": 3
+          },
+          "Done": false,
+          "Tags": [
+            "frontend"
+          ]
+        },
+        {
+          "Title": "Write product page copy",
+          "Project": "Website Redesign",
+          "Assignee": "Hannah Becker",
+          "Status": "in_progress",
+          "Priority": "medium",
+          "Estimate (hours)": 10,
+          "Due date": {
+            "$days": 8
+          },
+          "Done": false,
+          "Tags": [
+            "content"
+          ]
+        },
+        {
+          "Title": "Set up redirects for old URLs",
+          "Project": "Website Redesign",
+          "Assignee": "Maya Chen",
+          "Status": "to_do",
+          "Priority": "medium",
+          "Estimate (hours)": 5,
+          "Due date": {
+            "$days": 14
+          },
+          "Done": false,
+          "Tags": [
+            "backend"
+          ]
+        },
+        {
+          "Title": "Accessibility review",
+          "Project": "Website Redesign",
+          "Assignee": "Yuki Tanaka",
+          "Status": "backlog",
+          "Priority": "low",
+          "Estimate (hours)": 8,
+          "Due date": {
+            "$days": 18
+          },
+          "Done": false,
+          "Tags": [
+            "design",
+            "qa"
+          ]
+        },
+        {
+          "Title": "Offline sync architecture",
+          "Project": "Mobile App v2",
+          "Assignee": "Maya Chen",
+          "Status": "in_progress",
+          "Priority": "urgent",
+          "Estimate (hours)": 24,
+          "Due date": {
+            "$days": 7
+          },
+          "Done": false,
+          "Tags": [
+            "backend"
+          ],
+          "Notes": "Evaluating CRDTs versus a simple last-write-wins strategy."
+        },
+        {
+          "Title": "Push notification service",
+          "Project": "Mobile App v2",
+          "Assignee": "Diego Alvarez",
+          "Status": "in_review",
+          "Priority": "high",
+          "Estimate (hours)": 14,
+          "Due date": {
+            "$days": 4
+          },
+          "Done": false,
+          "Tags": [
+            "backend",
+            "mobile"
+          ]
+        },
+        {
+          "Title": "Onboarding flow screens",
+          "Project": "Mobile App v2",
+          "Assignee": "Yuki Tanaka",
+          "Status": "done",
+          "Priority": "medium",
+          "Estimate (hours)": 18,
+          "Due date": {
+            "$days": -15
+          },
+          "Done": true,
+          "Tags": [
+            "design",
+            "mobile"
+          ]
+        },
+        {
+          "Title": "Biometric login",
+          "Project": "Mobile App v2",
+          "Assignee": "Diego Alvarez",
+          "Status": "to_do",
+          "Priority": "medium",
+          "Estimate (hours)": 10,
+          "Due date": {
+            "$days": 16
+          },
+          "Done": false,
+          "Tags": [
+            "mobile"
+          ]
+        },
+        {
+          "Title": "Crash reporting integration",
+          "Project": "Mobile App v2",
+          "Assignee": "Liam O'Connor",
+          "Status": "done",
+          "Priority": "low",
+          "Estimate (hours)": 4,
+          "Due date": {
+            "$days": -20
+          },
+          "Done": true,
+          "Tags": [
+            "devops"
+          ]
+        },
+        {
+          "Title": "Dark mode support",
+          "Project": "Mobile App v2",
+          "Assignee": "Yuki Tanaka",
+          "Status": "backlog",
+          "Priority": "low",
+          "Estimate (hours)": 12,
+          "Due date": {
+            "$days": 30
+          },
+          "Done": false,
+          "Tags": [
+            "design",
+            "mobile"
+          ]
+        },
+        {
+          "Title": "Gather stakeholder requirements",
+          "Project": "Customer Portal",
+          "Assignee": "Priya Nair",
+          "Status": "in_progress",
+          "Priority": "high",
+          "Estimate (hours)": 14,
+          "Due date": {
+            "$days": 6
+          },
+          "Done": false,
+          "Tags": [
+            "research"
+          ]
+        },
+        {
+          "Title": "Draft information architecture",
+          "Project": "Customer Portal",
+          "Assignee": "Kai Morgan",
+          "Status": "to_do",
+          "Priority": "medium",
+          "Estimate (hours)": 9,
+          "Due date": {
+            "$days": 12
+          },
+          "Done": false,
+          "Tags": [
+            "design"
+          ]
+        },
+        {
+          "Title": "Select auth provider",
+          "Project": "Customer Portal",
+          "Assignee": "Maya Chen",
+          "Status": "backlog",
+          "Priority": "medium",
+          "Estimate (hours)": 6,
+          "Due date": {
+            "$days": 21
+          },
+          "Done": false,
+          "Tags": [
+            "backend",
+            "security"
+          ]
+        },
+        {
+          "Title": "Prototype appointment booking",
+          "Project": "Customer Portal",
+          "Assignee": "Yuki Tanaka",
+          "Status": "backlog",
+          "Priority": "low",
+          "Estimate (hours)": 15,
+          "Due date": {
+            "$days": 40
+          },
+          "Done": false,
+          "Tags": [
+            "design"
+          ]
+        },
+        {
+          "Title": "Inventory source systems",
+          "Project": "Data Warehouse Migration",
+          "Assignee": "Liam O'Connor",
+          "Status": "done",
+          "Priority": "high",
+          "Estimate (hours)": 20,
+          "Due date": {
+            "$days": -70
+          },
+          "Done": true,
+          "Tags": [
+            "data"
+          ]
+        },
+        {
+          "Title": "Map legacy schemas",
+          "Project": "Data Warehouse Migration",
+          "Assignee": "Liam O'Connor",
+          "Status": "in_progress",
+          "Priority": "high",
+          "Estimate (hours)": 32,
+          "Due date": {
+            "$days": 10
+          },
+          "Done": false,
+          "Tags": [
+            "data"
+          ],
+          "Notes": "Blocked on documentation from the client's DBA."
+        },
+        {
+          "Title": "Build ingestion pipelines",
+          "Project": "Data Warehouse Migration",
+          "Assignee": "Sofia Rossi",
+          "Status": "to_do",
+          "Priority": "medium",
+          "Estimate (hours)": 40,
+          "Due date": {
+            "$days": 35
+          },
+          "Done": false,
+          "Tags": [
+            "data",
+            "devops"
+          ]
+        },
+        {
+          "Title": "Validate row counts",
+          "Project": "Data Warehouse Migration",
+          "Assignee": "Sofia Rossi",
+          "Status": "backlog",
+          "Priority": "low",
+          "Estimate (hours)": 8,
+          "Due date": {
+            "$days": 50
+          },
+          "Done": false,
+          "Tags": [
+            "qa",
+            "data"
+          ]
+        },
+        {
+          "Title": "Finalise logo variations",
+          "Project": "Brand Refresh",
+          "Assignee": "Kai Morgan",
+          "Status": "done",
+          "Priority": "medium",
+          "Estimate (hours)": 10,
+          "Due date": {
+            "$days": -90
+          },
+          "Done": true,
+          "Tags": [
+            "design"
+          ]
+        },
+        {
+          "Title": "Publish brand guidelines",
+          "Project": "Brand Refresh",
+          "Assignee": "Hannah Becker",
+          "Status": "done",
+          "Priority": "medium",
+          "Estimate (hours)": 8,
+          "Due date": {
+            "$days": -35
+          },
+          "Done": true,
+          "Tags": [
+            "content"
+          ]
+        },
+        {
+          "Title": "Define core KPIs",
+          "Project": "Analytics Dashboard",
+          "Assignee": "Priya Nair",
+          "Status": "to_do",
+          "Priority": "medium",
+          "Estimate (hours)": 6,
+          "Due date": {
+            "$days": 20
+          },
+          "Done": false,
+          "Tags": [
+            "research"
+          ]
+        },
+        {
+          "Title": "Wireframe dashboard",
+          "Project": "Analytics Dashboard",
+          "Assignee": "Yuki Tanaka",
+          "Status": "backlog",
+          "Priority": "low",
+          "Estimate (hours)": 12,
+          "Due date": {
+            "$days": 34
+          },
+          "Done": false,
+          "Tags": [
+            "design"
+          ]
+        },
+        {
+          "Title": "Interview new students",
+          "Project": "Onboarding Revamp",
+          "Assignee": "Priya Nair",
+          "Status": "done",
+          "Priority": "medium",
+          "Estimate (hours)": 12,
+          "Due date": {
+            "$days": -18
+          },
+          "Done": true,
+          "Tags": [
+            "research"
+          ]
+        },
+        {
+          "Title": "Rewrite welcome emails",
+          "Project": "Onboarding Revamp",
+          "Assignee": "Hannah Becker",
+          "Status": "in_progress",
+          "Priority": "medium",
+          "Estimate (hours)": 7,
+          "Due date": {
+            "$days": 5
+          },
+          "Done": false,
+          "Tags": [
+            "content"
+          ]
+        },
+        {
+          "Title": "Build progress checklist",
+          "Project": "Onboarding Revamp",
+          "Assignee": "Diego Alvarez",
+          "Status": "to_do",
+          "Priority": "high",
+          "Estimate (hours)": 14,
+          "Due date": {
+            "$days": 11
+          },
+          "Done": false,
+          "Tags": [
+            "frontend"
+          ]
+        },
+        {
+          "Title": "Launch pilot cohort",
+          "Project": "Onboarding Revamp",
+          "Assignee": "Zara Ahmed",
+          "Status": "backlog",
+          "Priority": "high",
+          "Estimate (hours)": 10,
+          "Due date": {
+            "$days": 24
+          },
+          "Done": false,
+          "Tags": [
+            "launch"
+          ]
+        },
+        {
+          "Title": "Publish API docs",
+          "Project": "Fleet Tracking API",
+          "Assignee": "Maya Chen",
+          "Status": "done",
+          "Priority": "medium",
+          "Estimate (hours)": 9,
+          "Due date": {
+            "$days": -75
+          },
+          "Done": true,
+          "Tags": [
+            "docs"
+          ]
+        },
+        {
+          "Title": "Load test endpoints",
+          "Project": "Fleet Tracking API",
+          "Assignee": "Liam O'Connor",
+          "Status": "done",
+          "Priority": "high",
+          "Estimate (hours)": 11,
+          "Due date": {
+            "$days": -65
+          },
+          "Done": true,
+          "Tags": [
+            "qa",
+            "devops"
+          ]
+        },
+        {
+          "Title": "Automate invoice reminders",
+          "Project": "Internal Tools",
+          "Assignee": "Sofia Rossi",
+          "Status": "in_progress",
+          "Priority": "medium",
+          "Estimate (hours)": 8,
+          "Due date": {
+            "$days": 9
+          },
+          "Done": false,
+          "Tags": [
+            "automation"
+          ]
+        },
+        {
+          "Title": "Migrate wiki to the new workspace",
+          "Project": "Internal Tools",
+          "Assignee": "Sofia Rossi",
+          "Status": "to_do",
+          "Priority": "low",
+          "Estimate (hours)": 6,
+          "Due date": {
+            "$days": 28
+          },
+          "Done": false,
+          "Tags": [
+            "content"
+          ]
+        },
+        {
+          "Title": "Review onboarding flow #1",
+          "Project": "Website Redesign",
+          "Assignee": "Maya Chen",
+          "Status": "backlog",
+          "Priority": "low",
+          "Estimate (hours)": 1,
+          "Due date": {
+            "$days": -60
+          },
+          "Done": false,
+          "Tags": [
+            "frontend",
+            "design"
+          ],
+          "Notes": "Generated task 1 for pagination testing."
+        },
+        {
+          "Title": "Refactor email templates #2",
+          "Project": "Analytics Dashboard",
+          "Assignee": "Diego Alvarez",
+          "Status": "in_progress",
+          "Priority": "urgent",
+          "Estimate (hours)": 14,
+          "Due date": {
+            "$days": -43
+          },
+          "Done": false,
+          "Tags": [
+            "backend",
+            "frontend"
+          ]
+        },
+        {
+          "Title": "Document audit log #3",
+          "Project": "Mobile App v2",
+          "Assignee": "Sofia Rossi",
+          "Status": "done",
+          "Priority": "high",
+          "Estimate (hours)": 3,
+          "Due date": {
+            "$days": -26
+          },
+          "Done": true,
+          "Tags": [
+            "mobile",
+            "content"
+          ]
+        },
+        {
+          "Title": "Test permissions matrix #4",
+          "Project": "Onboarding Revamp",
+          "Assignee": "Zara Ahmed",
+          "Status": "to_do",
+          "Priority": "medium",
+          "Estimate (hours)": 16,
+          "Due date": {
+            "$days": -9
+          },
+          "Done": false,
+          "Tags": [
+            "design",
+            "mobile"
+          ]
+        },
+        {
+          "Title": "Plan billing page #5",
+          "Project": "Customer Portal",
+          "Assignee": "Priya Nair",
+          "Status": "in_review",
+          "Priority": "low",
+          "Estimate (hours)": 5,
+          "Due date": {
+            "$days": 8
+          },
+          "Done": false,
+          "Tags": [
+            "research",
+            "docs"
+          ],
+          "Notes": "Generated task 5 for pagination testing."
+        },
+        {
+          "Title": "Prototype import wizard #6",
+          "Project": "Fleet Tracking API",
+          "Assignee": "Omar Haddad",
+          "Status": "backlog",
+          "Priority": "urgent",
+          "Estimate (hours)": 18,
+          "Due date": {
+            "$days": 25
+          },
+          "Done": false,
+          "Tags": [
+            "content",
+            "research"
+          ]
+        },
+        {
+          "Title": "Polish mobile layout #7",
+          "Project": "Data Warehouse Migration",
+          "Assignee": "Yuki Tanaka",
+          "Status": "in_progress",
+          "Priority": "high",
+          "Estimate (hours)": 7,
+          "Due date": {
+            "$days": 42
+          },
+          "Done": false,
+          "Tags": [
+            "qa",
+            "backend"
+          ]
+        },
+        {
+          "Title": "Ship search results #8",
+          "Project": "Internal Tools",
+          "Assignee": "Kai Morgan",
+          "Status": "done",
+          "Priority": "medium",
+          "Estimate (hours)": 20,
+          "Due date": {
+            "$days": 59
+          },
+          "Done": true,
+          "Tags": [
+            "docs",
+            "qa"
+          ]
+        },
+        {
+          "Title": "Review dashboard widgets #9",
+          "Project": "Brand Refresh",
+          "Assignee": "Hannah Becker",
+          "Status": "to_do",
+          "Priority": "low",
+          "Estimate (hours)": 9,
+          "Due date": {
+            "$days": -44
+          },
+          "Done": false,
+          "Tags": [
+            "frontend",
+            "design"
+          ],
+          "Notes": "Generated task 9 for pagination testing."
+        },
+        {
+          "Title": "Refactor notification settings #10",
+          "Project": "Website Redesign",
+          "Assignee": "Liam O'Connor",
+          "Status": "in_review",
+          "Priority": "urgent",
+          "Estimate (hours)": 22,
+          "Due date": {
+            "$days": -27
+          },
+          "Done": false,
+          "Tags": [
+            "backend",
+            "frontend"
+          ]
+        },
+        {
+          "Title": "Document onboarding flow #11",
+          "Project": "Analytics Dashboard",
+          "Assignee": "Maya Chen",
+          "Status": "backlog",
+          "Priority": "high",
+          "Estimate (hours)": 11,
+          "Due date": {
+            "$days": -10
+          },
+          "Done": false,
+          "Tags": [
+            "mobile",
+            "content"
+          ]
+        },
+        {
+          "Title": "Test email templates #12",
+          "Project": "Mobile App v2",
+          "Assignee": "Diego Alvarez",
+          "Status": "in_progress",
+          "Priority": "medium",
+          "Estimate (hours)": 24,
+          "Due date": {
+            "$days": 7
+          },
+          "Done": false,
+          "Tags": [
+            "design",
+            "mobile"
+          ]
+        },
+        {
+          "Title": "Plan audit log #13",
+          "Project": "Onboarding Revamp",
+          "Assignee": "Sofia Rossi",
+          "Status": "done",
+          "Priority": "low",
+          "Estimate (hours)": 13,
+          "Due date": {
+            "$days": 24
+          },
+          "Done": true,
+          "Tags": [
+            "research",
+            "docs"
+          ],
+          "Notes": "Generated task 13 for pagination testing."
+        },
+        {
+          "Title": "Prototype permissions matrix #14",
+          "Project": "Customer Portal",
+          "Assignee": "Zara Ahmed",
+          "Status": "to_do",
+          "Priority": "urgent",
+          "Estimate (hours)": 2,
+          "Due date": {
+            "$days": 41
+          },
+          "Done": false,
+          "Tags": [
+            "content",
+            "research"
+          ]
+        },
+        {
+          "Title": "Polish billing page #15",
+          "Project": "Fleet Tracking API",
+          "Assignee": "Priya Nair",
+          "Status": "in_review",
+          "Priority": "high",
+          "Estimate (hours)": 15,
+          "Due date": {
+            "$days": 58
+          },
+          "Done": false,
+          "Tags": [
+            "qa",
+            "backend"
+          ]
+        },
+        {
+          "Title": "Ship import wizard #16",
+          "Project": "Data Warehouse Migration",
+          "Assignee": "Omar Haddad",
+          "Status": "backlog",
+          "Priority": "medium",
+          "Estimate (hours)": 4,
+          "Due date": {
+            "$days": -45
+          },
+          "Done": false,
+          "Tags": [
+            "docs",
+            "qa"
+          ]
+        },
+        {
+          "Title": "Review mobile layout #17",
+          "Project": "Internal Tools",
+          "Assignee": "Yuki Tanaka",
+          "Status": "in_progress",
+          "Priority": "low",
+          "Estimate (hours)": 17,
+          "Due date": {
+            "$days": -28
+          },
+          "Done": false,
+          "Tags": [
+            "frontend",
+            "design"
+          ],
+          "Notes": "Generated task 17 for pagination testing."
+        },
+        {
+          "Title": "Refactor search results #18",
+          "Project": "Brand Refresh",
+          "Assignee": "Kai Morgan",
+          "Status": "done",
+          "Priority": "urgent",
+          "Estimate (hours)": 6,
+          "Due date": {
+            "$days": -11
+          },
+          "Done": true,
+          "Tags": [
+            "backend",
+            "frontend"
+          ]
+        },
+        {
+          "Title": "Document dashboard widgets #19",
+          "Project": "Website Redesign",
+          "Assignee": "Hannah Becker",
+          "Status": "to_do",
+          "Priority": "high",
+          "Estimate (hours)": 19,
+          "Due date": {
+            "$days": 6
+          },
+          "Done": false,
+          "Tags": [
+            "mobile",
+            "content"
+          ]
+        },
+        {
+          "Title": "Test notification settings #20",
+          "Project": "Analytics Dashboard",
+          "Assignee": "Liam O'Connor",
+          "Status": "in_review",
+          "Priority": "medium",
+          "Estimate (hours)": 8,
+          "Due date": {
+            "$days": 23
+          },
+          "Done": false,
+          "Tags": [
+            "design",
+            "mobile"
+          ]
+        },
+        {
+          "Title": "Plan onboarding flow #21",
+          "Project": "Mobile App v2",
+          "Assignee": "Maya Chen",
+          "Status": "backlog",
+          "Priority": "low",
+          "Estimate (hours)": 21,
+          "Due date": {
+            "$days": 40
+          },
+          "Done": false,
+          "Tags": [
+            "research",
+            "docs"
+          ],
+          "Notes": "Generated task 21 for pagination testing."
+        },
+        {
+          "Title": "Prototype email templates #22",
+          "Project": "Onboarding Revamp",
+          "Assignee": "Diego Alvarez",
+          "Status": "in_progress",
+          "Priority": "urgent",
+          "Estimate (hours)": 10,
+          "Due date": {
+            "$days": 57
+          },
+          "Done": false,
+          "Tags": [
+            "content",
+            "research"
+          ]
+        },
+        {
+          "Title": "Polish audit log #23",
+          "Project": "Customer Portal",
+          "Assignee": "Sofia Rossi",
+          "Status": "done",
+          "Priority": "high",
+          "Estimate (hours)": 23,
+          "Due date": {
+            "$days": -46
+          },
+          "Done": true,
+          "Tags": [
+            "qa",
+            "backend"
+          ]
+        },
+        {
+          "Title": "Ship permissions matrix #24",
+          "Project": "Fleet Tracking API",
+          "Assignee": "Zara Ahmed",
+          "Status": "to_do",
+          "Priority": "medium",
+          "Estimate (hours)": 12,
+          "Due date": {
+            "$days": -29
+          },
+          "Done": false,
+          "Tags": [
+            "docs",
+            "qa"
+          ]
+        },
+        {
+          "Title": "Review billing page #25",
+          "Project": "Data Warehouse Migration",
+          "Assignee": "Priya Nair",
+          "Status": "in_review",
+          "Priority": "low",
+          "Estimate (hours)": 1,
+          "Due date": {
+            "$days": -12
+          },
+          "Done": false,
+          "Tags": [
+            "frontend",
+            "design"
+          ],
+          "Notes": "Generated task 25 for pagination testing."
+        },
+        {
+          "Title": "Refactor import wizard #26",
+          "Project": "Internal Tools",
+          "Assignee": "Omar Haddad",
+          "Status": "backlog",
+          "Priority": "urgent",
+          "Estimate (hours)": 14,
+          "Due date": {
+            "$days": 5
+          },
+          "Done": false,
+          "Tags": [
+            "backend",
+            "frontend"
+          ]
+        },
+        {
+          "Title": "Document mobile layout #27",
+          "Project": "Brand Refresh",
+          "Assignee": "Yuki Tanaka",
+          "Status": "in_progress",
+          "Priority": "high",
+          "Estimate (hours)": 3,
+          "Due date": {
+            "$days": 22
+          },
+          "Done": false,
+          "Tags": [
+            "mobile",
+            "content"
+          ]
+        },
+        {
+          "Title": "Test search results #28",
+          "Project": "Website Redesign",
+          "Assignee": "Kai Morgan",
+          "Status": "done",
+          "Priority": "medium",
+          "Estimate (hours)": 16,
+          "Due date": {
+            "$days": 39
+          },
+          "Done": true,
+          "Tags": [
+            "design",
+            "mobile"
+          ]
+        },
+        {
+          "Title": "Plan dashboard widgets #29",
+          "Project": "Analytics Dashboard",
+          "Assignee": "Hannah Becker",
+          "Status": "to_do",
+          "Priority": "low",
+          "Estimate (hours)": 5,
+          "Due date": {
+            "$days": 56
+          },
+          "Done": false,
+          "Tags": [
+            "research",
+            "docs"
+          ],
+          "Notes": "Generated task 29 for pagination testing."
+        },
+        {
+          "Title": "Prototype notification settings #30",
+          "Project": "Mobile App v2",
+          "Assignee": "Liam O'Connor",
+          "Status": "in_review",
+          "Priority": "urgent",
+          "Estimate (hours)": 18,
+          "Due date": {
+            "$days": -47
+          },
+          "Done": false,
+          "Tags": [
+            "content",
+            "research"
+          ]
+        },
+        {
+          "Title": "Polish onboarding flow #31",
+          "Project": "Onboarding Revamp",
+          "Assignee": "Maya Chen",
+          "Status": "backlog",
+          "Priority": "high",
+          "Estimate (hours)": 7,
+          "Due date": {
+            "$days": -30
+          },
+          "Done": false,
+          "Tags": [
+            "qa",
+            "backend"
+          ]
+        },
+        {
+          "Title": "Ship email templates #32",
+          "Project": "Customer Portal",
+          "Assignee": "Diego Alvarez",
+          "Status": "in_progress",
+          "Priority": "medium",
+          "Estimate (hours)": 20,
+          "Due date": {
+            "$days": -13
+          },
+          "Done": false,
+          "Tags": [
+            "docs",
+            "qa"
+          ]
+        },
+        {
+          "Title": "Review audit log #33",
+          "Project": "Fleet Tracking API",
+          "Assignee": "Sofia Rossi",
+          "Status": "done",
+          "Priority": "low",
+          "Estimate (hours)": 9,
+          "Due date": {
+            "$days": 4
+          },
+          "Done": true,
+          "Tags": [
+            "frontend",
+            "design"
+          ],
+          "Notes": "Generated task 33 for pagination testing."
+        },
+        {
+          "Title": "Refactor permissions matrix #34",
+          "Project": "Data Warehouse Migration",
+          "Assignee": "Zara Ahmed",
+          "Status": "to_do",
+          "Priority": "urgent",
+          "Estimate (hours)": 22,
+          "Due date": {
+            "$days": 21
+          },
+          "Done": false,
+          "Tags": [
+            "backend",
+            "frontend"
+          ]
+        },
+        {
+          "Title": "Document billing page #35",
+          "Project": "Internal Tools",
+          "Assignee": "Priya Nair",
+          "Status": "in_review",
+          "Priority": "high",
+          "Estimate (hours)": 11,
+          "Due date": {
+            "$days": 38
+          },
+          "Done": false,
+          "Tags": [
+            "mobile",
+            "content"
+          ]
+        },
+        {
+          "Title": "Test import wizard #36",
+          "Project": "Brand Refresh",
+          "Assignee": "Omar Haddad",
+          "Status": "backlog",
+          "Priority": "medium",
+          "Estimate (hours)": 24,
+          "Due date": {
+            "$days": 55
+          },
+          "Done": false,
+          "Tags": [
+            "design",
+            "mobile"
+          ]
+        },
+        {
+          "Title": "Plan mobile layout #37",
+          "Project": "Website Redesign",
+          "Assignee": "Yuki Tanaka",
+          "Status": "in_progress",
+          "Priority": "low",
+          "Estimate (hours)": 13,
+          "Due date": {
+            "$days": -48
+          },
+          "Done": false,
+          "Tags": [
+            "research",
+            "docs"
+          ],
+          "Notes": "Generated task 37 for pagination testing."
+        },
+        {
+          "Title": "Prototype search results #38",
+          "Project": "Analytics Dashboard",
+          "Assignee": "Kai Morgan",
+          "Status": "done",
+          "Priority": "urgent",
+          "Estimate (hours)": 2,
+          "Due date": {
+            "$days": -31
+          },
+          "Done": true,
+          "Tags": [
+            "content",
+            "research"
+          ]
+        },
+        {
+          "Title": "Polish dashboard widgets #39",
+          "Project": "Mobile App v2",
+          "Assignee": "Hannah Becker",
+          "Status": "to_do",
+          "Priority": "high",
+          "Estimate (hours)": 15,
+          "Due date": {
+            "$days": -14
+          },
+          "Done": false,
+          "Tags": [
+            "qa",
+            "backend"
+          ]
+        },
+        {
+          "Title": "Ship notification settings #40",
+          "Project": "Onboarding Revamp",
+          "Assignee": "Liam O'Connor",
+          "Status": "in_review",
+          "Priority": "medium",
+          "Estimate (hours)": 4,
+          "Due date": {
+            "$days": 3
+          },
+          "Done": false,
+          "Tags": [
+            "docs",
+            "qa"
+          ]
+        },
+        {
+          "Title": "Review onboarding flow #41",
+          "Project": "Customer Portal",
+          "Assignee": "Maya Chen",
+          "Status": "backlog",
+          "Priority": "low",
+          "Estimate (hours)": 17,
+          "Due date": {
+            "$days": 20
+          },
+          "Done": false,
+          "Tags": [
+            "frontend",
+            "design"
+          ],
+          "Notes": "Generated task 41 for pagination testing."
+        },
+        {
+          "Title": "Refactor email templates #42",
+          "Project": "Fleet Tracking API",
+          "Assignee": "Diego Alvarez",
+          "Status": "in_progress",
+          "Priority": "urgent",
+          "Estimate (hours)": 6,
+          "Due date": {
+            "$days": 37
+          },
+          "Done": false,
+          "Tags": [
+            "backend",
+            "frontend"
+          ]
+        },
+        {
+          "Title": "Document audit log #43",
+          "Project": "Data Warehouse Migration",
+          "Assignee": "Sofia Rossi",
+          "Status": "done",
+          "Priority": "high",
+          "Estimate (hours)": 19,
+          "Due date": {
+            "$days": 54
+          },
+          "Done": true,
+          "Tags": [
+            "mobile",
+            "content"
+          ]
+        },
+        {
+          "Title": "Test permissions matrix #44",
+          "Project": "Internal Tools",
+          "Assignee": "Zara Ahmed",
+          "Status": "to_do",
+          "Priority": "medium",
+          "Estimate (hours)": 8,
+          "Due date": {
+            "$days": -49
+          },
+          "Done": false,
+          "Tags": [
+            "design",
+            "mobile"
+          ]
+        },
+        {
+          "Title": "Plan billing page #45",
+          "Project": "Brand Refresh",
+          "Assignee": "Priya Nair",
+          "Status": "in_review",
+          "Priority": "low",
+          "Estimate (hours)": 21,
+          "Due date": {
+            "$days": -32
+          },
+          "Done": false,
+          "Tags": [
+            "research",
+            "docs"
+          ],
+          "Notes": "Generated task 45 for pagination testing."
+        },
+        {
+          "Title": "Prototype import wizard #46",
+          "Project": "Website Redesign",
+          "Assignee": "Omar Haddad",
+          "Status": "backlog",
+          "Priority": "urgent",
+          "Estimate (hours)": 10,
+          "Due date": {
+            "$days": -15
+          },
+          "Done": false,
+          "Tags": [
+            "content",
+            "research"
+          ]
+        },
+        {
+          "Title": "Polish mobile layout #47",
+          "Project": "Analytics Dashboard",
+          "Assignee": "Yuki Tanaka",
+          "Status": "in_progress",
+          "Priority": "high",
+          "Estimate (hours)": 23,
+          "Due date": {
+            "$days": 2
+          },
+          "Done": false,
+          "Tags": [
+            "qa",
+            "backend"
+          ]
+        },
+        {
+          "Title": "Ship search results #48",
+          "Project": "Mobile App v2",
+          "Assignee": "Kai Morgan",
+          "Status": "done",
+          "Priority": "medium",
+          "Estimate (hours)": 12,
+          "Due date": {
+            "$days": 19
+          },
+          "Done": true,
+          "Tags": [
+            "docs",
+            "qa"
+          ]
+        },
+        {
+          "Title": "Review dashboard widgets #49",
+          "Project": "Onboarding Revamp",
+          "Assignee": "Hannah Becker",
+          "Status": "to_do",
+          "Priority": "low",
+          "Estimate (hours)": 1,
+          "Due date": {
+            "$days": 36
+          },
+          "Done": false,
+          "Tags": [
+            "frontend",
+            "design"
+          ],
+          "Notes": "Generated task 49 for pagination testing."
+        },
+        {
+          "Title": "Refactor notification settings #50",
+          "Project": "Customer Portal",
+          "Assignee": "Liam O'Connor",
+          "Status": "in_review",
+          "Priority": "urgent",
+          "Estimate (hours)": 14,
+          "Due date": {
+            "$days": 53
+          },
+          "Done": false,
+          "Tags": [
+            "backend",
+            "frontend"
+          ]
+        },
+        {
+          "Title": "Document onboarding flow #51",
+          "Project": "Fleet Tracking API",
+          "Assignee": "Maya Chen",
+          "Status": "backlog",
+          "Priority": "high",
+          "Estimate (hours)": 3,
+          "Due date": {
+            "$days": -50
+          },
+          "Done": false,
+          "Tags": [
+            "mobile",
+            "content"
+          ]
+        },
+        {
+          "Title": "Test email templates #52",
+          "Project": "Data Warehouse Migration",
+          "Assignee": "Diego Alvarez",
+          "Status": "in_progress",
+          "Priority": "medium",
+          "Estimate (hours)": 16,
+          "Due date": {
+            "$days": -33
+          },
+          "Done": false,
+          "Tags": [
+            "design",
+            "mobile"
+          ]
+        },
+        {
+          "Title": "Plan audit log #53",
+          "Project": "Internal Tools",
+          "Assignee": "Sofia Rossi",
+          "Status": "done",
+          "Priority": "low",
+          "Estimate (hours)": 5,
+          "Due date": {
+            "$days": -16
+          },
+          "Done": true,
+          "Tags": [
+            "research",
+            "docs"
+          ],
+          "Notes": "Generated task 53 for pagination testing."
+        },
+        {
+          "Title": "Prototype permissions matrix #54",
+          "Project": "Brand Refresh",
+          "Assignee": "Zara Ahmed",
+          "Status": "to_do",
+          "Priority": "urgent",
+          "Estimate (hours)": 18,
+          "Due date": {
+            "$days": 1
+          },
+          "Done": false,
+          "Tags": [
+            "content",
+            "research"
+          ]
+        },
+        {
+          "Title": "Polish billing page #55",
+          "Project": "Website Redesign",
+          "Assignee": "Priya Nair",
+          "Status": "in_review",
+          "Priority": "high",
+          "Estimate (hours)": 7,
+          "Due date": {
+            "$days": 18
+          },
+          "Done": false,
+          "Tags": [
+            "qa",
+            "backend"
+          ]
+        },
+        {
+          "Title": "Ship import wizard #56",
+          "Project": "Analytics Dashboard",
+          "Assignee": "Omar Haddad",
+          "Status": "backlog",
+          "Priority": "medium",
+          "Estimate (hours)": 20,
+          "Due date": {
+            "$days": 35
+          },
+          "Done": false,
+          "Tags": [
+            "docs",
+            "qa"
+          ]
+        },
+        {
+          "Title": "Review mobile layout #57",
+          "Project": "Mobile App v2",
+          "Assignee": "Yuki Tanaka",
+          "Status": "in_progress",
+          "Priority": "low",
+          "Estimate (hours)": 9,
+          "Due date": {
+            "$days": 52
+          },
+          "Done": false,
+          "Tags": [
+            "frontend",
+            "design"
+          ],
+          "Notes": "Generated task 57 for pagination testing."
+        },
+        {
+          "Title": "Refactor search results #58",
+          "Project": "Onboarding Revamp",
+          "Assignee": "Kai Morgan",
+          "Status": "done",
+          "Priority": "urgent",
+          "Estimate (hours)": 22,
+          "Due date": {
+            "$days": -51
+          },
+          "Done": true,
+          "Tags": [
+            "backend",
+            "frontend"
+          ]
+        },
+        {
+          "Title": "Document dashboard widgets #59",
+          "Project": "Customer Portal",
+          "Assignee": "Hannah Becker",
+          "Status": "to_do",
+          "Priority": "high",
+          "Estimate (hours)": 11,
+          "Due date": {
+            "$days": -34
+          },
+          "Done": false,
+          "Tags": [
+            "mobile",
+            "content"
+          ]
+        },
+        {
+          "Title": "Test notification settings #60",
+          "Project": "Fleet Tracking API",
+          "Assignee": "Liam O'Connor",
+          "Status": "in_review",
+          "Priority": "medium",
+          "Estimate (hours)": 24,
+          "Due date": {
+            "$days": -17
+          },
+          "Done": false,
+          "Tags": [
+            "design",
+            "mobile"
+          ]
+        },
+        {
+          "Title": "Plan onboarding flow #61",
+          "Project": "Data Warehouse Migration",
+          "Assignee": "Maya Chen",
+          "Status": "backlog",
+          "Priority": "low",
+          "Estimate (hours)": 13,
+          "Due date": {
+            "$days": 0
+          },
+          "Done": false,
+          "Tags": [
+            "research",
+            "docs"
+          ],
+          "Notes": "Generated task 61 for pagination testing."
+        },
+        {
+          "Title": "Prototype email templates #62",
+          "Project": "Internal Tools",
+          "Assignee": "Diego Alvarez",
+          "Status": "in_progress",
+          "Priority": "urgent",
+          "Estimate (hours)": 2,
+          "Due date": {
+            "$days": 17
+          },
+          "Done": false,
+          "Tags": [
+            "content",
+            "research"
+          ]
+        },
+        {
+          "Title": "Polish audit log #63",
+          "Project": "Brand Refresh",
+          "Assignee": "Sofia Rossi",
+          "Status": "done",
+          "Priority": "high",
+          "Estimate (hours)": 15,
+          "Due date": {
+            "$days": 34
+          },
+          "Done": true,
+          "Tags": [
+            "qa",
+            "backend"
+          ]
+        },
+        {
+          "Title": "Ship permissions matrix #64",
+          "Project": "Website Redesign",
+          "Assignee": "Zara Ahmed",
+          "Status": "to_do",
+          "Priority": "medium",
+          "Estimate (hours)": 4,
+          "Due date": {
+            "$days": 51
+          },
+          "Done": false,
+          "Tags": [
+            "docs",
+            "qa"
+          ]
+        },
+        {
+          "Title": "Review billing page #65",
+          "Project": "Analytics Dashboard",
+          "Assignee": "Priya Nair",
+          "Status": "in_review",
+          "Priority": "low",
+          "Estimate (hours)": 17,
+          "Due date": {
+            "$days": -52
+          },
+          "Done": false,
+          "Tags": [
+            "frontend",
+            "design"
+          ],
+          "Notes": "Generated task 65 for pagination testing."
+        },
+        {
+          "Title": "Refactor import wizard #66",
+          "Project": "Mobile App v2",
+          "Assignee": "Omar Haddad",
+          "Status": "backlog",
+          "Priority": "urgent",
+          "Estimate (hours)": 6,
+          "Due date": {
+            "$days": -35
+          },
+          "Done": false,
+          "Tags": [
+            "backend",
+            "frontend"
+          ]
+        },
+        {
+          "Title": "Document mobile layout #67",
+          "Project": "Onboarding Revamp",
+          "Assignee": "Yuki Tanaka",
+          "Status": "in_progress",
+          "Priority": "high",
+          "Estimate (hours)": 19,
+          "Due date": {
+            "$days": -18
+          },
+          "Done": false,
+          "Tags": [
+            "mobile",
+            "content"
+          ]
+        },
+        {
+          "Title": "Test search results #68",
+          "Project": "Customer Portal",
+          "Assignee": "Kai Morgan",
+          "Status": "done",
+          "Priority": "medium",
+          "Estimate (hours)": 8,
+          "Due date": {
+            "$days": -1
+          },
+          "Done": true,
+          "Tags": [
+            "design",
+            "mobile"
+          ]
+        },
+        {
+          "Title": "Plan dashboard widgets #69",
+          "Project": "Fleet Tracking API",
+          "Assignee": "Hannah Becker",
+          "Status": "to_do",
+          "Priority": "low",
+          "Estimate (hours)": 21,
+          "Due date": {
+            "$days": 16
+          },
+          "Done": false,
+          "Tags": [
+            "research",
+            "docs"
+          ],
+          "Notes": "Generated task 69 for pagination testing."
+        },
+        {
+          "Title": "Prototype notification settings #70",
+          "Project": "Data Warehouse Migration",
+          "Assignee": "Liam O'Connor",
+          "Status": "in_review",
+          "Priority": "urgent",
+          "Estimate (hours)": 10,
+          "Due date": {
+            "$days": 33
+          },
+          "Done": false,
+          "Tags": [
+            "content",
+            "research"
+          ]
+        },
+        {
+          "Title": "Polish onboarding flow #71",
+          "Project": "Internal Tools",
+          "Assignee": "Maya Chen",
+          "Status": "backlog",
+          "Priority": "high",
+          "Estimate (hours)": 23,
+          "Due date": {
+            "$days": 50
+          },
+          "Done": false,
+          "Tags": [
+            "qa",
+            "backend"
+          ]
+        },
+        {
+          "Title": "Ship email templates #72",
+          "Project": "Brand Refresh",
+          "Assignee": "Diego Alvarez",
+          "Status": "in_progress",
+          "Priority": "medium",
+          "Estimate (hours)": 12,
+          "Due date": {
+            "$days": -53
+          },
+          "Done": false,
+          "Tags": [
+            "docs",
+            "qa"
+          ]
+        },
+        {
+          "Title": "Review audit log #73",
+          "Project": "Website Redesign",
+          "Assignee": "Sofia Rossi",
+          "Status": "done",
+          "Priority": "low",
+          "Estimate (hours)": 1,
+          "Due date": {
+            "$days": -36
+          },
+          "Done": true,
+          "Tags": [
+            "frontend",
+            "design"
+          ],
+          "Notes": "Generated task 73 for pagination testing."
+        },
+        {
+          "Title": "Refactor permissions matrix #74",
+          "Project": "Analytics Dashboard",
+          "Assignee": "Zara Ahmed",
+          "Status": "to_do",
+          "Priority": "urgent",
+          "Estimate (hours)": 14,
+          "Due date": {
+            "$days": -19
+          },
+          "Done": false,
+          "Tags": [
+            "backend",
+            "frontend"
+          ]
+        },
+        {
+          "Title": "Document billing page #75",
+          "Project": "Mobile App v2",
+          "Assignee": "Priya Nair",
+          "Status": "in_review",
+          "Priority": "high",
+          "Estimate (hours)": 3,
+          "Due date": {
+            "$days": -2
+          },
+          "Done": false,
+          "Tags": [
+            "mobile",
+            "content"
+          ]
+        },
+        {
+          "Title": "Test import wizard #76",
+          "Project": "Onboarding Revamp",
+          "Assignee": "Omar Haddad",
+          "Status": "backlog",
+          "Priority": "medium",
+          "Estimate (hours)": 16,
+          "Due date": {
+            "$days": 15
+          },
+          "Done": false,
+          "Tags": [
+            "design",
+            "mobile"
+          ]
+        },
+        {
+          "Title": "Plan mobile layout #77",
+          "Project": "Customer Portal",
+          "Assignee": "Yuki Tanaka",
+          "Status": "in_progress",
+          "Priority": "low",
+          "Estimate (hours)": 5,
+          "Due date": {
+            "$days": 32
+          },
+          "Done": false,
+          "Tags": [
+            "research",
+            "docs"
+          ],
+          "Notes": "Generated task 77 for pagination testing."
+        },
+        {
+          "Title": "Prototype search results #78",
+          "Project": "Fleet Tracking API",
+          "Assignee": "Kai Morgan",
+          "Status": "done",
+          "Priority": "urgent",
+          "Estimate (hours)": 18,
+          "Due date": {
+            "$days": 49
+          },
+          "Done": true,
+          "Tags": [
+            "content",
+            "research"
+          ]
+        },
+        {
+          "Title": "Polish dashboard widgets #79",
+          "Project": "Data Warehouse Migration",
+          "Assignee": "Hannah Becker",
+          "Status": "to_do",
+          "Priority": "high",
+          "Estimate (hours)": 7,
+          "Due date": {
+            "$days": -54
+          },
+          "Done": false,
+          "Tags": [
+            "qa",
+            "backend"
+          ]
+        },
+        {
+          "Title": "Ship notification settings #80",
+          "Project": "Internal Tools",
+          "Assignee": "Liam O'Connor",
+          "Status": "in_review",
+          "Priority": "medium",
+          "Estimate (hours)": 20,
+          "Due date": {
+            "$days": -37
+          },
+          "Done": false,
+          "Tags": [
+            "docs",
+            "qa"
+          ]
+        },
+        {
+          "Title": "Review onboarding flow #81",
+          "Project": "Brand Refresh",
+          "Assignee": "Maya Chen",
+          "Status": "backlog",
+          "Priority": "low",
+          "Estimate (hours)": 9,
+          "Due date": {
+            "$days": -20
+          },
+          "Done": false,
+          "Tags": [
+            "frontend",
+            "design"
+          ],
+          "Notes": "Generated task 81 for pagination testing."
+        },
+        {
+          "Title": "Refactor email templates #82",
+          "Project": "Website Redesign",
+          "Assignee": "Diego Alvarez",
+          "Status": "in_progress",
+          "Priority": "urgent",
+          "Estimate (hours)": 22,
+          "Due date": {
+            "$days": -3
+          },
+          "Done": false,
+          "Tags": [
+            "backend",
+            "frontend"
+          ]
+        },
+        {
+          "Title": "Document audit log #83",
+          "Project": "Analytics Dashboard",
+          "Assignee": "Sofia Rossi",
+          "Status": "done",
+          "Priority": "high",
+          "Estimate (hours)": 11,
+          "Due date": {
+            "$days": 14
+          },
+          "Done": true,
+          "Tags": [
+            "mobile",
+            "content"
+          ]
+        },
+        {
+          "Title": "Test permissions matrix #84",
+          "Project": "Mobile App v2",
+          "Assignee": "Zara Ahmed",
+          "Status": "to_do",
+          "Priority": "medium",
+          "Estimate (hours)": 24,
+          "Due date": {
+            "$days": 31
+          },
+          "Done": false,
+          "Tags": [
+            "design",
+            "mobile"
+          ]
+        },
+        {
+          "Title": "Plan billing page #85",
+          "Project": "Onboarding Revamp",
+          "Assignee": "Priya Nair",
+          "Status": "in_review",
+          "Priority": "low",
+          "Estimate (hours)": 13,
+          "Due date": {
+            "$days": 48
+          },
+          "Done": false,
+          "Tags": [
+            "research",
+            "docs"
+          ],
+          "Notes": "Generated task 85 for pagination testing."
+        },
+        {
+          "Title": "Prototype import wizard #86",
+          "Project": "Customer Portal",
+          "Assignee": "Omar Haddad",
+          "Status": "backlog",
+          "Priority": "urgent",
+          "Estimate (hours)": 2,
+          "Due date": {
+            "$days": -55
+          },
+          "Done": false,
+          "Tags": [
+            "content",
+            "research"
+          ]
+        },
+        {
+          "Title": "Polish mobile layout #87",
+          "Project": "Fleet Tracking API",
+          "Assignee": "Yuki Tanaka",
+          "Status": "in_progress",
+          "Priority": "high",
+          "Estimate (hours)": 15,
+          "Due date": {
+            "$days": -38
+          },
+          "Done": false,
+          "Tags": [
+            "qa",
+            "backend"
+          ]
+        },
+        {
+          "Title": "Ship search results #88",
+          "Project": "Data Warehouse Migration",
+          "Assignee": "Kai Morgan",
+          "Status": "done",
+          "Priority": "medium",
+          "Estimate (hours)": 4,
+          "Due date": {
+            "$days": -21
+          },
+          "Done": true,
+          "Tags": [
+            "docs",
+            "qa"
+          ]
+        },
+        {
+          "Title": "Review dashboard widgets #89",
+          "Project": "Internal Tools",
+          "Assignee": "Hannah Becker",
+          "Status": "to_do",
+          "Priority": "low",
+          "Estimate (hours)": 17,
+          "Due date": {
+            "$days": -4
+          },
+          "Done": false,
+          "Tags": [
+            "frontend",
+            "design"
+          ],
+          "Notes": "Generated task 89 for pagination testing."
+        },
+        {
+          "Title": "Refactor notification settings #90",
+          "Project": "Brand Refresh",
+          "Assignee": "Liam O'Connor",
+          "Status": "in_review",
+          "Priority": "urgent",
+          "Estimate (hours)": 6,
+          "Due date": {
+            "$days": 13
+          },
+          "Done": false,
+          "Tags": [
+            "backend",
+            "frontend"
+          ]
+        },
+        {
+          "Title": "Document onboarding flow #91",
+          "Project": "Website Redesign",
+          "Assignee": "Maya Chen",
+          "Status": "backlog",
+          "Priority": "high",
+          "Estimate (hours)": 19,
+          "Due date": {
+            "$days": 30
+          },
+          "Done": false,
+          "Tags": [
+            "mobile",
+            "content"
+          ]
+        },
+        {
+          "Title": "Test email templates #92",
+          "Project": "Analytics Dashboard",
+          "Assignee": "Diego Alvarez",
+          "Status": "in_progress",
+          "Priority": "medium",
+          "Estimate (hours)": 8,
+          "Due date": {
+            "$days": 47
+          },
+          "Done": false,
+          "Tags": [
+            "design",
+            "mobile"
+          ]
+        },
+        {
+          "Title": "Plan audit log #93",
+          "Project": "Mobile App v2",
+          "Assignee": "Sofia Rossi",
+          "Status": "done",
+          "Priority": "low",
+          "Estimate (hours)": 21,
+          "Due date": {
+            "$days": -56
+          },
+          "Done": true,
+          "Tags": [
+            "research",
+            "docs"
+          ],
+          "Notes": "Generated task 93 for pagination testing."
+        },
+        {
+          "Title": "Prototype permissions matrix #94",
+          "Project": "Onboarding Revamp",
+          "Assignee": "Zara Ahmed",
+          "Status": "to_do",
+          "Priority": "urgent",
+          "Estimate (hours)": 10,
+          "Due date": {
+            "$days": -39
+          },
+          "Done": false,
+          "Tags": [
+            "content",
+            "research"
+          ]
+        },
+        {
+          "Title": "Polish billing page #95",
+          "Project": "Customer Portal",
+          "Assignee": "Priya Nair",
+          "Status": "in_review",
+          "Priority": "high",
+          "Estimate (hours)": 23,
+          "Due date": {
+            "$days": -22
+          },
+          "Done": false,
+          "Tags": [
+            "qa",
+            "backend"
+          ]
+        },
+        {
+          "Title": "Ship import wizard #96",
+          "Project": "Fleet Tracking API",
+          "Assignee": "Omar Haddad",
+          "Status": "backlog",
+          "Priority": "medium",
+          "Estimate (hours)": 12,
+          "Due date": {
+            "$days": -5
+          },
+          "Done": false,
+          "Tags": [
+            "docs",
+            "qa"
+          ]
+        },
+        {
+          "Title": "Review mobile layout #97",
+          "Project": "Data Warehouse Migration",
+          "Assignee": "Yuki Tanaka",
+          "Status": "in_progress",
+          "Priority": "low",
+          "Estimate (hours)": 1,
+          "Due date": {
+            "$days": 12
+          },
+          "Done": false,
+          "Tags": [
+            "frontend",
+            "design"
+          ],
+          "Notes": "Generated task 97 for pagination testing."
+        },
+        {
+          "Title": "Refactor search results #98",
+          "Project": "Internal Tools",
+          "Assignee": "Kai Morgan",
+          "Status": "done",
+          "Priority": "urgent",
+          "Estimate (hours)": 14,
+          "Due date": {
+            "$days": 29
+          },
+          "Done": true,
+          "Tags": [
+            "backend",
+            "frontend"
+          ]
+        },
+        {
+          "Title": "Document dashboard widgets #99",
+          "Project": "Brand Refresh",
+          "Assignee": "Hannah Becker",
+          "Status": "to_do",
+          "Priority": "high",
+          "Estimate (hours)": 3,
+          "Due date": {
+            "$days": 46
+          },
+          "Done": false,
+          "Tags": [
+            "mobile",
+            "content"
+          ]
+        },
+        {
+          "Title": "Test notification settings #100",
+          "Project": "Website Redesign",
+          "Assignee": "Liam O'Connor",
+          "Status": "in_review",
+          "Priority": "medium",
+          "Estimate (hours)": 16,
+          "Due date": {
+            "$days": -57
+          },
+          "Done": false,
+          "Tags": [
+            "design",
+            "mobile"
+          ]
+        },
+        {
+          "Title": "Plan onboarding flow #101",
+          "Project": "Analytics Dashboard",
+          "Assignee": "Maya Chen",
+          "Status": "backlog",
+          "Priority": "low",
+          "Estimate (hours)": 5,
+          "Due date": {
+            "$days": -40
+          },
+          "Done": false,
+          "Tags": [
+            "research",
+            "docs"
+          ],
+          "Notes": "Generated task 101 for pagination testing."
+        },
+        {
+          "Title": "Prototype email templates #102",
+          "Project": "Mobile App v2",
+          "Assignee": "Diego Alvarez",
+          "Status": "in_progress",
+          "Priority": "urgent",
+          "Estimate (hours)": 18,
+          "Due date": {
+            "$days": -23
+          },
+          "Done": false,
+          "Tags": [
+            "content",
+            "research"
+          ]
+        },
+        {
+          "Title": "Polish audit log #103",
+          "Project": "Onboarding Revamp",
+          "Assignee": "Sofia Rossi",
+          "Status": "done",
+          "Priority": "high",
+          "Estimate (hours)": 7,
+          "Due date": {
+            "$days": -6
+          },
+          "Done": true,
+          "Tags": [
+            "qa",
+            "backend"
+          ]
+        },
+        {
+          "Title": "Ship permissions matrix #104",
+          "Project": "Customer Portal",
+          "Assignee": "Zara Ahmed",
+          "Status": "to_do",
+          "Priority": "medium",
+          "Estimate (hours)": 20,
+          "Due date": {
+            "$days": 11
+          },
+          "Done": false,
+          "Tags": [
+            "docs",
+            "qa"
+          ]
+        },
+        {
+          "Title": "Review billing page #105",
+          "Project": "Fleet Tracking API",
+          "Assignee": "Priya Nair",
+          "Status": "in_review",
+          "Priority": "low",
+          "Estimate (hours)": 9,
+          "Due date": {
+            "$days": 28
+          },
+          "Done": false,
+          "Tags": [
+            "frontend",
+            "design"
+          ],
+          "Notes": "Generated task 105 for pagination testing."
+        },
+        {
+          "Title": "Refactor import wizard #106",
+          "Project": "Data Warehouse Migration",
+          "Assignee": "Omar Haddad",
+          "Status": "backlog",
+          "Priority": "urgent",
+          "Estimate (hours)": 22,
+          "Due date": {
+            "$days": 45
+          },
+          "Done": false,
+          "Tags": [
+            "backend",
+            "frontend"
+          ]
+        },
+        {
+          "Title": "Document mobile layout #107",
+          "Project": "Internal Tools",
+          "Assignee": "Yuki Tanaka",
+          "Status": "in_progress",
+          "Priority": "high",
+          "Estimate (hours)": 11,
+          "Due date": {
+            "$days": -58
+          },
+          "Done": false,
+          "Tags": [
+            "mobile",
+            "content"
+          ]
+        },
+        {
+          "Title": "Test search results #108",
+          "Project": "Brand Refresh",
+          "Assignee": "Kai Morgan",
+          "Status": "done",
+          "Priority": "medium",
+          "Estimate (hours)": 24,
+          "Due date": {
+            "$days": -41
+          },
+          "Done": true,
+          "Tags": [
+            "design",
+            "mobile"
+          ]
+        },
+        {
+          "Title": "Plan dashboard widgets #109",
+          "Project": "Website Redesign",
+          "Assignee": "Hannah Becker",
+          "Status": "to_do",
+          "Priority": "low",
+          "Estimate (hours)": 13,
+          "Due date": {
+            "$days": -24
+          },
+          "Done": false,
+          "Tags": [
+            "research",
+            "docs"
+          ],
+          "Notes": "Generated task 109 for pagination testing."
+        },
+        {
+          "Title": "Prototype notification settings #110",
+          "Project": "Analytics Dashboard",
+          "Assignee": "Liam O'Connor",
+          "Status": "in_review",
+          "Priority": "urgent",
+          "Estimate (hours)": 2,
+          "Due date": {
+            "$days": -7
+          },
+          "Done": false,
+          "Tags": [
+            "content",
+            "research"
+          ]
+        },
+        {
+          "Title": "Polish onboarding flow #111",
+          "Project": "Mobile App v2",
+          "Assignee": "Maya Chen",
+          "Status": "backlog",
+          "Priority": "high",
+          "Estimate (hours)": 15,
+          "Due date": {
+            "$days": 10
+          },
+          "Done": false,
+          "Tags": [
+            "qa",
+            "backend"
+          ]
+        },
+        {
+          "Title": "Ship email templates #112",
+          "Project": "Onboarding Revamp",
+          "Assignee": "Diego Alvarez",
+          "Status": "in_progress",
+          "Priority": "medium",
+          "Estimate (hours)": 4,
+          "Due date": {
+            "$days": 27
+          },
+          "Done": false,
+          "Tags": [
+            "docs",
+            "qa"
+          ]
+        },
+        {
+          "Title": "Review audit log #113",
+          "Project": "Customer Portal",
+          "Assignee": "Sofia Rossi",
+          "Status": "done",
+          "Priority": "low",
+          "Estimate (hours)": 17,
+          "Due date": {
+            "$days": 44
+          },
+          "Done": true,
+          "Tags": [
+            "frontend",
+            "design"
+          ],
+          "Notes": "Generated task 113 for pagination testing."
+        },
+        {
+          "Title": "Refactor permissions matrix #114",
+          "Project": "Fleet Tracking API",
+          "Assignee": "Zara Ahmed",
+          "Status": "to_do",
+          "Priority": "urgent",
+          "Estimate (hours)": 6,
+          "Due date": {
+            "$days": -59
+          },
+          "Done": false,
+          "Tags": [
+            "backend",
+            "frontend"
+          ]
+        },
+        {
+          "Title": "Document billing page #115",
+          "Project": "Data Warehouse Migration",
+          "Assignee": "Priya Nair",
+          "Status": "in_review",
+          "Priority": "high",
+          "Estimate (hours)": 19,
+          "Due date": {
+            "$days": -42
+          },
+          "Done": false,
+          "Tags": [
+            "mobile",
+            "content"
+          ]
+        },
+        {
+          "Title": "Test import wizard #116",
+          "Project": "Internal Tools",
+          "Assignee": "Omar Haddad",
+          "Status": "backlog",
+          "Priority": "medium",
+          "Estimate (hours)": 8,
+          "Due date": {
+            "$days": -25
+          },
+          "Done": false,
+          "Tags": [
+            "design",
+            "mobile"
+          ]
+        },
+        {
+          "Title": "Plan mobile layout #117",
+          "Project": "Brand Refresh",
+          "Assignee": "Yuki Tanaka",
+          "Status": "in_progress",
+          "Priority": "low",
+          "Estimate (hours)": 21,
+          "Due date": {
+            "$days": -8
+          },
+          "Done": false,
+          "Tags": [
+            "research",
+            "docs"
+          ],
+          "Notes": "Generated task 117 for pagination testing."
+        },
+        {
+          "Title": "Prototype search results #118",
+          "Project": "Website Redesign",
+          "Assignee": "Kai Morgan",
+          "Status": "done",
+          "Priority": "urgent",
+          "Estimate (hours)": 10,
+          "Due date": {
+            "$days": 9
+          },
+          "Done": true,
+          "Tags": [
+            "content",
+            "research"
+          ]
+        },
+        {
+          "Title": "Polish dashboard widgets #119",
+          "Project": "Analytics Dashboard",
+          "Assignee": "Hannah Becker",
+          "Status": "to_do",
+          "Priority": "high",
+          "Estimate (hours)": 23,
+          "Due date": {
+            "$days": 26
+          },
+          "Done": false,
+          "Tags": [
+            "qa",
+            "backend"
+          ]
+        },
+        {
+          "Title": "Ship notification settings #120",
+          "Project": "Mobile App v2",
+          "Assignee": "Liam O'Connor",
+          "Status": "in_review",
+          "Priority": "medium",
+          "Estimate (hours)": 12,
+          "Due date": {
+            "$days": 43
+          },
+          "Done": false,
+          "Tags": [
+            "docs",
+            "qa"
+          ]
+        },
+        {
+          "Title": "Review onboarding flow #121",
+          "Project": "Onboarding Revamp",
+          "Assignee": "Maya Chen",
+          "Status": "backlog",
+          "Priority": "low",
+          "Estimate (hours)": 1,
+          "Due date": {
+            "$days": -60
+          },
+          "Done": false,
+          "Tags": [
+            "frontend",
+            "design"
+          ],
+          "Notes": "Generated task 121 for pagination testing."
+        },
+        {
+          "Title": "Refactor email templates #122",
+          "Project": "Customer Portal",
+          "Assignee": "Diego Alvarez",
+          "Status": "in_progress",
+          "Priority": "urgent",
+          "Estimate (hours)": 14,
+          "Due date": {
+            "$days": -43
+          },
+          "Done": false,
+          "Tags": [
+            "backend",
+            "frontend"
+          ]
+        },
+        {
+          "Title": "Document audit log #123",
+          "Project": "Fleet Tracking API",
+          "Assignee": "Sofia Rossi",
+          "Status": "done",
+          "Priority": "high",
+          "Estimate (hours)": 3,
+          "Due date": {
+            "$days": -26
+          },
+          "Done": true,
+          "Tags": [
+            "mobile",
+            "content"
+          ]
+        },
+        {
+          "Title": "Test permissions matrix #124",
+          "Project": "Data Warehouse Migration",
+          "Assignee": "Zara Ahmed",
+          "Status": "to_do",
+          "Priority": "medium",
+          "Estimate (hours)": 16,
+          "Due date": {
+            "$days": -9
+          },
+          "Done": false,
+          "Tags": [
+            "design",
+            "mobile"
+          ]
+        },
+        {
+          "Title": "Plan billing page #125",
+          "Project": "Internal Tools",
+          "Assignee": "Priya Nair",
+          "Status": "in_review",
+          "Priority": "low",
+          "Estimate (hours)": 5,
+          "Due date": {
+            "$days": 8
+          },
+          "Done": false,
+          "Tags": [
+            "research",
+            "docs"
+          ],
+          "Notes": "Generated task 125 for pagination testing."
+        },
+        {
+          "Title": "Prototype import wizard #126",
+          "Project": "Brand Refresh",
+          "Assignee": "Omar Haddad",
+          "Status": "backlog",
+          "Priority": "urgent",
+          "Estimate (hours)": 18,
+          "Due date": {
+            "$days": 25
+          },
+          "Done": false,
+          "Tags": [
+            "content",
+            "research"
+          ]
+        },
+        {
+          "Title": "Polish mobile layout #127",
+          "Project": "Website Redesign",
+          "Assignee": "Yuki Tanaka",
+          "Status": "in_progress",
+          "Priority": "high",
+          "Estimate (hours)": 7,
+          "Due date": {
+            "$days": 42
+          },
+          "Done": false,
+          "Tags": [
+            "qa",
+            "backend"
+          ]
+        },
+        {
+          "Title": "Ship search results #128",
+          "Project": "Analytics Dashboard",
+          "Assignee": "Kai Morgan",
+          "Status": "done",
+          "Priority": "medium",
+          "Estimate (hours)": 20,
+          "Due date": {
+            "$days": 59
+          },
+          "Done": true,
+          "Tags": [
+            "docs",
+            "qa"
+          ]
+        },
+        {
+          "Title": "Review dashboard widgets #129",
+          "Project": "Mobile App v2",
+          "Assignee": "Hannah Becker",
+          "Status": "to_do",
+          "Priority": "low",
+          "Estimate (hours)": 9,
+          "Due date": {
+            "$days": -44
+          },
+          "Done": false,
+          "Tags": [
+            "frontend",
+            "design"
+          ],
+          "Notes": "Generated task 129 for pagination testing."
+        },
+        {
+          "Title": "Refactor notification settings #130",
+          "Project": "Onboarding Revamp",
+          "Assignee": "Liam O'Connor",
+          "Status": "in_review",
+          "Priority": "urgent",
+          "Estimate (hours)": 22,
+          "Due date": {
+            "$days": -27
+          },
+          "Done": false,
+          "Tags": [
+            "backend",
+            "frontend"
+          ]
+        },
+        {
+          "Title": "Document onboarding flow #131",
+          "Project": "Customer Portal",
+          "Assignee": "Maya Chen",
+          "Status": "backlog",
+          "Priority": "high",
+          "Estimate (hours)": 11,
+          "Due date": {
+            "$days": -10
+          },
+          "Done": false,
+          "Tags": [
+            "mobile",
+            "content"
+          ]
+        },
+        {
+          "Title": "Test email templates #132",
+          "Project": "Fleet Tracking API",
+          "Assignee": "Diego Alvarez",
+          "Status": "in_progress",
+          "Priority": "medium",
+          "Estimate (hours)": 24,
+          "Due date": {
+            "$days": 7
+          },
+          "Done": false,
+          "Tags": [
+            "design",
+            "mobile"
+          ]
+        },
+        {
+          "Title": "Plan audit log #133",
+          "Project": "Data Warehouse Migration",
+          "Assignee": "Sofia Rossi",
+          "Status": "done",
+          "Priority": "low",
+          "Estimate (hours)": 13,
+          "Due date": {
+            "$days": 24
+          },
+          "Done": true,
+          "Tags": [
+            "research",
+            "docs"
+          ],
+          "Notes": "Generated task 133 for pagination testing."
+        },
+        {
+          "Title": "Prototype permissions matrix #134",
+          "Project": "Internal Tools",
+          "Assignee": "Zara Ahmed",
+          "Status": "to_do",
+          "Priority": "urgent",
+          "Estimate (hours)": 2,
+          "Due date": {
+            "$days": 41
+          },
+          "Done": false,
+          "Tags": [
+            "content",
+            "research"
+          ]
+        },
+        {
+          "Title": "Polish billing page #135",
+          "Project": "Brand Refresh",
+          "Assignee": "Priya Nair",
+          "Status": "in_review",
+          "Priority": "high",
+          "Estimate (hours)": 15,
+          "Due date": {
+            "$days": 58
+          },
+          "Done": false,
+          "Tags": [
+            "qa",
+            "backend"
+          ]
+        },
+        {
+          "Title": "Ship import wizard #136",
+          "Project": "Website Redesign",
+          "Assignee": "Omar Haddad",
+          "Status": "backlog",
+          "Priority": "medium",
+          "Estimate (hours)": 4,
+          "Due date": {
+            "$days": -45
+          },
+          "Done": false,
+          "Tags": [
+            "docs",
+            "qa"
+          ]
+        },
+        {
+          "Title": "Review mobile layout #137",
+          "Project": "Analytics Dashboard",
+          "Assignee": "Yuki Tanaka",
+          "Status": "in_progress",
+          "Priority": "low",
+          "Estimate (hours)": 17,
+          "Due date": {
+            "$days": -28
+          },
+          "Done": false,
+          "Tags": [
+            "frontend",
+            "design"
+          ],
+          "Notes": "Generated task 137 for pagination testing."
+        },
+        {
+          "Title": "Refactor search results #138",
+          "Project": "Mobile App v2",
+          "Assignee": "Kai Morgan",
+          "Status": "done",
+          "Priority": "urgent",
+          "Estimate (hours)": 6,
+          "Due date": {
+            "$days": -11
+          },
+          "Done": true,
+          "Tags": [
+            "backend",
+            "frontend"
+          ]
+        },
+        {
+          "Title": "Document dashboard widgets #139",
+          "Project": "Onboarding Revamp",
+          "Assignee": "Hannah Becker",
+          "Status": "to_do",
+          "Priority": "high",
+          "Estimate (hours)": 19,
+          "Due date": {
+            "$days": 6
+          },
+          "Done": false,
+          "Tags": [
+            "mobile",
+            "content"
+          ]
+        },
+        {
+          "Title": "Test notification settings #140",
+          "Project": "Customer Portal",
+          "Assignee": "Liam O'Connor",
+          "Status": "in_review",
+          "Priority": "medium",
+          "Estimate (hours)": 8,
+          "Due date": {
+            "$days": 23
+          },
+          "Done": false,
+          "Tags": [
+            "design",
+            "mobile"
+          ]
+        },
+        {
+          "Title": "Plan onboarding flow #141",
+          "Project": "Fleet Tracking API",
+          "Assignee": "Maya Chen",
+          "Status": "backlog",
+          "Priority": "low",
+          "Estimate (hours)": 21,
+          "Due date": {
+            "$days": 40
+          },
+          "Done": false,
+          "Tags": [
+            "research",
+            "docs"
+          ],
+          "Notes": "Generated task 141 for pagination testing."
+        },
+        {
+          "Title": "Prototype email templates #142",
+          "Project": "Data Warehouse Migration",
+          "Assignee": "Diego Alvarez",
+          "Status": "in_progress",
+          "Priority": "urgent",
+          "Estimate (hours)": 10,
+          "Due date": {
+            "$days": 57
+          },
+          "Done": false,
+          "Tags": [
+            "content",
+            "research"
+          ]
+        },
+        {
+          "Title": "Polish audit log #143",
+          "Project": "Internal Tools",
+          "Assignee": "Sofia Rossi",
+          "Status": "done",
+          "Priority": "high",
+          "Estimate (hours)": 23,
+          "Due date": {
+            "$days": -46
+          },
+          "Done": true,
+          "Tags": [
+            "qa",
+            "backend"
+          ]
+        },
+        {
+          "Title": "Ship permissions matrix #144",
+          "Project": "Brand Refresh",
+          "Assignee": "Zara Ahmed",
+          "Status": "to_do",
+          "Priority": "medium",
+          "Estimate (hours)": 12,
+          "Due date": {
+            "$days": -29
+          },
+          "Done": false,
+          "Tags": [
+            "docs",
+            "qa"
+          ]
+        },
+        {
+          "Title": "Review billing page #145",
+          "Project": "Website Redesign",
+          "Assignee": "Priya Nair",
+          "Status": "in_review",
+          "Priority": "low",
+          "Estimate (hours)": 1,
+          "Due date": {
+            "$days": -12
+          },
+          "Done": false,
+          "Tags": [
+            "frontend",
+            "design"
+          ],
+          "Notes": "Generated task 145 for pagination testing."
+        },
+        {
+          "Title": "Refactor import wizard #146",
+          "Project": "Analytics Dashboard",
+          "Assignee": "Omar Haddad",
+          "Status": "backlog",
+          "Priority": "urgent",
+          "Estimate (hours)": 14,
+          "Due date": {
+            "$days": 5
+          },
+          "Done": false,
+          "Tags": [
+            "backend",
+            "frontend"
+          ]
+        },
+        {
+          "Title": "Document mobile layout #147",
+          "Project": "Mobile App v2",
+          "Assignee": "Yuki Tanaka",
+          "Status": "in_progress",
+          "Priority": "high",
+          "Estimate (hours)": 3,
+          "Due date": {
+            "$days": 22
+          },
+          "Done": false,
+          "Tags": [
+            "mobile",
+            "content"
+          ]
+        },
+        {
+          "Title": "Test search results #148",
+          "Project": "Onboarding Revamp",
+          "Assignee": "Kai Morgan",
+          "Status": "done",
+          "Priority": "medium",
+          "Estimate (hours)": 16,
+          "Due date": {
+            "$days": 39
+          },
+          "Done": true,
+          "Tags": [
+            "design",
+            "mobile"
+          ]
+        },
+        {
+          "Title": "Plan dashboard widgets #149",
+          "Project": "Customer Portal",
+          "Assignee": "Hannah Becker",
+          "Status": "to_do",
+          "Priority": "low",
+          "Estimate (hours)": 5,
+          "Due date": {
+            "$days": 56
+          },
+          "Done": false,
+          "Tags": [
+            "research",
+            "docs"
+          ],
+          "Notes": "Generated task 149 for pagination testing."
+        },
+        {
+          "Title": "Prototype notification settings #150",
+          "Project": "Fleet Tracking API",
+          "Assignee": "Liam O'Connor",
+          "Status": "in_review",
+          "Priority": "urgent",
+          "Estimate (hours)": 18,
+          "Due date": {
+            "$days": -47
+          },
+          "Done": false,
+          "Tags": [
+            "content",
+            "research"
+          ]
+        },
+        {
+          "Title": "Polish onboarding flow #151",
+          "Project": "Data Warehouse Migration",
+          "Assignee": "Maya Chen",
+          "Status": "backlog",
+          "Priority": "high",
+          "Estimate (hours)": 7,
+          "Due date": {
+            "$days": -30
+          },
+          "Done": false,
+          "Tags": [
+            "qa",
+            "backend"
+          ]
+        },
+        {
+          "Title": "Ship email templates #152",
+          "Project": "Internal Tools",
+          "Assignee": "Diego Alvarez",
+          "Status": "in_progress",
+          "Priority": "medium",
+          "Estimate (hours)": 20,
+          "Due date": {
+            "$days": -13
+          },
+          "Done": false,
+          "Tags": [
+            "docs",
+            "qa"
+          ]
+        },
+        {
+          "Title": "Review audit log #153",
+          "Project": "Brand Refresh",
+          "Assignee": "Sofia Rossi",
+          "Status": "done",
+          "Priority": "low",
+          "Estimate (hours)": 9,
+          "Due date": {
+            "$days": 4
+          },
+          "Done": true,
+          "Tags": [
+            "frontend",
+            "design"
+          ],
+          "Notes": "Generated task 153 for pagination testing."
+        },
+        {
+          "Title": "Refactor permissions matrix #154",
+          "Project": "Website Redesign",
+          "Assignee": "Zara Ahmed",
+          "Status": "to_do",
+          "Priority": "urgent",
+          "Estimate (hours)": 22,
+          "Due date": {
+            "$days": 21
+          },
+          "Done": false,
+          "Tags": [
+            "backend",
+            "frontend"
+          ]
+        },
+        {
+          "Title": "Document billing page #155",
+          "Project": "Analytics Dashboard",
+          "Assignee": "Priya Nair",
+          "Status": "in_review",
+          "Priority": "high",
+          "Estimate (hours)": 11,
+          "Due date": {
+            "$days": 38
+          },
+          "Done": false,
+          "Tags": [
+            "mobile",
+            "content"
+          ]
+        },
+        {
+          "Title": "Test import wizard #156",
+          "Project": "Mobile App v2",
+          "Assignee": "Omar Haddad",
+          "Status": "backlog",
+          "Priority": "medium",
+          "Estimate (hours)": 24,
+          "Due date": {
+            "$days": 55
+          },
+          "Done": false,
+          "Tags": [
+            "design",
+            "mobile"
+          ]
+        },
+        {
+          "Title": "Plan mobile layout #157",
+          "Project": "Onboarding Revamp",
+          "Assignee": "Yuki Tanaka",
+          "Status": "in_progress",
+          "Priority": "low",
+          "Estimate (hours)": 13,
+          "Due date": {
+            "$days": -48
+          },
+          "Done": false,
+          "Tags": [
+            "research",
+            "docs"
+          ],
+          "Notes": "Generated task 157 for pagination testing."
+        },
+        {
+          "Title": "Prototype search results #158",
+          "Project": "Customer Portal",
+          "Assignee": "Kai Morgan",
+          "Status": "done",
+          "Priority": "urgent",
+          "Estimate (hours)": 2,
+          "Due date": {
+            "$days": -31
+          },
+          "Done": true,
+          "Tags": [
+            "content",
+            "research"
+          ]
+        },
+        {
+          "Title": "Polish dashboard widgets #159",
+          "Project": "Fleet Tracking API",
+          "Assignee": "Hannah Becker",
+          "Status": "to_do",
+          "Priority": "high",
+          "Estimate (hours)": 15,
+          "Due date": {
+            "$days": -14
+          },
+          "Done": false,
+          "Tags": [
+            "qa",
+            "backend"
+          ]
+        },
+        {
+          "Title": "Ship notification settings #160",
+          "Project": "Data Warehouse Migration",
+          "Assignee": "Liam O'Connor",
+          "Status": "in_review",
+          "Priority": "medium",
+          "Estimate (hours)": 4,
+          "Due date": {
+            "$days": 3
+          },
+          "Done": false,
+          "Tags": [
+            "docs",
+            "qa"
+          ]
+        },
+        {
+          "Title": "Review onboarding flow #161",
+          "Project": "Internal Tools",
+          "Assignee": "Maya Chen",
+          "Status": "backlog",
+          "Priority": "low",
+          "Estimate (hours)": 17,
+          "Due date": {
+            "$days": 20
+          },
+          "Done": false,
+          "Tags": [
+            "frontend",
+            "design"
+          ],
+          "Notes": "Generated task 161 for pagination testing."
+        },
+        {
+          "Title": "Refactor email templates #162",
+          "Project": "Brand Refresh",
+          "Assignee": "Diego Alvarez",
+          "Status": "in_progress",
+          "Priority": "urgent",
+          "Estimate (hours)": 6,
+          "Due date": {
+            "$days": 37
+          },
+          "Done": false,
+          "Tags": [
+            "backend",
+            "frontend"
+          ]
+        },
+        {
+          "Title": "Document audit log #163",
+          "Project": "Website Redesign",
+          "Assignee": "Sofia Rossi",
+          "Status": "done",
+          "Priority": "high",
+          "Estimate (hours)": 19,
+          "Due date": {
+            "$days": 54
+          },
+          "Done": true,
+          "Tags": [
+            "mobile",
+            "content"
+          ]
+        },
+        {
+          "Title": "Test permissions matrix #164",
+          "Project": "Analytics Dashboard",
+          "Assignee": "Zara Ahmed",
+          "Status": "to_do",
+          "Priority": "medium",
+          "Estimate (hours)": 8,
+          "Due date": {
+            "$days": -49
+          },
+          "Done": false,
+          "Tags": [
+            "design",
+            "mobile"
+          ]
+        },
+        {
+          "Title": "Plan billing page #165",
+          "Project": "Mobile App v2",
+          "Assignee": "Priya Nair",
+          "Status": "in_review",
+          "Priority": "low",
+          "Estimate (hours)": 21,
+          "Due date": {
+            "$days": -32
+          },
+          "Done": false,
+          "Tags": [
+            "research",
+            "docs"
+          ],
+          "Notes": "Generated task 165 for pagination testing."
+        },
+        {
+          "Title": "Prototype import wizard #166",
+          "Project": "Onboarding Revamp",
+          "Assignee": "Omar Haddad",
+          "Status": "backlog",
+          "Priority": "urgent",
+          "Estimate (hours)": 10,
+          "Due date": {
+            "$days": -15
+          },
+          "Done": false,
+          "Tags": [
+            "content",
+            "research"
+          ]
+        },
+        {
+          "Title": "Polish mobile layout #167",
+          "Project": "Customer Portal",
+          "Assignee": "Yuki Tanaka",
+          "Status": "in_progress",
+          "Priority": "high",
+          "Estimate (hours)": 23,
+          "Due date": {
+            "$days": 2
+          },
+          "Done": false,
+          "Tags": [
+            "qa",
+            "backend"
+          ]
+        },
+        {
+          "Title": "Ship search results #168",
+          "Project": "Fleet Tracking API",
+          "Assignee": "Kai Morgan",
+          "Status": "done",
+          "Priority": "medium",
+          "Estimate (hours)": 12,
+          "Due date": {
+            "$days": 19
+          },
+          "Done": true,
+          "Tags": [
+            "docs",
+            "qa"
+          ]
+        },
+        {
+          "Title": "Review dashboard widgets #169",
+          "Project": "Data Warehouse Migration",
+          "Assignee": "Hannah Becker",
+          "Status": "to_do",
+          "Priority": "low",
+          "Estimate (hours)": 1,
+          "Due date": {
+            "$days": 36
+          },
+          "Done": false,
+          "Tags": [
+            "frontend",
+            "design"
+          ],
+          "Notes": "Generated task 169 for pagination testing."
+        },
+        {
+          "Title": "Refactor notification settings #170",
+          "Project": "Internal Tools",
+          "Assignee": "Liam O'Connor",
+          "Status": "in_review",
+          "Priority": "urgent",
+          "Estimate (hours)": 14,
+          "Due date": {
+            "$days": 53
+          },
+          "Done": false,
+          "Tags": [
+            "backend",
+            "frontend"
+          ]
+        },
+        {
+          "Title": "Document onboarding flow #171",
+          "Project": "Brand Refresh",
+          "Assignee": "Maya Chen",
+          "Status": "backlog",
+          "Priority": "high",
+          "Estimate (hours)": 3,
+          "Due date": {
+            "$days": -50
+          },
+          "Done": false,
+          "Tags": [
+            "mobile",
+            "content"
+          ]
+        },
+        {
+          "Title": "Test email templates #172",
+          "Project": "Website Redesign",
+          "Assignee": "Diego Alvarez",
+          "Status": "in_progress",
+          "Priority": "medium",
+          "Estimate (hours)": 16,
+          "Due date": {
+            "$days": -33
+          },
+          "Done": false,
+          "Tags": [
+            "design",
+            "mobile"
+          ]
+        },
+        {
+          "Title": "Plan audit log #173",
+          "Project": "Analytics Dashboard",
+          "Assignee": "Sofia Rossi",
+          "Status": "done",
+          "Priority": "low",
+          "Estimate (hours)": 5,
+          "Due date": {
+            "$days": -16
+          },
+          "Done": true,
+          "Tags": [
+            "research",
+            "docs"
+          ],
+          "Notes": "Generated task 173 for pagination testing."
+        },
+        {
+          "Title": "Prototype permissions matrix #174",
+          "Project": "Mobile App v2",
+          "Assignee": "Zara Ahmed",
+          "Status": "to_do",
+          "Priority": "urgent",
+          "Estimate (hours)": 18,
+          "Due date": {
+            "$days": 1
+          },
+          "Done": false,
+          "Tags": [
+            "content",
+            "research"
+          ]
+        },
+        {
+          "Title": "Polish billing page #175",
+          "Project": "Onboarding Revamp",
+          "Assignee": "Priya Nair",
+          "Status": "in_review",
+          "Priority": "high",
+          "Estimate (hours)": 7,
+          "Due date": {
+            "$days": 18
+          },
+          "Done": false,
+          "Tags": [
+            "qa",
+            "backend"
+          ]
+        },
+        {
+          "Title": "Ship import wizard #176",
+          "Project": "Customer Portal",
+          "Assignee": "Omar Haddad",
+          "Status": "backlog",
+          "Priority": "medium",
+          "Estimate (hours)": 20,
+          "Due date": {
+            "$days": 35
+          },
+          "Done": false,
+          "Tags": [
+            "docs",
+            "qa"
+          ]
+        },
+        {
+          "Title": "Review mobile layout #177",
+          "Project": "Fleet Tracking API",
+          "Assignee": "Yuki Tanaka",
+          "Status": "in_progress",
+          "Priority": "low",
+          "Estimate (hours)": 9,
+          "Due date": {
+            "$days": 52
+          },
+          "Done": false,
+          "Tags": [
+            "frontend",
+            "design"
+          ],
+          "Notes": "Generated task 177 for pagination testing."
+        },
+        {
+          "Title": "Refactor search results #178",
+          "Project": "Data Warehouse Migration",
+          "Assignee": "Kai Morgan",
+          "Status": "done",
+          "Priority": "urgent",
+          "Estimate (hours)": 22,
+          "Due date": {
+            "$days": -51
+          },
+          "Done": true,
+          "Tags": [
+            "backend",
+            "frontend"
+          ]
+        },
+        {
+          "Title": "Document dashboard widgets #179",
+          "Project": "Internal Tools",
+          "Assignee": "Hannah Becker",
+          "Status": "to_do",
+          "Priority": "high",
+          "Estimate (hours)": 11,
+          "Due date": {
+            "$days": -34
+          },
+          "Done": false,
+          "Tags": [
+            "mobile",
+            "content"
+          ]
+        },
+        {
+          "Title": "Test notification settings #180",
+          "Project": "Brand Refresh",
+          "Assignee": "Liam O'Connor",
+          "Status": "in_review",
+          "Priority": "medium",
+          "Estimate (hours)": 24,
+          "Due date": {
+            "$days": -17
+          },
+          "Done": false,
+          "Tags": [
+            "design",
+            "mobile"
+          ]
+        },
+        {
+          "Title": "Plan onboarding flow #181",
+          "Project": "Website Redesign",
+          "Assignee": "Maya Chen",
+          "Status": "backlog",
+          "Priority": "low",
+          "Estimate (hours)": 13,
+          "Due date": {
+            "$days": 0
+          },
+          "Done": false,
+          "Tags": [
+            "research",
+            "docs"
+          ],
+          "Notes": "Generated task 181 for pagination testing."
+        },
+        {
+          "Title": "Prototype email templates #182",
+          "Project": "Analytics Dashboard",
+          "Assignee": "Diego Alvarez",
+          "Status": "in_progress",
+          "Priority": "urgent",
+          "Estimate (hours)": 2,
+          "Due date": {
+            "$days": 17
+          },
+          "Done": false,
+          "Tags": [
+            "content",
+            "research"
+          ]
+        },
+        {
+          "Title": "Polish audit log #183",
+          "Project": "Mobile App v2",
+          "Assignee": "Sofia Rossi",
+          "Status": "done",
+          "Priority": "high",
+          "Estimate (hours)": 15,
+          "Due date": {
+            "$days": 34
+          },
+          "Done": true,
+          "Tags": [
+            "qa",
+            "backend"
+          ]
+        },
+        {
+          "Title": "Ship permissions matrix #184",
+          "Project": "Onboarding Revamp",
+          "Assignee": "Zara Ahmed",
+          "Status": "to_do",
+          "Priority": "medium",
+          "Estimate (hours)": 4,
+          "Due date": {
+            "$days": 51
+          },
+          "Done": false,
+          "Tags": [
+            "docs",
+            "qa"
+          ]
+        },
+        {
+          "Title": "Review billing page #185",
+          "Project": "Customer Portal",
+          "Assignee": "Priya Nair",
+          "Status": "in_review",
+          "Priority": "low",
+          "Estimate (hours)": 17,
+          "Due date": {
+            "$days": -52
+          },
+          "Done": false,
+          "Tags": [
+            "frontend",
+            "design"
+          ],
+          "Notes": "Generated task 185 for pagination testing."
+        },
+        {
+          "Title": "Refactor import wizard #186",
+          "Project": "Fleet Tracking API",
+          "Assignee": "Omar Haddad",
+          "Status": "backlog",
+          "Priority": "urgent",
+          "Estimate (hours)": 6,
+          "Due date": {
+            "$days": -35
+          },
+          "Done": false,
+          "Tags": [
+            "backend",
+            "frontend"
+          ]
+        },
+        {
+          "Title": "Document mobile layout #187",
+          "Project": "Data Warehouse Migration",
+          "Assignee": "Yuki Tanaka",
+          "Status": "in_progress",
+          "Priority": "high",
+          "Estimate (hours)": 19,
+          "Due date": {
+            "$days": -18
+          },
+          "Done": false,
+          "Tags": [
+            "mobile",
+            "content"
+          ]
+        },
+        {
+          "Title": "Test search results #188",
+          "Project": "Internal Tools",
+          "Assignee": "Kai Morgan",
+          "Status": "done",
+          "Priority": "medium",
+          "Estimate (hours)": 8,
+          "Due date": {
+            "$days": -1
+          },
+          "Done": true,
+          "Tags": [
+            "design",
+            "mobile"
+          ]
+        },
+        {
+          "Title": "Plan dashboard widgets #189",
+          "Project": "Brand Refresh",
+          "Assignee": "Hannah Becker",
+          "Status": "to_do",
+          "Priority": "low",
+          "Estimate (hours)": 21,
+          "Due date": {
+            "$days": 16
+          },
+          "Done": false,
+          "Tags": [
+            "research",
+            "docs"
+          ],
+          "Notes": "Generated task 189 for pagination testing."
+        },
+        {
+          "Title": "Prototype notification settings #190",
+          "Project": "Website Redesign",
+          "Assignee": "Liam O'Connor",
+          "Status": "in_review",
+          "Priority": "urgent",
+          "Estimate (hours)": 10,
+          "Due date": {
+            "$days": 33
+          },
+          "Done": false,
+          "Tags": [
+            "content",
+            "research"
+          ]
+        },
+        {
+          "Title": "Polish onboarding flow #191",
+          "Project": "Analytics Dashboard",
+          "Assignee": "Maya Chen",
+          "Status": "backlog",
+          "Priority": "high",
+          "Estimate (hours)": 23,
+          "Due date": {
+            "$days": 50
+          },
+          "Done": false,
+          "Tags": [
+            "qa",
+            "backend"
+          ]
+        },
+        {
+          "Title": "Ship email templates #192",
+          "Project": "Mobile App v2",
+          "Assignee": "Diego Alvarez",
+          "Status": "in_progress",
+          "Priority": "medium",
+          "Estimate (hours)": 12,
+          "Due date": {
+            "$days": -53
+          },
+          "Done": false,
+          "Tags": [
+            "docs",
+            "qa"
+          ]
+        },
+        {
+          "Title": "Review audit log #193",
+          "Project": "Onboarding Revamp",
+          "Assignee": "Sofia Rossi",
+          "Status": "done",
+          "Priority": "low",
+          "Estimate (hours)": 1,
+          "Due date": {
+            "$days": -36
+          },
+          "Done": true,
+          "Tags": [
+            "frontend",
+            "design"
+          ],
+          "Notes": "Generated task 193 for pagination testing."
+        },
+        {
+          "Title": "Refactor permissions matrix #194",
+          "Project": "Customer Portal",
+          "Assignee": "Zara Ahmed",
+          "Status": "to_do",
+          "Priority": "urgent",
+          "Estimate (hours)": 14,
+          "Due date": {
+            "$days": -19
+          },
+          "Done": false,
+          "Tags": [
+            "backend",
+            "frontend"
+          ]
+        },
+        {
+          "Title": "Document billing page #195",
+          "Project": "Fleet Tracking API",
+          "Assignee": "Priya Nair",
+          "Status": "in_review",
+          "Priority": "high",
+          "Estimate (hours)": 3,
+          "Due date": {
+            "$days": -2
+          },
+          "Done": false,
+          "Tags": [
+            "mobile",
+            "content"
+          ]
+        },
+        {
+          "Title": "Test import wizard #196",
+          "Project": "Data Warehouse Migration",
+          "Assignee": "Omar Haddad",
+          "Status": "backlog",
+          "Priority": "medium",
+          "Estimate (hours)": 16,
+          "Due date": {
+            "$days": 15
+          },
+          "Done": false,
+          "Tags": [
+            "design",
+            "mobile"
+          ]
+        },
+        {
+          "Title": "Plan mobile layout #197",
+          "Project": "Internal Tools",
+          "Assignee": "Yuki Tanaka",
+          "Status": "in_progress",
+          "Priority": "low",
+          "Estimate (hours)": 5,
+          "Due date": {
+            "$days": 32
+          },
+          "Done": false,
+          "Tags": [
+            "research",
+            "docs"
+          ],
+          "Notes": "Generated task 197 for pagination testing."
+        },
+        {
+          "Title": "Prototype search results #198",
+          "Project": "Brand Refresh",
+          "Assignee": "Kai Morgan",
+          "Status": "done",
+          "Priority": "urgent",
+          "Estimate (hours)": 18,
+          "Due date": {
+            "$days": 49
+          },
+          "Done": true,
+          "Tags": [
+            "content",
+            "research"
+          ]
+        },
+        {
+          "Title": "Polish dashboard widgets #199",
+          "Project": "Website Redesign",
+          "Assignee": "Hannah Becker",
+          "Status": "to_do",
+          "Priority": "high",
+          "Estimate (hours)": 7,
+          "Due date": {
+            "$days": -54
+          },
+          "Done": false,
+          "Tags": [
+            "qa",
+            "backend"
+          ]
+        },
+        {
+          "Title": "Ship notification settings #200",
+          "Project": "Analytics Dashboard",
+          "Assignee": "Liam O'Connor",
+          "Status": "in_review",
+          "Priority": "medium",
+          "Estimate (hours)": 20,
+          "Due date": {
+            "$days": -37
+          },
+          "Done": false,
+          "Tags": [
+            "docs",
+            "qa"
+          ]
+        },
+        {
+          "Title": "Review onboarding flow #201",
+          "Project": "Mobile App v2",
+          "Assignee": "Maya Chen",
+          "Status": "backlog",
+          "Priority": "low",
+          "Estimate (hours)": 9,
+          "Due date": {
+            "$days": -20
+          },
+          "Done": false,
+          "Tags": [
+            "frontend",
+            "design"
+          ],
+          "Notes": "Generated task 201 for pagination testing."
+        },
+        {
+          "Title": "Refactor email templates #202",
+          "Project": "Onboarding Revamp",
+          "Assignee": "Diego Alvarez",
+          "Status": "in_progress",
+          "Priority": "urgent",
+          "Estimate (hours)": 22,
+          "Due date": {
+            "$days": -3
+          },
+          "Done": false,
+          "Tags": [
+            "backend",
+            "frontend"
+          ]
+        },
+        {
+          "Title": "Document audit log #203",
+          "Project": "Customer Portal",
+          "Assignee": "Sofia Rossi",
+          "Status": "done",
+          "Priority": "high",
+          "Estimate (hours)": 11,
+          "Due date": {
+            "$days": 14
+          },
+          "Done": true,
+          "Tags": [
+            "mobile",
+            "content"
+          ]
+        },
+        {
+          "Title": "Test permissions matrix #204",
+          "Project": "Fleet Tracking API",
+          "Assignee": "Zara Ahmed",
+          "Status": "to_do",
+          "Priority": "medium",
+          "Estimate (hours)": 24,
+          "Due date": {
+            "$days": 31
+          },
+          "Done": false,
+          "Tags": [
+            "design",
+            "mobile"
+          ]
+        },
+        {
+          "Title": "Plan billing page #205",
+          "Project": "Data Warehouse Migration",
+          "Assignee": "Priya Nair",
+          "Status": "in_review",
+          "Priority": "low",
+          "Estimate (hours)": 13,
+          "Due date": {
+            "$days": 48
+          },
+          "Done": false,
+          "Tags": [
+            "research",
+            "docs"
+          ],
+          "Notes": "Generated task 205 for pagination testing."
+        },
+        {
+          "Title": "Prototype import wizard #206",
+          "Project": "Internal Tools",
+          "Assignee": "Omar Haddad",
+          "Status": "backlog",
+          "Priority": "urgent",
+          "Estimate (hours)": 2,
+          "Due date": {
+            "$days": -55
+          },
+          "Done": false,
+          "Tags": [
+            "content",
+            "research"
+          ]
+        },
+        {
+          "Title": "Polish mobile layout #207",
+          "Project": "Brand Refresh",
+          "Assignee": "Yuki Tanaka",
+          "Status": "in_progress",
+          "Priority": "high",
+          "Estimate (hours)": 15,
+          "Due date": {
+            "$days": -38
+          },
+          "Done": false,
+          "Tags": [
+            "qa",
+            "backend"
+          ]
+        },
+        {
+          "Title": "Ship search results #208",
+          "Project": "Website Redesign",
+          "Assignee": "Kai Morgan",
+          "Status": "done",
+          "Priority": "medium",
+          "Estimate (hours)": 4,
+          "Due date": {
+            "$days": -21
+          },
+          "Done": true,
+          "Tags": [
+            "docs",
+            "qa"
+          ]
+        },
+        {
+          "Title": "Review dashboard widgets #209",
+          "Project": "Analytics Dashboard",
+          "Assignee": "Hannah Becker",
+          "Status": "to_do",
+          "Priority": "low",
+          "Estimate (hours)": 17,
+          "Due date": {
+            "$days": -4
+          },
+          "Done": false,
+          "Tags": [
+            "frontend",
+            "design"
+          ],
+          "Notes": "Generated task 209 for pagination testing."
+        },
+        {
+          "Title": "Refactor notification settings #210",
+          "Project": "Mobile App v2",
+          "Assignee": "Liam O'Connor",
+          "Status": "in_review",
+          "Priority": "urgent",
+          "Estimate (hours)": 6,
+          "Due date": {
+            "$days": 13
+          },
+          "Done": false,
+          "Tags": [
+            "backend",
+            "frontend"
+          ]
+        },
+        {
+          "Title": "Document onboarding flow #211",
+          "Project": "Onboarding Revamp",
+          "Assignee": "Maya Chen",
+          "Status": "backlog",
+          "Priority": "high",
+          "Estimate (hours)": 19,
+          "Due date": {
+            "$days": 30
+          },
+          "Done": false,
+          "Tags": [
+            "mobile",
+            "content"
+          ]
+        },
+        {
+          "Title": "Test email templates #212",
+          "Project": "Customer Portal",
+          "Assignee": "Diego Alvarez",
+          "Status": "in_progress",
+          "Priority": "medium",
+          "Estimate (hours)": 8,
+          "Due date": {
+            "$days": 47
+          },
+          "Done": false,
+          "Tags": [
+            "design",
+            "mobile"
+          ]
+        },
+        {
+          "Title": "Plan audit log #213",
+          "Project": "Fleet Tracking API",
+          "Assignee": "Sofia Rossi",
+          "Status": "done",
+          "Priority": "low",
+          "Estimate (hours)": 21,
+          "Due date": {
+            "$days": -56
+          },
+          "Done": true,
+          "Tags": [
+            "research",
+            "docs"
+          ],
+          "Notes": "Generated task 213 for pagination testing."
+        },
+        {
+          "Title": "Prototype permissions matrix #214",
+          "Project": "Data Warehouse Migration",
+          "Assignee": "Zara Ahmed",
+          "Status": "to_do",
+          "Priority": "urgent",
+          "Estimate (hours)": 10,
+          "Due date": {
+            "$days": -39
+          },
+          "Done": false,
+          "Tags": [
+            "content",
+            "research"
+          ]
+        },
+        {
+          "Title": "Polish billing page #215",
+          "Project": "Internal Tools",
+          "Assignee": "Priya Nair",
+          "Status": "in_review",
+          "Priority": "high",
+          "Estimate (hours)": 23,
+          "Due date": {
+            "$days": -22
+          },
+          "Done": false,
+          "Tags": [
+            "qa",
+            "backend"
+          ]
+        },
+        {
+          "Title": "Ship import wizard #216",
+          "Project": "Brand Refresh",
+          "Assignee": "Omar Haddad",
+          "Status": "backlog",
+          "Priority": "medium",
+          "Estimate (hours)": 12,
+          "Due date": {
+            "$days": -5
+          },
+          "Done": false,
+          "Tags": [
+            "docs",
+            "qa"
+          ]
+        },
+        {
+          "Title": "Review mobile layout #217",
+          "Project": "Website Redesign",
+          "Assignee": "Yuki Tanaka",
+          "Status": "in_progress",
+          "Priority": "low",
+          "Estimate (hours)": 1,
+          "Due date": {
+            "$days": 12
+          },
+          "Done": false,
+          "Tags": [
+            "frontend",
+            "design"
+          ],
+          "Notes": "Generated task 217 for pagination testing."
+        },
+        {
+          "Title": "Refactor search results #218",
+          "Project": "Analytics Dashboard",
+          "Assignee": "Kai Morgan",
+          "Status": "done",
+          "Priority": "urgent",
+          "Estimate (hours)": 14,
+          "Due date": {
+            "$days": 29
+          },
+          "Done": true,
+          "Tags": [
+            "backend",
+            "frontend"
+          ]
+        },
+        {
+          "Title": "Document dashboard widgets #219",
+          "Project": "Mobile App v2",
+          "Assignee": "Hannah Becker",
+          "Status": "to_do",
+          "Priority": "high",
+          "Estimate (hours)": 3,
+          "Due date": {
+            "$days": 46
+          },
+          "Done": false,
+          "Tags": [
+            "mobile",
+            "content"
+          ]
+        },
+        {
+          "Title": "Test notification settings #220",
+          "Project": "Onboarding Revamp",
+          "Assignee": "Liam O'Connor",
+          "Status": "in_review",
+          "Priority": "medium",
+          "Estimate (hours)": 16,
+          "Due date": {
+            "$days": -57
+          },
+          "Done": false,
+          "Tags": [
+            "design",
+            "mobile"
+          ]
+        },
+        {
+          "Title": "Plan onboarding flow #221",
+          "Project": "Customer Portal",
+          "Assignee": "Maya Chen",
+          "Status": "backlog",
+          "Priority": "low",
+          "Estimate (hours)": 5,
+          "Due date": {
+            "$days": -40
+          },
+          "Done": false,
+          "Tags": [
+            "research",
+            "docs"
+          ],
+          "Notes": "Generated task 221 for pagination testing."
+        },
+        {
+          "Title": "Prototype email templates #222",
+          "Project": "Fleet Tracking API",
+          "Assignee": "Diego Alvarez",
+          "Status": "in_progress",
+          "Priority": "urgent",
+          "Estimate (hours)": 18,
+          "Due date": {
+            "$days": -23
+          },
+          "Done": false,
+          "Tags": [
+            "content",
+            "research"
+          ]
+        },
+        {
+          "Title": "Polish audit log #223",
+          "Project": "Data Warehouse Migration",
+          "Assignee": "Sofia Rossi",
+          "Status": "done",
+          "Priority": "high",
+          "Estimate (hours)": 7,
+          "Due date": {
+            "$days": -6
+          },
+          "Done": true,
+          "Tags": [
+            "qa",
+            "backend"
+          ]
+        },
+        {
+          "Title": "Ship permissions matrix #224",
+          "Project": "Internal Tools",
+          "Assignee": "Zara Ahmed",
+          "Status": "to_do",
+          "Priority": "medium",
+          "Estimate (hours)": 20,
+          "Due date": {
+            "$days": 11
+          },
+          "Done": false,
+          "Tags": [
+            "docs",
+            "qa"
+          ]
+        },
+        {
+          "Title": "Review billing page #225",
+          "Project": "Brand Refresh",
+          "Assignee": "Priya Nair",
+          "Status": "in_review",
+          "Priority": "low",
+          "Estimate (hours)": 9,
+          "Due date": {
+            "$days": 28
+          },
+          "Done": false,
+          "Tags": [
+            "frontend",
+            "design"
+          ],
+          "Notes": "Generated task 225 for pagination testing."
+        },
+        {
+          "Title": "Refactor import wizard #226",
+          "Project": "Website Redesign",
+          "Assignee": "Omar Haddad",
+          "Status": "backlog",
+          "Priority": "urgent",
+          "Estimate (hours)": 22,
+          "Due date": {
+            "$days": 45
+          },
+          "Done": false,
+          "Tags": [
+            "backend",
+            "frontend"
+          ]
+        },
+        {
+          "Title": "Document mobile layout #227",
+          "Project": "Analytics Dashboard",
+          "Assignee": "Yuki Tanaka",
+          "Status": "in_progress",
+          "Priority": "high",
+          "Estimate (hours)": 11,
+          "Due date": {
+            "$days": -58
+          },
+          "Done": false,
+          "Tags": [
+            "mobile",
+            "content"
+          ]
+        },
+        {
+          "Title": "Test search results #228",
+          "Project": "Mobile App v2",
+          "Assignee": "Kai Morgan",
+          "Status": "done",
+          "Priority": "medium",
+          "Estimate (hours)": 24,
+          "Due date": {
+            "$days": -41
+          },
+          "Done": true,
+          "Tags": [
+            "design",
+            "mobile"
+          ]
+        },
+        {
+          "Title": "Plan dashboard widgets #229",
+          "Project": "Onboarding Revamp",
+          "Assignee": "Hannah Becker",
+          "Status": "to_do",
+          "Priority": "low",
+          "Estimate (hours)": 13,
+          "Due date": {
+            "$days": -24
+          },
+          "Done": false,
+          "Tags": [
+            "research",
+            "docs"
+          ],
+          "Notes": "Generated task 229 for pagination testing."
+        },
+        {
+          "Title": "Prototype notification settings #230",
+          "Project": "Customer Portal",
+          "Assignee": "Liam O'Connor",
+          "Status": "in_review",
+          "Priority": "urgent",
+          "Estimate (hours)": 2,
+          "Due date": {
+            "$days": -7
+          },
+          "Done": false,
+          "Tags": [
+            "content",
+            "research"
+          ]
+        },
+        {
+          "Title": "Polish onboarding flow #231",
+          "Project": "Fleet Tracking API",
+          "Assignee": "Maya Chen",
+          "Status": "backlog",
+          "Priority": "high",
+          "Estimate (hours)": 15,
+          "Due date": {
+            "$days": 10
+          },
+          "Done": false,
+          "Tags": [
+            "qa",
+            "backend"
+          ]
+        },
+        {
+          "Title": "Ship email templates #232",
+          "Project": "Data Warehouse Migration",
+          "Assignee": "Diego Alvarez",
+          "Status": "in_progress",
+          "Priority": "medium",
+          "Estimate (hours)": 4,
+          "Due date": {
+            "$days": 27
+          },
+          "Done": false,
+          "Tags": [
+            "docs",
+            "qa"
+          ]
+        },
+        {
+          "Title": "Review audit log #233",
+          "Project": "Internal Tools",
+          "Assignee": "Sofia Rossi",
+          "Status": "done",
+          "Priority": "low",
+          "Estimate (hours)": 17,
+          "Due date": {
+            "$days": 44
+          },
+          "Done": true,
+          "Tags": [
+            "frontend",
+            "design"
+          ],
+          "Notes": "Generated task 233 for pagination testing."
+        },
+        {
+          "Title": "Refactor permissions matrix #234",
+          "Project": "Brand Refresh",
+          "Assignee": "Zara Ahmed",
+          "Status": "to_do",
+          "Priority": "urgent",
+          "Estimate (hours)": 6,
+          "Due date": {
+            "$days": -59
+          },
+          "Done": false,
+          "Tags": [
+            "backend",
+            "frontend"
+          ]
+        },
+        {
+          "Title": "Document billing page #235",
+          "Project": "Website Redesign",
+          "Assignee": "Priya Nair",
+          "Status": "in_review",
+          "Priority": "high",
+          "Estimate (hours)": 19,
+          "Due date": {
+            "$days": -42
+          },
+          "Done": false,
+          "Tags": [
+            "mobile",
+            "content"
+          ]
+        },
+        {
+          "Title": "Test import wizard #236",
+          "Project": "Analytics Dashboard",
+          "Assignee": "Omar Haddad",
+          "Status": "backlog",
+          "Priority": "medium",
+          "Estimate (hours)": 8,
+          "Due date": {
+            "$days": -25
+          },
+          "Done": false,
+          "Tags": [
+            "design",
+            "mobile"
+          ]
+        },
+        {
+          "Title": "Plan mobile layout #237",
+          "Project": "Mobile App v2",
+          "Assignee": "Yuki Tanaka",
+          "Status": "in_progress",
+          "Priority": "low",
+          "Estimate (hours)": 21,
+          "Due date": {
+            "$days": -8
+          },
+          "Done": false,
+          "Tags": [
+            "research",
+            "docs"
+          ],
+          "Notes": "Generated task 237 for pagination testing."
+        },
+        {
+          "Title": "Prototype search results #238",
+          "Project": "Onboarding Revamp",
+          "Assignee": "Kai Morgan",
+          "Status": "done",
+          "Priority": "urgent",
+          "Estimate (hours)": 10,
+          "Due date": {
+            "$days": 9
+          },
+          "Done": true,
+          "Tags": [
+            "content",
+            "research"
+          ]
+        },
+        {
+          "Title": "Polish dashboard widgets #239",
+          "Project": "Customer Portal",
+          "Assignee": "Hannah Becker",
+          "Status": "to_do",
+          "Priority": "high",
+          "Estimate (hours)": 23,
+          "Due date": {
+            "$days": 26
+          },
+          "Done": false,
+          "Tags": [
+            "qa",
+            "backend"
+          ]
+        },
+        {
+          "Title": "Ship notification settings #240",
+          "Project": "Fleet Tracking API",
+          "Assignee": "Liam O'Connor",
+          "Status": "in_review",
+          "Priority": "medium",
+          "Estimate (hours)": 12,
+          "Due date": {
+            "$days": 43
+          },
+          "Done": false,
+          "Tags": [
+            "docs",
+            "qa"
+          ]
+        },
+        {
+          "Title": "Review onboarding flow #241",
+          "Project": "Data Warehouse Migration",
+          "Assignee": "Maya Chen",
+          "Status": "backlog",
+          "Priority": "low",
+          "Estimate (hours)": 1,
+          "Due date": {
+            "$days": -60
+          },
+          "Done": false,
+          "Tags": [
+            "frontend",
+            "design"
+          ],
+          "Notes": "Generated task 241 for pagination testing."
+        },
+        {
+          "Title": "Refactor email templates #242",
+          "Project": "Internal Tools",
+          "Assignee": "Diego Alvarez",
+          "Status": "in_progress",
+          "Priority": "urgent",
+          "Estimate (hours)": 14,
+          "Due date": {
+            "$days": -43
+          },
+          "Done": false,
+          "Tags": [
+            "backend",
+            "frontend"
+          ]
+        },
+        {
+          "Title": "Document audit log #243",
+          "Project": "Brand Refresh",
+          "Assignee": "Sofia Rossi",
+          "Status": "done",
+          "Priority": "high",
+          "Estimate (hours)": 3,
+          "Due date": {
+            "$days": -26
+          },
+          "Done": true,
+          "Tags": [
+            "mobile",
+            "content"
+          ]
+        },
+        {
+          "Title": "Test permissions matrix #244",
+          "Project": "Website Redesign",
+          "Assignee": "Zara Ahmed",
+          "Status": "to_do",
+          "Priority": "medium",
+          "Estimate (hours)": 16,
+          "Due date": {
+            "$days": -9
+          },
+          "Done": false,
+          "Tags": [
+            "design",
+            "mobile"
+          ]
+        },
+        {
+          "Title": "Plan billing page #245",
+          "Project": "Analytics Dashboard",
+          "Assignee": "Priya Nair",
+          "Status": "in_review",
+          "Priority": "low",
+          "Estimate (hours)": 5,
+          "Due date": {
+            "$days": 8
+          },
+          "Done": false,
+          "Tags": [
+            "research",
+            "docs"
+          ],
+          "Notes": "Generated task 245 for pagination testing."
+        },
+        {
+          "Title": "Prototype import wizard #246",
+          "Project": "Mobile App v2",
+          "Assignee": "Omar Haddad",
+          "Status": "backlog",
+          "Priority": "urgent",
+          "Estimate (hours)": 18,
+          "Due date": {
+            "$days": 25
+          },
+          "Done": false,
+          "Tags": [
+            "content",
+            "research"
+          ]
+        },
+        {
+          "Title": "Polish mobile layout #247",
+          "Project": "Onboarding Revamp",
+          "Assignee": "Yuki Tanaka",
+          "Status": "in_progress",
+          "Priority": "high",
+          "Estimate (hours)": 7,
+          "Due date": {
+            "$days": 42
+          },
+          "Done": false,
+          "Tags": [
+            "qa",
+            "backend"
+          ]
+        },
+        {
+          "Title": "Ship search results #248",
+          "Project": "Customer Portal",
+          "Assignee": "Kai Morgan",
+          "Status": "done",
+          "Priority": "medium",
+          "Estimate (hours)": 20,
+          "Due date": {
+            "$days": 59
+          },
+          "Done": true,
+          "Tags": [
+            "docs",
+            "qa"
+          ]
+        },
+        {
+          "Title": "Review dashboard widgets #249",
+          "Project": "Fleet Tracking API",
+          "Assignee": "Hannah Becker",
+          "Status": "to_do",
+          "Priority": "low",
+          "Estimate (hours)": 9,
+          "Due date": {
+            "$days": -44
+          },
+          "Done": false,
+          "Tags": [
+            "frontend",
+            "design"
+          ],
+          "Notes": "Generated task 249 for pagination testing."
+        },
+        {
+          "Title": "Refactor notification settings #250",
+          "Project": "Data Warehouse Migration",
+          "Assignee": "Liam O'Connor",
+          "Status": "in_review",
+          "Priority": "urgent",
+          "Estimate (hours)": 22,
+          "Due date": {
+            "$days": -27
+          },
+          "Done": false,
+          "Tags": [
+            "backend",
+            "frontend"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Invoices",
+      "icon": "receipt",
+      "group": "Sales",
+      "description": "Invoices issued to clients for project milestones.",
+      "title": "Number",
+      "audit": true,
+      "columns": [
+        {
+          "name": "Number",
+          "format": "text",
+          "required": true,
+          "unique": true,
+          "searchable": true
+        },
+        {
+          "name": "Client",
+          "format": "relation",
+          "options": {
+            "onDelete": "set null"
+          },
+          "relation": "Clients"
+        },
+        {
+          "name": "Project",
+          "format": "relation",
+          "options": {
+            "onDelete": "set null"
+          },
+          "relation": "Projects"
+        },
+        {
+          "name": "Amount",
+          "format": "currency",
+          "options": {
+            "currency": "USD",
+            "precision": 2
+          },
+          "required": true,
+          "check": "{Amount} > 0"
+        },
+        {
+          "name": "Status",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Draft",
+                "value": "draft"
+              },
+              {
+                "label": "Sent",
+                "value": "sent"
+              },
+              {
+                "label": "Paid",
+                "value": "paid"
+              },
+              {
+                "label": "Overdue",
+                "value": "overdue"
+              }
+            ]
+          },
+          "filterable": true,
+          "sortable": true,
+          "default": "draft"
+        },
+        {
+          "name": "Issued",
+          "format": "date"
+        },
+        {
+          "name": "Due",
+          "format": "date"
+        },
+        {
+          "name": "Paid",
+          "format": "checkbox",
+          "filterable": true,
+          "sortable": true,
+          "default": "false"
+        }
+      ],
+      "views": [
+        {
+          "name": "Unpaid invoices",
+          "icon": "wallet",
+          "description": "Invoices that have not been paid.",
+          "columns": [
+            "Number",
+            "Client",
+            "Amount",
+            "Status",
+            "Due"
+          ],
+          "filters": [
+            {
+              "column": "Paid",
+              "op": "is",
+              "value": false
+            }
+          ]
+        },
+        {
+          "name": "Overdue invoices",
+          "icon": "triangle-alert",
+          "description": "Invoices past their due date.",
+          "columns": [
+            "Number",
+            "Client",
+            "Project",
+            "Amount",
+            "Due"
+          ],
+          "filters": [
+            {
+              "column": "Status",
+              "op": "is",
+              "value": "overdue"
+            }
+          ]
+        }
+      ],
+      "forms": [
+        {
+          "name": "Invoice request",
+          "icon": "receipt",
+          "description": "Request a new invoice for a client project.",
+          "columns": [
+            "Number",
+            "Client",
+            "Project",
+            "Amount",
+            "Due"
+          ]
+        }
+      ],
+      "rows": [
+        {
+          "Number": "INV-2025-001",
+          "Client": "Northwind Traders",
+          "Project": "Website Redesign",
+          "Amount": 12000,
+          "Status": "paid",
+          "Issued": {
+            "$days": -40
+          },
+          "Due": {
+            "$days": -10
+          },
+          "Paid": true
+        },
+        {
+          "Number": "INV-2025-002",
+          "Client": "Northwind Traders",
+          "Project": "Website Redesign",
+          "Amount": 12000,
+          "Status": "sent",
+          "Issued": {
+            "$days": -12
+          },
+          "Due": {
+            "$days": 18
+          },
+          "Paid": false
+        },
+        {
+          "Number": "INV-2025-003",
+          "Client": "Initech Software",
+          "Project": "Mobile App v2",
+          "Amount": 30000,
+          "Status": "paid",
+          "Issued": {
+            "$days": -75
+          },
+          "Due": {
+            "$days": -45
+          },
+          "Paid": true
+        },
+        {
+          "Number": "INV-2025-004",
+          "Client": "Initech Software",
+          "Project": "Mobile App v2",
+          "Amount": 30000,
+          "Status": "paid",
+          "Issued": {
+            "$days": -45
+          },
+          "Due": {
+            "$days": -15
+          },
+          "Paid": true
+        },
+        {
+          "Number": "INV-2025-005",
+          "Client": "Initech Software",
+          "Project": "Mobile App v2",
+          "Amount": 30000,
+          "Status": "overdue",
+          "Issued": {
+            "$days": -25
+          },
+          "Due": {
+            "$days": -5
+          },
+          "Paid": false
+        },
+        {
+          "Number": "INV-2025-006",
+          "Client": "Stark Finance",
+          "Project": "Data Warehouse Migration",
+          "Amount": 50000,
+          "Status": "paid",
+          "Issued": {
+            "$days": -110
+          },
+          "Due": {
+            "$days": -80
+          },
+          "Paid": true
+        },
+        {
+          "Number": "INV-2025-007",
+          "Client": "Stark Finance",
+          "Project": "Data Warehouse Migration",
+          "Amount": 50000,
+          "Status": "overdue",
+          "Issued": {
+            "$days": -50
+          },
+          "Due": {
+            "$days": -20
+          },
+          "Paid": false
+        },
+        {
+          "Number": "INV-2025-008",
+          "Client": "Acme Retail",
+          "Project": "Brand Refresh",
+          "Amount": 22000,
+          "Status": "paid",
+          "Issued": {
+            "$days": -60
+          },
+          "Due": {
+            "$days": -30
+          },
+          "Paid": true
+        },
+        {
+          "Number": "INV-2025-009",
+          "Client": "Wayne Education",
+          "Project": "Onboarding Revamp",
+          "Amount": 15000,
+          "Status": "sent",
+          "Issued": {
+            "$days": -8
+          },
+          "Due": {
+            "$days": 22
+          },
+          "Paid": false
+        },
+        {
+          "Number": "INV-2025-010",
+          "Client": "Umbrella Logistics",
+          "Project": "Fleet Tracking API",
+          "Amount": 47500,
+          "Status": "paid",
+          "Issued": {
+            "$days": -95
+          },
+          "Due": {
+            "$days": -65
+          },
+          "Paid": true
+        },
+        {
+          "Number": "INV-2025-011",
+          "Client": "Globex Health",
+          "Project": "Customer Portal",
+          "Amount": 8500,
+          "Status": "draft",
+          "Issued": {
+            "$days": 0
+          },
+          "Due": {
+            "$days": 30
+          },
+          "Paid": false
+        },
+        {
+          "Number": "INV-2025-012",
+          "Client": "Hooli Cloud",
+          "Project": "Analytics Dashboard",
+          "Amount": 4000,
+          "Status": "draft",
+          "Issued": {
+            "$days": 2
+          },
+          "Due": {
+            "$days": 32
+          },
+          "Paid": false
+        }
+      ]
+    },
+    {
+      "name": "Products",
+      "icon": "package",
+      "group": "Sales",
+      "description": "Hardware, software and services we sell, with live stock value.",
+      "title": "SKU",
+      "audit": true,
+      "columns": [
+        {
+          "name": "SKU",
+          "format": "text",
+          "required": true,
+          "unique": true,
+          "searchable": true
+        },
+        {
+          "name": "Name",
+          "format": "text",
+          "required": true,
+          "searchable": true
+        },
+        {
+          "name": "Category",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Hardware",
+                "value": "hardware"
+              },
+              {
+                "label": "Accessories",
+                "value": "accessories"
+              },
+              {
+                "label": "Software",
+                "value": "software"
+              },
+              {
+                "label": "Services",
+                "value": "services"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Price",
+          "format": "currency",
+          "options": {
+            "currency": "USD",
+            "precision": 2
+          },
+          "required": true,
+          "check": "{Price} >= 0"
+        },
+        {
+          "name": "Stock",
+          "format": "integer",
+          "filterable": true,
+          "sortable": true,
+          "default": "0",
+          "check": "{Stock} >= 0"
+        },
+        {
+          "name": "Reorder level",
+          "format": "integer",
+          "default": "0"
+        },
+        {
+          "name": "Stock value",
+          "format": "currency",
+          "options": {
+            "currency": "USD",
+            "precision": 2
+          },
+          "generated": "{Price} * {Stock}"
+        },
+        {
+          "name": "Supplier",
+          "format": "text"
+        },
+        {
+          "name": "Discontinued",
+          "format": "checkbox",
+          "filterable": true,
+          "sortable": true,
+          "default": "false"
+        }
+      ],
+      "views": [
+        {
+          "name": "Low stock",
+          "icon": "trending-down",
+          "description": "Products with fewer than 10 units left.",
+          "columns": [
+            "SKU",
+            "Name",
+            "Stock",
+            "Reorder level",
+            "Supplier"
+          ],
+          "filters": [
+            {
+              "column": "Stock",
+              "op": "lt",
+              "value": 10
+            }
+          ]
+        },
+        {
+          "name": "Active catalog",
+          "icon": "package-check",
+          "description": "Products that are still on sale.",
+          "columns": [
+            "SKU",
+            "Name",
+            "Category",
+            "Price",
+            "Stock"
+          ],
+          "filters": [
+            {
+              "column": "Discontinued",
+              "op": "is",
+              "value": false
+            }
+          ]
+        }
+      ],
+      "forms": [
+        {
+          "name": "Product suggestion",
+          "icon": "package",
+          "description": "Suggest a product to add to the catalog.",
+          "columns": [
+            "SKU",
+            "Name",
+            "Category",
+            "Price",
+            "Supplier"
+          ],
+          "open": false
+        }
+      ],
+      "rows": [
+        {
+          "SKU": "HW-1001",
+          "Name": "Wireless Keyboard",
+          "Category": "hardware",
+          "Price": 59.9,
+          "Stock": 140,
+          "Reorder level": 40,
+          "Supplier": "Keychron",
+          "Discontinued": false
+        },
+        {
+          "SKU": "HW-1002",
+          "Name": "Ergonomic Mouse",
+          "Category": "hardware",
+          "Price": 44.5,
+          "Stock": 18,
+          "Reorder level": 30,
+          "Supplier": "Logitech",
+          "Discontinued": false
+        },
+        {
+          "SKU": "HW-1003",
+          "Name": "USB-C Dock",
+          "Category": "hardware",
+          "Price": 129,
+          "Stock": 62,
+          "Reorder level": 20,
+          "Supplier": "CalDigit",
+          "Discontinued": false
+        },
+        {
+          "SKU": "HW-1004",
+          "Name": "27\" 4K Monitor",
+          "Category": "hardware",
+          "Price": 389,
+          "Stock": 9,
+          "Reorder level": 10,
+          "Supplier": "Dell",
+          "Discontinued": false
+        },
+        {
+          "SKU": "HW-1005",
+          "Name": "HD Webcam",
+          "Category": "hardware",
+          "Price": 79,
+          "Stock": 77,
+          "Reorder level": 25,
+          "Supplier": "Logitech",
+          "Discontinued": false
+        },
+        {
+          "SKU": "HW-1006",
+          "Name": "Noise-cancelling Headset",
+          "Category": "hardware",
+          "Price": 199,
+          "Stock": 33,
+          "Reorder level": 15,
+          "Supplier": "Sony",
+          "Discontinued": false
+        },
+        {
+          "SKU": "AC-2001",
+          "Name": "Laptop Stand",
+          "Category": "accessories",
+          "Price": 34,
+          "Stock": 210,
+          "Reorder level": 50,
+          "Supplier": "Rain Design",
+          "Discontinued": false
+        },
+        {
+          "SKU": "AC-2002",
+          "Name": "Cable Management Kit",
+          "Category": "accessories",
+          "Price": 14.5,
+          "Stock": 320,
+          "Reorder level": 100,
+          "Supplier": "Orico",
+          "Discontinued": false
+        },
+        {
+          "SKU": "AC-2003",
+          "Name": "Desk Mat",
+          "Category": "accessories",
+          "Price": 24,
+          "Stock": 0,
+          "Reorder level": 40,
+          "Supplier": "Grovemade",
+          "Discontinued": true
+        },
+        {
+          "SKU": "SW-3001",
+          "Name": "Team Plan (annual)",
+          "Category": "software",
+          "Price": 480,
+          "Stock": 0,
+          "Reorder level": 0,
+          "Supplier": "Nocosheet",
+          "Discontinued": false
+        },
+        {
+          "SKU": "SW-3002",
+          "Name": "Enterprise Plan (annual)",
+          "Category": "software",
+          "Price": 2400,
+          "Stock": 0,
+          "Reorder level": 0,
+          "Supplier": "Nocosheet",
+          "Discontinued": false
+        },
+        {
+          "SKU": "SV-4001",
+          "Name": "Onboarding Workshop",
+          "Category": "services",
+          "Price": 900,
+          "Stock": 25,
+          "Reorder level": 5,
+          "Supplier": "Nocosheet",
+          "Discontinued": false
+        }
+      ]
+    },
+    {
+      "name": "Bug Reports",
+      "icon": "bug",
+      "group": "Delivery",
+      "description": "Issues reported by the team, with severity and reproduction steps.",
+      "title": "Title",
+      "columns": [
+        {
+          "name": "Title",
+          "format": "text",
+          "required": true,
+          "searchable": true
+        },
+        {
+          "name": "Severity",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Low",
+                "value": "low"
+              },
+              {
+                "label": "Medium",
+                "value": "medium"
+              },
+              {
+                "label": "High",
+                "value": "high"
+              },
+              {
+                "label": "Critical",
+                "value": "critical"
+              }
+            ]
+          },
+          "filterable": true,
+          "sortable": true,
+          "default": "medium"
+        },
+        {
+          "name": "Status",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Open",
+                "value": "open"
+              },
+              {
+                "label": "Investigating",
+                "value": "investigating"
+              },
+              {
+                "label": "Fixed",
+                "value": "fixed"
+              },
+              {
+                "label": "Won't fix",
+                "value": "won_t_fix"
+              }
+            ]
+          },
+          "filterable": true,
+          "sortable": true,
+          "default": "open"
+        },
+        {
+          "name": "Project",
+          "format": "relation",
+          "options": {
+            "onDelete": "set null"
+          },
+          "relation": "Projects"
+        },
+        {
+          "name": "Reporter",
+          "format": "relation",
+          "options": {
+            "onDelete": "set null"
+          },
+          "relation": "Team Members"
+        },
+        {
+          "name": "Reported at",
+          "format": "datetime"
+        },
+        {
+          "name": "Votes",
+          "format": "integer",
+          "default": "0"
+        },
+        {
+          "name": "Steps to reproduce",
+          "format": "long_text"
+        }
+      ],
+      "views": [
+        {
+          "name": "Needs attention",
+          "icon": "bug",
+          "description": "High and critical bugs that are not fixed.",
+          "columns": [
+            "Title",
+            "Severity",
+            "Status",
+            "Project",
+            "Reporter",
+            "Votes"
+          ],
+          "filters": [
+            {
+              "column": "Severity",
+              "op": "is_any_of",
+              "value": [
+                "high",
+                "critical"
+              ]
+            },
+            {
+              "column": "Status",
+              "op": "is_not",
+              "value": "fixed"
+            }
+          ]
+        }
+      ],
+      "forms": [
+        {
+          "name": "Report a bug",
+          "icon": "bug",
+          "description": "Tell us what went wrong and how to reproduce it.",
+          "columns": [
+            "Title",
+            "Severity",
+            "Project",
+            "Steps to reproduce"
+          ]
+        }
+      ],
+      "rows": [
+        {
+          "Title": "Checkout button unresponsive on Safari 17",
+          "Severity": "critical",
+          "Status": "investigating",
+          "Project": "Website Redesign",
+          "Reporter": "Zara Ahmed",
+          "Reported at": {
+            "$days": -3,
+            "$hour": 13
+          },
+          "Votes": 14,
+          "Steps to reproduce": "1. Add any item to the cart\n2. Open the cart in Safari 17\n3. Tap Checkout; nothing happens."
+        },
+        {
+          "Title": "Product images blurry on retina displays",
+          "Severity": "medium",
+          "Status": "open",
+          "Project": "Website Redesign",
+          "Reporter": "Kai Morgan",
+          "Reported at": {
+            "$days": -6,
+            "$hour": 13
+          },
+          "Votes": 5,
+          "Steps to reproduce": "Open any product page on a 2x display and compare with the Figma export."
+        },
+        {
+          "Title": "App crashes when syncing 500+ items offline",
+          "Severity": "high",
+          "Status": "investigating",
+          "Project": "Mobile App v2",
+          "Reporter": "Diego Alvarez",
+          "Reported at": {
+            "$days": -4,
+            "$hour": 10
+          },
+          "Votes": 11,
+          "Steps to reproduce": "Create more than 500 items offline, reconnect and wait for sync to start."
+        },
+        {
+          "Title": "Push notifications arrive twice on Android 14",
+          "Severity": "medium",
+          "Status": "fixed",
+          "Project": "Mobile App v2",
+          "Reporter": "Liam O'Connor",
+          "Reported at": {
+            "$days": -18,
+            "$hour": 15
+          },
+          "Votes": 7,
+          "Steps to reproduce": "Register the same device twice by reinstalling without clearing the token."
+        },
+        {
+          "Title": "Date picker ignores the user's locale",
+          "Severity": "low",
+          "Status": "open",
+          "Project": "Customer Portal",
+          "Reporter": "Priya Nair",
+          "Reported at": {
+            "$days": -9,
+            "$hour": 11
+          },
+          "Votes": 3,
+          "Steps to reproduce": "Switch the browser language to German and open the booking form."
+        },
+        {
+          "Title": "Row counts differ after migration batch 4",
+          "Severity": "high",
+          "Status": "investigating",
+          "Project": "Data Warehouse Migration",
+          "Reporter": "Sofia Rossi",
+          "Reported at": {
+            "$days": -7,
+            "$hour": 8
+          },
+          "Votes": 9,
+          "Steps to reproduce": "Compare counts between the legacy table and the new fact table for 2023-Q4."
+        },
+        {
+          "Title": "Welcome email links open the wrong page",
+          "Severity": "medium",
+          "Status": "fixed",
+          "Project": "Onboarding Revamp",
+          "Reporter": "Hannah Becker",
+          "Reported at": {
+            "$days": -12,
+            "$hour": 12
+          },
+          "Votes": 4,
+          "Steps to reproduce": "Click 'Start learning' in the welcome email from a mobile client."
+        },
+        {
+          "Title": "Rate limiting returns 500 instead of 429",
+          "Severity": "high",
+          "Status": "fixed",
+          "Project": "Fleet Tracking API",
+          "Reporter": "Maya Chen",
+          "Reported at": {
+            "$days": -80,
+            "$hour": 15
+          },
+          "Votes": 16,
+          "Steps to reproduce": "Send more than 100 requests per minute from one API key."
+        },
+        {
+          "Title": "Dashboard chart tooltips overlap",
+          "Severity": "low",
+          "Status": "won_t_fix",
+          "Project": "Analytics Dashboard",
+          "Reporter": "Yuki Tanaka",
+          "Reported at": {
+            "$days": -5,
+            "$hour": 9
+          },
+          "Votes": 1,
+          "Steps to reproduce": "Hover two adjacent bars on a narrow viewport."
+        },
+        {
+          "Title": "Invoice reminder runs twice at midnight",
+          "Severity": "medium",
+          "Status": "open",
+          "Project": "Internal Tools",
+          "Reporter": "Sofia Rossi",
+          "Reported at": {
+            "$days": -2,
+            "$hour": 10
+          },
+          "Votes": 2,
+          "Steps to reproduce": "Check the automation log around the daylight-saving switch."
+        },
+        {
+          "Title": "Logo SVG renders with a white background in dark mode",
+          "Severity": "low",
+          "Status": "fixed",
+          "Project": "Brand Refresh",
+          "Reporter": "Hannah Becker",
+          "Reported at": {
+            "$days": -40,
+            "$hour": 10
+          },
+          "Votes": 2,
+          "Steps to reproduce": "Open the brand guidelines page with a dark colour scheme."
+        },
+        {
+          "Title": "Search suggestions are slow for long queries",
+          "Severity": "medium",
+          "Status": "open",
+          "Project": "Website Redesign",
+          "Reporter": "Omar Haddad",
+          "Reported at": {
+            "$days": -1,
+            "$hour": 14
+          },
+          "Votes": 6,
+          "Steps to reproduce": "Type more than 40 characters into the header search box."
+        }
+      ]
+    },
+    {
+      "name": "Content Calendar",
+      "icon": "calendar-days",
+      "group": "Marketing",
+      "description": "Planned and published posts across every channel.",
+      "title": "Title",
+      "columns": [
+        {
+          "name": "Title",
+          "format": "text",
+          "required": true,
+          "searchable": true
+        },
+        {
+          "name": "Channel",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Blog",
+                "value": "blog"
+              },
+              {
+                "label": "Newsletter",
+                "value": "newsletter"
+              },
+              {
+                "label": "Twitter",
+                "value": "twitter"
+              },
+              {
+                "label": "LinkedIn",
+                "value": "linkedin"
+              },
+              {
+                "label": "YouTube",
+                "value": "youtube"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Status",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Idea",
+                "value": "idea"
+              },
+              {
+                "label": "Drafting",
+                "value": "drafting"
+              },
+              {
+                "label": "Scheduled",
+                "value": "scheduled"
+              },
+              {
+                "label": "Published",
+                "value": "published"
+              }
+            ]
+          },
+          "filterable": true,
+          "sortable": true,
+          "default": "idea"
+        },
+        {
+          "name": "Author",
+          "format": "relation",
+          "options": {
+            "onDelete": "set null"
+          },
+          "relation": "Team Members"
+        },
+        {
+          "name": "Publish date",
+          "format": "date"
+        },
+        {
+          "name": "URL",
+          "format": "url"
+        },
+        {
+          "name": "Quality",
+          "format": "rating",
+          "options": {
+            "max": 5
+          }
+        }
+      ],
+      "views": [
+        {
+          "name": "Scheduled posts",
+          "icon": "calendar-clock",
+          "description": "Posts ready to go out.",
+          "columns": [
+            "Title",
+            "Channel",
+            "Author",
+            "Publish date"
+          ],
+          "filters": [
+            {
+              "column": "Status",
+              "op": "is",
+              "value": "scheduled"
+            }
+          ]
+        },
+        {
+          "name": "Published",
+          "icon": "calendar-check",
+          "description": "Everything that is already live.",
+          "columns": [
+            "Title",
+            "Channel",
+            "Author",
+            "Publish date",
+            "URL",
+            "Quality"
+          ],
+          "filters": [
+            {
+              "column": "Status",
+              "op": "is",
+              "value": "published"
+            }
+          ]
+        }
+      ],
+      "forms": [
+        {
+          "name": "Content idea",
+          "icon": "lightbulb",
+          "description": "Pitch a post for the content calendar.",
+          "columns": [
+            "Title",
+            "Channel",
+            "Author",
+            "Publish date"
+          ]
+        }
+      ],
+      "rows": [
+        {
+          "Title": "Why we moved to a no-code database",
+          "Channel": "blog",
+          "Status": "published",
+          "Author": "Priya Nair",
+          "Publish date": {
+            "$days": -28
+          },
+          "URL": "https://blog.example.com/no-code-database",
+          "Quality": 5
+        },
+        {
+          "Title": "Spring release notes",
+          "Channel": "newsletter",
+          "Status": "published",
+          "Author": "Hannah Becker",
+          "Publish date": {
+            "$days": -21
+          },
+          "URL": "https://news.example.com/spring-release",
+          "Quality": 4
+        },
+        {
+          "Title": "Five spreadsheet habits worth breaking",
+          "Channel": "linkedin",
+          "Status": "published",
+          "Author": "Hannah Becker",
+          "Publish date": {
+            "$days": -14
+          },
+          "URL": "https://linkedin.example.com/posts/spreadsheet-habits",
+          "Quality": 4
+        },
+        {
+          "Title": "Behind the scenes: building views",
+          "Channel": "youtube",
+          "Status": "published",
+          "Author": "Kai Morgan",
+          "Publish date": {
+            "$days": -9
+          },
+          "URL": "https://video.example.com/behind-the-scenes-views",
+          "Quality": 5
+        },
+        {
+          "Title": "Customer story: Northwind Traders",
+          "Channel": "blog",
+          "Status": "scheduled",
+          "Author": "Priya Nair",
+          "Publish date": {
+            "$days": 4
+          }
+        },
+        {
+          "Title": "Tips for structuring relations",
+          "Channel": "twitter",
+          "Status": "scheduled",
+          "Author": "Hannah Becker",
+          "Publish date": {
+            "$days": 2
+          }
+        },
+        {
+          "Title": "Summer release preview",
+          "Channel": "newsletter",
+          "Status": "drafting",
+          "Author": "Hannah Becker",
+          "Publish date": {
+            "$days": 12
+          }
+        },
+        {
+          "Title": "Webinar: modelling your first workspace",
+          "Channel": "youtube",
+          "Status": "drafting",
+          "Author": "Zara Ahmed",
+          "Publish date": {
+            "$days": 19
+          }
+        },
+        {
+          "Title": "Open-source roadmap",
+          "Channel": "blog",
+          "Status": "idea",
+          "Author": "Maya Chen",
+          "Publish date": {
+            "$days": 30
+          }
+        },
+        {
+          "Title": "Template gallery launch",
+          "Channel": "linkedin",
+          "Status": "idea",
+          "Author": "Kai Morgan",
+          "Publish date": {
+            "$days": 38
+          }
+        }
+      ]
+    },
+    {
+      "name": "Brand Assets",
+      "icon": "image",
+      "group": "Marketing",
+      "description": "Logos, photography and documents with their files.",
+      "title": "Name",
+      "columns": [
+        {
+          "name": "Name",
+          "format": "text",
+          "required": true,
+          "searchable": true
+        },
+        {
+          "name": "Category",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Logo",
+                "value": "logo"
+              },
+              {
+                "label": "Photography",
+                "value": "photography"
+              },
+              {
+                "label": "Document",
+                "value": "document"
+              },
+              {
+                "label": "Screenshot",
+                "value": "screenshot"
+              }
+            ]
+          },
+          "filterable": true,
+          "sortable": true
+        },
+        {
+          "name": "Preview",
+          "format": "image",
+          "options": {
+            "multiple": false
+          }
+        },
+        {
+          "name": "Files",
+          "format": "file",
+          "options": {
+            "multiple": true
+          }
+        },
+        {
+          "name": "Notes",
+          "format": "long_text"
+        }
+      ],
+      "views": [
+        {
+          "name": "Logos",
+          "icon": "image",
+          "description": "Logo files only.",
+          "columns": [
+            "Name",
+            "Preview",
+            "Files"
+          ],
+          "filters": [
+            {
+              "column": "Category",
+              "op": "is",
+              "value": "logo"
+            }
+          ]
+        }
+      ],
+      "rows": [
+        {
+          "Name": "Primary logo",
+          "Category": "logo",
+          "Preview": [
+            {
+              "url": "https://picsum.photos/seed/logo-primary/640/480",
+              "name": "logo-primary.jpg",
+              "size": 68400,
+              "type": "image/jpeg"
+            }
+          ],
+          "Files": [
+            {
+              "url": "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+              "name": "logo-guidelines.pdf",
+              "size": 482000,
+              "type": "application/pdf"
+            }
+          ],
+          "Notes": "Use on light backgrounds only."
+        },
+        {
+          "Name": "Dark logo",
+          "Category": "logo",
+          "Preview": [
+            {
+              "url": "https://picsum.photos/seed/logo-dark/640/480",
+              "name": "logo-dark.jpg",
+              "size": 63300,
+              "type": "image/jpeg"
+            }
+          ],
+          "Files": [],
+          "Notes": "Use on dark backgrounds."
+        },
+        {
+          "Name": "Homepage hero",
+          "Category": "photography",
+          "Preview": [
+            {
+              "url": "https://picsum.photos/seed/hero-home/960/540",
+              "name": "hero-home.jpg",
+              "size": 63300,
+              "type": "image/jpeg"
+            }
+          ],
+          "Files": [
+            {
+              "url": "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+              "name": "hero-usage-rights.pdf",
+              "size": 126000,
+              "type": "application/pdf"
+            }
+          ],
+          "Notes": "Licensed for web and print."
+        },
+        {
+          "Name": "Team offsite",
+          "Category": "photography",
+          "Preview": [
+            {
+              "url": "https://picsum.photos/seed/offsite/640/480",
+              "name": "offsite.jpg",
+              "size": 59900,
+              "type": "image/jpeg"
+            }
+          ],
+          "Files": []
+        },
+        {
+          "Name": "Brand guidelines",
+          "Category": "document",
+          "Files": [
+            {
+              "url": "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+              "name": "brand-guidelines.pdf",
+              "size": 2480000,
+              "type": "application/pdf"
+            },
+            {
+              "url": "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+              "name": "typography.pdf",
+              "size": 640000,
+              "type": "application/pdf"
+            }
+          ],
+          "Notes": "Version 3, updated this quarter."
+        },
+        {
+          "Name": "Product screenshots",
+          "Category": "screenshot",
+          "Preview": [
+            {
+              "url": "https://picsum.photos/seed/screens-dashboard/960/600",
+              "name": "screens-dashboard.jpg",
+              "size": 76900,
+              "type": "image/jpeg"
+            }
+          ],
+          "Files": [
+            {
+              "url": "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+              "name": "release-notes.pdf",
+              "size": 310000,
+              "type": "application/pdf"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

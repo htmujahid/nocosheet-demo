@@ -31,5 +31,6 @@ export const workspaceKeys = {
   tableList: (query: object) => [...workspaceKeys.tables(), "list", query] as const,
   table: (id: number) => [...workspaceKeys.tables(), id] as const,
   auditList: (query: object) => [...workspaceKeys.all, "audit", "list", query] as const,
+  templates: () => [...workspaceKeys.all, "templates"] as const,
   mutation: (name: string) => [...workspaceKeys.all, name] as const,
 };

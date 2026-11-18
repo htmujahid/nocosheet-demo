@@ -1,4 +1,4 @@
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 
 import { Button } from "@/components/ui/button";
@@ -13,8 +13,11 @@ import {
 } from "@/components/ui/card";
 import { NamedIcon } from "@/components/workspace/tables/named-icon";
 import { sidebarQueryOptions } from "@/data/workspace/sidebar";
+import { templatesQueryOptions } from "@/data/workspace/templates";
 import { useAccess } from "@/hooks/use-access";
 import { formatRelativeTime } from "@/lib/format-relative-time";
+
+import { TemplateGallery } from "./template-gallery";
 
 const RECENT_SHOWN = 5;
 
@@ -24,6 +27,12 @@ export function TableShortcuts({ workspace }: { workspace: string }) {
   const tables = sidebar.groups
     .flatMap((group) => group.tables)
     .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+  const empty = tables.length === 0;
+  const { data: templates, isError } = useQuery({
+    ...templatesQueryOptions(workspace),
+    enabled: access.admin && empty,
+  });
+  const showTemplates = access.admin && empty && !isError && (templates === undefined || templates.length > 0);
 
   return (
     <>
@@ -31,7 +40,7 @@ export function TableShortcuts({ workspace }: { workspace: string }) {
         <CardFrameHeader>
           <CardFrameTitle>Recent tables</CardFrameTitle>
           <CardFrameDescription>Jump back into what changed last.</CardFrameDescription>
-          {access.admin && (
+          {access.admin && !empty && (
             <CardFrameAction>
               <Button
                 variant="ghost"
@@ -68,29 +77,32 @@ export function TableShortcuts({ workspace }: { workspace: string }) {
               </span>
             </Link>
           ))}
-          {tables.length === 0 && (
-            <CardPanel className="flex flex-col items-center gap-3 py-8 text-center">
-              <p className="text-muted-foreground text-sm">
-                {access.admin
-                  ? "No tables yet. Create one to get started."
-                  : "No tables yet. An administrator can create them."}
-              </p>
-              {access.admin && (
-                <Button
-                  size="sm"
-                  render={
-                    <Link
-                      to="/workspaces/$workspace/tables/new"
-                      params={{ workspace }}
-                      search={{ step: 1 }}
-                    />
-                  }
-                >
-                  New table
-                </Button>
-              )}
-            </CardPanel>
-          )}
+          {empty &&
+            (showTemplates ? (
+              <TemplateGallery workspace={workspace} templates={templates} />
+            ) : (
+              <CardPanel className="flex flex-col items-center gap-3 py-8 text-center">
+                <p className="text-muted-foreground text-sm">
+                  {access.admin
+                    ? "No tables yet. Create one to get started."
+                    : "No tables yet. An administrator can create them."}
+                </p>
+                {access.admin && (
+                  <Button
+                    size="sm"
+                    render={
+                      <Link
+                        to="/workspaces/$workspace/tables/new"
+                        params={{ workspace }}
+                        search={{ step: 1 }}
+                      />
+                    }
+                  >
+                    New table
+                  </Button>
+                )}
+              </CardPanel>
+            ))}
         </Card>
       </CardFrame>
     </>
