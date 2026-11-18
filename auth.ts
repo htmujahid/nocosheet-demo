@@ -25,7 +25,11 @@ export default defineAuth(({ defaults, env }) => ({
   // Demo: sessions expire with the 12-hour reset, so KV never needs wiping. The default
   // updateAge (1 day) is longer, so activity can't slide the expiry past the reset.
   session: { ...defaults.session, expiresIn: 60 * 60 * 12 },
-  rateLimit: { ...defaults.rateLimit, storage: "secondary-storage" },
+  rateLimit: {
+    ...defaults.rateLimit,
+    storage: "secondary-storage",
+    customRules: { "/get-session": false },
+  },
   plugins: [
     ...(defaults.plugins ?? []),
     passkey({ rpName: "Nocosheet" }),
