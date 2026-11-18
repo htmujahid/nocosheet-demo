@@ -224,7 +224,7 @@ export function FilterBuilder({
             return (
               <div
                 key={index}
-                className="grid grid-cols-[2rem_7rem_7rem_10rem] items-center gap-2 max-sm:grid-cols-[2rem_1fr] max-sm:rounded-lg max-sm:border max-sm:p-2"
+                className="grid grid-cols-[2rem_minmax(7rem,1fr)_minmax(7rem,1fr)_minmax(10rem,2fr)] items-center gap-2 max-sm:grid-cols-[2rem_1fr] max-sm:rounded-lg max-sm:border max-sm:p-2"
               >
                 <Button
                   variant="ghost"
