@@ -6,7 +6,7 @@ import { viewsQueryOptions } from "@/data/workspace/views";
 
 export const Route = createFileRoute("/workspaces/$workspace/_core/tables/$table")({
   staticData: { crumb: (loaderData) => (loaderData as { name?: string } | undefined)?.name },
-  loader: async ({ context, params }) => {
+  beforeLoad: async ({ context, params }) => {
     const id = Number(params.table);
     if (!Number.isInteger(id) || id < 1) throw notFound();
     const [table, views, forms] = await Promise.all([
@@ -17,7 +17,8 @@ export const Route = createFileRoute("/workspaces/$workspace/_core/tables/$table
       context.queryClient.query(formsQueryOptions(params.workspace, id)).catch(() => undefined),
     ]);
     if (!table && !views?.length && !forms?.length) throw notFound();
-    return table;
+    return { table, views, forms };
   },
+  loader: ({ context }) => context.table,
   component: Outlet,
 });

@@ -3,19 +3,20 @@ import { mutationOptions, queryOptions } from "@tanstack/react-query";
 import { fetch } from "void/client";
 
 import { type ResolvedRecordsQuery, recordsKeyOf } from "@/lib/records/query";
-import type { ViewsQuery } from "@/lib/views/query";
 import type { ViewInput, ViewPatchInput } from "@/lib/views/validation";
 
 import { unwrapFetch } from "./api-error";
 import { workspaceKeys } from "./keys";
 
-export const viewsQueryOptions = (workspace: string, tableId: number) =>
+/** Every view of a table the user can see; `limit` caps how many come back. */
+export const viewsQueryOptions = (workspace: string, tableId: number, limit?: number) =>
   queryOptions({
-    queryKey: workspaceKeys.views(tableId),
+    queryKey: limit ? [...workspaceKeys.views(tableId), "limit", limit] : workspaceKeys.views(tableId),
     queryFn: () =>
       unwrapFetch(
-        fetch("/api/workspaces/:workspace/tables/:table/views/all", {
+        fetch("/api/workspaces/:workspace/tables/:table/views", {
           params: { workspace, table: String(tableId) },
+          query: limit ? { limit } : {},
         }),
       ),
     staleTime: 30_000,
@@ -46,26 +47,6 @@ export const viewExportQueryOptions = (workspace: string, tableId: number, viewI
       ),
     staleTime: 0,
     gcTime: 0,
-    retry: false,
-  });
-
-export const viewsPageQueryOptions = (workspace: string, tableId: number, query: ViewsQuery) =>
-  queryOptions({
-    queryKey: workspaceKeys.viewList(tableId, query),
-    queryFn: () =>
-      unwrapFetch(
-        fetch("/api/workspaces/:workspace/tables/:table/views", {
-          params: { workspace, table: String(tableId) },
-          query: {
-            page: query.page,
-            pageSize: query.pageSize,
-            sort: query.sort,
-            order: query.order,
-            ...(query.q ? { q: query.q } : {}),
-          },
-        }),
-      ),
-    staleTime: 30_000,
     retry: false,
   });
 

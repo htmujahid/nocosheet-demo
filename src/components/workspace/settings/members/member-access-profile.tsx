@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "@tanstack/react-router";
 
 import { SettingsRow } from "@/components/shared/settings-row";
 import { Badge } from "@/components/ui/badge";
@@ -36,6 +37,7 @@ export function MemberAccessProfile({
   role?: string | null;
 }) {
   const queryClient = useQueryClient();
+  const router = useRouter();
   const { data: profiles } = useQuery(accessProfilesQueryOptions(DEFAULT_WORKSPACE));
   const { data: assignments } = useQuery(profileAssignmentsQueryOptions(DEFAULT_WORKSPACE));
 
@@ -45,6 +47,7 @@ export function MemberAccessProfile({
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: workspaceKeys.accessProfiles() }),
         queryClient.invalidateQueries({ queryKey: workspaceKeys.access() }),
+        router.invalidate(),
       ]);
       const label = profiles?.find((item) => item.id === variables.profileId)?.name;
       toastManager.add({

@@ -4,12 +4,11 @@ import { z } from "zod";
 
 import { isAdmin } from "@/lib/auth/access";
 import { requireAdmin } from "@/lib/auth/require-admin";
-import { resolveFormsQuery, formsSearchSchema } from "@/lib/forms/query";
+import { formsLimitSchema } from "@/lib/forms/query";
 import {
   createForm,
   findForms,
   listForms,
-  listFormsPage,
   softDeleteForms,
 } from "@/lib/forms/repository";
 import { checkFormDefinition, formInputSchema, formsDeleteSchema } from "@/lib/forms/validation";
@@ -19,20 +18,15 @@ import { findTable, listColumns } from "@/lib/tables/repository";
 
 const params = z.object({ workspace: z.string(), table: z.coerce.number().int().positive() });
 
-export const GET = defineHandler.withValidator({ params, query: formsSearchSchema })(async (
+export const GET = defineHandler.withValidator({ params, query: formsLimitSchema })(async (
   c,
   { params, query },
 ) => {
   const user = requireAuth(c);
-  const visible = (await findTable(params.table))
-    ? await visibleResources(user, "create", params.table, await listForms(params.table))
-    : [];
-  return listFormsPage(
-    params.table,
-    resolveFormsQuery(query),
-    !isAdmin(user),
-    visible.map((form) => form.id),
-  );
+  if (!(await findTable(params.table))) return [];
+  const visible = await visibleResources(user, "create", params.table, await listForms(params.table));
+  const forms = isAdmin(user) ? visible : visible.filter((form) => form.isOpen);
+  return query.limit ? forms.slice(0, query.limit) : forms;
 });
 
 export const POST = defineHandler.withValidator({ params, body: formInputSchema })(async (

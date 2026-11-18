@@ -9,18 +9,11 @@ import { Button } from "@/components/ui/button";
 import { ViewDialog } from "@/components/workspace/views/view-dialog";
 import { ViewsEmpty } from "@/components/workspace/views/views-empty";
 import { ViewsTable } from "@/components/workspace/views/views-table";
-import { viewsPageQueryOptions } from "@/data/workspace/views";
 import { useWorkspace } from "@/hooks/use-workspace";
-import { resolveViewsQuery, validateViewsSearch } from "@/lib/views/query";
+import { validateViewsSearch } from "@/lib/views/query";
 
 export const Route = createFileRoute("/workspaces/$workspace/_core/tables/$table/views/_list")({
   validateSearch: validateViewsSearch,
-  loaderDeps: ({ search }) => resolveViewsQuery(search),
-  loader: ({ context, deps, params }) => {
-    void context.queryClient
-      .query(viewsPageQueryOptions(params.workspace, Number(params.table), deps))
-      .catch(() => undefined);
-  },
   component: ViewsPage,
 });
 

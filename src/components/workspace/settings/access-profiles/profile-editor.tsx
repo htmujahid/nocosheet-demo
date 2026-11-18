@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { useRouter } from "@tanstack/react-router";
 
 import { SettingsRow } from "@/components/shared/settings-row";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -30,6 +31,7 @@ import { type GrantTarget, GrantMatrix } from "./grant-matrix";
 
 export function ProfileEditor({ workspace, profileId }: { workspace: string; profileId: number }) {
   const queryClient = useQueryClient();
+  const router = useRouter();
   const { data: profiles } = useSuspenseQuery(accessProfilesQueryOptions(workspace));
   const { data: targets } = useSuspenseQuery(grantTargetsQueryOptions(workspace));
   const profile = profiles.find((item) => item.id === profileId);
@@ -51,6 +53,7 @@ export function ProfileEditor({ workspace, profileId }: { workspace: string; pro
         await Promise.all([
           queryClient.invalidateQueries({ queryKey: workspaceKeys.accessProfiles() }),
           queryClient.invalidateQueries({ queryKey: workspaceKeys.access() }),
+          router.invalidate(),
         ]);
       }}
     />

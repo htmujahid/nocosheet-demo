@@ -1,22 +1,19 @@
 import { useMemo } from "react";
 
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useRouteContext } from "@tanstack/react-router";
 
-import { accessQueryOptions } from "@/data/workspace/access";
-import { type Action, scopeOf, type Scope } from "@/lib/access/grants";
+import { type Action, scopeFor, type Scope } from "@/lib/access/grants";
 
 import { useSession } from "./use-session";
-import { useWorkspace } from "./use-workspace";
 
 export function useAccess() {
-  const { id: workspace } = useWorkspace();
   const session = useSession();
-  const { data } = useSuspenseQuery(accessQueryOptions(workspace));
+  const data = useRouteContext({ from: "/workspaces/$workspace", select: (context) => context.access });
   const userId = session?.user.id;
 
   return useMemo(() => {
     const scope = (action: Action, tableId: number, viewId?: number | null): Scope => {
-      return data.admin ? "all" : scopeOf(data.grants, action, tableId, viewId);
+      return scopeFor(data, action, tableId, viewId);
     };
 
     return {

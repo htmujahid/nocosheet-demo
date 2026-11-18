@@ -1,9 +1,8 @@
-import { createFileRoute, Navigate } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
 import { FormsTrash } from "@/components/workspace/forms/forms-trash";
 import { TrashSheet } from "@/components/workspace/trash/trash-sheet";
 import { deletedFormsQueryOptions } from "@/data/workspace/forms";
-import { useWorkspace } from "@/hooks/use-workspace";
 import { TRASH_RETENTION_DAYS } from "@/lib/records/retention";
 import { ALL_VIEW } from "@/lib/views/constants";
 
@@ -12,6 +11,14 @@ export const Route = createFileRoute(
 )({
   staticData: { crumb: "Deleted forms" },
   pendingComponent: () => null,
+  beforeLoad: ({ context, params }) => {
+    if (!context.workspace.isAdmin)
+      throw redirect({
+        to: "/workspaces/$workspace/tables/$table/views/$view",
+        params: { workspace: params.workspace, table: params.table, view: ALL_VIEW },
+        replace: true,
+      });
+  },
   loader: ({ context, params }) => {
     void context.queryClient
       .query(deletedFormsQueryOptions(params.workspace, Number(params.table)))
@@ -23,16 +30,6 @@ export const Route = createFileRoute(
 function FormsTrashSheet() {
   const { workspace, table } = Route.useParams();
   const navigate = Route.useNavigate();
-  const { isAdmin } = useWorkspace();
-
-  if (!isAdmin)
-    return (
-      <Navigate
-        to="/workspaces/$workspace/tables/$table/views/$view"
-        params={{ workspace, table, view: ALL_VIEW }}
-        replace
-      />
-    );
 
   return (
     <TrashSheet
