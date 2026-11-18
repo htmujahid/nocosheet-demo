@@ -1,31 +1,58 @@
 import { useEffect, useMemo, useState } from "react";
 
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { functionalUpdate, useTable } from "@tanstack/react-table";
 
 import { SearchIcon } from "lucide-react";
 import { useQueryStates } from "nuqs";
 
 import { DataTable } from "@/components/shared/data-table/data-table";
-import { DataTablePagination } from "@/components/shared/data-table/data-table-pagination";
 import { DataTableViewOptions } from "@/components/shared/data-table/data-table-view-options";
 import { dataTableFeatures } from "@/components/shared/data-table/features";
-import { Frame, FrameFooter } from "@/components/ui/frame";
+import { Frame } from "@/components/ui/frame";
 import { Input } from "@/components/ui/input";
-import { formsPageQueryOptions } from "@/data/workspace/forms";
+import { formsQueryOptions } from "@/data/workspace/forms";
 import { useAccess } from "@/hooks/use-access";
 import { formsSearchParams, type FormsQuery } from "@/lib/forms/query";
 
 import { DeleteFormsDialog } from "./delete-forms-dialog";
 import { formsColumns } from "./forms-columns";
 
-export type FormsRow = NonNullable<ReturnType<typeof useFormsRows>["data"]>["rows"][number];
+function useFormsList(workspace: string, tableId: number) {
+  return useQuery(formsQueryOptions(workspace, tableId));
+}
 
+export type FormsRow = NonNullable<ReturnType<typeof useFormsList>["data"]>[number] & {
+  columnCount: number;
+};
+
+/** Sorts and searches the (few) rows locally: the list endpoint has no paging. */
 function useFormsRows(workspace: string, tableId: number, query: FormsQuery) {
-  return useQuery({
-    ...formsPageQueryOptions(workspace, tableId, query),
-    placeholderData: keepPreviousData,
-  });
+  const { data, isFetching } = useFormsList(workspace, tableId);
+  const rows = useMemo(() => {
+    if (!data) return undefined;
+    const needle = query.q.trim().toLowerCase();
+    const matching = data
+      .map((row): FormsRow => ({ ...row, columnCount: row.selectColumns.length }))
+      .filter(
+      (row) =>
+        !needle ||
+        row.name.toLowerCase().includes(needle) ||
+        row.description?.toLowerCase().includes(needle),
+    );
+    const key = (row: (typeof matching)[number]) =>
+      query.sort === "name"
+        ? row.name.toLowerCase()
+        : query.sort === "columnCount"
+          ? row.columnCount
+          : new Date(row[query.sort]).getTime();
+    const direction = query.order === "desc" ? -1 : 1;
+    return matching.sort((a, b) => {
+      const [x, y] = [key(a), key(b)];
+      return (x < y ? -1 : x > y ? 1 : a.id - b.id) * direction;
+    });
+  }, [data, query.q, query.sort, query.order]);
+  return { rows, total: data?.length, isFetching };
 }
 
 export function FormsTable({
@@ -43,9 +70,8 @@ export function FormsTable({
   const access = useAccess();
   const [query, setQuery] = useQueryStates(formsSearchParams, { history: "replace" });
   const onQueryChange = (patch: Partial<FormsQuery>) => void setQuery(patch);
-  const { data, isFetching } = useFormsRows(workspace, tableId, query);
-  const rows = data?.rows ?? [];
-  const total = data?.total ?? 0;
+  const { rows: found, total, isFetching } = useFormsRows(workspace, tableId, query);
+  const rows = useMemo(() => found ?? [], [found]);
   const columns = useMemo(
     () => formsColumns({ workspace, table: tableParam, canManage: access.admin }),
     [workspace, tableParam, access.admin],
@@ -57,27 +83,14 @@ export function FormsTable({
       columns,
       data: rows,
       getRowId: (row) => String(row.id),
-      manualPagination: true,
       manualSorting: true,
       manualFiltering: true,
       enableRowSelection: access.admin,
       enableMultiSort: false,
       enableSortingRemoval: false,
-      rowCount: total,
       state: {
-        pagination: { pageIndex: query.page - 1, pageSize: query.pageSize },
         sorting: [{ id: query.sort, desc: query.order === "desc" }],
         globalFilter: query.q,
-      },
-      onPaginationChange: (updater) => {
-        const next = functionalUpdate(updater, {
-          pageIndex: query.page - 1,
-          pageSize: query.pageSize,
-        });
-        onQueryChange({
-          page: next.pageSize === query.pageSize ? next.pageIndex + 1 : 1,
-          pageSize: next.pageSize as FormsQuery["pageSize"],
-        });
       },
       onSortingChange: (updater) => {
         const [next] = functionalUpdate(updater, [
@@ -87,12 +100,11 @@ export function FormsTable({
         onQueryChange({
           sort: next.id as FormsQuery["sort"],
           order: next.desc ? "desc" : "asc",
-          page: 1,
         });
       },
       onGlobalFilterChange: (updater) => {
         const next = functionalUpdate(updater, query.q) as string;
-        onQueryChange({ q: next, page: 1 });
+        onQueryChange({ q: next });
       },
     },
     (state) => ({
@@ -113,7 +125,7 @@ export function FormsTable({
     .filter(([, selected]) => selected)
     .map(([id]) => Number(id));
 
-  if (data && total === 0 && !query.q) return placeholder;
+  if (total === 0) return placeholder;
 
   return (
     <div className="flex flex-col gap-4">
@@ -135,11 +147,7 @@ export function FormsTable({
               workspace={workspace}
               tableId={tableId}
               ids={selectedIds}
-              onDeleted={(deleted) => {
-                grid.resetRowSelection();
-                const lastPage = Math.max(1, Math.ceil((total - deleted) / query.pageSize));
-                if (query.page > lastPage) onQueryChange({ page: lastPage });
-              }}
+              onDeleted={() => grid.resetRowSelection()}
             />
           )}
           <DataTableViewOptions table={grid} />
@@ -147,14 +155,6 @@ export function FormsTable({
       </div>
       <Frame>
         <DataTable table={grid} empty={empty} pending={isFetching} />
-        <FrameFooter className="p-2">
-          <DataTablePagination
-            page={query.page}
-            pageSize={query.pageSize}
-            total={total}
-            onPageChange={(page) => grid.setPageIndex(page - 1)}
-          />
-        </FrameFooter>
       </Frame>
     </div>
   );

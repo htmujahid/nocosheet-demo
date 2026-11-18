@@ -6,12 +6,11 @@ import { requireAdmin } from "@/lib/auth/require-admin";
 import { conflictOrBadRequest, httpError, NOT_FOUND } from "@/lib/http";
 import { visibleResources } from "@/lib/access/guard";
 import { findTable, listColumns } from "@/lib/tables/repository";
-import { resolveViewsQuery, viewsSearchSchema } from "@/lib/views/query";
+import { viewsLimitSchema } from "@/lib/views/query";
 import {
   createView,
   findViews,
   listViews,
-  listViewsPage,
   softDeleteViews,
 } from "@/lib/views/repository";
 import { checkViewDefinition, viewInputSchema, viewsDeleteSchema } from "@/lib/views/validation";
@@ -19,18 +18,18 @@ import { ViewWhereError } from "@/lib/views/where";
 
 const params = z.object({ workspace: z.string(), table: z.coerce.number().int().positive() });
 
-export const GET = defineHandler.withValidator({ params, query: viewsSearchSchema })(async (
+export const GET = defineHandler.withValidator({ params, query: viewsLimitSchema })(async (
   c,
   { params, query },
 ) => {
-  const visible = (await findTable(params.table))
-    ? await visibleResources(requireAuth(c), "read", params.table, await listViews(params.table))
-    : [];
-  return listViewsPage(
+  if (!(await findTable(params.table))) return [];
+  const views = await visibleResources(
+    requireAuth(c),
+    "read",
     params.table,
-    resolveViewsQuery(query),
-    visible.map((view) => view.id),
+    await listViews(params.table),
   );
+  return query.limit ? views.slice(0, query.limit) : views;
 });
 
 export const POST = defineHandler.withValidator({ params, body: viewInputSchema })(async (

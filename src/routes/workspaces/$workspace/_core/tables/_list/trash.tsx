@@ -1,9 +1,8 @@
-import { createFileRoute, Navigate } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 
 import { TrashSheet } from "@/components/workspace/trash/trash-sheet";
 import { TablesTrash } from "@/components/workspace/tables/tables-trash";
 import { deletedTablesQueryOptions } from "@/data/workspace/tables";
-import { useWorkspace } from "@/hooks/use-workspace";
 import { TRASH_RETENTION_DAYS } from "@/lib/records/retention";
 
 export const Route = createFileRoute("/workspaces/$workspace/_core/tables/_list/trash")({
@@ -20,9 +19,6 @@ export const Route = createFileRoute("/workspaces/$workspace/_core/tables/_list/
 function TablesTrashSheet() {
   const { workspace } = Route.useParams();
   const navigate = Route.useNavigate();
-  const { isAdmin } = useWorkspace();
-
-  if (!isAdmin) return <Navigate to="/workspaces/$workspace/tables" params={{ workspace }} replace />;
 
   return (
     <TrashSheet

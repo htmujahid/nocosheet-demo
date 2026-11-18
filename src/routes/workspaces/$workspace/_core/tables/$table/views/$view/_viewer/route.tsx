@@ -1,5 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
-import { createFileRoute, getRouteApi, Navigate, Outlet } from "@tanstack/react-router";
+import { createFileRoute, getRouteApi, Outlet, redirect } from "@tanstack/react-router";
 
 import { WorkspaceContent, WorkspaceHeader } from "@/components/layout/workspace-header";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -10,6 +9,7 @@ import { ViewActions } from "@/components/workspace/views/view-actions";
 import { recordsQueryOptions } from "@/data/workspace/records";
 import { viewRecordsQueryOptions, viewsQueryOptions } from "@/data/workspace/views";
 import { useAccess } from "@/hooks/use-access";
+import { scopeFor } from "@/lib/access/grants";
 import { resolveRecordsQuery, validateRecordsSearch } from "@/lib/records/query";
 import { ALL_VIEW } from "@/lib/views/constants";
 
@@ -21,15 +21,29 @@ export const Route = createFileRoute(
   validateSearch: (search: Record<string, unknown>) => search,
   loaderDeps: ({ search }) => resolveRecordsQuery(validateRecordsSearch(search)),
   loader: async ({ context, deps, params }) => {
+    const table = Number(params.table);
     if (params.view === ALL_VIEW) {
-      await context.queryClient
-        .query(recordsQueryOptions(params.workspace, Number(params.table), deps))
+      if (scopeFor(context.access, "read", table) === "none") {
+        // No access to the table's records: fall back to the first saved view, if any.
+        const [first] = await context.queryClient
+          .query(viewsQueryOptions(params.workspace, table))
+          .catch(() => []);
+        if (first)
+          throw redirect({
+            to: "/workspaces/$workspace/tables/$table/views/$view",
+            params: { ...params, view: String(first.id) },
+            replace: true,
+          });
+        return;
+      }
+      void context.queryClient
+        .query(recordsQueryOptions(params.workspace, table, deps))
         .catch(() => undefined);
       return;
     }
-    void context.queryClient.prefetchQuery(
-      viewRecordsQueryOptions(params.workspace, Number(params.table), Number(params.view), deps),
-    );
+    void context.queryClient
+      .query(viewRecordsQueryOptions(params.workspace, table, Number(params.view), deps))
+      .catch(() => undefined);
   },
   component: ViewerPage,
 });
@@ -76,33 +90,17 @@ function TableViewer() {
   const navigate = Route.useNavigate();
   const access = useAccess();
   const readable = access.can("read", Number(table));
-  const { data: views } = useQuery({
-    ...viewsQueryOptions(workspace, Number(table)),
-    enabled: !readable,
-  });
 
   if (!readable) {
-    if (views?.[0])
-      return (
-        <Navigate
-          to="/workspaces/$workspace/tables/$table/views/$view"
-          params={{ workspace, table, view: String(views[0].id) }}
-          replace
-        />
-      );
     return (
       <>
         <WorkspaceHeader workspace={workspace}>
           <TableActions workspace={workspace} table={table} />
         </WorkspaceHeader>
         <WorkspaceContent>
-          {views && (
-            <Alert variant="info">
-              <AlertDescription>
-                You don't have access to the records of this table.
-              </AlertDescription>
-            </Alert>
-          )}
+          <Alert variant="info">
+            <AlertDescription>You don't have access to the records of this table.</AlertDescription>
+          </Alert>
         </WorkspaceContent>
       </>
     );

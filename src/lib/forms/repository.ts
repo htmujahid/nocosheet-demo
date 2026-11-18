@@ -1,10 +1,9 @@
 import { formTable, resourceTable } from "@db/schema";
-import { and, asc, count, db, desc, eq, inArray, isNotNull, isNull, lt, or, sql } from "void/db";
+import { and, asc, db, desc, eq, inArray, isNotNull, isNull, lt, sql } from "void/db";
 
 import type { Table } from "../tables/repository";
 import { TRASH_LIST_LIMIT } from "../trash/query";
 import { newFormKey } from "./naming";
-import type { FormsQuery } from "./query";
 import type { FormValues } from "./validation";
 
 export type Form = typeof formTable.$inferSelect;
@@ -69,60 +68,6 @@ export async function softDeleteForm(id: number, userId: string) {
     .update(formTable)
     .set({ deletedAt: new Date(), deletedBy: userId })
     .where(eq(formTable.id, id));
-}
-
-export async function listFormsPage(
-  tableId: number,
-  query: FormsQuery,
-  openOnly: boolean,
-  ids?: number[],
-) {
-  const { page, pageSize, sort, order, q } = query;
-  const pattern = q ? `%${q.replaceAll(/[\\%_]/g, "\\$&")}%` : null;
-
-  const where = and(
-    eq(formTable.tableId, tableId),
-    isNull(formTable.deletedAt),
-    openOnly ? eq(formTable.isOpen, true) : undefined,
-    ids ? inArray(formTable.id, ids.length > 0 ? ids : [0]) : undefined,
-    pattern
-      ? or(
-          sql`${formTable.name} like ${pattern} escape '\\'`,
-          sql`${formTable.description} like ${pattern} escape '\\'`,
-        )
-      : undefined,
-  );
-
-  const columnCount = sql<number>`json_array_length(${formTable.selectColumns})`;
-  const sortExpression = {
-    name: sql`lower(${formTable.name})`,
-    columnCount,
-    createdAt: formTable.createdAt,
-    updatedAt: formTable.updatedAt,
-  }[sort];
-  const direction = order === "desc" ? desc : asc;
-
-  const [rows, [{ total }]] = await db.batch([
-    db
-      .select({
-        id: formTable.id,
-        name: formTable.name,
-        description: formTable.description,
-        icon: formTable.icon,
-        isOpen: formTable.isOpen,
-        columnCount,
-        createdAt: formTable.createdAt,
-        updatedAt: formTable.updatedAt,
-      })
-      .from(formTable)
-      .where(where)
-      .orderBy(direction(sortExpression), asc(formTable.id))
-      .limit(pageSize)
-      .offset((page - 1) * pageSize),
-    db.select({ total: count() }).from(formTable).where(where),
-  ]);
-
-  return { rows, total };
 }
 
 export async function findForms(tableId: number, ids: number[]) {

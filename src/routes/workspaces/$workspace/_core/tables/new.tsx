@@ -29,13 +29,12 @@ export const Route = createFileRoute("/workspaces/$workspace/_core/tables/new")(
       });
   },
   loaderDeps: ({ search }) => ({ table: search.table }),
+  // The table being set up can't render without its data, so it is awaited.
   loader: ({ context, deps, params }) => {
     if (!deps.table) return null;
-    return context.queryClient
-      .query({ ...tableQueryOptions(params.workspace, deps.table), staleTime: 0 })
-      .catch(() => {
-        throw notFound();
-      });
+    return context.queryClient.query(tableQueryOptions(params.workspace, deps.table)).catch(() => {
+      throw notFound();
+    });
   },
   component: NewTablePage,
 });

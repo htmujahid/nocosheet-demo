@@ -6,9 +6,15 @@ import { WorkspaceContent, WorkspaceHeader } from "@/components/layout/workspace
 import { Button } from "@/components/ui/button";
 import { AddMemberDialog } from "@/components/workspace/settings/members/add-member-dialog";
 import { MembersList } from "@/components/workspace/settings/members/members-list";
+import { membersQueryOptions } from "@/data/workspace/members";
 import { useWorkspace } from "@/hooks/use-workspace";
 
 export const Route = createFileRoute("/workspaces/$workspace/settings/members/")({
+  loader: ({ context }) => {
+    void context.queryClient
+      .query({ ...membersQueryOptions, staleTime: "static" })
+      .catch(() => undefined);
+  },
   component: MembersPage,
 });
 

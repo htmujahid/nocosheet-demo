@@ -8,15 +8,18 @@ export const Route = createFileRoute("/workspaces/$workspace/_core/tables/$table
     crumb: (loaderData) =>
       (loaderData as { name?: string } | null | undefined)?.name ?? "All records",
   },
-  // `null` means all records (`ALL_VIEW`): the table itself, not a saved view.
-  loader: async ({ context, params }) => {
-    if (params.view === ALL_VIEW) return null;
+  beforeLoad: ({ params }) => {
+    if (params.view === ALL_VIEW) return { viewId: null };
 
     const viewId = Number(params.view);
     if (!Number.isInteger(viewId) || viewId < 1) throw notFound();
+    return { viewId };
+  },
+  loader: ({ context, params }) => {
+    if (context.viewId === null) return null;
 
     return context.queryClient
-      .query(viewQueryOptions(params.workspace, Number(params.table), viewId))
+      .query(viewQueryOptions(params.workspace, Number(params.table), context.viewId))
       .catch(() => {
         throw notFound();
       });

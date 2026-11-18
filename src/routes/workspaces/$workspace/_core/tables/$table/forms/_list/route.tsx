@@ -9,18 +9,11 @@ import { Button } from "@/components/ui/button";
 import { FormDialog } from "@/components/workspace/forms/form-dialog";
 import { FormsEmpty } from "@/components/workspace/forms/forms-empty";
 import { FormsTable } from "@/components/workspace/forms/forms-table";
-import { formsPageQueryOptions } from "@/data/workspace/forms";
 import { useWorkspace } from "@/hooks/use-workspace";
-import { resolveFormsQuery, validateFormsSearch } from "@/lib/forms/query";
+import { validateFormsSearch } from "@/lib/forms/query";
 
 export const Route = createFileRoute("/workspaces/$workspace/_core/tables/$table/forms/_list")({
   validateSearch: validateFormsSearch,
-  loaderDeps: ({ search }) => resolveFormsQuery(search),
-  loader: ({ context, deps, params }) => {
-    void context.queryClient
-      .query(formsPageQueryOptions(params.workspace, Number(params.table), deps))
-      .catch(() => undefined);
-  },
   component: FormsPage,
 });
 

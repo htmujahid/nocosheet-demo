@@ -1,12 +1,11 @@
 import { resourceTable, viewTable } from "@db/schema";
-import { and, asc, count, db, desc, eq, inArray, isNotNull, isNull, lt, or, sql } from "void/db";
+import { and, asc, db, desc, eq, inArray, isNotNull, isNull, lt, sql } from "void/db";
 
 import { physicalTableName } from "../tables/naming";
 import type { Column, Table } from "../tables/repository";
 import { TRASH_LIST_LIMIT } from "../trash/query";
 import { buildCreateView, buildDropView } from "./ddl";
 import { newViewName, physicalViewName } from "./naming";
-import type { ViewsQuery } from "./query";
 import type { ViewPatchValues, ViewValues } from "./validation";
 import { buildViewWhere } from "./where";
 
@@ -18,53 +17,6 @@ export async function listViews(tableId: number) {
     .from(viewTable)
     .where(and(eq(viewTable.tableId, tableId), isNull(viewTable.deletedAt)))
     .orderBy(asc(viewTable.position), asc(viewTable.id));
-}
-
-export async function listViewsPage(tableId: number, query: ViewsQuery, ids?: number[]) {
-  const { page, pageSize, sort, order, q } = query;
-  const pattern = q ? `%${q.replaceAll(/[\\%_]/g, "\\$&")}%` : null;
-
-  const where = and(
-    eq(viewTable.tableId, tableId),
-    isNull(viewTable.deletedAt),
-    ids ? inArray(viewTable.id, ids.length > 0 ? ids : [0]) : undefined,
-    pattern
-      ? or(
-          sql`${viewTable.name} like ${pattern} escape '\\'`,
-          sql`${viewTable.description} like ${pattern} escape '\\'`,
-        )
-      : undefined,
-  );
-
-  const columnCount = sql<number>`json_array_length(${viewTable.selectColumns})`;
-  const sortExpression = {
-    name: sql`lower(${viewTable.name})`,
-    columnCount,
-    createdAt: viewTable.createdAt,
-    updatedAt: viewTable.updatedAt,
-  }[sort];
-  const direction = order === "desc" ? desc : asc;
-
-  const [rows, [{ total }]] = await db.batch([
-    db
-      .select({
-        id: viewTable.id,
-        name: viewTable.name,
-        description: viewTable.description,
-        icon: viewTable.icon,
-        columnCount,
-        createdAt: viewTable.createdAt,
-        updatedAt: viewTable.updatedAt,
-      })
-      .from(viewTable)
-      .where(where)
-      .orderBy(direction(sortExpression), asc(viewTable.id))
-      .limit(pageSize)
-      .offset((page - 1) * pageSize),
-    db.select({ total: count() }).from(viewTable).where(where),
-  ]);
-
-  return { rows, total };
 }
 
 export async function findViews(tableId: number, ids: number[]) {

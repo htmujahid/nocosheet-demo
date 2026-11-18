@@ -60,6 +60,13 @@ export const scopeOf = (
   resourceId?: number | null,
 ) => levelOf(grants, action, tableId, resourceId) ?? "none";
 
+export const scopeFor = (
+  access: { admin: boolean; grants: AccessGrant[] },
+  action: Action,
+  tableId: number | null,
+  resourceId?: number | null,
+): Scope => (access.admin ? "all" : scopeOf(access.grants, action, tableId, resourceId));
+
 export const FORM_ACTIONS: readonly Action[] = ["create"];
 
 export const VIEW_ACTIONS: readonly Action[] = ["read", "update", "delete", "export"];

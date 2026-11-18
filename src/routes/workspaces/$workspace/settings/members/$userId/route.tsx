@@ -16,19 +16,15 @@ export const Route = createFileRoute("/workspaces/$workspace/settings/members/$u
     }
     return { isSelf: context.session?.user.id === params.userId };
   },
+  // A member who isn't in the list is not found, so the list is awaited.
   loader: async ({ context, params }) => {
-    const members = await context.queryClient.query({
-      ...membersQueryOptions,
-      staleTime: "static",
-    });
-
+    const members = await context.queryClient.query({ ...membersQueryOptions, staleTime: "static" });
     const member = members.find((item) => item.id === params.userId);
     if (!member) throw notFound();
 
-    await context.queryClient
+    void context.queryClient
       .query({ ...adminUserQueryOptions(params.userId), staleTime: "static" })
       .catch(() => undefined);
-
     return { memberName: member.name };
   },
   staticData: {

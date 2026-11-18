@@ -16,11 +16,9 @@ export const workspaceKeys = {
   view: (id: number, viewId: number) => [...workspaceKeys.views(id), "detail", viewId] as const,
   viewExport: (id: number, viewId: number) =>
     [...workspaceKeys.view(id, viewId), "export"] as const,
-  viewList: (id: number, query: object) => [...workspaceKeys.views(id), "list", query] as const,
   viewsTrash: (id: number) => [...workspaceKeys.views(id), "trash"] as const,
   forms: (id: number) => [...workspaceKeys.table(id), "forms"] as const,
   form: (id: number, formId: number) => [...workspaceKeys.forms(id), "detail", formId] as const,
-  formList: (id: number, query: object) => [...workspaceKeys.forms(id), "list", query] as const,
   formsTrash: (id: number) => [...workspaceKeys.forms(id), "trash"] as const,
   trash: (id: number) => [...workspaceKeys.table(id), "trash"] as const,
   trashList: (id: number, query: object) => [...workspaceKeys.trash(id), "list", query] as const,

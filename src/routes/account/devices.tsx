@@ -6,8 +6,9 @@ import { useSession } from "@/hooks/use-session";
 import { sessionsQueryOptions } from "@/data/auth/sessions";
 
 export const Route = createFileRoute("/account/devices")({
-  loader: ({ context }) =>
-    context.queryClient.query({ ...sessionsQueryOptions, staleTime: "static" }),
+  loader: ({ context }) => {
+    void context.queryClient.query({ ...sessionsQueryOptions, staleTime: "static" }).catch(() => undefined);
+  },
   component: DevicesPage,
 });
 

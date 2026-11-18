@@ -1,27 +1,25 @@
-import { createFileRoute, Navigate } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
 import { WorkspaceContent, WorkspaceHeader } from "@/components/layout/workspace-header";
 import { TableActions } from "@/components/workspace/records/table-actions";
 import { TableOverview } from "@/components/workspace/tables/table-overview";
-import { useAccess } from "@/hooks/use-access";
+import { scopeFor } from "@/lib/access/grants";
 import { ALL_VIEW } from "@/lib/views/constants";
 
 export const Route = createFileRoute("/workspaces/$workspace/_core/tables/$table/")({
+  beforeLoad: ({ context, params }) => {
+    if (scopeFor(context.access, "read", Number(params.table)) === "none")
+      throw redirect({
+        to: "/workspaces/$workspace/tables/$table/views/$view",
+        params: { ...params, view: ALL_VIEW },
+        replace: true,
+      });
+  },
   component: TablePage,
 });
 
 function TablePage() {
   const { workspace, table } = Route.useParams();
-  const access = useAccess();
-
-  if (!access.can("read", Number(table)))
-    return (
-      <Navigate
-        to="/workspaces/$workspace/tables/$table/views/$view"
-        params={{ workspace, table, view: ALL_VIEW }}
-        replace
-      />
-    );
 
   return (
     <>

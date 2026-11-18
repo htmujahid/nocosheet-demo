@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
+import { Link, useRouter } from "@tanstack/react-router";
 
 import { ShieldCheckIcon } from "lucide-react";
 
@@ -25,12 +25,14 @@ import { ProfileSummary } from "./profile-summary";
 
 export function ProfilesList({ workspace }: { workspace: string }) {
   const queryClient = useQueryClient();
+  const router = useRouter();
   const { data: profiles } = useSuspenseQuery(accessProfilesQueryOptions(workspace));
 
   const refresh = () =>
     Promise.all([
       queryClient.invalidateQueries({ queryKey: workspaceKeys.accessProfiles() }),
       queryClient.invalidateQueries({ queryKey: workspaceKeys.access() }),
+      router.invalidate(),
     ]);
 
   const makeDefault = useMutation({

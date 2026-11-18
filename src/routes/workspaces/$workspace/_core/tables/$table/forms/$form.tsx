@@ -1,25 +1,33 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { createFileRoute, Navigate, notFound } from "@tanstack/react-router";
+import { createFileRoute, notFound, redirect } from "@tanstack/react-router";
 
 import { WorkspaceContent, WorkspaceHeader } from "@/components/layout/workspace-header";
 import { FormActions } from "@/components/workspace/forms/form-actions";
 import { FormFill } from "@/components/workspace/forms/form-fill";
 import { formQueryOptions } from "@/data/workspace/forms";
-import { useAccess } from "@/hooks/use-access";
+import { scopeFor } from "@/lib/access/grants";
 import { ALL_VIEW } from "@/lib/views/constants";
 
 export const Route = createFileRoute("/workspaces/$workspace/_core/tables/$table/forms/$form")({
   staticData: { crumb: (loaderData) => (loaderData as { name?: string } | undefined)?.name },
-  loader: async ({ context, params }) => {
+  beforeLoad: ({ context, params }) => {
+    if (scopeFor(context.access, "create", Number(params.table), Number(params.form)) === "none")
+      throw redirect({
+        to: "/workspaces/$workspace/tables/$table/views/$view",
+        params: { workspace: params.workspace, table: params.table, view: ALL_VIEW },
+        replace: true,
+      });
+
     const formId = Number(params.form);
     if (!Number.isInteger(formId) || formId < 1) throw notFound();
-
-    return context.queryClient
-      .query(formQueryOptions(params.workspace, Number(params.table), formId))
+  },
+  // A form that can't be loaded is not found, so its detail is awaited.
+  loader: ({ context, params }) =>
+    context.queryClient
+      .query(formQueryOptions(params.workspace, Number(params.table), Number(params.form)))
       .catch(() => {
         throw notFound();
-      });
-  },
+      }),
   component: FormPage,
 });
 
@@ -28,17 +36,7 @@ function FormPage() {
   const { data: form } = useSuspenseQuery(
     formQueryOptions(workspace, Number(table), Number(formParam)),
   );
-  const access = useAccess();
   const tableId = Number(table);
-
-  if (!access.can("create", tableId, Number(formParam)))
-    return (
-      <Navigate
-        to="/workspaces/$workspace/tables/$table/views/$view"
-        params={{ workspace, table, view: ALL_VIEW }}
-        replace
-      />
-    );
 
   return (
     <>

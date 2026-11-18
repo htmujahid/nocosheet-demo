@@ -1,15 +1,35 @@
+import { useState } from "react";
+
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 
-import { TableIcon } from "lucide-react";
+import {
+  ChevronDownIcon,
+  LayoutGridIcon,
+  ListIcon,
+  PlusIcon,
+  TableIcon,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Group, GroupSeparator } from "@/components/ui/group";
+import {
+  Menu,
+  MenuGroup,
+  MenuItem,
+  MenuLinkItem,
+  MenuPopup,
+  MenuSeparator,
+  MenuTrigger,
+} from "@/components/ui/menu";
 import { recordsCountQueryOptions } from "@/data/workspace/records";
 import { tableQueryOptions } from "@/data/workspace/tables";
+import { viewsQueryOptions } from "@/data/workspace/views";
 import { useAccess } from "@/hooks/use-access";
 import { ALL_VIEW } from "@/lib/views/constants";
 
+import { ViewDialog } from "../views/view-dialog";
 import { NamedIcon } from "./named-icon";
 import { RecentRecords } from "./recent-records";
 
@@ -27,14 +47,14 @@ export function TableOverview({ workspace, table }: { workspace: string; table: 
   const access = useAccess();
   const { data: info } = useQuery(tableQueryOptions(workspace, tableId));
 
-  // The page is only reached with read access ("all" or "own"). With "own", the count and the
-  // recent list are already limited to the user's own records server-side.
   const records = access.scope("read", tableId) === "own" ? "My records" : "All records";
   const { data: counted } = useQuery(recordsCountQueryOptions(workspace, tableId));
-  // Counting is capped server-side, so a capped result is shown as "1,000+".
+
   const recordsLabel = counted
     ? `${counted.count.toLocaleString()}${counted.capped ? "+" : ""}`
     : "—";
+  const { data: views = [] } = useQuery(viewsQueryOptions(workspace, tableId));
+  const [creating, setCreating] = useState(false);
   const columnCount = info?.columns?.length;
   const titleColumn =
     info?.columns?.find((column) => column.id === info.titleColumnId)?.columnName ?? null;
@@ -53,18 +73,72 @@ export function TableOverview({ workspace, table }: { workspace: string; table: 
             )}
           </div>
         </div>
-        <Button
-          variant="outline"
-          render={
-            <Link
-              to="/workspaces/$workspace/tables/$table/views/$view"
-              params={{ workspace, table, view: ALL_VIEW }}
-            />
-          }
-        >
-          <TableIcon />
-          {records}
-        </Button>
+        <Group aria-label="Views">
+          <Button
+            variant="outline"
+            render={
+              <Link
+                to="/workspaces/$workspace/tables/$table/views/$view"
+                params={{ workspace, table, view: ALL_VIEW }}
+              />
+            }
+          >
+            <TableIcon aria-hidden="true" />
+            {records}
+          </Button>
+          <GroupSeparator />
+          <Menu>
+            <MenuTrigger render={<Button variant="outline" size="icon" aria-label="Views" />}>
+              <ChevronDownIcon aria-hidden="true" />
+            </MenuTrigger>
+            <MenuPopup align="end" className="min-w-56">
+              {views.length > 0 && (
+                <>
+                  <MenuGroup>
+                    {views.map((view) => (
+                      <MenuLinkItem
+                        key={view.id}
+                        render={
+                          <Link
+                            to="/workspaces/$workspace/tables/$table/views/$view"
+                            params={{ workspace, table, view: String(view.id) }}
+                          />
+                        }
+                      >
+                        <NamedIcon
+                          name={view.icon}
+                          fallback={LayoutGridIcon}
+                          className="size-4 shrink-0 text-muted-foreground"
+                        />
+                        <span className="truncate">{view.name}</span>
+                      </MenuLinkItem>
+                    ))}
+                  </MenuGroup>
+                  <MenuSeparator />
+                </>
+              )}
+              <MenuGroup>
+                <MenuLinkItem
+                  render={
+                    <Link
+                      to="/workspaces/$workspace/tables/$table/views"
+                      params={{ workspace, table }}
+                    />
+                  }
+                >
+                  <ListIcon aria-hidden="true" />
+                  All views
+                </MenuLinkItem>
+                {access.admin && (
+                  <MenuItem onClick={() => setCreating(true)}>
+                    <PlusIcon aria-hidden="true" />
+                    New view
+                  </MenuItem>
+                )}
+              </MenuGroup>
+            </MenuPopup>
+          </Menu>
+        </Group>
       </div>
 
       <Card>
@@ -75,6 +149,15 @@ export function TableOverview({ workspace, table }: { workspace: string; table: 
       </Card>
 
       <RecentRecords workspace={workspace} table={table} titleColumn={titleColumn} />
+
+      {access.admin && (
+        <ViewDialog
+          workspace={workspace}
+          tableId={tableId}
+          open={creating}
+          onOpenChange={setCreating}
+        />
+      )}
     </div>
   );
 }

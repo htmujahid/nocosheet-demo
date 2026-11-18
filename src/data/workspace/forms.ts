@@ -2,19 +2,20 @@ import { mutationOptions, queryOptions } from "@tanstack/react-query";
 
 import { fetch } from "void/client";
 
-import type { FormsQuery } from "@/lib/forms/query";
 import type { FormInput } from "@/lib/forms/validation";
 
 import { unwrapFetch } from "./api-error";
 import { workspaceKeys } from "./keys";
 
-export const formsQueryOptions = (workspace: string, tableId: number) =>
+/** Every form of a table the user can fill in; `limit` caps how many come back. */
+export const formsQueryOptions = (workspace: string, tableId: number, limit?: number) =>
   queryOptions({
-    queryKey: workspaceKeys.forms(tableId),
+    queryKey: limit ? [...workspaceKeys.forms(tableId), "limit", limit] : workspaceKeys.forms(tableId),
     queryFn: () =>
       unwrapFetch(
-        fetch("/api/workspaces/:workspace/tables/:table/forms/all", {
+        fetch("/api/workspaces/:workspace/tables/:table/forms", {
           params: { workspace, table: String(tableId) },
+          query: limit ? { limit } : {},
         }),
       ),
     staleTime: 30_000,
@@ -28,26 +29,6 @@ export const formQueryOptions = (workspace: string, tableId: number, formId: num
       unwrapFetch(
         fetch("/api/workspaces/:workspace/tables/:table/forms/:form", {
           params: { workspace, table: String(tableId), form: String(formId) },
-        }),
-      ),
-    staleTime: 30_000,
-    retry: false,
-  });
-
-export const formsPageQueryOptions = (workspace: string, tableId: number, query: FormsQuery) =>
-  queryOptions({
-    queryKey: workspaceKeys.formList(tableId, query),
-    queryFn: () =>
-      unwrapFetch(
-        fetch("/api/workspaces/:workspace/tables/:table/forms", {
-          params: { workspace, table: String(tableId) },
-          query: {
-            page: query.page,
-            pageSize: query.pageSize,
-            sort: query.sort,
-            order: query.order,
-            ...(query.q ? { q: query.q } : {}),
-          },
         }),
       ),
     staleTime: 30_000,
