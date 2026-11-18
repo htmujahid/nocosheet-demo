@@ -13,17 +13,14 @@ export const Route = createFileRoute("/workspaces/$workspace/settings/members/$u
     if (context.isSelf)
       throw redirect({ to: "/workspaces/$workspace/settings/members/$userId", params });
   },
-  loader: ({ context, params }) =>
-    Promise.allSettled([
-      context.queryClient.query({
-        ...adminUserSessionsQueryOptions(params.userId),
-        staleTime: "static",
-      }),
-      context.queryClient.query({
-        ...memberApiKeysQueryOptions(params.workspace, params.userId),
-        staleTime: "static",
-      }),
-    ]),
+  loader: ({ context, params }) => {
+    void context.queryClient
+      .query({ ...adminUserSessionsQueryOptions(params.userId), staleTime: "static" })
+      .catch(() => undefined);
+    void context.queryClient
+      .query({ ...memberApiKeysQueryOptions(params.workspace, params.userId), staleTime: "static" })
+      .catch(() => undefined);
+  },
   component: DevicesPage,
 });
 

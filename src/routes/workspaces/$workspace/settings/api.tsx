@@ -6,8 +6,11 @@ import { apiKeysQueryOptions } from "@/data/auth/api-keys";
 
 export const Route = createFileRoute("/workspaces/$workspace/settings/api")({
   staticData: { crumb: "API Keys" },
-  loader: ({ context }) =>
-    context.queryClient.query({ ...apiKeysQueryOptions, staleTime: "static" }),
+  loader: ({ context }) => {
+    void context.queryClient
+      .query({ ...apiKeysQueryOptions, staleTime: "static" })
+      .catch(() => undefined);
+  },
   component: Page,
 });
 

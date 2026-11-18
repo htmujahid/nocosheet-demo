@@ -17,17 +17,17 @@ export const Route = createFileRoute("/workspaces/$workspace/_core/tables/$table
         params: { workspace: params.workspace, table: params.table, view: ALL_VIEW },
         replace: true,
       });
-  },
-  loader: async ({ context, params }) => {
+
     const formId = Number(params.form);
     if (!Number.isInteger(formId) || formId < 1) throw notFound();
-
-    return context.queryClient
-      .query(formQueryOptions(params.workspace, Number(params.table), formId))
+  },
+  // A form that can't be loaded is not found, so its detail is awaited.
+  loader: ({ context, params }) =>
+    context.queryClient
+      .query(formQueryOptions(params.workspace, Number(params.table), Number(params.form)))
       .catch(() => {
         throw notFound();
-      });
-  },
+      }),
   component: FormPage,
 });
 

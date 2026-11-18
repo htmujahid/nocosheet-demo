@@ -8,35 +8,36 @@ import { useAccess } from "@/hooks/use-access";
 import { scopeFor } from "@/lib/access/grants";
 import { ALL_VIEW } from "@/lib/views/constants";
 
+const back = (params: { workspace: string; table: string; view: string }) =>
+  redirect({
+    to: "/workspaces/$workspace/tables/$table/views/$view",
+    params: { workspace: params.workspace, table: params.table, view: params.view },
+    search: (previous) => previous,
+    replace: true,
+  });
+
 const viewRoute = getRouteApi("/workspaces/$workspace/_core/tables/$table/views/$view");
 
 export const Route = createFileRoute(
   "/workspaces/$workspace/_core/tables/$table/views/$view/_viewer/$record",
 )({
   pendingComponent: () => null,
-  beforeLoad: async ({ context, params }) => {
+  beforeLoad: ({ context, params }) => {
+    const viewId = params.view === ALL_VIEW ? undefined : Number(params.view);
+    if (scopeFor(context.access, "read", Number(params.table), viewId) === "none")
+      throw back(params);
+  },
+  loader: async ({ context, params }) => {
     const tableId = Number(params.table);
     const viewId = params.view === ALL_VIEW ? undefined : Number(params.view);
-    const back = () =>
-      redirect({
-        to: "/workspaces/$workspace/tables/$table/views/$view",
-        params: { workspace: params.workspace, table: params.table, view: params.view },
-        search: (previous) => previous,
-        replace: true,
-      });
-
-    const scope = scopeFor(context.access, "read", tableId, viewId);
-    if (scope === "none") throw back();
-
-    // The record must exist and be readable; with `read:own` it must also be the user's own.
-    const record = await context.queryClient
+    const record = context.queryClient
       .query(recordQueryOptions(params.workspace, tableId, Number(params.record), viewId))
       .catch(() => undefined);
-    if (!record) throw back();
-    if (scope === "own") {
-      const owner = (record.created_by as { id?: string } | null | undefined)?.id;
-      if (!owner || owner !== context.session?.user.id) throw back();
-    }
+
+    // With `read:own` the record decides whether the user may open it, so it is awaited.
+    if (scopeFor(context.access, "read", tableId, viewId) !== "own") return;
+    const owner = ((await record)?.created_by as { id?: string } | null | undefined)?.id;
+    if (!owner || owner !== context.session?.user.id) throw back(params);
   },
   component: RecordPage,
 });

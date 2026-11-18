@@ -6,7 +6,11 @@ import { membersQueryOptions } from "@/data/workspace/members";
 
 export const Route = createFileRoute("/workspaces/$workspace/settings/")({
   staticData: { crumb: "General" },
-  loader: ({ context }) => context.queryClient.query({ ...membersQueryOptions, staleTime: "static" }),
+  loader: ({ context }) => {
+    void context.queryClient
+      .query({ ...membersQueryOptions, staleTime: "static" })
+      .catch(() => undefined);
+  },
   component: SettingsPage,
 });
 

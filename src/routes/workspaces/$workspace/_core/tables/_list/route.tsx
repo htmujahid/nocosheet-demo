@@ -16,8 +16,9 @@ export const Route = createFileRoute("/workspaces/$workspace/_core/tables/_list"
       throw redirect({ to: "/workspaces/$workspace", params: { workspace: params.workspace } });
   },
   loaderDeps: ({ search }) => resolveTablesQuery(search),
-  loader: ({ context, deps, params }) =>
-    context.queryClient.query(tablesQueryOptions(params.workspace, deps)),
+  loader: ({ context, deps, params }) => {
+    void context.queryClient.query(tablesQueryOptions(params.workspace, deps)).catch(() => undefined);
+  },
   component: TablesPage,
 });
 

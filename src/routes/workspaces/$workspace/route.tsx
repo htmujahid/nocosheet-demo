@@ -25,8 +25,8 @@ export const Route = createFileRoute("/workspaces/$workspace")({
       access,
     };
   },
-  loader: async ({ context, params }) => {
-    await context.queryClient.query(sidebarQueryOptions(params.workspace));
+  loader: ({ context, params }) => {
+    void context.queryClient.query(sidebarQueryOptions(params.workspace)).catch(() => undefined);
   },
   component: Outlet,
 });

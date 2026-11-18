@@ -5,15 +5,17 @@ import { CreateProfileDialog } from "@/components/workspace/settings/access-prof
 import { ProfilesList } from "@/components/workspace/settings/access-profiles/profiles-list";
 import { YourAccess } from "@/components/workspace/settings/access-profiles/your-access";
 import { accessProfilesQueryOptions } from "@/data/workspace/access-profiles";
-import { sidebarQueryOptions } from "@/data/workspace/sidebar";
 import { useWorkspace } from "@/hooks/use-workspace";
 
 export const Route = createFileRoute("/workspaces/$workspace/settings/access/")({
-  // Administrators manage access profiles; everyone else sees what they can do.
-  loader: ({ context, params }) =>
-    context.workspace.isAdmin
-      ? context.queryClient.query(accessProfilesQueryOptions(params.workspace))
-      : context.queryClient.query(sidebarQueryOptions(params.workspace)),
+  // Administrators manage access profiles; everyone else sees what they can do (from the access
+  // and sidebar data the workspace route already loaded).
+  loader: ({ context, params }) => {
+    if (context.workspace.isAdmin)
+      void context.queryClient
+        .query(accessProfilesQueryOptions(params.workspace))
+        .catch(() => undefined);
+  },
   component: AccessPage,
 });
 

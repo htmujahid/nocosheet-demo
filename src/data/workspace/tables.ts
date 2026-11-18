@@ -197,6 +197,7 @@ export const deletedColumnsQueryOptions = (workspace: string, id: number) =>
           params: { workspace, table: String(id) },
         }),
       ),
+    staleTime: 15_000,
   });
 
 export const restoreColumnMutationOptions = mutationOptions({

@@ -3,7 +3,6 @@ import { createFileRoute, notFound, redirect } from "@tanstack/react-router";
 import { WorkspaceContent, WorkspaceHeader } from "@/components/layout/workspace-header";
 import { ProfileEditor } from "@/components/workspace/settings/access-profiles/profile-editor";
 import { accessProfilesQueryOptions } from "@/data/workspace/access-profiles";
-import { sidebarQueryOptions } from "@/data/workspace/sidebar";
 
 export const Route = createFileRoute("/workspaces/$workspace/settings/access/$profileId")({
   beforeLoad: ({ context, params }) => {
@@ -13,11 +12,9 @@ export const Route = createFileRoute("/workspaces/$workspace/settings/access/$pr
         params: { workspace: params.workspace },
       });
   },
+  // A profile that no longer exists is not found, so the list is awaited.
   loader: async ({ context, params }) => {
-    const [profiles] = await Promise.all([
-      context.queryClient.query({ ...accessProfilesQueryOptions(params.workspace), staleTime: 0 }),
-      context.queryClient.query(sidebarQueryOptions(params.workspace)),
-    ]);
+    const profiles = await context.queryClient.query(accessProfilesQueryOptions(params.workspace));
     const profile = profiles.find((item) => item.id === Number(params.profileId));
     if (!profile) throw notFound();
     return { profileName: profile.name };

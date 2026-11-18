@@ -9,8 +9,9 @@ export const Route = createFileRoute("/account")({
   beforeLoad: ({ context, location }) => {
     if (!context.session) throw redirect({ to: "/auth/sign-in", search: { redirect: location.href } });
   },
-  loader: ({ context }) =>
-    context.queryClient.query({ ...accountsQueryOptions, staleTime: "static" }),
+  loader: ({ context }) => {
+    void context.queryClient.query({ ...accountsQueryOptions, staleTime: "static" }).catch(() => undefined);
+  },
   component: AccountLayout,
 });
 

@@ -7,7 +7,7 @@ import { ViewGridView } from "@/components/workspace/records/grid/view-grid-view
 import { TableActions } from "@/components/workspace/records/table-actions";
 import { ViewActions } from "@/components/workspace/views/view-actions";
 import { recordsQueryOptions } from "@/data/workspace/records";
-import { viewRecordsQueryOptions } from "@/data/workspace/views";
+import { viewRecordsQueryOptions, viewsQueryOptions } from "@/data/workspace/views";
 import { useAccess } from "@/hooks/use-access";
 import { scopeFor } from "@/lib/access/grants";
 import { resolveRecordsQuery, validateRecordsSearch } from "@/lib/records/query";
@@ -19,30 +19,30 @@ export const Route = createFileRoute(
   "/workspaces/$workspace/_core/tables/$table/views/$view/_viewer",
 )({
   validateSearch: (search: Record<string, unknown>) => search,
-  beforeLoad: ({ context, params }) => {
-    if (params.view !== ALL_VIEW || scopeFor(context.access, "read", Number(params.table)) !== "none")
-      return;
-    // No access to the table's records: fall back to the first saved view, if any.
-    const [first] = context.views ?? [];
-    if (first)
-      throw redirect({
-        to: "/workspaces/$workspace/tables/$table/views/$view",
-        params: { ...params, view: String(first.id) },
-        replace: true,
-      });
-  },
   loaderDeps: ({ search }) => resolveRecordsQuery(validateRecordsSearch(search)),
   loader: async ({ context, deps, params }) => {
+    const table = Number(params.table);
     if (params.view === ALL_VIEW) {
-      await context.queryClient
-        .query(recordsQueryOptions(params.workspace, Number(params.table), deps))
+      if (scopeFor(context.access, "read", table) === "none") {
+        // No access to the table's records: fall back to the first saved view, if any.
+        const [first] = await context.queryClient
+          .query(viewsQueryOptions(params.workspace, table))
+          .catch(() => []);
+        if (first)
+          throw redirect({
+            to: "/workspaces/$workspace/tables/$table/views/$view",
+            params: { ...params, view: String(first.id) },
+            replace: true,
+          });
+        return;
+      }
+      void context.queryClient
+        .query(recordsQueryOptions(params.workspace, table, deps))
         .catch(() => undefined);
       return;
     }
     void context.queryClient
-      .query(
-        viewRecordsQueryOptions(params.workspace, Number(params.table), Number(params.view), deps),
-      )
+      .query(viewRecordsQueryOptions(params.workspace, table, Number(params.view), deps))
       .catch(() => undefined);
   },
   component: ViewerPage,

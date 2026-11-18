@@ -9,7 +9,6 @@ export const Route = createFileRoute("/workspaces/$workspace/_core/tables/$table
       (loaderData as { name?: string } | null | undefined)?.name ?? "All records",
   },
   beforeLoad: ({ params }) => {
-    // `null` means all records (`ALL_VIEW`): the table itself, not a saved view.
     if (params.view === ALL_VIEW) return { viewId: null };
 
     const viewId = Number(params.view);
