@@ -1,6 +1,7 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 
 import { ImpersonationBanner } from "@/components/layout/impersonation-banner";
+import { ReadonlyFieldset } from "@/components/layout/readonly-fieldset";
 import { SettingsSidebar } from "@/components/layout/settings-sidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { useSession } from "@/hooks/use-session";
@@ -20,7 +21,9 @@ function SettingsLayout() {
       <SettingsSidebar workspace={workspace} user={session!.user} />
       <SidebarInset>
         <ImpersonationBanner />
-        <Outlet />
+        <ReadonlyFieldset className="flex-1 gap-0">
+          <Outlet />
+        </ReadonlyFieldset>
       </SidebarInset>
     </SidebarProvider>
   );

@@ -3,6 +3,7 @@ import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { AccountTabs } from "@/components/account/account-tabs";
 import { AppHeader } from "@/components/layout/app-header";
 import { ImpersonationBanner } from "@/components/layout/impersonation-banner";
+import { ReadonlyFieldset } from "@/components/layout/readonly-fieldset";
 import { accountsQueryOptions } from "@/data/auth/accounts";
 
 export const Route = createFileRoute("/account")({
@@ -29,7 +30,9 @@ function AccountLayout() {
             </p>
           </div>
           <AccountTabs />
-          <Outlet />
+          <ReadonlyFieldset>
+            <Outlet />
+          </ReadonlyFieldset>
         </div>
       </main>
     </div>
