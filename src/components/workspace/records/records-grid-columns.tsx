@@ -18,7 +18,7 @@ import { type DraftRow, isDraft } from "./use-draft-row";
 
 export type ViewerRow = Record<string, unknown> & { id: number };
 
-export type SummaryRow = { aggregates: ReadonlyMap<string, Aggregate> };
+export type SummaryRow = { count: number; aggregates: ReadonlyMap<string, Aggregate> };
 
 export function useRecordsGridColumns<TSelected extends { rowSelection: Record<string, boolean> }>({
   table,
@@ -78,10 +78,10 @@ export function useRecordsGridColumns<TSelected extends { rowSelection: Record<s
           );
         },
         summaryCellClass: "records-row-number",
-        renderSummaryCell: () => (
-            <span className="truncate" title="Calculated from the records on this page">
-              Total
-            </span>
+        renderSummaryCell: ({ row }) => (
+          <span className="truncate tabular-nums" title="Records on this page">
+            {row.count.toLocaleString()}
+          </span>
         ),
         renderCell: ({ row }) =>
           isDraft(row) ? (
@@ -106,28 +106,28 @@ export function useRecordsGridColumns<TSelected extends { rowSelection: Record<s
               </Button>
             </span>
           ) : (
-          <>
-            <span className="records-row-index">{row.id}</span>
-            {selectable && (
-              <Checkbox
-                aria-label="Select row"
-                className="records-row-check"
-                checked={!!selection[String(row.id)]}
-                onCheckedChange={(value) => table.getRow(String(row.id)).toggleSelected(!!value)}
-              />
-            )}
-            {onOpenRecord && (
-              <Button
-                variant="ghost"
-                size="icon-xs"
-                aria-label="Open record"
-                className="records-row-open"
-                onClick={() => onOpenRecord(row.id)}
-              >
-                <Maximize2Icon />
-              </Button>
-            )}
-          </>
+            <>
+              <span className="records-row-index">{row.id}</span>
+              {selectable && (
+                <Checkbox
+                  aria-label="Select row"
+                  className="records-row-check"
+                  checked={!!selection[String(row.id)]}
+                  onCheckedChange={(value) => table.getRow(String(row.id)).toggleSelected(!!value)}
+                />
+              )}
+              {onOpenRecord && (
+                <Button
+                  variant="ghost"
+                  size="icon-xs"
+                  aria-label="Open record"
+                  className="records-row-open"
+                  onClick={() => onOpenRecord(row.id)}
+                >
+                  <Maximize2Icon />
+                </Button>
+              )}
+            </>
           ),
       },
       ...visible.flatMap((column): Column<ViewerRow, SummaryRow>[] => {

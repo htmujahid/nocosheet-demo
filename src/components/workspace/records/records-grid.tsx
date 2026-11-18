@@ -93,6 +93,7 @@ export function RecordsGrid<TSelected extends { rowSelection: Record<string, boo
         ? []
         : [
             {
+              count: rows.length,
               aggregates: new Map(
                 columns.map((column) => [
                   column.key,
