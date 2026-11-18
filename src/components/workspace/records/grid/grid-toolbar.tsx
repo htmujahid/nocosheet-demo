@@ -3,7 +3,8 @@ import { type ReactNode, useEffect, useState } from "react";
 import { SearchIcon } from "lucide-react";
 
 import { DataTableViewOptions } from "@/components/shared/data-table/data-table-view-options";
-import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { toColumnFilters } from "@/lib/records/column-filters";
 
 import type { ViewerColumn } from "../columns";
@@ -25,26 +26,35 @@ export function GridToolbar({
   const searchable = columns.some((column) => column.searchable);
   const [search, setSearch] = useState(query.q);
   useEffect(() => setSearch(query.q), [query.q]);
-  useEffect(() => {
-    if (search === query.q) return;
-    const timeout = setTimeout(() => grid.setGlobalFilter(search), 300);
-    return () => clearTimeout(timeout);
-  }, [search, query.q, grid]);
 
   return (
     <div className="flex flex-wrap items-center gap-2 border-t px-4 py-2">
       {searchable && (
-        <div className="relative w-full sm:w-72">
-          <SearchIcon className="pointer-events-none absolute start-3 top-1/2 z-10 size-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            type="search"
-            aria-label="Search records"
-            placeholder="Search records"
-            className="ps-9"
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-          />
-        </div>
+        <form
+          role="search"
+          className="w-full sm:w-64"
+          onSubmit={(event) => {
+            event.preventDefault();
+            if (search !== query.q) grid.setGlobalFilter(search);
+          }}
+        >
+          <InputGroup>
+            <InputGroupInput
+              type="search"
+              enterKeyHint="search"
+              aria-label="Search records"
+              placeholder="Search records"
+              className="[&::-webkit-search-cancel-button]:appearance-none"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+            />
+            <InputGroupAddon align="inline-end">
+              <Button type="submit" variant="ghost" size="icon-xs" aria-label="Search">
+                <SearchIcon aria-hidden="true" />
+              </Button>
+            </InputGroupAddon>
+          </InputGroup>
+        </form>
       )}
       <RecordFilters
         columns={columns}

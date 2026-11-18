@@ -40,7 +40,15 @@ export function RecordFilters({
         {value.length > 0 && <Badge variant="secondary">{value.length}</Badge>}
       </PopoverTrigger>
       <PopoverPopup align="start" className="w-[30rem] max-w-[calc(100vw-2rem)]">
-        <div className="flex flex-col gap-3">
+        <form
+          className="flex flex-col gap-3"
+          onSubmit={(event) => {
+            event.preventDefault();
+            if (invalid) return;
+            onApply(draft);
+            setOpen(false);
+          }}
+        >
           <div className="flex flex-col gap-1">
             <h4 className="font-medium text-sm leading-none">
               {draft.length > 0 ? "Filters" : "No filters applied"}
@@ -69,20 +77,13 @@ export function RecordFilters({
                 >
                   Reset
                 </Button>
-                <Button
-                  size="sm"
-                  disabled={invalid}
-                  onClick={() => {
-                    onApply(draft);
-                    setOpen(false);
-                  }}
-                >
+                <Button type="submit" size="sm" disabled={invalid}>
                   Apply filters
                 </Button>
               </div>
             }
           />
-        </div>
+        </form>
       </PopoverPopup>
     </Popover>
   );
