@@ -3,6 +3,7 @@ import { useSearch } from "@tanstack/react-router";
 
 import { Button } from "@/components/ui/button";
 import { socialSignInMutationOptions } from "@/data/auth/social-sign-in";
+import { useConfig } from "@/hooks/use-config";
 
 import { AuthErrorAlert } from "./auth-error-alert";
 
@@ -31,6 +32,7 @@ function GoogleIcon() {
 
 export function GoogleSignInButton({ collapsed = false }: { collapsed?: boolean }) {
   const mutation = useMutation(socialSignInMutationOptions);
+  const config = useConfig();
   const { redirect } = useSearch({ from: "/auth" });
 
   return (
@@ -39,6 +41,7 @@ export function GoogleSignInButton({ collapsed = false }: { collapsed?: boolean 
         type="button"
         variant="outline"
         className="w-full"
+        disabled={!config.auth.google}
         loading={mutation.isPending}
         onClick={() => mutation.mutate({ provider: "google", callbackURL: redirect ?? "/" })}
       >
