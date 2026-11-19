@@ -49,6 +49,25 @@ jobs:
         if: steps.check.outputs.enabled == 'true'
         run: pnpm install --frozen-lockfile
 
+      # VITE_* values are public and baked into the client bundle at build time (Void ignores .env in builds).
+      # Set them as repository Variables (Settings > Secrets and variables > Actions > Variables).
+      # Only non-empty ones are exported, so anything unset falls back to its default in env.ts.
+      - name: Public build values
+        if: steps.check.outputs.enabled == 'true'
+        env:
+          VITE_WORKSPACE_NAME: ${{ vars.VITE_WORKSPACE_NAME }}
+          VITE_ENABLE_SIGNUP: ${{ vars.VITE_ENABLE_SIGNUP }}
+          VITE_DEMO_MODE: ${{ vars.VITE_DEMO_MODE }}
+        run: |
+          for name in VITE_WORKSPACE_NAME VITE_ENABLE_SIGNUP VITE_DEMO_MODE; do
+            value="${!name}"
+            if [ -n "$value" ]; then
+              echo "$name<<__VITE_EOF__" >> "$GITHUB_ENV"
+              echo "$value" >> "$GITHUB_ENV"
+              echo "__VITE_EOF__" >> "$GITHUB_ENV"
+            fi
+          done
+
       - name: Deploy
         if: steps.check.outputs.enabled == 'true'
         env:
