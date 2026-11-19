@@ -14,17 +14,17 @@ import {
   CardFrameTitle,
   CardPanel,
 } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogClose,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogPanel,
-  DialogPopup,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import {
+  Sheet,
+  SheetClose,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetPanel,
+  SheetPopup,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
 import { toastManager } from "@/components/ui/toast";
@@ -40,7 +40,7 @@ function describe(template: TemplateSummary) {
   return `${count(template.tables.length, "table")} · ${count(columns, "column")}`;
 }
 
-function UseTemplateDialog({
+function UseTemplateSheet({
   workspace,
   template,
   onClose,
@@ -72,7 +72,7 @@ function UseTemplateDialog({
   const totalRows = template?.tables.reduce((sum, table) => sum + table.rows, 0) ?? 0;
 
   return (
-    <Dialog
+    <Sheet
       open={template !== null}
       onOpenChange={(open) => {
         if (open || apply.isPending) return;
@@ -80,12 +80,12 @@ function UseTemplateDialog({
         onClose();
       }}
     >
-      <DialogPopup className="max-w-lg">
-        <DialogHeader>
-          <DialogTitle>{template?.name}</DialogTitle>
-          <DialogDescription>{template?.description}</DialogDescription>
-        </DialogHeader>
-        <DialogPanel className="flex flex-col gap-4">
+      <SheetPopup variant="inset" className="max-w-lg">
+        <SheetHeader>
+          <SheetTitle>{template?.name}</SheetTitle>
+          <SheetDescription>{template?.description}</SheetDescription>
+        </SheetHeader>
+        <SheetPanel className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
             <p className="font-medium text-sm">This will create</p>
             {template?.tables.map((table) => (
@@ -124,9 +124,9 @@ function UseTemplateDialog({
               <AlertDescription>{apply.error.message}</AlertDescription>
             </Alert>
           )}
-        </DialogPanel>
-        <DialogFooter>
-          <DialogClose render={<Button type="button" variant="ghost" />}>Cancel</DialogClose>
+        </SheetPanel>
+        <SheetFooter>
+          <SheetClose render={<Button type="button" variant="ghost" />}>Cancel</SheetClose>
           <Button
             loading={apply.isPending}
             onClick={() =>
@@ -135,9 +135,9 @@ function UseTemplateDialog({
           >
             Use template
           </Button>
-        </DialogFooter>
-      </DialogPopup>
-    </Dialog>
+        </SheetFooter>
+      </SheetPopup>
+    </Sheet>
   );
 }
 
@@ -187,7 +187,7 @@ export function TemplateGallery({ workspace }: { workspace: string }) {
           ))}
         </CardPanel>
       </Card>
-      <UseTemplateDialog
+      <UseTemplateSheet
         key={selected?.id}
         workspace={workspace}
         template={selected}
