@@ -1,0 +1,1228 @@
+{
+  "version": 1,
+  "id": "hiring-pipeline",
+  "name": "Hiring Pipeline",
+  "description": "A fully populated recruiting workspace: open roles, candidates, interviews, interviewers and offers.",
+  "icon": "user-search",
+  "tags": [
+    "hiring",
+    "recruiting",
+    "sample"
+  ],
+  "tables": [
+    {
+      "name": "Interviewers",
+      "icon": "users",
+      "group": "People",
+      "description": "Team members who run interviews and screenings.",
+      "title": "Name",
+      "columns": [
+        {
+          "name": "Name",
+          "format": "text",
+          "required": true,
+          "searchable": true
+        },
+        {
+          "name": "Email",
+          "format": "email",
+          "required": true,
+          "unique": true
+        },
+        {
+          "name": "Role",
+          "format": "text"
+        },
+        {
+          "name": "Active",
+          "format": "checkbox",
+          "filterable": true,
+          "sortable": true,
+          "default": "true"
+        }
+      ],
+      "views": [
+        {
+          "name": "Active interviewers",
+          "icon": "users",
+          "description": "People currently available to interview.",
+          "columns": [
+            "Name",
+            "Role",
+            "Email"
+          ],
+          "filters": [
+            {
+              "column": "Active",
+              "op": "is",
+              "value": true
+            }
+          ]
+        }
+      ],
+      "rows": [
+        {
+          "Name": "Elena Petrova",
+          "Email": "elena.petrova@example.com",
+          "Role": "Engineering Manager",
+          "Active": true
+        },
+        {
+          "Name": "Marcus Webb",
+          "Email": "marcus.webb@example.com",
+          "Role": "Staff Engineer",
+          "Active": true
+        },
+        {
+          "Name": "Aisha Khan",
+          "Email": "aisha.khan@example.com",
+          "Role": "Head of Design",
+          "Active": true
+        },
+        {
+          "Name": "Tomás Silva",
+          "Email": "tomas.silva@example.com",
+          "Role": "Recruiter",
+          "Active": true
+        },
+        {
+          "Name": "Grace Liu",
+          "Email": "grace.liu@example.com",
+          "Role": "Product Lead",
+          "Active": true
+        },
+        {
+          "Name": "Noah Fischer",
+          "Email": "noah.fischer@example.com",
+          "Role": "Head of People",
+          "Active": true
+        }
+      ]
+    },
+    {
+      "name": "Jobs",
+      "icon": "briefcase",
+      "group": "Hiring",
+      "description": "Open roles with department, salary band and hiring manager.",
+      "title": "Title",
+      "audit": true,
+      "columns": [
+        {
+          "name": "Title",
+          "format": "text",
+          "required": true,
+          "searchable": true
+        },
+        {
+          "name": "Department",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Engineering",
+                "value": "engineering"
+              },
+              {
+                "label": "Design",
+                "value": "design"
+              },
+              {
+                "label": "Product",
+                "value": "product"
+              },
+              {
+                "label": "Operations",
+                "value": "operations"
+              }
+            ]
+          },
+          "filterable": true,
+          "sortable": true
+        },
+        {
+          "name": "Status",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Draft",
+                "value": "draft"
+              },
+              {
+                "label": "Open",
+                "value": "open"
+              },
+              {
+                "label": "On hold",
+                "value": "on_hold"
+              },
+              {
+                "label": "Filled",
+                "value": "filled"
+              }
+            ]
+          },
+          "filterable": true,
+          "sortable": true,
+          "default": "draft"
+        },
+        {
+          "name": "Location",
+          "format": "text"
+        },
+        {
+          "name": "Salary min",
+          "format": "currency",
+          "options": {
+            "currency": "EUR",
+            "precision": 0
+          },
+          "check": "{Salary min} >= 0"
+        },
+        {
+          "name": "Salary max",
+          "format": "currency",
+          "options": {
+            "currency": "EUR",
+            "precision": 0
+          },
+          "check": "{Salary max} >= {Salary min}"
+        },
+        {
+          "name": "Openings",
+          "format": "integer",
+          "default": "1",
+          "check": "{Openings} >= 1"
+        },
+        {
+          "name": "Opened",
+          "format": "date"
+        },
+        {
+          "name": "Hiring manager",
+          "format": "relation",
+          "options": {
+            "onDelete": "set null"
+          },
+          "relation": "Interviewers"
+        },
+        {
+          "name": "Description",
+          "format": "long_text"
+        }
+      ],
+      "views": [
+        {
+          "name": "Open roles",
+          "icon": "door-open",
+          "description": "Roles we are actively hiring for.",
+          "columns": [
+            "Title",
+            "Department",
+            "Location",
+            "Openings",
+            "Hiring manager"
+          ],
+          "filters": [
+            {
+              "column": "Status",
+              "op": "is",
+              "value": "open"
+            }
+          ]
+        },
+        {
+          "name": "Engineering roles",
+          "icon": "code",
+          "description": "All engineering positions.",
+          "columns": [
+            "Title",
+            "Status",
+            "Location",
+            "Salary min",
+            "Salary max"
+          ],
+          "filters": [
+            {
+              "column": "Department",
+              "op": "is",
+              "value": "engineering"
+            }
+          ]
+        }
+      ],
+      "forms": [
+        {
+          "name": "Role request",
+          "icon": "clipboard-list",
+          "description": "Ask People to open a new position.",
+          "columns": [
+            "Title",
+            "Department",
+            "Location",
+            "Openings",
+            "Description"
+          ]
+        }
+      ],
+      "rows": [
+        {
+          "Title": "Senior Frontend Engineer",
+          "Department": "engineering",
+          "Status": "open",
+          "Location": "Remote (EU)",
+          "Salary min": 95000,
+          "Salary max": 130000,
+          "Openings": 2,
+          "Opened": {
+            "$days": -30
+          },
+          "Hiring manager": "Elena Petrova",
+          "Description": "We are looking for a senior frontend engineer to join the team."
+        },
+        {
+          "Title": "Backend Engineer",
+          "Department": "engineering",
+          "Status": "open",
+          "Location": "Berlin, Germany",
+          "Salary min": 85000,
+          "Salary max": 115000,
+          "Openings": 1,
+          "Opened": {
+            "$days": -21
+          },
+          "Hiring manager": "Elena Petrova",
+          "Description": "We are looking for a backend engineer to join the team."
+        },
+        {
+          "Title": "Product Designer",
+          "Department": "design",
+          "Status": "open",
+          "Location": "Remote (Global)",
+          "Salary min": 70000,
+          "Salary max": 95000,
+          "Openings": 1,
+          "Opened": {
+            "$days": -45
+          },
+          "Hiring manager": "Aisha Khan",
+          "Description": "We are looking for a product designer to join the team."
+        },
+        {
+          "Title": "Product Manager",
+          "Department": "product",
+          "Status": "open",
+          "Location": "London, UK",
+          "Salary min": 90000,
+          "Salary max": 120000,
+          "Openings": 1,
+          "Opened": {
+            "$days": -14
+          },
+          "Hiring manager": "Grace Liu",
+          "Description": "We are looking for a product manager to join the team."
+        },
+        {
+          "Title": "Customer Success Lead",
+          "Department": "operations",
+          "Status": "on_hold",
+          "Location": "Lisbon, Portugal",
+          "Salary min": 55000,
+          "Salary max": 70000,
+          "Openings": 1,
+          "Opened": {
+            "$days": -60
+          },
+          "Hiring manager": "Noah Fischer",
+          "Description": "We are looking for a customer success lead to join the team."
+        },
+        {
+          "Title": "Data Analyst",
+          "Department": "engineering",
+          "Status": "filled",
+          "Location": "Remote (EU)",
+          "Salary min": 60000,
+          "Salary max": 80000,
+          "Openings": 1,
+          "Opened": {
+            "$days": -110
+          },
+          "Hiring manager": "Elena Petrova",
+          "Description": "We are looking for a data analyst to join the team."
+        },
+        {
+          "Title": "Technical Recruiter",
+          "Department": "operations",
+          "Status": "draft",
+          "Location": "Berlin, Germany",
+          "Salary min": 50000,
+          "Salary max": 65000,
+          "Openings": 1,
+          "Opened": {
+            "$days": -3
+          },
+          "Hiring manager": "Noah Fischer",
+          "Description": "We are looking for a technical recruiter to join the team."
+        }
+      ]
+    },
+    {
+      "name": "Candidates",
+      "icon": "user-search",
+      "group": "Hiring",
+      "description": "Everyone in the pipeline, from application to hire.",
+      "title": "Name",
+      "audit": true,
+      "columns": [
+        {
+          "name": "Name",
+          "format": "text",
+          "required": true,
+          "searchable": true
+        },
+        {
+          "name": "Email",
+          "format": "email",
+          "required": true,
+          "unique": true
+        },
+        {
+          "name": "Job",
+          "format": "relation",
+          "options": {
+            "onDelete": "set null"
+          },
+          "relation": "Jobs"
+        },
+        {
+          "name": "Source",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Careers page",
+                "value": "careers_page"
+              },
+              {
+                "label": "LinkedIn",
+                "value": "linkedin"
+              },
+              {
+                "label": "Referral",
+                "value": "referral"
+              },
+              {
+                "label": "Agency",
+                "value": "agency"
+              }
+            ]
+          },
+          "filterable": true,
+          "sortable": true
+        },
+        {
+          "name": "Stage",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Applied",
+                "value": "applied"
+              },
+              {
+                "label": "Screening",
+                "value": "screening"
+              },
+              {
+                "label": "Interview",
+                "value": "interview"
+              },
+              {
+                "label": "Offer",
+                "value": "offer"
+              },
+              {
+                "label": "Hired",
+                "value": "hired"
+              },
+              {
+                "label": "Rejected",
+                "value": "rejected"
+              },
+              {
+                "label": "Withdrawn",
+                "value": "withdrawn"
+              }
+            ]
+          },
+          "filterable": true,
+          "sortable": true,
+          "default": "applied"
+        },
+        {
+          "name": "Rating",
+          "format": "rating",
+          "options": {
+            "max": 5
+          }
+        },
+        {
+          "name": "Location",
+          "format": "text"
+        },
+        {
+          "name": "Experience (years)",
+          "format": "integer",
+          "check": "{Experience (years)} >= 0"
+        },
+        {
+          "name": "Applied",
+          "format": "date"
+        },
+        {
+          "name": "Notes",
+          "format": "long_text"
+        }
+      ],
+      "views": [
+        {
+          "name": "Active pipeline",
+          "icon": "workflow",
+          "description": "Candidates still in the process.",
+          "columns": [
+            "Name",
+            "Job",
+            "Stage",
+            "Rating",
+            "Applied"
+          ],
+          "filters": [
+            {
+              "column": "Stage",
+              "op": "is_any_of",
+              "value": [
+                "applied",
+                "screening",
+                "interview",
+                "offer"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Referrals",
+          "icon": "handshake",
+          "description": "Candidates referred by the team.",
+          "columns": [
+            "Name",
+            "Job",
+            "Stage",
+            "Rating"
+          ],
+          "filters": [
+            {
+              "column": "Source",
+              "op": "is",
+              "value": "referral"
+            }
+          ]
+        }
+      ],
+      "forms": [
+        {
+          "name": "Job application",
+          "icon": "inbox",
+          "description": "Apply for one of our open roles.",
+          "columns": [
+            "Name",
+            "Email",
+            "Job",
+            "Location",
+            "Experience (years)",
+            "Notes"
+          ]
+        }
+      ],
+      "rows": [
+        {
+          "Name": "Sara Lindqvist",
+          "Email": "sara.lindqvist@example.com",
+          "Job": "Senior Frontend Engineer",
+          "Source": "referral",
+          "Stage": "interview",
+          "Rating": 4,
+          "Location": "Stockholm, Sweden",
+          "Experience (years)": 8,
+          "Applied": {
+            "$days": -18
+          }
+        },
+        {
+          "Name": "Rahul Mehta",
+          "Email": "rahul.mehta@example.com",
+          "Job": "Senior Frontend Engineer",
+          "Source": "linkedin",
+          "Stage": "screening",
+          "Rating": 3,
+          "Location": "Pune, India",
+          "Experience (years)": 6,
+          "Applied": {
+            "$days": -9
+          }
+        },
+        {
+          "Name": "Chloe Martin",
+          "Email": "chloe.martin@example.com",
+          "Job": "Senior Frontend Engineer",
+          "Source": "careers_page",
+          "Stage": "offer",
+          "Rating": 5,
+          "Location": "Lyon, France",
+          "Experience (years)": 9,
+          "Applied": {
+            "$days": -26
+          }
+        },
+        {
+          "Name": "Daniel Okafor",
+          "Email": "daniel.okafor@example.com",
+          "Job": "Backend Engineer",
+          "Source": "linkedin",
+          "Stage": "interview",
+          "Rating": 4,
+          "Location": "Lagos, Nigeria",
+          "Experience (years)": 7,
+          "Applied": {
+            "$days": -15
+          }
+        },
+        {
+          "Name": "Mia Johansson",
+          "Email": "mia.johansson@example.com",
+          "Job": "Backend Engineer",
+          "Source": "careers_page",
+          "Stage": "applied",
+          "Rating": 0,
+          "Location": "Gothenburg, Sweden",
+          "Experience (years)": 5,
+          "Applied": {
+            "$days": -2
+          }
+        },
+        {
+          "Name": "Ethan Brooks",
+          "Email": "ethan.brooks@example.com",
+          "Job": "Backend Engineer",
+          "Source": "agency",
+          "Stage": "rejected",
+          "Rating": 2,
+          "Location": "Manchester, UK",
+          "Experience (years)": 4,
+          "Applied": {
+            "$days": -20
+          }
+        },
+        {
+          "Name": "Lucía Fernández",
+          "Email": "lucia.fernandez@example.com",
+          "Job": "Product Designer",
+          "Source": "referral",
+          "Stage": "interview",
+          "Rating": 5,
+          "Location": "Madrid, Spain",
+          "Experience (years)": 7,
+          "Applied": {
+            "$days": -24
+          }
+        },
+        {
+          "Name": "Kenji Watanabe",
+          "Email": "kenji.watanabe@example.com",
+          "Job": "Product Designer",
+          "Source": "careers_page",
+          "Stage": "screening",
+          "Rating": 3,
+          "Location": "Osaka, Japan",
+          "Experience (years)": 3,
+          "Applied": {
+            "$days": -7
+          }
+        },
+        {
+          "Name": "Olivia Green",
+          "Email": "olivia.green@example.com",
+          "Job": "Product Designer",
+          "Source": "linkedin",
+          "Stage": "rejected",
+          "Rating": 2,
+          "Location": "Toronto, Canada",
+          "Experience (years)": 2,
+          "Applied": {
+            "$days": -33
+          }
+        },
+        {
+          "Name": "Amir Rahimi",
+          "Email": "amir.rahimi@example.com",
+          "Job": "Product Manager",
+          "Source": "linkedin",
+          "Stage": "interview",
+          "Rating": 4,
+          "Location": "Dubai, UAE",
+          "Experience (years)": 10,
+          "Applied": {
+            "$days": -11
+          }
+        },
+        {
+          "Name": "Hanna Kowalska",
+          "Email": "hanna.kowalska@example.com",
+          "Job": "Product Manager",
+          "Source": "referral",
+          "Stage": "applied",
+          "Rating": 0,
+          "Location": "Warsaw, Poland",
+          "Experience (years)": 6,
+          "Applied": {
+            "$days": -1
+          }
+        },
+        {
+          "Name": "Victor Almeida",
+          "Email": "victor.almeida@example.com",
+          "Job": "Customer Success Lead",
+          "Source": "careers_page",
+          "Stage": "screening",
+          "Rating": 3,
+          "Location": "Porto, Portugal",
+          "Experience (years)": 5,
+          "Applied": {
+            "$days": -40
+          }
+        },
+        {
+          "Name": "Nina Popescu",
+          "Email": "nina.popescu@example.com",
+          "Job": "Data Analyst",
+          "Source": "referral",
+          "Stage": "hired",
+          "Rating": 5,
+          "Location": "Bucharest, Romania",
+          "Experience (years)": 4,
+          "Applied": {
+            "$days": -95
+          }
+        },
+        {
+          "Name": "Jonas Becker",
+          "Email": "jonas.becker@example.com",
+          "Job": "Data Analyst",
+          "Source": "linkedin",
+          "Stage": "rejected",
+          "Rating": 1,
+          "Location": "Hamburg, Germany",
+          "Experience (years)": 3,
+          "Applied": {
+            "$days": -100
+          }
+        },
+        {
+          "Name": "Fatima Zahra",
+          "Email": "fatima.zahra@example.com",
+          "Job": "Senior Frontend Engineer",
+          "Source": "agency",
+          "Stage": "withdrawn",
+          "Rating": 3,
+          "Location": "Casablanca, Morocco",
+          "Experience (years)": 5,
+          "Applied": {
+            "$days": -28
+          }
+        }
+      ]
+    },
+    {
+      "name": "Interviews",
+      "icon": "calendar-check",
+      "group": "Hiring",
+      "description": "Scheduled and completed interviews with scores and feedback.",
+      "title": "Title",
+      "columns": [
+        {
+          "name": "Title",
+          "format": "text",
+          "required": true,
+          "searchable": true
+        },
+        {
+          "name": "Candidate",
+          "format": "relation",
+          "options": {
+            "onDelete": "set null"
+          },
+          "relation": "Candidates"
+        },
+        {
+          "name": "Interviewer",
+          "format": "relation",
+          "options": {
+            "onDelete": "set null"
+          },
+          "relation": "Interviewers"
+        },
+        {
+          "name": "Type",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Phone screen",
+                "value": "phone_screen"
+              },
+              {
+                "label": "Technical",
+                "value": "technical"
+              },
+              {
+                "label": "Portfolio review",
+                "value": "portfolio"
+              },
+              {
+                "label": "Product case",
+                "value": "product_case"
+              },
+              {
+                "label": "Culture",
+                "value": "culture"
+              },
+              {
+                "label": "Final",
+                "value": "final"
+              }
+            ]
+          },
+          "filterable": true,
+          "sortable": true
+        },
+        {
+          "name": "Status",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Scheduled",
+                "value": "scheduled"
+              },
+              {
+                "label": "Completed",
+                "value": "completed"
+              },
+              {
+                "label": "No show",
+                "value": "no_show"
+              },
+              {
+                "label": "Cancelled",
+                "value": "cancelled"
+              }
+            ]
+          },
+          "filterable": true,
+          "sortable": true,
+          "default": "scheduled"
+        },
+        {
+          "name": "Scheduled for",
+          "format": "datetime"
+        },
+        {
+          "name": "Score",
+          "format": "rating",
+          "options": {
+            "max": 5
+          }
+        },
+        {
+          "name": "Feedback",
+          "format": "long_text"
+        }
+      ],
+      "views": [
+        {
+          "name": "Upcoming",
+          "icon": "calendar-clock",
+          "description": "Interviews that have not happened yet.",
+          "columns": [
+            "Title",
+            "Candidate",
+            "Interviewer",
+            "Scheduled for"
+          ],
+          "filters": [
+            {
+              "column": "Status",
+              "op": "is",
+              "value": "scheduled"
+            }
+          ]
+        },
+        {
+          "name": "Completed",
+          "icon": "badge-check",
+          "description": "Interviews with feedback.",
+          "columns": [
+            "Title",
+            "Candidate",
+            "Interviewer",
+            "Score",
+            "Feedback"
+          ],
+          "filters": [
+            {
+              "column": "Status",
+              "op": "is",
+              "value": "completed"
+            }
+          ]
+        }
+      ],
+      "forms": [
+        {
+          "name": "Interview feedback",
+          "icon": "message-square",
+          "description": "Share your score and notes after an interview.",
+          "columns": [
+            "Title",
+            "Candidate",
+            "Interviewer",
+            "Type",
+            "Score",
+            "Feedback"
+          ]
+        }
+      ],
+      "rows": [
+        {
+          "Title": "Technical – Sara Lindqvist",
+          "Candidate": "Sara Lindqvist",
+          "Interviewer": "Marcus Webb",
+          "Type": "technical",
+          "Status": "completed",
+          "Scheduled for": {
+            "$days": -8,
+            "$hour": 10
+          },
+          "Score": 4,
+          "Feedback": "Strong React fundamentals; clear on performance trade-offs."
+        },
+        {
+          "Title": "Culture – Sara Lindqvist",
+          "Candidate": "Sara Lindqvist",
+          "Interviewer": "Elena Petrova",
+          "Type": "culture",
+          "Status": "completed",
+          "Scheduled for": {
+            "$days": -5,
+            "$hour": 10
+          },
+          "Score": 5,
+          "Feedback": "Great collaborator, thoughtful about mentoring."
+        },
+        {
+          "Title": "Phone Screen – Rahul Mehta",
+          "Candidate": "Rahul Mehta",
+          "Interviewer": "Tomás Silva",
+          "Type": "phone_screen",
+          "Status": "completed",
+          "Scheduled for": {
+            "$days": -4,
+            "$hour": 10
+          },
+          "Score": 3,
+          "Feedback": "Solid background, wants a deeper look at system design."
+        },
+        {
+          "Title": "Technical – Chloe Martin",
+          "Candidate": "Chloe Martin",
+          "Interviewer": "Marcus Webb",
+          "Type": "technical",
+          "Status": "completed",
+          "Scheduled for": {
+            "$days": -20,
+            "$hour": 10
+          },
+          "Score": 5,
+          "Feedback": "Excellent live-coding session."
+        },
+        {
+          "Title": "Final – Chloe Martin",
+          "Candidate": "Chloe Martin",
+          "Interviewer": "Elena Petrova",
+          "Type": "final",
+          "Status": "completed",
+          "Scheduled for": {
+            "$days": -14,
+            "$hour": 10
+          },
+          "Score": 5,
+          "Feedback": "Clear yes from the panel."
+        },
+        {
+          "Title": "Technical – Daniel Okafor",
+          "Candidate": "Daniel Okafor",
+          "Interviewer": "Marcus Webb",
+          "Type": "technical",
+          "Status": "completed",
+          "Scheduled for": {
+            "$days": -9,
+            "$hour": 10
+          },
+          "Score": 4,
+          "Feedback": "Good API design instincts."
+        },
+        {
+          "Title": "Culture – Daniel Okafor",
+          "Candidate": "Daniel Okafor",
+          "Interviewer": "Noah Fischer",
+          "Type": "culture",
+          "Status": "scheduled",
+          "Scheduled for": {
+            "$days": 3,
+            "$hour": 14
+          }
+        },
+        {
+          "Title": "Technical – Ethan Brooks",
+          "Candidate": "Ethan Brooks",
+          "Interviewer": "Marcus Webb",
+          "Type": "technical",
+          "Status": "completed",
+          "Scheduled for": {
+            "$days": -16,
+            "$hour": 10
+          },
+          "Score": 2,
+          "Feedback": "Struggled with the concurrency exercise."
+        },
+        {
+          "Title": "Portfolio – Lucía Fernández",
+          "Candidate": "Lucía Fernández",
+          "Interviewer": "Aisha Khan",
+          "Type": "portfolio",
+          "Status": "completed",
+          "Scheduled for": {
+            "$days": -12,
+            "$hour": 10
+          },
+          "Score": 4,
+          "Feedback": "Beautiful case studies with measurable outcomes."
+        },
+        {
+          "Title": "Final – Lucía Fernández",
+          "Candidate": "Lucía Fernández",
+          "Interviewer": "Grace Liu",
+          "Type": "final",
+          "Status": "scheduled",
+          "Scheduled for": {
+            "$days": 2,
+            "$hour": 14
+          }
+        },
+        {
+          "Title": "Phone Screen – Kenji Watanabe",
+          "Candidate": "Kenji Watanabe",
+          "Interviewer": "Tomás Silva",
+          "Type": "phone_screen",
+          "Status": "completed",
+          "Scheduled for": {
+            "$days": -3,
+            "$hour": 10
+          },
+          "Score": 4,
+          "Feedback": "Motivated and articulate."
+        },
+        {
+          "Title": "Product Case – Amir Rahimi",
+          "Candidate": "Amir Rahimi",
+          "Interviewer": "Grace Liu",
+          "Type": "product_case",
+          "Status": "completed",
+          "Scheduled for": {
+            "$days": -6,
+            "$hour": 10
+          },
+          "Score": 4,
+          "Feedback": "Structured thinking, good prioritisation."
+        },
+        {
+          "Title": "Culture – Amir Rahimi",
+          "Candidate": "Amir Rahimi",
+          "Interviewer": "Noah Fischer",
+          "Type": "culture",
+          "Status": "scheduled",
+          "Scheduled for": {
+            "$days": 1,
+            "$hour": 14
+          }
+        },
+        {
+          "Title": "Phone Screen – Victor Almeida",
+          "Candidate": "Victor Almeida",
+          "Interviewer": "Tomás Silva",
+          "Type": "phone_screen",
+          "Status": "no_show",
+          "Scheduled for": {
+            "$days": -35,
+            "$hour": 10
+          },
+          "Feedback": "Did not join the call; no response to follow-up."
+        },
+        {
+          "Title": "Technical – Nina Popescu",
+          "Candidate": "Nina Popescu",
+          "Interviewer": "Marcus Webb",
+          "Type": "technical",
+          "Status": "completed",
+          "Scheduled for": {
+            "$days": -80,
+            "$hour": 10
+          },
+          "Score": 5,
+          "Feedback": "Top analytics case answers."
+        }
+      ]
+    },
+    {
+      "name": "Offers",
+      "icon": "file-signature",
+      "group": "Hiring",
+      "description": "Offers extended to candidates and their outcome.",
+      "title": "Title",
+      "audit": true,
+      "columns": [
+        {
+          "name": "Title",
+          "format": "text",
+          "required": true,
+          "searchable": true
+        },
+        {
+          "name": "Candidate",
+          "format": "relation",
+          "options": {
+            "onDelete": "set null"
+          },
+          "relation": "Candidates"
+        },
+        {
+          "name": "Job",
+          "format": "relation",
+          "options": {
+            "onDelete": "set null"
+          },
+          "relation": "Jobs"
+        },
+        {
+          "name": "Salary",
+          "format": "currency",
+          "options": {
+            "currency": "EUR",
+            "precision": 0
+          },
+          "required": true,
+          "check": "{Salary} > 0"
+        },
+        {
+          "name": "Status",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Pending",
+                "value": "pending"
+              },
+              {
+                "label": "Accepted",
+                "value": "accepted"
+              },
+              {
+                "label": "Declined",
+                "value": "declined"
+              }
+            ]
+          },
+          "filterable": true,
+          "sortable": true,
+          "default": "pending"
+        },
+        {
+          "name": "Sent",
+          "format": "date"
+        },
+        {
+          "name": "Responded",
+          "format": "date"
+        }
+      ],
+      "views": [
+        {
+          "name": "Pending offers",
+          "icon": "hourglass",
+          "description": "Offers waiting for an answer.",
+          "columns": [
+            "Title",
+            "Candidate",
+            "Job",
+            "Salary",
+            "Sent"
+          ],
+          "filters": [
+            {
+              "column": "Status",
+              "op": "is",
+              "value": "pending"
+            }
+          ]
+        }
+      ],
+      "rows": [
+        {
+          "Title": "Offer – Chloe Martin",
+          "Candidate": "Chloe Martin",
+          "Job": "Senior Frontend Engineer",
+          "Salary": 118000,
+          "Status": "pending",
+          "Sent": {
+            "$days": -10
+          }
+        },
+        {
+          "Title": "Offer – Nina Popescu",
+          "Candidate": "Nina Popescu",
+          "Job": "Data Analyst",
+          "Salary": 74000,
+          "Status": "accepted",
+          "Sent": {
+            "$days": -85
+          },
+          "Responded": {
+            "$days": -70
+          }
+        },
+        {
+          "Title": "Offer – Jonas Becker",
+          "Candidate": "Jonas Becker",
+          "Job": "Data Analyst",
+          "Salary": 66000,
+          "Status": "declined",
+          "Sent": {
+            "$days": -92
+          },
+          "Responded": {
+            "$days": -88
+          }
+        }
+      ]
+    }
+  ]
+}

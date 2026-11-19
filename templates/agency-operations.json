@@ -1,11 +1,11 @@
 {
   "version": 1,
-  "id": "demo",
-  "name": "Demo",
-  "description": "A fully populated demo workspace: team, clients, projects, tasks, invoices, bug reports and more.",
+  "id": "agency-operations",
+  "name": "Agency Operations",
+  "description": "A fully populated workspace for running an agency: team, clients, projects, tasks, invoices, products, bug reports, a content calendar and brand assets.",
   "icon": "sparkles",
   "tags": [
-    "demo",
+    "agency",
     "sample"
   ],
   "tables": [
