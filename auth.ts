@@ -12,6 +12,7 @@ import {
   API_KEY_PREFIX,
   API_KEY_RATE_LIMIT,
 } from "./src/lib/auth/api-keys";
+import { googleCredentials } from "./src/lib/auth/google";
 import { enqueueEmail } from "./src/lib/auth/mail";
 import { kvSecondaryStorage } from "./src/lib/auth/secondary-storage";
 import { avatarKey, isAvatarUrl } from "./src/lib/avatar";
@@ -21,6 +22,10 @@ const LAST_ADMIN_MESSAGE = "This is the last admin. Make someone else an admin f
 
 export default defineAuth(({ defaults, env }) => ({
   ...defaults,
+  socialProviders: {
+    ...defaults.socialProviders,
+    ...(googleCredentials(env) ? { google: googleCredentials(env) } : {}),
+  },
   secondaryStorage: kvSecondaryStorage,
   rateLimit: {
     ...defaults.rateLimit,
