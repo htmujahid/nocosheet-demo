@@ -6,7 +6,9 @@ export default defineConfig({
   email: { from: "Nocosheet <noreply@mail.example.com>" },
   // auth.ts (project root) sends mail but isn't scanned for `void/email`, so enable email (+ dev inbox) and KV (auth secondary storage) explicitly.
   inference: { bindings: { email: true, kv: true } },
-  auth: { providers: ["email", "google"] },
+  // Google is enabled at runtime in auth.ts only when its credentials are set. Listing it here would
+  // make every request fail when AUTH_GOOGLE_CLIENT_ID / AUTH_GOOGLE_CLIENT_SECRET are missing.
+  auth: { providers: ["email"] },
   routing: {
     typedRoutes: true,
   },
