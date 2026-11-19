@@ -1,58 +1,32 @@
-import { tableTable } from "@db/schema";
-import { db, isNull } from "void/db";
+import { columnTable, tableTable } from "@db/schema";
+import { db, eq, isNull, sql } from "void/db";
 
-import { formInputSchema } from "../forms/validation";
-import { createForm } from "../forms/repository";
-import { createRecordRows } from "../records/repository";
-import { parseRecordValues } from "../records/values";
-import type { RelationTarget } from "../tables/ddl";
+import { buildFormStatements } from "../forms/repository";
+import { buildRecordInserts } from "../records/repository";
 import {
-  type Column,
-  createColumn,
-  createTable,
+  buildColumnInsert,
+  buildTableStatements,
   dropTables,
   type Table,
-  updateTable,
 } from "../tables/repository";
-import { columnInputSchema, tableInputSchema } from "../tables/validation";
-import { createView } from "../views/repository";
-import { viewInputSchema } from "../views/validation";
-import { relativeDate, type Template, type TemplateTable } from "./schema";
+import { buildViewStatements } from "../views/repository";
+import { planTemplate } from "./plan";
+import type { Template } from "./schema";
 
-const DAY = 86_400_000;
-const CHUNK = 50;
+const BATCH_SIZE = 100;
 
-type Built = { def: TemplateTable; table: Table; columns: Column[] };
+type Statement = unknown;
 
-function resolveValue(format: string, value: unknown) {
-  const date = relativeDate.safeParse(value);
-  if (!date.success) return value;
-  const now = new Date();
-  const midnight = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
-  const at = midnight + date.data.$days * DAY + (date.data.$hour ?? 0) * 3_600_000;
-  if (format === "datetime") return at;
-  if (format === "datetime_tz") return new Date(at).toISOString();
-  return new Date(at).toISOString().slice(0, 10);
-}
-
-function insertionOrder(tables: TemplateTable[]) {
-  const names = new Set(tables.map((table) => table.name.toLowerCase()));
-  const done = new Set<string>();
-  const ordered: TemplateTable[] = [];
-  const visit = (table: TemplateTable, trail: Set<string>) => {
-    const key = table.name.toLowerCase();
-    if (done.has(key) || trail.has(key)) return;
-    trail.add(key);
-    for (const column of table.columns) {
-      const target = column.relation?.toLowerCase();
-      const found = target && names.has(target) && tables.find((t) => t.name.toLowerCase() === target);
-      if (found) visit(found, trail);
+async function runGroups(groups: Statement[][]) {
+  let batch: Statement[] = [];
+  for (const group of groups) {
+    if (batch.length && batch.length + group.length > BATCH_SIZE) {
+      await db.batch(batch as never);
+      batch = [];
     }
-    done.add(key);
-    ordered.push(table);
-  };
-  for (const table of tables) visit(table, new Set());
-  return ordered;
+    batch.push(...group);
+  }
+  if (batch.length) await db.batch(batch as never);
 }
 
 export async function applyTemplate(
@@ -62,151 +36,86 @@ export async function applyTemplate(
   options: { sampleData: boolean },
 ) {
   const taken = new Set(
-    (await db.select({ name: tableTable.name }).from(tableTable).where(isNull(tableTable.deletedAt))).map(
-      (row) => row.name.toLowerCase(),
-    ),
+    (
+      await db.select({ name: tableTable.name }).from(tableTable).where(isNull(tableTable.deletedAt))
+    ).map((row) => row.name.toLowerCase()),
   );
-  const uniqueName = (name: string) => {
-    let candidate = name;
-    for (let n = 2; taken.has(candidate.toLowerCase()); n++) candidate = `${name} ${n}`;
-    taken.add(candidate.toLowerCase());
-    return candidate;
-  };
 
-  const built = new Map<string, Built>();
+  const plan = planTemplate(workspace, template, taken, options);
+
+  const results = (await db.batch(
+    plan.tables.flatMap((table) =>
+      buildTableStatements(table.tableName, table.input, userId, table.ddl),
+    ) as never,
+  )) as unknown[];
+
+  let offset = 0;
+  const created = plan.tables.map((table) => {
+    offset += table.ddl.length + 2;
+    return (results[offset - 1] as Table[])[0];
+  });
 
   try {
-    for (const def of template.tables) {
-      const table = await createTable(
+    const groups: Statement[][] = [];
+
+    plan.tables.forEach((table, index) => {
+      const row = created[index];
+
+      for (const column of table.columns) {
+        const body =
+          column.relationTable === undefined
+            ? column.body
+            : {
+                ...column.body,
+                options: { ...column.body.options, tableId: created[column.relationTable].id },
+              };
+        groups.push([
+          buildColumnInsert(
+            row.id,
+            column.columnName,
+            body,
+            column.sqliteType,
+            column.check,
+            column.generated,
+          ),
+        ]);
+      }
+
+      if (table.titleColumn)
+        groups.push([
+          db
+            .update(tableTable)
+            .set({
+              titleColumnId: sql`(select ${columnTable.id} from ${columnTable} where ${columnTable.tableId} = ${row.id} and ${columnTable.columnName} = ${table.titleColumn})`,
+            })
+            .where(eq(tableTable.id, row.id)),
+        ]);
+
+      for (const view of table.views)
+        groups.push([...buildViewStatements(row, table.columns, view, userId)]);
+      for (const form of table.forms) groups.push([...buildFormStatements(row, form, userId)]);
+    });
+
+    for (const index of plan.rowOrder) {
+      const { rows } = plan.tables[index];
+      for (const statement of buildRecordInserts(
         workspace,
-        tableInputSchema.parse({
-          name: uniqueName(def.name),
-          icon: def.icon,
-          groupName: def.group,
-          description: def.description,
-          isAudit: def.audit ?? false,
-          isHidden: def.hidden ?? false,
-        }),
+        created[index],
+        rows.map((row) => row.values),
         userId,
-      );
-      built.set(def.name.toLowerCase(), { def, table, columns: [] });
+        rows.map((row) => row.id),
+      ))
+        groups.push([statement]);
     }
 
-    for (const entry of built.values()) {
-      const { def } = entry;
-      for (const [position, spec] of def.columns.entries()) {
-        const target = spec.relation ? built.get(spec.relation.toLowerCase()) : undefined;
-        const input = columnInputSchema.parse({
-          name: spec.name,
-          description: spec.description,
-          icon: spec.icon,
-          format: spec.format,
-          options: target
-            ? { tableId: target.table.id, onDelete: "set null", ...spec.options }
-            : (spec.options ?? {}),
-          isRequired: spec.required,
-          isUnique: spec.unique,
-          isHidden: spec.hidden,
-          isSearchable: spec.searchable,
-          isFilterable: spec.filterable ?? false,
-          isSortable: spec.sortable ?? false,
-          defaultValue: spec.default,
-          generatedExpression: spec.generated,
-          checkExpression: spec.check,
-          position,
-        });
-        const targets = new Map<number, RelationTarget>();
-        if (target)
-          targets.set(target.table.id, {
-            physicalName: `${workspace}__${target.table.tableName}`,
-          });
-        entry.columns.push(await createColumn(workspace, entry.table, input, targets));
-      }
-
-      const title = entry.columns.find((column) => column.name === def.title);
-      if (title) entry.table = (await updateTable(entry.table.id, { titleColumnId: title.id })) ?? entry.table;
-
-      const byName = new Map(entry.columns.map((column) => [column.name, column]));
-      const physical = (name: string) => (byName.get(name) as Column).columnName;
-
-      for (const view of def.views ?? [])
-        await createView(
-          entry.table,
-          entry.columns,
-          viewInputSchema.parse({
-            name: view.name,
-            icon: view.icon,
-            description: view.description,
-            selectColumns: view.columns.map(physical),
-            filters: (view.filters ?? []).map((filter) => ({
-              ...filter,
-              column: physical(filter.column),
-            })),
-          }),
-          userId,
-        );
-
-      for (const form of def.forms ?? [])
-        await createForm(
-          entry.table,
-          formInputSchema.parse({
-            name: form.name,
-            icon: form.icon,
-            description: form.description,
-            selectColumns: form.columns.map(physical),
-            isOpen: form.open ?? true,
-          }),
-          userId,
-        );
-    }
-
-    if (options.sampleData) {
-      const titles = new Map<string, Map<string, number>>();
-      for (const def of insertionOrder(template.tables)) {
-        const entry = built.get(def.name.toLowerCase()) as Built;
-        const byName = new Map(entry.columns.map((column) => [column.name, column]));
-        const parsedRows = (def.rows ?? []).map((row) => {
-          const values: Record<string, unknown> = {};
-          for (const [key, raw] of Object.entries(row)) {
-            const column = byName.get(key) as Column;
-            if (raw === null || raw === undefined) continue;
-            const spec = def.columns.find((item) => item.name === key);
-            if (spec?.relation) {
-              const id = titles.get(spec.relation.toLowerCase())?.get(String(raw));
-              if (id !== undefined) values[column.columnName] = id;
-            } else {
-              values[column.columnName] = resolveValue(column.format, raw);
-            }
-          }
-          const parsed = parseRecordValues(entry.columns, values);
-          if (!parsed.ok) throw new Error(`${def.name}: ${parsed.message}`);
-          return parsed.values;
-        });
-
-        const ids: number[] = [];
-        for (let start = 0; start < parsedRows.length; start += CHUNK)
-          ids.push(
-            ...(await createRecordRows(
-              workspace,
-              entry.table,
-              parsedRows.slice(start, start + CHUNK),
-              userId,
-            )),
-          );
-
-        const byTitle = new Map<string, number>();
-        (def.rows ?? []).forEach((row, index) => byTitle.set(String(row[def.title]), ids[index]));
-        titles.set(def.name.toLowerCase(), byTitle);
-      }
-    }
+    await runGroups(groups);
   } catch (error) {
-    if (built.size)
-      await dropTables(
-        workspace,
-        [...built.values()].map(({ table }) => ({ id: table.id, tableName: table.tableName })),
-      ).catch(() => undefined);
+    await dropTables(
+      workspace,
+      created.map(({ id, tableName }) => ({ id, tableName })),
+    ).catch(() => undefined);
     throw error;
   }
 
-  return { tables: [...built.values()].map(({ table }) => ({ id: table.id, name: table.name })) };
+  return { tables: created.map(({ id, name }) => ({ id, name })) };
 }

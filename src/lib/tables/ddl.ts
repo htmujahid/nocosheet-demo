@@ -88,7 +88,7 @@ export function compileExpressions(
   }
 }
 
-function columnDefinition(
+export function columnDefinition(
   columnName: string,
   column: ColumnValues,
   targets: Map<number, RelationTarget>,
@@ -119,10 +119,10 @@ const trackingDefinitions = () => [
   `"updated_by" TEXT REFERENCES "user" ("id") ON DELETE SET NULL`,
 ];
 
-export function buildCreateTable(physicalName: string) {
+export function buildCreateTable(physicalName: string, columns: string[] = []) {
   const id = `"id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL`;
 
-  return `CREATE TABLE ${quoteIdent(physicalName)} (\n  ${[id, ...trackingDefinitions()].join(",\n  ")}\n)`;
+  return `CREATE TABLE ${quoteIdent(physicalName)} (\n  ${[id, ...trackingDefinitions(), ...columns].join(",\n  ")}\n)`;
 }
 
 export type IndexKind = "uq" | "idx";
@@ -152,6 +152,26 @@ export const buildDropIndex = (name: string) => `DROP INDEX IF EXISTS ${quoteIde
 export const buildDropColumn = (physicalName: string, columnName: string) =>
   `ALTER TABLE ${quoteIdent(physicalName)} DROP COLUMN ${quoteIdent(columnName)}`;
 
+export function buildColumnIndexes(
+  workspace: string,
+  physicalName: string,
+  columnName: string,
+  column: Pick<ColumnValues, "isUnique" | "format">,
+) {
+  const kind = indexKind(column);
+  return kind
+    ? [
+        buildCreateIndex(
+          indexName(workspace, columnName, kind),
+          physicalName,
+          columnName,
+          kind,
+          column.format,
+        ),
+      ]
+    : [];
+}
+
 export function buildAddColumn(
   workspace: string,
   physicalName: string,
@@ -160,23 +180,10 @@ export function buildAddColumn(
   targets: Map<number, RelationTarget>,
   columns: Map<string, string>,
 ) {
-  const statements = [
+  return [
     `ALTER TABLE ${quoteIdent(physicalName)} ADD COLUMN ${columnDefinition(columnName, column, targets, columns)}`,
+    ...buildColumnIndexes(workspace, physicalName, columnName, column),
   ];
-
-  const kind = indexKind(column);
-  if (kind)
-    statements.push(
-      buildCreateIndex(
-        indexName(workspace, columnName, kind),
-        physicalName,
-        columnName,
-        kind,
-        column.format,
-      ),
-    );
-
-  return statements;
 }
 
 export const buildDropTable = (physicalName: string) => `DROP TABLE ${quoteIdent(physicalName)}`;

@@ -384,7 +384,7 @@ type RecordsTable = ReturnType<typeof recordsTable>;
 function buildInsert(
   workspace: string,
   table: Table,
-  parsed: ParsedValue<Column>[],
+  parsed: ParsedValue[],
   system: Record<string, unknown>,
   targets?: Map<string, RecordsTable>,
 ) {
@@ -426,6 +426,26 @@ export async function createRecordRow(
   return created;
 }
 
+export function buildRecordInserts(
+  workspace: string,
+  table: Table,
+  rows: ParsedValue[][],
+  userId: string,
+  ids?: number[],
+) {
+  const targets = new Map<string, RecordsTable>();
+  return rows.map((parsed, index) => {
+    const { target, query } = buildInsert(
+      workspace,
+      table,
+      parsed,
+      { ...(ids ? { id: ids[index] } : {}), created_by: userId, updated_by: userId },
+      targets,
+    );
+    return query.returning({ id: target.id });
+  });
+}
+
 export async function createRecordRows(
   workspace: string,
   table: Table,
@@ -433,19 +453,8 @@ export async function createRecordRows(
   userId: string,
 ) {
   if (!rows.length) return [];
-  const targets = new Map<string, RecordsTable>();
-  const statements = rows.map((parsed) => {
-    const { target, query } = buildInsert(
-      workspace,
-      table,
-      parsed,
-      { created_by: userId, updated_by: userId },
-      targets,
-    );
-    return query.returning({ id: target.id });
-  });
   const results = (await db.batch(
-    statements as unknown as Parameters<typeof db.batch>[0],
+    buildRecordInserts(workspace, table, rows, userId) as unknown as Parameters<typeof db.batch>[0],
   )) as unknown as { id: number }[][];
   return results.flatMap((inserted) => inserted.map((row) => row.id));
 }

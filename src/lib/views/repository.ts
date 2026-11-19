@@ -38,12 +38,17 @@ export async function findViewsUsingColumn(tableId: number, columnName: string) 
   );
 }
 
-export async function createView(table: Table, columns: Column[], body: ViewValues, userId: string) {
+export function buildViewStatements(
+  table: Pick<Table, "id">,
+  columns: Pick<Column, "columnName">[],
+  body: ViewValues,
+  userId: string,
+) {
   const selected = columns
     .filter((column) => body.selectColumns.includes(column.columnName))
     .map((column) => column.columnName);
 
-  const [, inserted] = await db.batch([
+  return [
     db.insert(resourceTable).values({ kind: "view" }),
     db
       .insert(viewTable)
@@ -60,7 +65,11 @@ export async function createView(table: Table, columns: Column[], body: ViewValu
         createdBy: userId,
       })
       .returning(),
-  ]);
+  ] as const;
+}
+
+export async function createView(table: Table, columns: Column[], body: ViewValues, userId: string) {
+  const [, inserted] = await db.batch(buildViewStatements(table, columns, body, userId));
   return inserted[0];
 }
 
