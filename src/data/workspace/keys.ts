@@ -1,7 +1,6 @@
 export const workspaceKeys = {
   all: ["workspace"] as const,
   members: () => [...workspaceKeys.all, "members"] as const,
-  memberApiKeys: (userId: string) => [...workspaceKeys.members(), userId, "api-keys"] as const,
   access: () => [...workspaceKeys.all, "access"] as const,
   accessProfiles: () => [...workspaceKeys.all, "access-profiles"] as const,
   accessProfile: (id: number) => [...workspaceKeys.accessProfiles(), id] as const,

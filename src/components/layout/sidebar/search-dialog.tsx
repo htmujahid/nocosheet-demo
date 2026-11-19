@@ -9,7 +9,6 @@ import {
   CornerDownLeftIcon,
   CreditCardIcon,
   HomeIcon,
-  KeyRoundIcon,
   PaletteIcon,
   ScrollTextIcon,
   SearchIcon,
@@ -66,7 +65,6 @@ const settings: SettingsItem[] = [
   { value: "appearance", label: "Appearance", icon: PaletteIcon, path: "/settings/appearance" },
   { value: "members", label: "Members", icon: UsersIcon, path: "/settings/members" },
   { value: "access", label: "Access", icon: ShieldCheckIcon, path: "/settings/access" },
-  { value: "api", label: "API Keys", icon: KeyRoundIcon, path: "/settings/api" },
   {
     value: "audit-log",
     label: "Audit Log",

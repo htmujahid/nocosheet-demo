@@ -1,4 +1,3 @@
-import { apiKeyClient } from "@better-auth/api-key/client";
 import { passkeyClient } from "@better-auth/passkey/client";
 import { adminClient, twoFactorClient, usernameClient } from "better-auth/client/plugins";
 import { createAuthClient } from "void/client";
@@ -12,7 +11,6 @@ export const auth = createAuthClient({
     passkeyClient(),
     twoFactorClient(),
     adminClient({ ac, roles }),
-    apiKeyClient(),
     usernameClient(),
   ],
 });

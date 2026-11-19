@@ -2,7 +2,6 @@ import { Link } from "@tanstack/react-router";
 
 import {
   CreditCardIcon,
-  KeyRoundIcon,
   PaletteIcon,
   ScrollTextIcon,
   ShieldCheckIcon,
@@ -45,12 +44,6 @@ const items = [
     label: "Access",
     icon: ShieldCheckIcon,
     path: "/access",
-  },
-  {
-    to: "/workspaces/$workspace/settings/api",
-    label: "API Keys",
-    icon: KeyRoundIcon,
-    path: "/api",
   },
   {
     to: "/workspaces/$workspace/settings/audit-log",

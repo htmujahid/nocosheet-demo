@@ -66,7 +66,7 @@ export function ResetWorkspaceCard({ workspace }: { workspace: string }) {
       <Card>
         <SettingsRow
           title="Reset workspace"
-          description="Delete every table, record, view, form, favorite, trash entry and audit log entry. Accounts, members, API keys and access profiles are kept."
+          description="Delete every table, record, view, form, favorite, trash entry and audit log entry. Accounts, members and access profiles are kept."
         >
           <AlertDialog
             open={open}

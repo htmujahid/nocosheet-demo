@@ -28,10 +28,6 @@ nocosheet is an open-source, fully no-code CMS and spreadsheet-style database. M
 - **Audit log**: turn on auditing per table to log every record created, edited or deleted, with who did it and when. Entries are kept for 30 days
 - **Account security**: sign in with a password or passkey, add an authenticator app and manage your sessions
 
-### Developers
-
-- **REST API and API keys**: read and write records from your own scripts and apps with API keys or bearer tokens, documented with an OpenAPI reference
-
 ### Hosting
 
 - **Self-hosted on Cloudflare**: Workers, D1 and R2 on your own account, with no external services required

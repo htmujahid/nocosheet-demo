@@ -30,7 +30,6 @@ import { Route as WorkspacesWorkspaceCoreIndexRouteImport } from './routes/works
 import { Route as WorkspacesWorkspaceCoreTablesRouteRouteImport } from './routes/workspaces/$workspace/_core/tables/route'
 import { Route as WorkspacesWorkspaceSettingsIndexRouteImport } from './routes/workspaces/$workspace/settings/index'
 import { Route as WorkspacesWorkspaceSettingsAccessRouteRouteImport } from './routes/workspaces/$workspace/settings/access/route'
-import { Route as WorkspacesWorkspaceSettingsApiRouteImport } from './routes/workspaces/$workspace/settings/api'
 import { Route as WorkspacesWorkspaceSettingsAppearanceRouteImport } from './routes/workspaces/$workspace/settings/appearance'
 import { Route as WorkspacesWorkspaceSettingsAuditLogRouteImport } from './routes/workspaces/$workspace/settings/audit-log'
 import { Route as WorkspacesWorkspaceSettingsBillingRouteImport } from './routes/workspaces/$workspace/settings/billing'
@@ -176,12 +175,6 @@ const WorkspacesWorkspaceSettingsAccessRouteRoute =
   WorkspacesWorkspaceSettingsAccessRouteRouteImport.update({
     id: '/access',
     path: '/access',
-    getParentRoute: () => WorkspacesWorkspaceSettingsRouteRoute,
-  } as any)
-const WorkspacesWorkspaceSettingsApiRoute =
-  WorkspacesWorkspaceSettingsApiRouteImport.update({
-    id: '/api',
-    path: '/api',
     getParentRoute: () => WorkspacesWorkspaceSettingsRouteRoute,
   } as any)
 const WorkspacesWorkspaceSettingsAppearanceRoute =
@@ -415,7 +408,6 @@ export interface FileRoutesByFullPath {
   '/workspaces/$workspace/tables': typeof WorkspacesWorkspaceCoreTablesRouteRouteWithChildren
   '/workspaces/$workspace/settings/access': typeof WorkspacesWorkspaceSettingsAccessRouteRouteWithChildren
   '/workspaces/$workspace/settings/members': typeof WorkspacesWorkspaceSettingsMembersRouteRouteWithChildren
-  '/workspaces/$workspace/settings/api': typeof WorkspacesWorkspaceSettingsApiRoute
   '/workspaces/$workspace/settings/appearance': typeof WorkspacesWorkspaceSettingsAppearanceRoute
   '/workspaces/$workspace/settings/audit-log': typeof WorkspacesWorkspaceSettingsAuditLogRoute
   '/workspaces/$workspace/settings/billing': typeof WorkspacesWorkspaceSettingsBillingRoute
@@ -465,7 +457,6 @@ export interface FileRoutesByTo {
   '/auth/verify-email': typeof AuthVerifyEmailRoute
   '/account': typeof AccountIndexRoute
   '/workspaces/$workspace/tables': typeof WorkspacesWorkspaceCoreTablesListIndexRoute
-  '/workspaces/$workspace/settings/api': typeof WorkspacesWorkspaceSettingsApiRoute
   '/workspaces/$workspace/settings/appearance': typeof WorkspacesWorkspaceSettingsAppearanceRoute
   '/workspaces/$workspace/settings/audit-log': typeof WorkspacesWorkspaceSettingsAuditLogRoute
   '/workspaces/$workspace/settings/billing': typeof WorkspacesWorkspaceSettingsBillingRoute
@@ -514,7 +505,6 @@ export interface FileRoutesById {
   '/workspaces/$workspace/_core/tables': typeof WorkspacesWorkspaceCoreTablesRouteRouteWithChildren
   '/workspaces/$workspace/settings/access': typeof WorkspacesWorkspaceSettingsAccessRouteRouteWithChildren
   '/workspaces/$workspace/settings/members': typeof WorkspacesWorkspaceSettingsMembersRouteRouteWithChildren
-  '/workspaces/$workspace/settings/api': typeof WorkspacesWorkspaceSettingsApiRoute
   '/workspaces/$workspace/settings/appearance': typeof WorkspacesWorkspaceSettingsAppearanceRoute
   '/workspaces/$workspace/settings/audit-log': typeof WorkspacesWorkspaceSettingsAuditLogRoute
   '/workspaces/$workspace/settings/billing': typeof WorkspacesWorkspaceSettingsBillingRoute
@@ -574,7 +564,6 @@ export interface FileRouteTypes {
     | '/workspaces/$workspace/tables'
     | '/workspaces/$workspace/settings/access'
     | '/workspaces/$workspace/settings/members'
-    | '/workspaces/$workspace/settings/api'
     | '/workspaces/$workspace/settings/appearance'
     | '/workspaces/$workspace/settings/audit-log'
     | '/workspaces/$workspace/settings/billing'
@@ -624,7 +613,6 @@ export interface FileRouteTypes {
     | '/auth/verify-email'
     | '/account'
     | '/workspaces/$workspace/tables'
-    | '/workspaces/$workspace/settings/api'
     | '/workspaces/$workspace/settings/appearance'
     | '/workspaces/$workspace/settings/audit-log'
     | '/workspaces/$workspace/settings/billing'
@@ -672,7 +660,6 @@ export interface FileRouteTypes {
     | '/workspaces/$workspace/_core/tables'
     | '/workspaces/$workspace/settings/access'
     | '/workspaces/$workspace/settings/members'
-    | '/workspaces/$workspace/settings/api'
     | '/workspaces/$workspace/settings/appearance'
     | '/workspaces/$workspace/settings/audit-log'
     | '/workspaces/$workspace/settings/billing'
@@ -865,13 +852,6 @@ declare module '@tanstack/react-router' {
       path: '/access'
       fullPath: '/workspaces/$workspace/settings/access'
       preLoaderRoute: typeof WorkspacesWorkspaceSettingsAccessRouteRouteImport
-      parentRoute: typeof WorkspacesWorkspaceSettingsRouteRoute
-    }
-    '/workspaces/$workspace/settings/api': {
-      id: '/workspaces/$workspace/settings/api'
-      path: '/api'
-      fullPath: '/workspaces/$workspace/settings/api'
-      preLoaderRoute: typeof WorkspacesWorkspaceSettingsApiRouteImport
       parentRoute: typeof WorkspacesWorkspaceSettingsRouteRoute
     }
     '/workspaces/$workspace/settings/appearance': {
@@ -1445,7 +1425,6 @@ const WorkspacesWorkspaceSettingsMembersRouteRouteWithChildren =
 interface WorkspacesWorkspaceSettingsRouteRouteChildren {
   WorkspacesWorkspaceSettingsAccessRouteRoute: typeof WorkspacesWorkspaceSettingsAccessRouteRouteWithChildren
   WorkspacesWorkspaceSettingsMembersRouteRoute: typeof WorkspacesWorkspaceSettingsMembersRouteRouteWithChildren
-  WorkspacesWorkspaceSettingsApiRoute: typeof WorkspacesWorkspaceSettingsApiRoute
   WorkspacesWorkspaceSettingsAppearanceRoute: typeof WorkspacesWorkspaceSettingsAppearanceRoute
   WorkspacesWorkspaceSettingsAuditLogRoute: typeof WorkspacesWorkspaceSettingsAuditLogRoute
   WorkspacesWorkspaceSettingsBillingRoute: typeof WorkspacesWorkspaceSettingsBillingRoute
@@ -1458,7 +1437,6 @@ const WorkspacesWorkspaceSettingsRouteRouteChildren: WorkspacesWorkspaceSettings
       WorkspacesWorkspaceSettingsAccessRouteRouteWithChildren,
     WorkspacesWorkspaceSettingsMembersRouteRoute:
       WorkspacesWorkspaceSettingsMembersRouteRouteWithChildren,
-    WorkspacesWorkspaceSettingsApiRoute: WorkspacesWorkspaceSettingsApiRoute,
     WorkspacesWorkspaceSettingsAppearanceRoute:
       WorkspacesWorkspaceSettingsAppearanceRoute,
     WorkspacesWorkspaceSettingsAuditLogRoute:
