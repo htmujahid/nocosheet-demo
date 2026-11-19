@@ -48,8 +48,8 @@ export function useGridTable({
   );
 
   const pagination = useMemo<PaginationState>(
-    () => ({ pageIndex: paging.hasPrevious ? 1 : 0, pageSize: query.pageSize }),
-    [paging.hasPrevious, query.pageSize],
+    () => ({ pageIndex: query.page - 1, pageSize: query.pageSize }),
+    [query.page, query.pageSize],
   );
   const targets = useMemo(
     () =>
@@ -80,7 +80,7 @@ export function useGridTable({
       autoResetPageIndex: false,
       enableMultiSort: false,
       enableRowSelection: true,
-      pageCount: (paging.hasPrevious ? 1 : 0) + (paging.canNext ? 2 : 1),
+      pageCount: query.page + (paging.canNext ? 1 : 0),
       initialState: { columnVisibility: initialVisibility },
       state: {
         pagination,
@@ -94,7 +94,7 @@ export function useGridTable({
           void setQuery({ pageSize: next.pageSize as RecordsQuery["pageSize"] });
           return;
         }
-        if (next.pageIndex < pagination.pageIndex) void paging.previous();
+        if (next.pageIndex < pagination.pageIndex) paging.previous();
         else if (next.pageIndex > pagination.pageIndex) paging.next();
       },
       onSortingChange: (updater) => {

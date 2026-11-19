@@ -14,7 +14,7 @@ CREATE TABLE `default__access_profile_member` (
 	`user_id` text PRIMARY KEY NOT NULL,
 	`profile_id` integer NOT NULL,
 	`assigned_by` text,
-	`assigned_at` integer NOT NULL,
+	`assigned_at` integer NOT NULL DEFAULT (cast(unixepoch('subsec') * 1000 as integer)),
 	FOREIGN KEY (`user_id`) REFERENCES `user`(`id`) ON UPDATE no action ON DELETE cascade,
 	FOREIGN KEY (`profile_id`) REFERENCES `default__access_profile`(`id`) ON UPDATE no action ON DELETE restrict,
 	FOREIGN KEY (`assigned_by`) REFERENCES `user`(`id`) ON UPDATE no action ON DELETE set null
@@ -29,8 +29,8 @@ CREATE TABLE `default__access_profile` (
 	`is_default` integer DEFAULT false NOT NULL,
 	`kind` text DEFAULT 'custom' NOT NULL,
 	`position` integer DEFAULT 0 NOT NULL,
-	`created_at` integer NOT NULL,
-	`updated_at` integer NOT NULL,
+	`created_at` integer NOT NULL DEFAULT (cast(unixepoch('subsec') * 1000 as integer)),
+	`updated_at` integer NOT NULL DEFAULT (cast(unixepoch('subsec') * 1000 as integer)),
 	CONSTRAINT "default__access_profile_kind_check" CHECK("default__access_profile"."kind" in ('custom', 'authenticated'))
 );
 --> statement-breakpoint
@@ -47,7 +47,7 @@ CREATE TABLE `default__audit` (
 	`record_ids` text DEFAULT '[]' NOT NULL,
 	`count` integer DEFAULT 1 NOT NULL,
 	`changes` text DEFAULT '[]' NOT NULL,
-	`created_at` integer NOT NULL,
+	`created_at` integer NOT NULL DEFAULT (cast(unixepoch('subsec') * 1000 as integer)),
 	FOREIGN KEY (`table_id`) REFERENCES `default__table`(`id`) ON UPDATE no action ON DELETE set null,
 	FOREIGN KEY (`actor_id`) REFERENCES `user`(`id`) ON UPDATE no action ON DELETE set null,
 	CONSTRAINT "default__audit_action_check" CHECK("default__audit"."action" in ('create', 'update', 'delete', 'restore', 'purge', 'import'))
@@ -77,8 +77,8 @@ CREATE TABLE `default__column` (
 	`description` text,
 	`options` text DEFAULT '{}' NOT NULL,
 	`metadata` text DEFAULT '{}' NOT NULL,
-	`created_at` integer NOT NULL,
-	`updated_at` integer NOT NULL,
+	`created_at` integer NOT NULL DEFAULT (cast(unixepoch('subsec') * 1000 as integer)),
+	`updated_at` integer NOT NULL DEFAULT (cast(unixepoch('subsec') * 1000 as integer)),
 	`deleted_at` integer,
 	`deleted_by` text,
 	FOREIGN KEY (`table_id`) REFERENCES `default__table`(`id`) ON UPDATE no action ON DELETE cascade,
@@ -92,7 +92,7 @@ CREATE TABLE `default__favorite` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`user_id` text NOT NULL,
 	`table_id` integer NOT NULL,
-	`created_at` integer NOT NULL,
+	`created_at` integer NOT NULL DEFAULT (cast(unixepoch('subsec') * 1000 as integer)),
 	FOREIGN KEY (`user_id`) REFERENCES `user`(`id`) ON UPDATE no action ON DELETE cascade,
 	FOREIGN KEY (`table_id`) REFERENCES `default__table`(`id`) ON UPDATE no action ON DELETE cascade
 );
@@ -110,8 +110,8 @@ CREATE TABLE `default__form` (
 	`position` integer DEFAULT 0 NOT NULL,
 	`metadata` text DEFAULT '{}' NOT NULL,
 	`created_by` text,
-	`created_at` integer NOT NULL,
-	`updated_at` integer NOT NULL,
+	`created_at` integer NOT NULL DEFAULT (cast(unixepoch('subsec') * 1000 as integer)),
+	`updated_at` integer NOT NULL DEFAULT (cast(unixepoch('subsec') * 1000 as integer)),
 	FOREIGN KEY (`id`) REFERENCES `default__resource`(`id`) ON UPDATE no action ON DELETE cascade,
 	FOREIGN KEY (`table_id`) REFERENCES `default__table`(`id`) ON UPDATE no action ON DELETE cascade,
 	FOREIGN KEY (`created_by`) REFERENCES `user`(`id`) ON UPDATE no action ON DELETE set null
@@ -145,8 +145,8 @@ CREATE TABLE `default__table` (
 	`is_hidden` integer DEFAULT false NOT NULL,
 	`metadata` text DEFAULT '{}' NOT NULL,
 	`created_by` text,
-	`created_at` integer NOT NULL,
-	`updated_at` integer NOT NULL,
+	`created_at` integer NOT NULL DEFAULT (cast(unixepoch('subsec') * 1000 as integer)),
+	`updated_at` integer NOT NULL DEFAULT (cast(unixepoch('subsec') * 1000 as integer)),
 	`deleted_at` integer,
 	`deleted_by` text,
 	FOREIGN KEY (`id`) REFERENCES `default__resource`(`id`) ON UPDATE no action ON DELETE cascade,
@@ -166,7 +166,7 @@ CREATE TABLE `default__trash` (
 	`record_id` text NOT NULL,
 	`data` text DEFAULT '{}' NOT NULL,
 	`deleted_by` text,
-	`deleted_at` integer NOT NULL,
+	`deleted_at` integer NOT NULL DEFAULT (cast(unixepoch('subsec') * 1000 as integer)),
 	FOREIGN KEY (`table_id`) REFERENCES `default__table`(`id`) ON UPDATE no action ON DELETE cascade,
 	FOREIGN KEY (`deleted_by`) REFERENCES `user`(`id`) ON UPDATE no action ON DELETE set null
 );
@@ -184,8 +184,8 @@ CREATE TABLE `default__view` (
 	`where_expression` text DEFAULT '[]' NOT NULL,
 	`metadata` text DEFAULT '{}' NOT NULL,
 	`created_by` text,
-	`created_at` integer NOT NULL,
-	`updated_at` integer NOT NULL,
+	`created_at` integer NOT NULL DEFAULT (cast(unixepoch('subsec') * 1000 as integer)),
+	`updated_at` integer NOT NULL DEFAULT (cast(unixepoch('subsec') * 1000 as integer)),
 	FOREIGN KEY (`id`) REFERENCES `default__resource`(`id`) ON UPDATE no action ON DELETE cascade,
 	FOREIGN KEY (`table_id`) REFERENCES `default__table`(`id`) ON UPDATE no action ON DELETE cascade,
 	FOREIGN KEY (`created_by`) REFERENCES `user`(`id`) ON UPDATE no action ON DELETE set null
@@ -194,11 +194,11 @@ CREATE TABLE `default__view` (
 CREATE UNIQUE INDEX `default__view_name` ON `default__view` (`table_id`,lower("name"));--> statement-breakpoint
 CREATE INDEX `default__view_table_position` ON `default__view` (`table_id`,`position`);
 --> statement-breakpoint
-INSERT INTO `default__access_profile` (`name`, `description`, `is_system`, `is_default`, `kind`, `position`, `created_at`, `updated_at`) VALUES
-	('Authenticated', 'Applies to every signed-in member on top of their own profile.', 1, 0, 'authenticated', 0, CAST(strftime('%s', 'now') AS INTEGER) * 1000, CAST(strftime('%s', 'now') AS INTEGER) * 1000),
-	('Editor', 'Create, read, change and delete every record, and export them.', 1, 0, 'custom', 1, CAST(strftime('%s', 'now') AS INTEGER) * 1000, CAST(strftime('%s', 'now') AS INTEGER) * 1000),
-	('Contributor', 'Create records and read all, but only change or delete their own.', 1, 0, 'custom', 2, CAST(strftime('%s', 'now') AS INTEGER) * 1000, CAST(strftime('%s', 'now') AS INTEGER) * 1000),
-	('Viewer', 'Read and export every record.', 1, 1, 'custom', 3, CAST(strftime('%s', 'now') AS INTEGER) * 1000, CAST(strftime('%s', 'now') AS INTEGER) * 1000);
+INSERT INTO `default__access_profile` (`name`, `description`, `is_system`, `is_default`, `kind`, `position`) VALUES
+	('Authenticated', 'Applies to every signed-in member on top of their own profile.', 1, 0, 'authenticated', 0),
+	('Editor', 'Create, read, change and delete every record, and export them.', 1, 0, 'custom', 1),
+	('Contributor', 'Create records and read all, but only change or delete their own.', 1, 0, 'custom', 2),
+	('Viewer', 'Read and export every record.', 1, 1, 'custom', 3);
 --> statement-breakpoint
 WITH seed(profile_name, `grant`) AS (VALUES
 	('Editor', 'create'),

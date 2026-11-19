@@ -1,4 +1,3 @@
-import { decodeCursor } from "./cursor";
 import { SYSTEM_SORT_KEYS } from "./sort-param";
 import { conditionError, filterKind, isSortableFormat } from "./filters";
 import type { TypedRecordsQuery } from "./query";
@@ -28,8 +27,6 @@ export function checkRecordsQuery(columns: QueryColumn[], query: TypedRecordsQue
     if (!column || !column.isSortable || !isSortableFormat(column.format))
       return `"${query.sort}" can't be sorted.`;
   }
-
-  if (query.cursor && !decodeCursor(query.cursor)) return "The page cursor is invalid.";
 
   return undefined;
 }

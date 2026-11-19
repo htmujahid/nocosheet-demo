@@ -3,6 +3,7 @@ import {
   accessProfileMemberTable,
   accessGrantTable,
   accessProfileTable,
+  nowMs,
   tableTable,
   viewTable,
 } from "@db/schema";
@@ -102,7 +103,7 @@ export async function updateProfile(
     .set({
       ...(values.name !== undefined ? { name: values.name } : {}),
       ...(values.description !== undefined ? { description: values.description } : {}),
-      updatedAt: new Date(),
+      updatedAt: nowMs,
     })
     .where(eq(accessProfileTable.id, id))
     .returning();
@@ -114,7 +115,7 @@ export async function makeDefaultProfile(id: number) {
     db.update(accessProfileTable).set({ isDefault: false }).where(eq(accessProfileTable.isDefault, true)),
     db
       .update(accessProfileTable)
-      .set({ isDefault: true, updatedAt: new Date() })
+      .set({ isDefault: true, updatedAt: nowMs })
       .where(eq(accessProfileTable.id, id)),
   ]);
 }
@@ -146,7 +147,7 @@ export async function replaceGrants(profileId: number, grants: AccessGrant[]) {
 
   await db.batch([
     db.delete(accessGrantTable).where(eq(accessGrantTable.profileId, profileId)),
-    db.update(accessProfileTable).set({ updatedAt: new Date() }).where(eq(accessProfileTable.id, profileId)),
+    db.update(accessProfileTable).set({ updatedAt: nowMs }).where(eq(accessProfileTable.id, profileId)),
     ...inserts,
   ] as never);
 }
@@ -163,7 +164,7 @@ export async function assignProfile(userId: string, profileId: number, assignedB
     .values({ userId, profileId, assignedBy })
     .onConflictDoUpdate({
       target: accessProfileMemberTable.userId,
-      set: { profileId, assignedBy, assignedAt: new Date() },
+      set: { profileId, assignedBy, assignedAt: nowMs },
     });
 }
 

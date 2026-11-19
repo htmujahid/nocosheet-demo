@@ -2,6 +2,7 @@ import {
   columnTable,
   favoriteTable,
   formTable,
+  nowMs,
   resourceTable,
   tableTable,
   viewTable,
@@ -297,7 +298,7 @@ export async function updateTable(
 ) {
   const [updated] = await db
     .update(tableTable)
-    .set({ ...defined(fields), updatedAt: new Date() })
+    .set({ ...defined(fields), updatedAt: nowMs })
     .where(eq(tableTable.id, id))
     .returning();
   return updated;
@@ -374,7 +375,7 @@ export async function createColumn(
     first,
     ...rest,
     buildColumnInsert(table.id, columnName, body, columnSqliteType(body, targets), check, generated),
-    db.update(tableTable).set({ updatedAt: new Date() }).where(eq(tableTable.id, table.id)),
+    db.update(tableTable).set({ updatedAt: nowMs }).where(eq(tableTable.id, table.id)),
   ]);
 
   return (await findColumnByName(table.id, columnName)) as Column;
@@ -390,7 +391,7 @@ export async function updateColumn(
 
   await db.batch([
     db.update(columnTable).set(changes).where(eq(columnTable.id, column.id)),
-    db.update(tableTable).set({ updatedAt: new Date() }).where(eq(tableTable.id, table.id)),
+    db.update(tableTable).set({ updatedAt: nowMs }).where(eq(tableTable.id, table.id)),
   ] as never);
 
   return findColumn(table.id, column.id);
@@ -404,7 +405,7 @@ export async function reorderColumns(tableId: number, ids: number[]) {
         .set({ position: index })
         .where(and(eq(columnTable.id, id), eq(columnTable.tableId, tableId))),
     ),
-    db.update(tableTable).set({ updatedAt: new Date() }).where(eq(tableTable.id, tableId)),
+    db.update(tableTable).set({ updatedAt: nowMs }).where(eq(tableTable.id, tableId)),
   ] as never);
 }
 
@@ -419,12 +420,12 @@ export async function softDeleteColumn(
     db.run(sql.raw(buildDropIndex(indexName(workspace, column.columnName, "idx")))),
     db
       .update(columnTable)
-      .set({ deletedAt: new Date(), deletedBy: userId })
+      .set({ deletedAt: nowMs, deletedBy: userId })
       .where(eq(columnTable.id, column.id)),
     db
       .update(tableTable)
       .set({
-        updatedAt: new Date(),
+        updatedAt: nowMs,
         ...(table.titleColumnId === column.id ? { titleColumnId: null } : {}),
       })
       .where(eq(tableTable.id, table.id)),
@@ -459,7 +460,7 @@ export async function restoreColumn(workspace: string, table: Table, column: Col
           : "select 1",
       ),
     ),
-    db.update(tableTable).set({ updatedAt: new Date() }).where(eq(tableTable.id, table.id)),
+    db.update(tableTable).set({ updatedAt: nowMs }).where(eq(tableTable.id, table.id)),
   ]);
 }
 
@@ -492,7 +493,7 @@ export async function dropColumn(workspace: string, table: Table, column: Column
     db
       .update(tableTable)
       .set({
-        updatedAt: new Date(),
+        updatedAt: nowMs,
         ...(table.titleColumnId === column.id ? { titleColumnId: null } : {}),
       })
       .where(eq(tableTable.id, table.id)),
@@ -517,7 +518,7 @@ export async function findLinkingColumns(ids: number[], options: { liveOnly: boo
 export async function softDeleteTables(ids: number[], userId: string) {
   await db
     .update(tableTable)
-    .set({ deletedAt: new Date(), deletedBy: userId })
+    .set({ deletedAt: nowMs, deletedBy: userId })
     .where(inArray(tableTable.id, ids));
 }
 

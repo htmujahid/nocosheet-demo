@@ -1,4 +1,4 @@
-import { resourceTable, viewTable } from "@db/schema";
+import { nowMs, resourceTable, viewTable } from "@db/schema";
 import { and, asc, db, eq, inArray, sql } from "void/db";
 
 import type { Column, Table } from "../tables/repository";
@@ -80,7 +80,7 @@ export async function updateView(id: number, body: ViewPatchValues) {
       name: body.name,
       description: body.description,
       icon: body.icon,
-      updatedAt: new Date(),
+      updatedAt: nowMs,
     })
     .where(eq(viewTable.id, id))
     .returning();

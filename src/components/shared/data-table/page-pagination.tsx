@@ -18,7 +18,7 @@ import {
 
 import type { dataTableFeatures } from "./features";
 
-export function CursorPagination<
+export function PagePagination<
   TData extends RowData,
   TSelected extends { pagination: PaginationState },
 >({
@@ -30,7 +30,7 @@ export function CursorPagination<
   count: number;
   pageSizes: readonly number[];
 }) {
-  const { pageSize } = table.state.pagination;
+  const { pageIndex, pageSize } = table.state.pagination;
 
   return (
     <div className="flex items-center justify-between gap-2">
@@ -59,7 +59,7 @@ export function CursorPagination<
           ) : (
             <>
               Showing <strong className="font-medium text-foreground">{count}</strong>{" "}
-              {count === 1 ? "record" : "records"}
+              {count === 1 ? "record" : "records"} · Page {pageIndex + 1}
             </>
           )}
         </p>

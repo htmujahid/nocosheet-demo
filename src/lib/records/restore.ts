@@ -18,19 +18,16 @@ export function mergeSnapshot(
 }
 
 export function snapshotAuthors(snapshot: Row) {
-  return [snapshot.created_by, snapshot.updated_by].filter(
-    (value): value is string => typeof value === "string",
-  );
+  return typeof snapshot.created_by === "string" ? [snapshot.created_by] : [];
 }
 
-export function restoredSystemValues(snapshot: Row, knownUsers: Set<string>) {
+export function restoredSystemValues(snapshot: Row, knownUsers: Set<string>, restoredBy: string) {
   const author = (value: unknown) =>
     typeof value === "string" && knownUsers.has(value) ? value : null;
   return {
     id: snapshot.id,
     created_at: snapshot.created_at,
-    updated_at: snapshot.updated_at,
     created_by: author(snapshot.created_by),
-    updated_by: author(snapshot.updated_by),
+    updated_by: restoredBy,
   };
 }

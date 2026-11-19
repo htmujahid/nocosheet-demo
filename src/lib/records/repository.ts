@@ -6,7 +6,6 @@ import { NOCASE_FORMATS, SEARCHABLE_FORMATS } from "../tables/formats";
 import { physicalTableName, quoteIdent } from "../tables/naming";
 import type { Column, Table } from "../tables/repository";
 import { conditionText } from "./condition";
-import { decodeCursor, encodeCursor, type RecordCursor } from "./cursor";
 import { type FilterCondition, filterKind } from "./filters";
 import type { TypedRecordsQuery } from "./query";
 import { shapeRecord } from "./shape";
@@ -161,26 +160,6 @@ const orderOf = (keys: Key[]) =>
     sql`, `,
   );
 
-function seekSegments(spec: SortSpec, cursor: RecordCursor): Fragment[] {
-  const ascending = spec.direction === "asc";
-  const idOp = raw(ascending ? ">" : "<");
-  if (spec.name === "id") return [sql`t."id" ${idOp} ${cursor[0]}`];
-
-  const [value, id] = cursor;
-  const bare = col(spec.name);
-
-  if (value === null)
-    return ascending
-      ? [sql`${bare} is null and t."id" > ${id}`, sql`${bare} is not null`]
-      : [sql`${bare} is null and t."id" < ${id}`];
-
-  const target = sortTarget(spec);
-  const inclusive = raw(ascending ? ">=" : "<=");
-  const strict = raw(ascending ? ">" : "<");
-  const after = sql`${target} ${inclusive} ${value} and (${target} ${strict} ${value} or (${target} = ${value} and t."id" ${idOp} ${id}))`;
-  return ascending ? [after] : [after, sql`${bare} is null`];
-}
-
 export async function findRecords(
   workspace: string,
   table: Table,
@@ -191,52 +170,16 @@ export async function findRecords(
 ) {
   const { select, from } = await recordSource(workspace, table, columns);
   const condition = filterWhere(columns, query, ownerId, scope);
-  const forward = sortSpec(columns, query);
-  const backward = query.dir === "prev";
-  const spec: SortSpec = backward
-    ? { ...forward, direction: forward.direction === "asc" ? "desc" : "asc" }
-    : forward;
-  const cursor = query.cursor ? decodeCursor(query.cursor) : null;
-  if (backward && !cursor) throw new Error("The page cursor is invalid.");
-  const limit = query.pageSize + 1;
+  const order = orderOf(sortKeys(sortSpec(columns, query)));
+  const offset = (query.page - 1) * query.pageSize;
 
-  const keys = sortKeys(spec);
-  if (cursor && cursor.length !== keys.length) throw new Error("The page cursor is invalid.");
-  const order = orderOf(keys);
-  const segments = cursor ? seekSegments(spec, cursor) : [sql`1 = 1`];
-
-  const found: Record<string, unknown>[] = [];
-  for (const segment of segments) {
-    found.push(
-      ...(await db.all<Record<string, unknown>>(
-        sql`select ${select} from ${from} where ${condition} and ${segment} order by ${order} limit ${limit - found.length}`,
-      )),
-    );
-    if (found.length >= limit) break;
-  }
-
-  const keyOf = (row: Record<string, unknown>) =>
-    encodeCursor(
-      spec.name === "id"
-        ? [row.id as number]
-        : [(row[spec.name] as string | number | null) ?? null, row.id as number],
-    );
-
-  const hasMore = found.length > query.pageSize;
-  const page = found.slice(0, query.pageSize);
-  if (backward) page.reverse();
-
-  const first = page[0];
-  const last = page.at(-1);
-  const startCursor = backward ? (hasMore ? keyOf(found[query.pageSize]) : null) : query.cursor;
-  const nextCursor = last && (backward || hasMore) ? keyOf(last) : null;
-  const prevCursor = first && startCursor ? keyOf(first) : null;
+  const found = await db.all<Record<string, unknown>>(
+    sql`select ${select} from ${from} where ${condition} order by ${order} limit ${query.pageSize + 1} offset ${offset}`,
+  );
 
   return {
-    nextCursor,
-    prevCursor,
-    startCursor: startCursor ?? null,
-    rows: page.map((row) => shapeRecord(row, columns)),
+    hasMore: found.length > query.pageSize,
+    rows: found.slice(0, query.pageSize).map((row) => shapeRecord(row, columns)),
   };
 }
 

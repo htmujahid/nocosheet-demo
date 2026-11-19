@@ -1,4 +1,4 @@
-import { formTable, resourceTable } from "@db/schema";
+import { formTable, nowMs, resourceTable } from "@db/schema";
 import { and, asc, db, eq, inArray, sql } from "void/db";
 
 import type { Table } from "../tables/repository";
@@ -59,7 +59,7 @@ export async function updateForm(id: number, body: FormValues) {
       icon: body.icon,
       isOpen: body.isOpen,
       selectColumns: body.selectColumns,
-      updatedAt: new Date(),
+      updatedAt: nowMs,
     })
     .where(eq(formTable.id, id))
     .returning();

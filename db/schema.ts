@@ -19,14 +19,14 @@ const RESOURCE_KINDS = ["table", "view", "form"] as const;
 const lower = (column: AnySQLiteColumn) => sql`lower(${column})`;
 const live = (column: AnySQLiteColumn) => sql`${column} is null`;
 
+export const nowMs = sql`(cast(unixepoch('subsec') * 1000 as integer))`;
+
 const timestamps = {
-  createdAt: integer("created_at", { mode: "timestamp_ms" })
-    .notNull()
-    .$defaultFn(() => new Date()),
+  createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull().default(nowMs),
   updatedAt: integer("updated_at", { mode: "timestamp_ms" })
     .notNull()
-    .$defaultFn(() => new Date())
-    .$onUpdateFn(() => new Date()),
+    .default(nowMs)
+    .$onUpdateFn(() => nowMs),
 };
 
 const deletedAt = () => integer("deleted_at", { mode: "timestamp_ms" });
@@ -210,9 +210,7 @@ export const workspaceSchema = <W extends string = "default">(workspaceId: W = "
       recordId: text("record_id").notNull(),
       data: json<Record<string, unknown>>("data", {}),
       deletedBy: text("deleted_by").references(() => userTable.id, { onDelete: "set null" }),
-      deletedAt: integer("deleted_at", { mode: "timestamp_ms" })
-        .notNull()
-        .$defaultFn(() => new Date()),
+      deletedAt: integer("deleted_at", { mode: "timestamp_ms" }).notNull().default(nowMs),
     },
     (t) => [index(name("trash_table_deleted")).on(t.tableId, t.deletedAt)],
   );
@@ -229,9 +227,7 @@ export const workspaceSchema = <W extends string = "default">(workspaceId: W = "
       recordIds: json<number[]>("record_ids", []),
       count: integer("count").notNull().default(1),
       changes: json<AuditChange[]>("changes", []),
-      createdAt: integer("created_at", { mode: "timestamp_ms" })
-        .notNull()
-        .$defaultFn(() => new Date()),
+      createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull().default(nowMs),
     },
     (t) => [
       index(name("audit_created")).on(t.createdAt),
@@ -281,9 +277,7 @@ export const workspaceSchema = <W extends string = "default">(workspaceId: W = "
         .notNull()
         .references(() => accessProfileTable.id, { onDelete: "restrict" }),
       assignedBy: text("assigned_by").references(() => userTable.id, { onDelete: "set null" }),
-      assignedAt: integer("assigned_at", { mode: "timestamp_ms" })
-        .notNull()
-        .$defaultFn(() => new Date()),
+      assignedAt: integer("assigned_at", { mode: "timestamp_ms" }).notNull().default(nowMs),
     },
     (t) => [index(name("access_profile_member_profile")).on(t.profileId)],
   );

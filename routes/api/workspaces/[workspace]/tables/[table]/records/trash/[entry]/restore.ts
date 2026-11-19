@@ -38,7 +38,13 @@ export const POST = defineHandler.withValidator({ params, body })(async (c, { pa
 
   const known = await findExistingUserIds(snapshotAuthors(entry.data));
   try {
-    await restoreRow(workspace, table, entry.id, parsed, restoredSystemValues(entry.data, known));
+    await restoreRow(
+      workspace,
+      table,
+      entry.id,
+      parsed,
+      restoredSystemValues(entry.data, known, user.id),
+    );
   } catch (error) {
     writeFailure(error, columns);
   }

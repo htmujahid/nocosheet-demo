@@ -20,8 +20,7 @@ export const recordsQueryOptions = (
           params: { workspace, table: String(tableId) },
           query: {
             pageSize: query.pageSize,
-            ...(query.cursor ? { cursor: query.cursor } : {}),
-            ...(query.dir === "prev" ? { dir: query.dir } : {}),
+            ...(query.page > 1 ? { page: query.page } : {}),
             ...(query.sort ? { sort: query.sort, order: query.order } : {}),
             ...(query.q ? { q: query.q } : {}),
             ...(query.filter ? { filter: query.filter } : {}),

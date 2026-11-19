@@ -2,7 +2,7 @@ import { useEffect, useMemo } from "react";
 
 import { keepPreviousData, useQuery, useSuspenseQuery } from "@tanstack/react-query";
 
-import { CursorPagination } from "@/components/shared/data-table/cursor-pagination";
+import { PagePagination } from "@/components/shared/data-table/page-pagination";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { viewQueryOptions, viewRecordsQueryOptions } from "@/data/workspace/views";
 import { useAccess } from "@/hooks/use-access";
@@ -35,7 +35,7 @@ export function ViewGridView({
   const access = useAccess();
   const { data: detail } = useSuspenseQuery(viewQueryOptions(workspace, tableId, view.id));
   const columns = useMemo(() => withoutIdColumn(buildScopedColumns(detail)), [detail]);
-  const { query, setUrlQuery, setCursor } = useRecordsQuery(columns);
+  const { query, setUrlQuery, setPage } = useRecordsQuery(columns);
 
   const recordsOptions = viewRecordsQueryOptions(workspace, tableId, view.id, query);
   const updateCell = useUpdateCell({
@@ -51,10 +51,9 @@ export function ViewGridView({
   const rows = (data?.rows ?? []) as ViewerRow[];
   const draft = useDraftRow({ workspace, tableId, columns });
   const paging = useRecordsPaging({
-    data,
+    hasMore: data?.hasMore ?? false,
     query,
-    setCursor,
-    optionsFor: (q) => viewRecordsQueryOptions(workspace, tableId, view.id, q),
+    setPage,
   });
 
   const grid = useGridTable({
@@ -141,7 +140,7 @@ export function ViewGridView({
         />
       </div>
       <div className="border-t px-4 py-2">
-        <CursorPagination table={grid} count={rows.length} pageSizes={RECORD_PAGE_SIZES} />
+        <PagePagination table={grid} count={rows.length} pageSizes={RECORD_PAGE_SIZES} />
       </div>
     </div>
   );

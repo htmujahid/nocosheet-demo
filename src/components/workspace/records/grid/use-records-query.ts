@@ -1,7 +1,3 @@
-import { useState } from "react";
-
-import { type QueryKey, type UseQueryOptions, useQueryClient } from "@tanstack/react-query";
-
 import { useQueryStates } from "nuqs";
 
 import { parseFilters, serializeFilters, targetsOfColumns } from "@/lib/records/filter-param";
@@ -38,66 +34,37 @@ export function useRecordsQuery(columns: ViewerColumn[]) {
   };
 
   const setQuery = (values: { [K in keyof typeof urlQuery]?: (typeof urlQuery)[K] | null }) =>
-    setUrlQuery({ cursor: null, ...values });
+    setUrlQuery({ page: null, ...values });
 
   return {
-    query: { ...query, dir: "next" as "next" | "prev" },
+    query,
     setUrlQuery: setQuery,
-    setCursor: setUrlQuery,
+    setPage: setUrlQuery,
   };
 }
 
-type PageData = {
-  nextCursor: string | null;
-  prevCursor: string | null;
-  startCursor: string | null;
-};
-
-export function useRecordsPaging<TData extends PageData, TKey extends QueryKey>({
-  data,
+export function useRecordsPaging({
+  hasMore,
   query,
-  setCursor,
-  optionsFor,
+  setPage,
 }: {
-  data: TData | undefined;
+  hasMore: boolean;
   query: RecordsQuery;
-  setCursor: SetRecordsCursor;
-  optionsFor: (query: RecordsQuery) => UseQueryOptions<TData, Error, TData, TKey>;
+  setPage: SetRecordsPage;
 }) {
-  const queryClient = useQueryClient();
-  const [loading, setLoading] = useState(false);
-
-  const next = () => {
-    if (data?.nextCursor) void setCursor({ cursor: data.nextCursor }, { history: "push" });
-  };
-
-  const previous = async () => {
-    if (!data?.prevCursor || loading) return;
-    setLoading(true);
-    try {
-      const page = await queryClient.query(
-        optionsFor({ ...query, cursor: data.prevCursor, dir: "prev" }),
-      );
-      queryClient.setQueryData<TData>(
-        optionsFor({ ...query, cursor: page.startCursor, dir: "next" }).queryKey as QueryKey,
-        page,
-      );
-      await setCursor({ cursor: page.startCursor }, { history: "push" });
-    } finally {
-      setLoading(false);
-    }
-  };
+  const goTo = (page: number) => void setPage({ page }, { history: "push" });
 
   return {
-    hasPrevious: Boolean(data?.prevCursor),
-    canNext: Boolean(data?.nextCursor),
-    next,
-    previous,
+    page: query.page,
+    hasPrevious: query.page > 1,
+    canNext: hasMore,
+    next: () => hasMore && goTo(query.page + 1),
+    previous: () => query.page > 1 && goTo(query.page - 1),
   };
 }
 
 export type RecordsPaging = ReturnType<typeof useRecordsPaging>;
 
 export type RecordsQuery = ReturnType<typeof useRecordsQuery>["query"];
-export type SetRecordsCursor = ReturnType<typeof useRecordsQuery>["setCursor"];
+export type SetRecordsPage = ReturnType<typeof useRecordsQuery>["setPage"];
 export type SetRecordsQuery = ReturnType<typeof useRecordsQuery>["setUrlQuery"];
