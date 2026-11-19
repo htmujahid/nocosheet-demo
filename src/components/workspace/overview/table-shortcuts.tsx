@@ -1,4 +1,3 @@
-import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 
 import { Button } from "@/components/ui/button";
@@ -12,27 +11,22 @@ import {
   CardPanel,
 } from "@/components/ui/card";
 import { NamedIcon } from "@/components/workspace/tables/named-icon";
-import { sidebarQueryOptions } from "@/data/workspace/sidebar";
-import { templatesQueryOptions } from "@/data/workspace/templates";
+import type { SidebarTable } from "@/data/workspace/sidebar";
 import { useAccess } from "@/hooks/use-access";
 import { formatRelativeTime } from "@/lib/format-relative-time";
 
-import { TemplateGallery } from "./template-gallery";
-
 const RECENT_SHOWN = 5;
 
-export function TableShortcuts({ workspace }: { workspace: string }) {
-  const { data: sidebar } = useSuspenseQuery(sidebarQueryOptions(workspace));
+export function TableShortcuts({
+  workspace,
+  tables: allTables,
+}: {
+  workspace: string;
+  tables: SidebarTable[];
+}) {
   const access = useAccess();
-  const tables = sidebar.groups
-    .flatMap((group) => group.tables)
-    .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+  const tables = [...allTables].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
   const empty = tables.length === 0;
-  const { data: templates, isError } = useQuery({
-    ...templatesQueryOptions(workspace),
-    enabled: access.admin && empty,
-  });
-  const showTemplates = access.admin && empty && !isError && (templates === undefined || templates.length > 0);
 
   return (
     <>
@@ -78,9 +72,7 @@ export function TableShortcuts({ workspace }: { workspace: string }) {
             </Link>
           ))}
           {empty &&
-            (showTemplates ? (
-              <TemplateGallery workspace={workspace} templates={templates} />
-            ) : (
+            (
               <CardPanel className="flex flex-col items-center gap-3 py-8 text-center">
                 <p className="text-muted-foreground text-sm">
                   {access.admin
@@ -102,7 +94,7 @@ export function TableShortcuts({ workspace }: { workspace: string }) {
                   </Button>
                 )}
               </CardPanel>
-            ))}
+            )}
         </Card>
       </CardFrame>
     </>

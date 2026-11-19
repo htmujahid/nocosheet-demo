@@ -24,8 +24,8 @@ export async function findForm(tableId: number, id: number) {
   return row;
 }
 
-export async function createForm(table: Table, body: FormValues, userId: string) {
-  const [, inserted] = await db.batch([
+export function buildFormStatements(table: Pick<Table, "id">, body: FormValues, userId: string) {
+  return [
     db.insert(resourceTable).values({ kind: "form" }),
     db
       .insert(formTable)
@@ -42,7 +42,11 @@ export async function createForm(table: Table, body: FormValues, userId: string)
         createdBy: userId,
       })
       .returning(),
-  ]);
+  ] as const;
+}
+
+export async function createForm(table: Table, body: FormValues, userId: string) {
+  const [, inserted] = await db.batch(buildFormStatements(table, body, userId));
   return inserted[0];
 }
 

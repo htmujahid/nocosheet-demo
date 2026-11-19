@@ -246,12 +246,14 @@ export async function removeFavorite(userId: string, tableId: number) {
     .where(and(eq(favoriteTable.userId, userId), eq(favoriteTable.tableId, tableId)));
 }
 
-export async function createTable(workspace: string, body: TableValues, userId: string) {
-  const tableName = newTableName();
-  const physicalName = physicalTableName(workspace, tableName);
-
-  const [, , inserted] = await db.batch([
-    db.run(sql.raw(buildCreateTable(physicalName))),
+export function buildTableStatements(
+  tableName: string,
+  body: TableValues,
+  userId: string,
+  ddl: string[],
+) {
+  return [
+    ...ddl.map((statement) => db.run(sql.raw(statement))),
     db.insert(resourceTable).values({ kind: "table" }),
     db
       .insert(tableTable)
@@ -268,8 +270,17 @@ export async function createTable(workspace: string, body: TableValues, userId: 
         createdBy: userId,
       })
       .returning(),
-  ]);
-  return inserted[0];
+  ];
+}
+
+export async function createTable(workspace: string, body: TableValues, userId: string) {
+  const tableName = newTableName();
+  const physicalName = physicalTableName(workspace, tableName);
+
+  const results = (await db.batch(
+    buildTableStatements(tableName, body, userId, [buildCreateTable(physicalName)]) as never,
+  )) as unknown[];
+  return (results.at(-1) as Table[])[0];
 }
 
 export async function updateTable(
@@ -305,6 +316,36 @@ export async function findRelationTarget(workspace: string, tableId: number) {
   };
 }
 
+export function buildColumnInsert(
+  tableId: number,
+  columnName: string,
+  body: ColumnValues,
+  type: string,
+  check: { stored: string } | null,
+  generated: { stored: string } | null,
+) {
+  return db.insert(columnTable).values({
+    tableId,
+    columnName,
+    name: body.name,
+    icon: body.icon,
+    description: body.description,
+    type,
+    format: body.format,
+    options: body.options,
+    checkExpression: check?.stored ?? null,
+    generatedExpression: generated?.stored ?? null,
+    isRequired: body.isRequired,
+    isFilterable: body.isFilterable,
+    isSortable: body.isSortable,
+    isSearchable: body.isSearchable,
+    isUnique: body.isUnique,
+    isHidden: body.isHidden,
+    defaultValue: body.defaultValue,
+    position: body.position,
+  });
+}
+
 export async function createColumn(
   workspace: string,
   table: Table,
@@ -332,26 +373,7 @@ export async function createColumn(
   await db.batch([
     first,
     ...rest,
-    db.insert(columnTable).values({
-      tableId: table.id,
-      columnName,
-      name: body.name,
-      icon: body.icon,
-      description: body.description,
-      type: columnSqliteType(body, targets),
-      format: body.format,
-      options: body.options,
-      checkExpression: check?.stored ?? null,
-      generatedExpression: generated?.stored ?? null,
-      isRequired: body.isRequired,
-      isFilterable: body.isFilterable,
-      isSortable: body.isSortable,
-      isSearchable: body.isSearchable,
-      isUnique: body.isUnique,
-      isHidden: body.isHidden,
-      defaultValue: body.defaultValue,
-      position: body.position,
-    }),
+    buildColumnInsert(table.id, columnName, body, columnSqliteType(body, targets), check, generated),
     db.update(tableTable).set({ updatedAt: new Date() }).where(eq(tableTable.id, table.id)),
   ]);
 
