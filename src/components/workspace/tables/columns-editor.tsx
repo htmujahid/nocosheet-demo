@@ -111,7 +111,6 @@ export function ColumnsEditor({
           isFilterable: draft.isFilterable,
           isSortable: draft.isSortable,
           isSearchable: draft.isSearchable,
-          isUnique: draft.isUnique,
           isHidden: draft.isHidden,
         },
       });
