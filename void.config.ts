@@ -12,5 +12,8 @@ export default defineConfig({
   },
   worker: {
     compatibility_date: "2026-02-24",
+    workers_dev: true,
+    preview_urls: true,
+    routes: [],
   },
 });
