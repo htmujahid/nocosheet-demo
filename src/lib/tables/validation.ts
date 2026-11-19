@@ -163,7 +163,6 @@ export const columnPatchSchema = z.object({
   isFilterable: z.boolean().optional(),
   isSortable: z.boolean().optional(),
   isSearchable: z.boolean().optional(),
-  isUnique: z.boolean().optional(),
   isHidden: z.boolean().optional(),
   position: z.number().int().nonnegative().optional(),
 });

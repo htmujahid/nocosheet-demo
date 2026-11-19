@@ -127,12 +127,8 @@ export function buildCreateTable(physicalName: string) {
 
 export type IndexKind = "uq" | "idx";
 
-export const indexKind = (flags: {
-  isUnique: boolean;
-  isFilterable: boolean;
-  isSortable: boolean;
-}): IndexKind | null =>
-  flags.isUnique ? "uq" : flags.isFilterable || flags.isSortable ? "idx" : null;
+export const indexKind = (flags: { isUnique: boolean; format: string }): IndexKind | null =>
+  flags.isUnique ? "uq" : flags.format === "relation" ? "idx" : null;
 
 export const indexName = (workspace: string, columnName: string, kind: IndexKind) =>
   `${workspace}__ix_${columnName}_${kind}`;

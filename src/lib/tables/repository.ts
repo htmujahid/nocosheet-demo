@@ -364,34 +364,9 @@ export async function updateColumn(
   column: Column,
   patch: Partial<Column>,
 ) {
-  const physicalName = physicalTableName(workspace, table.tableName);
   const changes = defined(patch);
-  const before = indexKind(column);
-  const after = indexKind({ ...column, ...changes });
-  const statements = [];
-  if (before !== after) {
-    if (before)
-      statements.push(
-        db.run(sql.raw(buildDropIndex(indexName(workspace, column.columnName, before)))),
-      );
-    if (after)
-      statements.push(
-        db.run(
-          sql.raw(
-            buildCreateIndex(
-              indexName(workspace, column.columnName, after),
-              physicalName,
-              column.columnName,
-              after,
-              column.format as ColumnFormat,
-            ),
-          ),
-        ),
-      );
-  }
 
   await db.batch([
-    ...statements,
     db.update(columnTable).set(changes).where(eq(columnTable.id, column.id)),
     db.update(tableTable).set({ updatedAt: new Date() }).where(eq(tableTable.id, table.id)),
   ] as never);
@@ -417,12 +392,9 @@ export async function softDeleteColumn(
   column: Column,
   userId: string,
 ) {
-  const kind = indexKind(column);
-
   await db.batch([
-    db.run(
-      sql.raw(kind ? buildDropIndex(indexName(workspace, column.columnName, kind)) : "select 1"),
-    ),
+    db.run(sql.raw(buildDropIndex(indexName(workspace, column.columnName, "uq")))),
+    db.run(sql.raw(buildDropIndex(indexName(workspace, column.columnName, "idx")))),
     db
       .update(columnTable)
       .set({ deletedAt: new Date(), deletedBy: userId })
@@ -490,12 +462,9 @@ export async function purgeExpiredColumns(workspace: string, cutoff: Date) {
 
 export async function dropColumn(workspace: string, table: Table, column: Column) {
   const physicalName = physicalTableName(workspace, table.tableName);
-  const kind = indexKind(column);
-
   await db.batch([
-    db.run(
-      sql.raw(kind ? buildDropIndex(indexName(workspace, column.columnName, kind)) : "select 1"),
-    ),
+    db.run(sql.raw(buildDropIndex(indexName(workspace, column.columnName, "uq")))),
+    db.run(sql.raw(buildDropIndex(indexName(workspace, column.columnName, "idx")))),
     db.run(sql.raw(buildDropColumn(physicalName, column.columnName))),
     db.delete(columnTable).where(eq(columnTable.id, column.id)),
     db

@@ -309,6 +309,7 @@ function ColumnForm({
                       <Label>
                         <Checkbox
                           checked={field.state.value}
+                          disabled={locked && flag.name === "isUnique"}
                           onCheckedChange={(checked) => field.handleChange(checked === true)}
                         />
                         {flag.label}
