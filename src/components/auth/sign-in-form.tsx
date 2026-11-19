@@ -15,7 +15,11 @@ import { signInMutationOptions } from "@/data/auth/sign-in";
 import { signInPasskeyMutationOptions } from "@/data/auth/sign-in-passkey";
 import { useCompleteSignIn } from "@/hooks/use-complete-sign-in";
 
+import { DEMO_MODE } from "@/components/layout/readonly-fieldset";
+
 import { AuthErrorAlert } from "./auth-error-alert";
+
+const DEMO_CREDENTIALS = { identifier: "admin@example.com", password: "password123" };
 
 const schema = z.object({
   identifier: z.string().trim().min(1, "Enter your email or username"),
@@ -62,7 +66,7 @@ export function SignInForm() {
   }, [startAutofill]);
 
   const form = useForm({
-    defaultValues: { identifier: "", password: "" },
+    defaultValues: DEMO_MODE || import.meta.env.DEV ? DEMO_CREDENTIALS : { identifier: "", password: "" },
     validators: { onSubmit: schema },
     onSubmit: ({ value }) => mutation.mutate({ ...value, identifier: value.identifier.trim() }),
   });
