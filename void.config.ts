@@ -12,6 +12,9 @@ export default defineConfig({
   },
   worker: {
     compatibility_date: "2026-02-24",
+  },
+  // Declared explicitly so deploys never depend on dashboard-managed routes/visibility (or a local snapshot) to preserve them.
+  cloudflare: {
     workers_dev: true,
     preview_urls: true,
     routes: [],
