@@ -1,11 +1,19 @@
 import { useId, useState } from "react";
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardFrame,
+  CardFrameDescription,
+  CardFrameHeader,
+  CardFrameTitle,
+  CardPanel,
+} from "@/components/ui/card";
 import {
   Dialog,
   DialogClose,
@@ -22,7 +30,7 @@ import { Switch } from "@/components/ui/switch";
 import { toastManager } from "@/components/ui/toast";
 import { NamedIcon } from "@/components/workspace/tables/named-icon";
 import { workspaceKeys } from "@/data/workspace/keys";
-import { applyTemplateMutationOptions } from "@/data/workspace/templates";
+import { applyTemplateMutationOptions, templatesQueryOptions } from "@/data/workspace/templates";
 import type { TemplateSummary } from "@/lib/templates/catalog";
 
 const count = (value: number, noun: string) => `${value} ${noun}${value === 1 ? "" : "s"}`;
@@ -133,56 +141,58 @@ function UseTemplateDialog({
   );
 }
 
-export function TemplateGallery({
-  workspace,
-  templates,
-}: {
-  workspace: string;
-  templates: TemplateSummary[] | undefined;
-}) {
+export function TemplateGallery({ workspace }: { workspace: string }) {
+  const { data: templates, isError } = useQuery(templatesQueryOptions(workspace));
   const [selected, setSelected] = useState<TemplateSummary | null>(null);
 
   return (
-    <div className="flex flex-col gap-4 p-4 md:p-6">
-      <div className="flex flex-col gap-1">
-        <p className="font-medium text-sm">No tables yet</p>
-        <p className="text-muted-foreground text-sm">
+    <CardFrame>
+      <CardFrameHeader>
+        <CardFrameTitle>Templates</CardFrameTitle>
+        <CardFrameDescription>
           Pick a template to create your first table, view and form.
-        </p>
-      </div>
-      <div className="grid gap-3 sm:grid-cols-2">
-        {!templates &&
-          Array.from({ length: 4 }, (_, index) => <Skeleton key={index} className="h-24" />)}
-        {templates?.map((template) => (
-          <button
-            key={template.id}
-            type="button"
-            className="flex items-start gap-3 rounded-xl border p-4 text-left transition-colors hover:bg-accent/40 focus-visible:outline-2 focus-visible:outline-ring"
-            onClick={() => setSelected(template)}
-          >
-            <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
-              <NamedIcon name={template.icon} className="size-4" />
-            </span>
-            <span className="flex min-w-0 flex-1 flex-col gap-1">
-              <span className="font-medium text-sm">{template.name}</span>
-              <span className="line-clamp-2 text-muted-foreground text-xs">
-                {template.description}
+        </CardFrameDescription>
+      </CardFrameHeader>
+      <Card>
+        <CardPanel className="grid gap-3 sm:grid-cols-2">
+          {(isError || templates?.length === 0) && (
+            <p className="text-muted-foreground text-sm sm:col-span-2">
+              {isError ? "Couldn't load templates." : "No templates available."}
+            </p>
+          )}
+          {!templates && !isError &&
+            Array.from({ length: 4 }, (_, index) => <Skeleton key={index} className="h-24" />)}
+          {templates?.map((template) => (
+            <button
+              key={template.id}
+              type="button"
+              className="flex items-start gap-3 rounded-xl border p-4 text-left transition-colors hover:bg-accent/40 focus-visible:outline-2 focus-visible:outline-ring"
+              onClick={() => setSelected(template)}
+            >
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                <NamedIcon name={template.icon} className="size-4" />
               </span>
-              <span className="mt-1 flex flex-wrap items-center gap-1.5">
-                <Badge variant="secondary" size="sm">
-                  {describe(template)}
-                </Badge>
+              <span className="flex min-w-0 flex-1 flex-col gap-1">
+                <span className="font-medium text-sm">{template.name}</span>
+                <span className="line-clamp-2 text-muted-foreground text-xs">
+                  {template.description}
+                </span>
+                <span className="mt-1 flex flex-wrap items-center gap-1.5">
+                  <Badge variant="secondary" size="sm">
+                    {describe(template)}
+                  </Badge>
+                </span>
               </span>
-            </span>
-          </button>
-        ))}
-      </div>
+            </button>
+          ))}
+        </CardPanel>
+      </Card>
       <UseTemplateDialog
         key={selected?.id}
         workspace={workspace}
         template={selected}
         onClose={() => setSelected(null)}
       />
-    </div>
+    </CardFrame>
   );
 }
