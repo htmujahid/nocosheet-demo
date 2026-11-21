@@ -7,10 +7,5 @@ import { ac, roles } from "./access";
 /** Void's preconfigured `auth` client has no plugin hook, so build ours with the plugins we use. */
 export const auth = createAuthClient({
   basePath: "/api/auth",
-  plugins: [
-    passkeyClient(),
-    twoFactorClient(),
-    adminClient({ ac, roles }),
-    usernameClient(),
-  ],
+  plugins: [passkeyClient(), twoFactorClient(), adminClient({ ac, roles }), usernameClient()],
 });

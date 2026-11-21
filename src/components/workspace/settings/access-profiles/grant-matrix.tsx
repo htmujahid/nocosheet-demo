@@ -1,5 +1,3 @@
-import { LayoutGridIcon, TextAlignStartIcon } from "lucide-react";
-
 import { SettingsRow } from "@/components/shared/settings-row";
 import {
   Card,
@@ -8,14 +6,8 @@ import {
   CardFrameHeader,
   CardFrameTitle,
 } from "@/components/ui/card";
+import { ACTIONS, type Action, ACTION_LABELS } from "@/lib/access/grants";
 import type { Matrix } from "@/lib/access/matrix";
-import {
-  ACTIONS,
-  type Action,
-  FORM_ACTIONS,
-  ACTION_LABELS,
-  VIEW_ACTIONS,
-} from "@/lib/access/grants";
 
 import { OverrideCard } from "./override-card";
 import { ScopeSelect, type ScopeValue } from "./scope-select";
@@ -25,15 +17,13 @@ const DESCRIPTIONS: Record<Action, string> = {
   read: "See records and open their details.",
   update: "Change the values of records.",
   delete: "Move records to the trash.",
-  export: "Download a whole table or view as a CSV file.",
+  export: "Download a whole table as a CSV file.",
 };
 
 export type GrantTarget = {
   id: number;
   name: string;
   icon: string | null;
-  views: { id: number; name: string; icon: string | null }[];
-  forms: { id: number; name: string; icon: string | null }[];
 };
 
 export function GrantMatrix({
@@ -49,21 +39,14 @@ export function GrantMatrix({
     value !== "inherit" &&
     onChange({ ...matrix, workspace: { ...matrix.workspace, [action]: value } });
 
-  const views = targets.flatMap((table) =>
-    table.views.map((view) => ({ ...view, group: table.name })),
-  );
-  const forms = targets.flatMap((table) =>
-    table.forms.map((form) => ({ ...form, group: table.name })),
-  );
-
   return (
     <>
       <CardFrame>
         <CardFrameHeader>
           <CardFrameTitle>Workspace-wide access</CardFrameTitle>
           <CardFrameDescription>
-            What this profile can do in every table, unless a table, view or form below says otherwise.
-            Changing table structure is always for administrators only.
+            What this profile can do in every table, unless a table below says otherwise. Changing
+            table structure is always for administrators only.
           </CardFrameDescription>
         </CardFrameHeader>
         <Card>
@@ -97,40 +80,6 @@ export function GrantMatrix({
         matrix={matrix}
         actions={ACTIONS}
         inheritLabel="Same as workspace"
-        onChange={onChange}
-      />
-
-      <OverrideCard
-        title="View overrides"
-        description='What this profile can do through a view. A view only shows its own columns and records. New records are always added to the table, so creating follows the table or a form. Anything left on "Same as table" follows the table.'
-        addLabel="Add a view"
-        emptyLabel={
-          views.length === 0
-            ? "There are no views yet. Create a view to set access for it."
-            : "No view overrides yet. Use Add a view to give this profile different access through a view."
-        }
-        items={views}
-        matrix={matrix}
-        actions={VIEW_ACTIONS}
-        inheritLabel="Same as table"
-        fallback={LayoutGridIcon}
-        onChange={onChange}
-      />
-
-      <OverrideCard
-        title="Form overrides"
-        description='Who can fill in a form. Anything left on "Same as table" follows the table. A form only ever creates records.'
-        addLabel="Add a form"
-        emptyLabel={
-          forms.length === 0
-            ? "There are no forms yet. Create a form to set access for it."
-            : "No form overrides yet. Use Add a form to let this profile fill in a form."
-        }
-        items={forms}
-        matrix={matrix}
-        actions={FORM_ACTIONS}
-        inheritLabel="Same as table"
-        fallback={TextAlignStartIcon}
         onChange={onChange}
       />
     </>

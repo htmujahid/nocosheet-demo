@@ -24,7 +24,7 @@ export function RouteError({ error, reset }: ErrorComponentProps) {
   }, [queryErrorResetBoundary]);
 
   return (
-    <Empty className="min-h-svh">
+    <Empty className="py-16">
       <EmptyHeader>
         <EmptyMedia variant="icon">
           <TriangleAlertIcon aria-hidden="true" />

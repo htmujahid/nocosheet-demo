@@ -18,10 +18,6 @@ function resolveCrumb(crumb: RouteCrumb, loaderData: unknown) {
   return typeof crumb === "function" ? crumb(loaderData) : crumb;
 }
 
-/**
- * Home icon first, then one item per matched route that declares `staticData.crumb`. On the home
- * page there are no such routes, so only the icon shows.
- */
 export function WorkspaceBreadcrumbs({ workspace }: { workspace: string }) {
   const crumbs = useMatches({
     select: (matches) =>
@@ -54,7 +50,6 @@ export function WorkspaceBreadcrumbs({ workspace }: { workspace: string }) {
           const last = index === crumbs.length - 1;
           return (
             <Fragment key={crumb.id}>
-              {/* On small screens only the current page is shown after the home icon (below lg). */}
               <BreadcrumbSeparator className={last ? undefined : "hidden lg:block"} />
               <BreadcrumbItem className={last ? "min-w-0" : "hidden lg:inline-flex"}>
                 {last ? (

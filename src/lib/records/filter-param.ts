@@ -27,7 +27,8 @@ const needsQuotes = (item: string) => /[,;"]/.test(item) || item !== item.trim()
 
 const quote = (text: string) => `"${text.replaceAll('"', '""')}"`;
 
-const quoteValue = (text: string) => (/[;"]/.test(text) || text !== text.trim() ? quote(text) : text);
+const quoteValue = (text: string) =>
+  /[;"]/.test(text) || text !== text.trim() ? quote(text) : text;
 
 function unquote(raw: string) {
   if (raw.length < 2 || !raw.startsWith('"') || !raw.endsWith('"')) return raw;
@@ -128,7 +129,12 @@ export function parseCondition(target: FilterTarget, text: string): FilterParseR
   const dot = text.indexOf(".");
   const op = dot === -1 ? text : text.slice(0, dot);
   const rawText = dot === -1 ? null : text.slice(dot + 1);
-  const raw = rawText === null ? null : operatorInput(target.kind, op) === "choices" ? rawText : unquote(rawText);
+  const raw =
+    rawText === null
+      ? null
+      : operatorInput(target.kind, op) === "choices"
+        ? rawText
+        : unquote(rawText);
   const { key: column, kind } = target;
 
   if (!operatorsFor(kind).some((item) => item.value === op))

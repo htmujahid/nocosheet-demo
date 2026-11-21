@@ -31,7 +31,7 @@ import {
   ProgressLabel,
   ProgressTrack,
   ProgressValue,
-} from "@/components/ui/progress"
+} from "@/components/ui/progress";
 ```
 
 ## Minimal pattern

@@ -14,7 +14,10 @@ import { resolveTrashQuery, type TrashQuery } from "@/lib/trash/query";
 
 export function useTrashQuery() {
   const [query, setQuery] = useState<TrashQuery>(() => resolveTrashQuery({}));
-  return [query, (patch: Partial<TrashQuery>) => setQuery((previous) => ({ ...previous, ...patch }))] as const;
+  return [
+    query,
+    (patch: Partial<TrashQuery>) => setQuery((previous) => ({ ...previous, ...patch })),
+  ] as const;
 }
 
 export function TrashTable<TRow extends { id: number }>({

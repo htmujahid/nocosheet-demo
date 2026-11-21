@@ -19,8 +19,10 @@ export function ThemeToggle() {
         <MoonIcon className="hidden dark:block" />
       </MenuTrigger>
       <MenuPopup align="end">
-        <MenuRadioGroup value={preferences.theme}
-          onValueChange={(value) => setPreference("theme", value as Theme)}>
+        <MenuRadioGroup
+          value={preferences.theme}
+          onValueChange={(value) => setPreference("theme", value as Theme)}
+        >
           <MenuRadioItem value="light">
             <SunIcon className="me-2 inline" />
             Light

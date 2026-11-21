@@ -44,7 +44,7 @@ import {
   MenuSubPopup,
   MenuSubTrigger,
   MenuTrigger,
-} from "@/components/ui/menu"
+} from "@/components/ui/menu";
 ```
 
 ## Minimal pattern
@@ -123,4 +123,3 @@ const [confirmOpen, setConfirmOpen] = useState(false)
 - switch-style checkbox items: `p-menu-9`
 - cross-component example: `p-dialog-2` (menu opening dialog)
 - responsive menu/drawer variant: `p-drawer-13`
-

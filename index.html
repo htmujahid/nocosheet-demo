@@ -4,11 +4,18 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/icons.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0a0a0a" />
     <script>
       try {
         var p = JSON.parse(localStorage.getItem("preferences") || "{}");
         var root = document.documentElement;
-        if (p.theme === "dark" || (p.theme !== "light" && matchMedia("(prefers-color-scheme: dark)").matches)) {
+        if (
+          p.theme === "dark" ||
+          (p.theme !== "light" && matchMedia("(prefers-color-scheme: dark)").matches)
+        ) {
           root.classList.add("dark");
         }
         if (typeof p.accent === "string" && /^[a-z]+$/.test(p.accent) && p.accent !== "default") {

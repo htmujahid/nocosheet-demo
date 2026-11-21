@@ -1,7 +1,8 @@
 import { useState } from "react";
 
+import { useDbClient } from "@tanstack/react-db";
 import { useForm } from "@tanstack/react-form";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 
 import { PlusIcon } from "lucide-react";
 import { z } from "zod";
@@ -25,7 +26,7 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { toastManager } from "@/components/ui/toast";
 import { createUserMutationOptions } from "@/data/admin/create-user";
-import { workspaceKeys } from "@/data/workspace/keys";
+import { membersCollection } from "@/data/workspace/members";
 
 import { RoleSelect, type MemberRole } from "./role-select";
 
@@ -39,12 +40,12 @@ const schema = z.object({
 
 export function AddMemberDialog() {
   const [open, setOpen] = useState(false);
-  const queryClient = useQueryClient();
+  const dbClient = useDbClient();
 
   const createUser = useMutation({
     ...createUserMutationOptions,
     onSuccess: async (_data, values) => {
-      await queryClient.invalidateQueries({ queryKey: workspaceKeys.members() });
+      await dbClient.collection(membersCollection).utils.refetch();
       toastManager.add({ type: "success", title: `${values.name} was added` });
       setOpen(false);
     },

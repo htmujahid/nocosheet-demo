@@ -1,7 +1,6 @@
 import { useState } from "react";
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
+import { useMutation } from "@tanstack/react-query";
 
 import { RotateCcwIcon } from "lucide-react";
 
@@ -26,30 +25,25 @@ import {
   CardFrameTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { toastManager } from "@/components/ui/toast";
 import { resetWorkspaceMutationOptions } from "@/data/workspace/reset";
+import { useSession } from "@/hooks/use-session";
 import { useWorkspace } from "@/hooks/use-workspace";
+import { resetDbClient } from "@/lib/db/client";
 
 const CONFIRMATION = "reset";
 
 export function ResetWorkspaceCard({ workspace }: { workspace: string }) {
   const { isAdmin } = useWorkspace();
-  const queryClient = useQueryClient();
-  const navigate = useNavigate();
+  const session = useSession();
   const [open, setOpen] = useState(false);
   const [typed, setTyped] = useState("");
 
   const reset = useMutation({
     ...resetWorkspaceMutationOptions,
-    onSuccess: async ({ tables }) => {
+    onSuccess: async () => {
       setOpen(false);
-      queryClient.clear();
-      await navigate({ to: "/workspaces/$workspace", params: { workspace }, replace: true });
-      toastManager.add({
-        type: "success",
-        title: "Workspace reset",
-        description: `${tables} ${tables === 1 ? "table was" : "tables were"} deleted.`,
-      });
+      await resetDbClient(session!.user.id, workspace);
+      window.location.assign(`/workspaces/${workspace}`);
     },
   });
 
@@ -59,14 +53,12 @@ export function ResetWorkspaceCard({ workspace }: { workspace: string }) {
     <CardFrame>
       <CardFrameHeader>
         <CardFrameTitle>Danger zone</CardFrameTitle>
-        <CardFrameDescription>
-          Actions here can't be undone.
-        </CardFrameDescription>
+        <CardFrameDescription>Actions here can't be undone.</CardFrameDescription>
       </CardFrameHeader>
       <Card>
         <SettingsRow
           title="Reset workspace"
-          description="Delete every table, record, view, form, favorite, trash entry and audit log entry. Accounts, members and access profiles are kept."
+          description="Delete every table, record, view, favorite, trash entry and audit log entry. Accounts, members and access profiles are kept."
         >
           <AlertDialog
             open={open}
@@ -90,9 +82,9 @@ export function ResetWorkspaceCard({ workspace }: { workspace: string }) {
               <AlertDialogHeader>
                 <AlertDialogTitle>Reset this workspace?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Every table and all of its records, columns, views and forms are deleted
-                  permanently, along with the trash and the audit log. Accounts and access
-                  profiles are kept, but grants on specific tables are removed with them.
+                  Every table and all of its records, columns and views are deleted permanently,
+                  along with the trash and the audit log. Accounts and access profiles are kept, but
+                  grants on specific tables are removed with them.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <div className="flex flex-col gap-3 px-6 pb-2">

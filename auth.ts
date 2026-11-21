@@ -1,6 +1,6 @@
 import { passkey } from "@better-auth/passkey";
 import { APIError } from "better-auth/api";
-import { admin, bearer, twoFactor, username } from "better-auth/plugins";
+import { admin, twoFactor, username } from "better-auth/plugins";
 import { defineAuth } from "void/auth";
 import { storage } from "void/storage";
 
@@ -31,7 +31,6 @@ export default defineAuth(({ defaults, env }) => ({
     twoFactor({ issuer: "Nocosheet" }),
     admin({ ac, roles, defaultRole: DEFAULT_ROLE, adminRoles: ADMIN_ROLES }),
     username({ displayUsername: false, minUsernameLength: 3, maxUsernameLength: 30 }),
-    bearer({ requireSignature: true }),
   ],
   emailAndPassword: {
     ...defaults.emailAndPassword,

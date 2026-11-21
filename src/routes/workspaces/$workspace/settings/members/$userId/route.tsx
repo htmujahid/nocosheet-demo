@@ -4,10 +4,12 @@ import { WorkspaceContent, WorkspaceHeader } from "@/components/layout/workspace
 import { MemberNotFound } from "@/components/workspace/settings/members/member-not-found";
 import { MemberTabs } from "@/components/workspace/settings/members/member-tabs";
 import { adminUserQueryOptions } from "@/data/admin/user";
-import { membersQueryOptions } from "@/data/workspace/members";
+import { membersCollection } from "@/data/workspace/members";
+import { requireOnline } from "@/lib/require-online";
 
 export const Route = createFileRoute("/workspaces/$workspace/settings/members/$userId")({
-  beforeLoad: ({ context, params }) => {
+  beforeLoad: ({ context, location, params }) => {
+    requireOnline(location);
     if (!context.workspace.isAdmin) {
       throw redirect({
         to: "/workspaces/$workspace/settings/members",
@@ -16,10 +18,10 @@ export const Route = createFileRoute("/workspaces/$workspace/settings/members/$u
     }
     return { isSelf: context.session?.user.id === params.userId };
   },
-  // A member who isn't in the list is not found, so the list is awaited.
   loader: async ({ context, params }) => {
-    const members = await context.queryClient.query({ ...membersQueryOptions, staleTime: "static" });
-    const member = members.find((item) => item.id === params.userId);
+    const members = context.dbClient.collection(membersCollection);
+    await members.preload();
+    const member = members.get(params.userId);
     if (!member) throw notFound();
 
     void context.queryClient

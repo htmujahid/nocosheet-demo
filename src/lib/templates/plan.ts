@@ -1,8 +1,8 @@
-import { formInputSchema, type FormValues } from "../forms/validation";
 import { parseRecordValues, type ParsedValue, type WriteColumn } from "../records/values";
 import {
   buildColumnIndexes,
   buildCreateTable,
+  buildSystemIndexes,
   columnDefinition,
   columnSqliteType,
   compileExpressions,
@@ -35,7 +35,6 @@ export type PlannedTable = {
   columns: PlannedColumn[];
   titleColumn: string | undefined;
   views: ViewValues[];
-  forms: FormValues[];
   rows: { id: number; values: ParsedValue[] }[];
 };
 
@@ -80,7 +79,9 @@ export function planTemplate(
   options: { sampleData: boolean; now?: Date },
 ): TemplatePlan {
   const now = options.now ?? new Date();
-  const indexByName = new Map(template.tables.map((table, index) => [table.name.toLowerCase(), index]));
+  const indexByName = new Map(
+    template.tables.map((table, index) => [table.name.toLowerCase(), index]),
+  );
 
   const uniqueName = (name: string) => {
     let candidate = name;
@@ -148,8 +149,11 @@ export function planTemplate(
     const ddl = [
       buildCreateTable(
         physicalName,
-        columns.map((column) => columnDefinition(column.columnName, column.body, targets, references)),
+        columns.map((column) =>
+          columnDefinition(column.columnName, column.body, targets, references),
+        ),
       ),
+      ...buildSystemIndexes(physicalName),
       ...columns.flatMap((column) =>
         buildColumnIndexes(workspace, physicalName, column.columnName, column.body),
       ),
@@ -181,15 +185,6 @@ export function planTemplate(
             ...filter,
             column: columnName(filter.column),
           })),
-        }),
-      ),
-      forms: (def.forms ?? []).map((form) =>
-        formInputSchema.parse({
-          name: form.name,
-          icon: form.icon,
-          description: form.description,
-          selectColumns: form.columns.map(columnName),
-          isOpen: form.open ?? true,
         }),
       ),
       rows: [],

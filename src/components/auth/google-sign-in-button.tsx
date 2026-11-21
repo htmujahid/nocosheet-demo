@@ -41,7 +41,7 @@ export function GoogleSignInButton({ collapsed = false }: { collapsed?: boolean 
         type="button"
         variant="outline"
         className="w-full"
-        disabled={!config.auth.google}
+        disabled={!config?.auth.google}
         loading={mutation.isPending}
         onClick={() => mutation.mutate({ provider: "google", callbackURL: redirect ?? "/" })}
       >

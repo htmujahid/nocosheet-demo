@@ -9,10 +9,11 @@ import type { dataTableFeatures } from "@/components/shared/data-table/features"
 import "react-data-grid/lib/styles.css";
 
 import "./records-grid.css";
+import { aggregate } from "@/lib/records/aggregates";
+
 import { cellMode } from "./cells";
 import type { ViewerColumn } from "./columns";
 import { RecordsContextMenu } from "./records-context-menu";
-import { aggregate } from "@/lib/records/aggregates";
 import { type SummaryRow, type ViewerRow, useRecordsGridColumns } from "./records-grid-columns";
 import { type DraftRow, isDraft } from "./use-draft-row";
 
@@ -29,7 +30,6 @@ export function RecordsGrid<TSelected extends { rowSelection: Record<string, boo
   empty,
   workspace,
   tableId,
-  viewId,
   canEdit,
   canEditRow,
   canDeleteRow,
@@ -47,7 +47,6 @@ export function RecordsGrid<TSelected extends { rowSelection: Record<string, boo
   empty: string;
   workspace: string;
   tableId: number;
-  viewId?: number;
   canEdit: boolean;
   canEditRow: (row: ViewerRow) => boolean;
   canDeleteRow: (row: ViewerRow) => boolean;
@@ -116,7 +115,6 @@ export function RecordsGrid<TSelected extends { rowSelection: Record<string, boo
     <RecordsContextMenu
       workspace={workspace}
       tableId={tableId}
-      viewId={viewId}
       columns={columns}
       canEditRow={canEditRow}
       canDeleteRow={canDeleteRow}

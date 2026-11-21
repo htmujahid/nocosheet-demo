@@ -1,31 +1,37 @@
+import { useDbClient } from "@tanstack/react-db";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 
 import { toastManager } from "@/components/ui/toast";
-import { ApiError } from "@/data/workspace/api-error";
 import { workspaceKeys } from "@/data/workspace/keys";
-import { restoreRecord, type RestoreFailure } from "@/data/workspace/trash";
+import { recordsCollection } from "@/data/workspace/records";
+import { restoreRecord } from "@/data/workspace/trash";
 
 export function useRestoreRecord(workspace: string, tableId: number) {
   const queryClient = useQueryClient();
+  const dbClient = useDbClient();
   const navigate = useNavigate();
 
-  return async (entryIds: number[]) => {
+  return async (recordIds: number[]) => {
     let restored = 0;
-    let failed: { entryId: number; error: Error } | null = null;
+    let failed: { recordId: number; error: Error } | null = null;
 
-    for (const entryId of entryIds) {
+    for (const recordId of recordIds) {
       try {
-        await restoreRecord({ workspace, tableId, entryId });
+        await restoreRecord({ workspace, tableId, recordId });
         restored++;
       } catch (error) {
-        failed = { entryId, error: error instanceof Error ? error : new Error("Restore failed") };
+        failed = { recordId, error: error instanceof Error ? error : new Error("Restore failed") };
         break;
       }
     }
 
     if (restored > 0) {
-      await queryClient.invalidateQueries({ queryKey: workspaceKeys.table(tableId) });
+      await queryClient.invalidateQueries({ queryKey: workspaceKeys.recordsTrash(tableId) });
+      await dbClient
+        .collection(recordsCollection(tableId))
+        .utils.pull()
+        .catch(() => undefined);
       toastManager.add({
         type: "success",
         title: `Restored ${restored} ${restored === 1 ? "record" : "records"}`,
@@ -38,16 +44,9 @@ export function useRestoreRecord(workspace: string, tableId: number) {
         title: "Couldn't restore the record",
         description: failed.error.message,
       });
-      queryClient.setQueryData<RestoreFailure>(
-        workspaceKeys.restoreError(tableId, failed.entryId),
-        {
-          message: failed.error.message,
-          field: failed.error instanceof ApiError ? failed.error.field : undefined,
-        },
-      );
       void navigate({
-        to: "/workspaces/$workspace/tables/$table/trash/$entry",
-        params: { workspace, table: String(tableId), entry: String(failed.entryId) },
+        to: "/workspaces/$workspace/tables/$table/trash/$record",
+        params: { workspace, table: String(tableId), record: String(failed.recordId) },
       });
     }
 

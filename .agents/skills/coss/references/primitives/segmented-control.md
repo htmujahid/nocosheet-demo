@@ -4,12 +4,12 @@ A segmented control is a visual pattern, not a standalone behavior. `SegmentedCo
 
 ## Choose the behavior
 
-| Intent | Render | State model |
-| --- | --- | --- |
-| Choose one value, especially in a form | Radio Group primitives | Exactly one mutually exclusive value |
-| Navigate to another URL or route | `<nav />` and links | Browser navigation with `aria-current="page"` on the current link |
+| Intent                                       | Render                  | State model                                                          |
+| -------------------------------------------- | ----------------------- | -------------------------------------------------------------------- |
+| Choose one value, especially in a form       | Radio Group primitives  | Exactly one mutually exclusive value                                 |
+| Navigate to another URL or route             | `<nav />` and links     | Browser navigation with `aria-current="page"` on the current link    |
 | Apply an exclusive filter or reversible mode | Toggle Group primitives | At most one pressed item by default; the current item may be cleared |
-| Switch between associated content panels | Use Tabs instead | Each tab controls a matching panel |
+| Switch between associated content panels     | Use Tabs instead        | Each tab controls a matching panel                                   |
 
 Do not use Tabs for navigation links, form values, or filters merely because the result should look segmented. Do not use Toggle Group when one value must always remain selected; use Radio Group instead.
 
@@ -28,19 +28,13 @@ npm install @base-ui/react
 ## Canonical imports
 
 ```tsx
-import {
-  SegmentedControl,
-  SegmentedControlItem,
-} from "@/components/ui/segmented-control"
+import { SegmentedControl, SegmentedControlItem } from "@/components/ui/segmented-control";
 ```
 
 ## Minimal pattern
 
 ```tsx
-import {
-  RadioGroupPrimitive,
-  RadioPrimitive,
-} from "@/components/ui/radio-group"
+import { RadioGroupPrimitive, RadioPrimitive } from "@/components/ui/radio-group";
 
 <SegmentedControl
   aria-label="Billing period"
@@ -52,7 +46,7 @@ import {
   <SegmentedControlItem render={<RadioPrimitive.Root value="yearly" />}>
     Yearly
   </SegmentedControlItem>
-</SegmentedControl>
+</SegmentedControl>;
 ```
 
 ## Patterns from coss particles
@@ -66,26 +60,20 @@ Navigation renders the `<nav>` as the root and a link per item:
   <SegmentedControlItem render={<a aria-current="page" href="/overview" />}>
     Overview
   </SegmentedControlItem>
-  <SegmentedControlItem render={<a href="/activity" />}>
-    Activity
-  </SegmentedControlItem>
+  <SegmentedControlItem render={<a href="/activity" />}>Activity</SegmentedControlItem>
 </SegmentedControl>
 ```
 
 An exclusive filter that may be cleared renders the Toggle Group primitives:
 
 ```tsx
-import { ToggleGroupPrimitive } from "@/components/ui/toggle-group"
-import { TogglePrimitive } from "@/components/ui/toggle"
+import { TogglePrimitive } from "@/components/ui/toggle";
+import { ToggleGroupPrimitive } from "@/components/ui/toggle-group";
 
 <SegmentedControl render={<ToggleGroupPrimitive aria-label="Status" />}>
-  <SegmentedControlItem render={<TogglePrimitive value="open" />}>
-    Open
-  </SegmentedControlItem>
-  <SegmentedControlItem render={<TogglePrimitive value="closed" />}>
-    Closed
-  </SegmentedControlItem>
-</SegmentedControl>
+  <SegmentedControlItem render={<TogglePrimitive value="open" />}>Open</SegmentedControlItem>
+  <SegmentedControlItem render={<TogglePrimitive value="closed" />}>Closed</SegmentedControlItem>
+</SegmentedControl>;
 ```
 
 - Put behavior props (`defaultValue`, `value`, `onValueChange`, `href`, `aria-current`, `onClick`) on the rendered element, not on `SegmentedControl` or `SegmentedControlItem`.

@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useDbClient, useLiveQuery } from "@tanstack/react-db";
 import { Link, useNavigate } from "@tanstack/react-router";
 
 import {
@@ -25,11 +25,12 @@ import {
   MenuSeparator,
   MenuTrigger,
 } from "@/components/ui/menu";
-import { FormsMenu } from "@/components/workspace/forms/forms-menu";
+import { PendingRecords } from "@/components/workspace/records/pending-records";
 import { useExportRecords } from "@/components/workspace/records/use-export-records";
-import { workspaceKeys } from "@/data/workspace/keys";
-import { viewsQueryOptions } from "@/data/workspace/views";
+import { recordsCollection } from "@/data/workspace/records";
+import { viewsCollection } from "@/data/workspace/views";
 import { useAccess } from "@/hooks/use-access";
+import { useOnline } from "@/hooks/use-online";
 import { ALL_VIEW } from "@/lib/views/constants";
 
 import { DeleteViewDialog } from "./delete-view-dialog";
@@ -45,18 +46,22 @@ export function ViewActions({
   view: number;
 }) {
   const access = useAccess();
-  const queryClient = useQueryClient();
+  const online = useOnline();
+  const dbClient = useDbClient();
   const navigate = useNavigate();
   const [dialog, setDialog] = useState<"edit" | "delete" | null>(null);
   const tableId = Number(table);
-  const { data: views = [] } = useQuery(viewsQueryOptions(workspace, tableId));
+  const { data: views } = useLiveQuery((q) =>
+    q.from({ view: viewsCollection(tableId) }).orderBy(({ view }) => view.position),
+  );
   const active = views.find((item) => item.id === view);
-  const canCreate = access.can("create", tableId);
-  const canExport = access.can("export", tableId, view) && access.can("read", tableId, view);
+  const canCreate = access.can(tableId, "create");
+  const canExport = access.can(tableId, "export") && access.can(tableId, "read");
   const exportRecords = useExportRecords(workspace, tableId, view);
 
   return (
     <div className="flex items-center gap-2">
+      <PendingRecords tableId={tableId} />
       <Menu>
         <MenuTrigger
           render={
@@ -75,7 +80,10 @@ export function ViewActions({
           <MenuGroup>
             <MenuItem
               onClick={() =>
-                void queryClient.invalidateQueries({ queryKey: workspaceKeys.table(tableId) })
+                void dbClient
+                  .collection(recordsCollection(tableId))
+                  .utils.pull()
+                  .catch(() => undefined)
               }
             >
               <RefreshCwIcon aria-hidden="true" />
@@ -86,20 +94,26 @@ export function ViewActions({
             <>
               <MenuSeparator />
               <MenuGroup>
-                {canCreate && (
-                  <MenuLinkItem
-                    render={
-                      <Link
-                        to="/workspaces/$workspace/tables/$table/views/$view/import"
-                        params={{ workspace, table, view: String(view) }}
-                        search={(previous) => previous}
-                      />
-                    }
-                  >
-                    <UploadIcon aria-hidden="true" />
-                    Import
-                  </MenuLinkItem>
-                )}
+                {canCreate &&
+                  (online ? (
+                    <MenuLinkItem
+                      render={
+                        <Link
+                          to="/workspaces/$workspace/tables/$table/views/$view/import"
+                          params={{ workspace, table, view: String(view) }}
+                          search={(previous) => previous}
+                        />
+                      }
+                    >
+                      <UploadIcon aria-hidden="true" />
+                      Import
+                    </MenuLinkItem>
+                  ) : (
+                    <MenuItem disabled>
+                      <UploadIcon aria-hidden="true" />
+                      Import (needs a connection)
+                    </MenuItem>
+                  ))}
                 {canExport && (
                   <MenuItem
                     disabled={exportRecords.isPending}
@@ -150,7 +164,6 @@ export function ViewActions({
             <span className="max-sm:hidden">New record</span>
           </Button>
         )}
-        <FormsMenu workspace={workspace} table={table} grouped={canCreate} />
       </Group>
       {access.admin && active && (
         <>

@@ -5,7 +5,6 @@ export const AUDIT_ACTION_LABELS: Record<AuditAction, string> = {
   update: "Edited",
   delete: "Deleted",
   restore: "Restored",
-  purge: "Deleted forever",
   import: "Imported",
 };
 
@@ -23,8 +22,6 @@ export function summarizeAudit(entry: { action: AuditAction; count: number; reco
       return `Deleted ${target}`;
     case "restore":
       return `Restored ${target}`;
-    case "purge":
-      return `Permanently deleted ${target}`;
     case "import":
       return `Imported ${plural(entry.count)}`;
   }

@@ -1,4 +1,4 @@
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useLiveSuspenseQuery } from "@tanstack/react-db";
 import { Link } from "@tanstack/react-router";
 
 import { UserPlusIcon } from "lucide-react";
@@ -19,14 +19,16 @@ import {
   CardFrameTitle,
   CardPanel,
 } from "@/components/ui/card";
-import { membersQueryOptions } from "@/data/workspace/members";
+import { membersCollection } from "@/data/workspace/members";
 import { useAccess } from "@/hooks/use-access";
 import { getInitials } from "@/lib/initials";
 
 const MAX_AVATARS = 6;
 
 export function TeamCard({ workspace }: { workspace: string }) {
-  const { data: members } = useSuspenseQuery(membersQueryOptions);
+  const { data: members } = useLiveSuspenseQuery((q) =>
+    q.from({ member: membersCollection }).orderBy(({ member }) => member.name),
+  );
   const access = useAccess();
   const shown = members.slice(0, MAX_AVATARS);
   const extra = members.length - shown.length;

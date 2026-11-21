@@ -2,13 +2,8 @@ import { Link } from "@tanstack/react-router";
 
 import { SettingsIcon } from "lucide-react";
 
-import {
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-} from "@/components/ui/sidebar";
+import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
 
-/** Pinned to the bottom of the sidebar, above the user menu. */
 export function NavSecondary({ workspace }: { workspace: string }) {
   return (
     <SidebarMenu>

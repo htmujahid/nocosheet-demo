@@ -2,33 +2,20 @@ import { defineHandler } from "void";
 import { requireAuth } from "void/auth";
 import { z } from "zod";
 
+import { loadAccess } from "@/lib/access/load-access";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { conflictOrBadRequest, httpError, NOT_FOUND } from "@/lib/http";
-import { visibleResources } from "@/lib/access/guard";
 import { findTable, listColumns } from "@/lib/tables/repository";
-import { viewsLimitSchema } from "@/lib/views/query";
-import {
-  createView,
-  findViews,
-  listViews,
-  deleteViews,
-} from "@/lib/views/repository";
+import { createView, findViews, listViews, deleteViews } from "@/lib/views/repository";
 import { checkViewDefinition, viewInputSchema, viewsDeleteSchema } from "@/lib/views/validation";
 
 const params = z.object({ workspace: z.string(), table: z.coerce.number().int().positive() });
 
-export const GET = defineHandler.withValidator({ params, query: viewsLimitSchema })(async (
-  c,
-  { params, query },
-) => {
+export const GET = defineHandler.withValidator({ params })(async (c, { params }) => {
   if (!(await findTable(params.table))) return [];
-  const views = await visibleResources(
-    requireAuth(c),
-    "read",
-    params.table,
-    await listViews(params.table),
-  );
-  return query.limit ? views.slice(0, query.limit) : views;
+  const access = await loadAccess(requireAuth(c));
+  if (access.scope(params.table, "read") === "none") return [];
+  return listViews(params.table);
 });
 
 export const POST = defineHandler.withValidator({ params, body: viewInputSchema })(async (
@@ -62,5 +49,5 @@ export const DELETE = defineHandler.withValidator({ params, body: viewsDeleteSch
   if ((await findViews(table.id, ids)).length !== ids.length) throw httpError(404, NOT_FOUND);
 
   await deleteViews(ids);
-  return { ok: true };
+  return { ids };
 });

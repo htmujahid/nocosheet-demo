@@ -8,7 +8,9 @@ import { useSession } from "@/hooks/use-session";
 
 export const Route = createFileRoute("/account/security")({
   loader: ({ context }) => {
-    void context.queryClient.query({ ...passkeysQueryOptions, staleTime: "static" }).catch(() => undefined);
+    void context.queryClient
+      .query({ ...passkeysQueryOptions, staleTime: "static" })
+      .catch(() => undefined);
   },
   component: SecurityPage,
 });

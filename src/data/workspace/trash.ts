@@ -1,15 +1,15 @@
-import { mutationOptions, queryOptions } from "@tanstack/react-query";
+import { queryOptions } from "@tanstack/react-query";
 
 import { fetch } from "void/client";
 
+import { unwrapFetch } from "@/lib/api-error";
 import type { TrashQuery } from "@/lib/trash/query";
 
-import { unwrapFetch } from "./api-error";
 import { workspaceKeys } from "./keys";
 
 export const trashQueryOptions = (workspace: string, tableId: number, query: TrashQuery) =>
   queryOptions({
-    queryKey: workspaceKeys.trashList(tableId, query),
+    queryKey: workspaceKeys.recordsTrashList(tableId, query),
     queryFn: () =>
       unwrapFetch(
         fetch("/api/workspaces/:workspace/tables/:table/records/trash", {
@@ -27,13 +27,13 @@ export const trashQueryOptions = (workspace: string, tableId: number, query: Tra
     retry: false,
   });
 
-export const trashEntryQueryOptions = (workspace: string, tableId: number, entryId: number) =>
+export const trashEntryQueryOptions = (workspace: string, tableId: number, recordId: number) =>
   queryOptions({
-    queryKey: workspaceKeys.trashEntry(tableId, entryId),
+    queryKey: workspaceKeys.recordsTrashEntry(tableId, recordId),
     queryFn: () =>
       unwrapFetch(
-        fetch("/api/workspaces/:workspace/tables/:table/records/trash/:entry", {
-          params: { workspace, table: String(tableId), entry: String(entryId) },
+        fetch("/api/workspaces/:workspace/tables/:table/records/:record/trash", {
+          params: { workspace, table: String(tableId), record: String(recordId) },
         }),
       ),
     staleTime: 15_000,
@@ -45,42 +45,18 @@ export type RestoreFailure = { message: string; field?: string };
 export const restoreRecord = ({
   workspace,
   tableId,
-  entryId,
+  recordId,
   values,
 }: {
   workspace: string;
   tableId: number;
-  entryId: number;
+  recordId: number;
   values?: Record<string, unknown>;
 }) =>
   unwrapFetch(
-    fetch("/api/workspaces/:workspace/tables/:table/records/trash/:entry/restore", {
+    fetch("/api/workspaces/:workspace/tables/:table/records/trash/restore", {
       method: "POST",
-      params: { workspace, table: String(tableId), entry: String(entryId) },
-      body: values ? { values } : {},
+      params: { workspace, table: String(tableId) },
+      body: values ? { id: recordId, values } : { id: recordId },
     }),
   );
-
-export const restoreRecordMutationOptions = mutationOptions({
-  mutationKey: workspaceKeys.mutation("restore-record"),
-  mutationFn: restoreRecord,
-});
-
-export const purgeTrashMutationOptions = mutationOptions({
-  mutationKey: workspaceKeys.mutation("purge-trash"),
-  mutationFn: ({
-    workspace,
-    tableId,
-    entryId,
-  }: {
-    workspace: string;
-    tableId: number;
-    entryId: number;
-  }) =>
-    unwrapFetch(
-      fetch("/api/workspaces/:workspace/tables/:table/records/trash/:entry", {
-        method: "DELETE",
-        params: { workspace, table: String(tableId), entry: String(entryId) },
-      }),
-    ),
-});

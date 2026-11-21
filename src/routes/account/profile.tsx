@@ -11,9 +11,11 @@ export const Route = createFileRoute("/account/profile")({
 function ProfilePage() {
   const session = useSession();
 
+  if (!session) return null;
+
   return (
     <>
-      <ProfileDetailsForm user={session!.user} />
+      <ProfileDetailsForm user={session.user} />
       <DangerZone />
     </>
   );

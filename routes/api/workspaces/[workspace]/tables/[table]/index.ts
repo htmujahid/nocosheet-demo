@@ -3,19 +3,11 @@ import { z } from "zod";
 
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { conflictOrBadRequest, httpError, NOT_FOUND } from "@/lib/http";
-import { requireAccess } from "@/lib/access/require-access";
 import { TITLE_FORMATS } from "@/lib/tables/formats";
-import { findColumnByName, findTable, listColumns, updateTable } from "@/lib/tables/repository";
+import { findColumnByName, findTable, updateTable } from "@/lib/tables/repository";
 import { tableUpdateSchema } from "@/lib/tables/validation";
 
 const params = z.object({ workspace: z.string(), table: z.coerce.number().int().positive() });
-
-export const GET = defineHandler.withValidator({ params })(async (c, { params }) => {
-  await requireAccess(c, ["read", "create", "update"], params.table);
-  const table = await findTable(params.table);
-  if (!table) throw httpError(404, NOT_FOUND);
-  return { ...table, columns: await listColumns(table.id) };
-});
 
 export const PATCH = defineHandler.withValidator({ params, body: tableUpdateSchema })(async (
   c,

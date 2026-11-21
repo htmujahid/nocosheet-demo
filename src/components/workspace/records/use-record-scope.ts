@@ -1,41 +1,35 @@
 import { useMemo } from "react";
 
-import { type UseSuspenseQueryOptions, useSuspenseQuery } from "@tanstack/react-query";
+import { eq, useLiveSuspenseQuery } from "@tanstack/react-db";
+import { notFound } from "@tanstack/react-router";
 
-import { tableQueryOptions } from "@/data/workspace/tables";
-import { viewQueryOptions } from "@/data/workspace/views";
+import { columnsCollection } from "@/data/workspace/columns";
+import { tablesCollection } from "@/data/workspace/tables";
 
-import { buildScopedColumns, buildViewerColumns, type ViewScope } from "./columns";
+import { buildScopedColumns, type ViewScope } from "./columns";
 
-type TableData = Parameters<typeof buildViewerColumns>[0] & { name: string };
-
-type ViewData = {
-  name: string;
-  table: { id: number; name: string; titleColumnId: number | null };
-  columns: TableData["columns"];
-};
-
-export function useRecordScope(workspace: string, tableId: number, view?: Pick<ViewScope, "id">) {
-  const options = view
-    ? viewQueryOptions(workspace, tableId, view.id)
-    : tableQueryOptions(workspace, tableId);
-  const { data } = useSuspenseQuery(
-    options as unknown as UseSuspenseQueryOptions<TableData | ViewData>,
+export function useRecordScope(
+  _workspace: string,
+  tableId: number,
+  view?: Pick<ViewScope, "selectColumns">,
+) {
+  const { data: table } = useLiveSuspenseQuery((q) =>
+    q
+      .from({ table: tablesCollection })
+      .where(({ table }) => eq(table.id, tableId))
+      .findOne(),
   );
+  if (!table) throw notFound();
+  const { data: columns } = useLiveSuspenseQuery((q) =>
+    q.from({ column: columnsCollection(tableId) }).orderBy(({ column }) => column.position),
+  );
+  const selectColumns = view?.selectColumns;
 
   return useMemo(
-    () =>
-      view
-        ? {
-            name: data.name,
-            tableName: (data as ViewData).table.name,
-            columns: buildScopedColumns(data as ViewData),
-          }
-        : {
-            name: data.name,
-            tableName: data.name,
-            columns: buildViewerColumns(data as TableData),
-          },
-    [data, view],
+    () => ({
+      tableName: table.name,
+      columns: buildScopedColumns({ titleColumnId: table.titleColumnId, columns }, selectColumns),
+    }),
+    [table.name, table.titleColumnId, columns, selectColumns],
   );
 }

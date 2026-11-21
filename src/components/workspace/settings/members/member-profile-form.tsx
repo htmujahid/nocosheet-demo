@@ -1,3 +1,4 @@
+import { useDbClient } from "@tanstack/react-db";
 import { useForm } from "@tanstack/react-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
@@ -22,7 +23,7 @@ import { Switch } from "@/components/ui/switch";
 import { toastManager } from "@/components/ui/toast";
 import { adminKeys } from "@/data/admin/keys";
 import { updateUserMutationOptions } from "@/data/admin/update-user";
-import { workspaceKeys } from "@/data/workspace/keys";
+import { membersCollection } from "@/data/workspace/members";
 import { DEFAULT_ROLE } from "@/lib/auth/access";
 import { getInitials } from "@/lib/initials";
 
@@ -44,12 +45,12 @@ type MemberProfileFormProps = {
     image?: string | null;
     role?: string | null;
   };
-  /** Admins can't change their own role here, so the instance always keeps an admin. */
   isSelf: boolean;
 };
 
 export function MemberProfileForm({ member, isSelf }: MemberProfileFormProps) {
   const queryClient = useQueryClient();
+  const dbClient = useDbClient();
   const initial = {
     name: member.name,
     email: member.email,
@@ -59,7 +60,7 @@ export function MemberProfileForm({ member, isSelf }: MemberProfileFormProps) {
 
   const refresh = () =>
     Promise.all([
-      queryClient.invalidateQueries({ queryKey: workspaceKeys.members() }),
+      dbClient.collection(membersCollection).utils.refetch(),
       queryClient.invalidateQueries({ queryKey: adminKeys.user(member.id) }),
     ]);
 
@@ -84,9 +85,7 @@ export function MemberProfileForm({ member, isSelf }: MemberProfileFormProps) {
       try {
         await updateUser.mutateAsync({ userId: member.id, data });
         form.reset({ ...value, name: value.name.trim() });
-      } catch {
-        // Surfaced from the mutation state below.
-      }
+      } catch {}
     },
   });
 

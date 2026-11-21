@@ -35,7 +35,7 @@ import {
   AlertDialogPopup,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
+} from "@/components/ui/alert-dialog";
 ```
 
 ## Minimal pattern
@@ -48,15 +48,11 @@ import {
   <AlertDialogPopup>
     <AlertDialogHeader>
       <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-      <AlertDialogDescription>
-        This action cannot be undone.
-      </AlertDialogDescription>
+      <AlertDialogDescription>This action cannot be undone.</AlertDialogDescription>
     </AlertDialogHeader>
     <AlertDialogFooter>
       <AlertDialogClose render={<Button variant="ghost" />}>Cancel</AlertDialogClose>
-      <AlertDialogClose render={<Button variant="destructive" />}>
-        Delete Account
-      </AlertDialogClose>
+      <AlertDialogClose render={<Button variant="destructive" />}>Delete Account</AlertDialogClose>
     </AlertDialogFooter>
   </AlertDialogPopup>
 </AlertDialog>
@@ -78,18 +74,18 @@ import {
 Async confirmation (the dialog stays open until the mutation settles):
 
 ```tsx
-const [open, setOpen] = useState(false)
-const [isPending, setIsPending] = useState(false)
+const [open, setOpen] = useState(false);
+const [isPending, setIsPending] = useState(false);
 
 async function handleDelete() {
-  setIsPending(true)
+  setIsPending(true);
   try {
-    await deleteAccount()
-    setOpen(false)
+    await deleteAccount();
+    setOpen(false);
   } catch {
     // Keep the dialog open so the user can retry; surface the error (e.g. a toast).
   } finally {
-    setIsPending(false)
+    setIsPending(false);
   }
 }
 
@@ -100,9 +96,7 @@ async function handleDelete() {
   <AlertDialogPopup>
     <AlertDialogHeader>
       <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-      <AlertDialogDescription>
-        This action cannot be undone.
-      </AlertDialogDescription>
+      <AlertDialogDescription>This action cannot be undone.</AlertDialogDescription>
     </AlertDialogHeader>
     <AlertDialogFooter>
       <AlertDialogClose render={<Button variant="ghost" />}>Cancel</AlertDialogClose>
@@ -111,7 +105,7 @@ async function handleDelete() {
       </Button>
     </AlertDialogFooter>
   </AlertDialogPopup>
-</AlertDialog>
+</AlertDialog>;
 ```
 
 - The confirm is a plain `Button` (not `AlertDialogClose`) with `loading`, which disables it and shows the spinner while the request runs.

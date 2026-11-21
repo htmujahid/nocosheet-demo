@@ -45,9 +45,7 @@ export function SetPasswordDialog({ userId, name }: { userId: string; name: stri
         if (value.signOutEverywhere) await revokeSessions.mutateAsync({ userId });
         toastManager.add({ type: "success", title: "Password updated" });
         setOpen(false);
-      } catch {
-        // Surfaced from the mutation state below.
-      }
+      } catch {}
     },
   });
 

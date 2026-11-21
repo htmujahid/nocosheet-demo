@@ -4,7 +4,13 @@ import { cn } from "@/lib/utils";
 
 export const DEMO_MODE = String(import.meta.env.VITE_DEMO_MODE) === "true";
 
-export function ReadonlyFieldset({ children, className }: { children: ReactNode; className?: string }) {
+export function ReadonlyFieldset({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
   return (
     <fieldset
       disabled={DEMO_MODE}

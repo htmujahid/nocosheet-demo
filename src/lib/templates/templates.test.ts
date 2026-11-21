@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "vite-plus/test";
 
 import { checkTemplate, templateSchema } from "./schema";
 
@@ -26,10 +26,12 @@ describe("bundled templates", () => {
   describe.each(entries)("$file", ({ json }) => {
     it("matches the template format", () => {
       const parsed = templateSchema.safeParse(json);
-      expect(parsed.success ? [] : parsed.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`)).toEqual([]);
+      expect(
+        parsed.success ? [] : parsed.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`),
+      ).toEqual([]);
     });
 
-    it("has consistent tables, columns, views, forms and rows", () => {
+    it("has consistent tables, columns, views and rows", () => {
       const parsed = templateSchema.safeParse(json);
       expect(parsed.success).toBe(true);
       if (parsed.success) expect(checkTemplate(parsed.data)).toEqual([]);

@@ -17,7 +17,8 @@ export async function beginAudit(
 ): Promise<AuditSnapshot | undefined> {
   if (!table.isAudit) return undefined;
   const columns = await listColumns(table.id);
-  return { columns, record: await findRecord(workspace, table, columns, recordId) };
+  const row = await findRecord(workspace, table, columns, recordId);
+  return { columns, record: row && shapeRecord(row, columns) };
 }
 
 export async function auditCreated(
@@ -74,9 +75,4 @@ export async function auditRestored(
       shapeRecord(row, columns),
     ),
   });
-}
-
-export async function auditPurged(actor: Actor, table: Table, recordId: number) {
-  if (!table.isAudit) return;
-  await logRecordAudit(actor, table, { action: "purge", recordIds: [recordId] });
 }

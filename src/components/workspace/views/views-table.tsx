@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 
-import { useQuery } from "@tanstack/react-query";
+import { useLiveQuery } from "@tanstack/react-db";
 import { functionalUpdate, useTable } from "@tanstack/react-table";
 
 import { SearchIcon } from "lucide-react";
@@ -11,35 +11,34 @@ import { DataTableViewOptions } from "@/components/shared/data-table/data-table-
 import { dataTableFeatures } from "@/components/shared/data-table/features";
 import { Frame } from "@/components/ui/frame";
 import { Input } from "@/components/ui/input";
-import { viewsQueryOptions } from "@/data/workspace/views";
+import { type ViewRow, viewsCollection } from "@/data/workspace/views";
 import { useAccess } from "@/hooks/use-access";
+import { useSession } from "@/hooks/use-session";
 import { viewsSearchParams, type ViewsQuery } from "@/lib/views/query";
 
 import { DeleteViewsDialog } from "./delete-views-dialog";
 import { viewsColumns } from "./views-columns";
 
-function useViewsList(workspace: string, tableId: number) {
-  return useQuery(viewsQueryOptions(workspace, tableId));
-}
-
-export type ViewsRow = NonNullable<ReturnType<typeof useViewsList>["data"]>[number] & {
+export type ViewsRow = ViewRow & {
   columnCount: number;
 };
 
-/** Sorts and searches the (few) rows locally: the list endpoint has no paging. */
 function useViewsRows(workspace: string, tableId: number, query: ViewsQuery) {
-  const { data, isFetching } = useViewsList(workspace, tableId);
+  const { data: views, isReady } = useLiveQuery((q) =>
+    q.from({ view: viewsCollection(tableId) }).orderBy(({ view }) => view.position),
+  );
+  const data = isReady ? views : undefined;
   const rows = useMemo(() => {
     if (!data) return undefined;
     const needle = query.q.trim().toLowerCase();
     const matching = data
       .map((row): ViewsRow => ({ ...row, columnCount: row.selectColumns.length }))
       .filter(
-      (row) =>
-        !needle ||
-        row.name.toLowerCase().includes(needle) ||
-        row.description?.toLowerCase().includes(needle),
-    );
+        (row) =>
+          !needle ||
+          row.name.toLowerCase().includes(needle) ||
+          row.description?.toLowerCase().includes(needle),
+      );
     const key = (row: (typeof matching)[number]) =>
       query.sort === "name"
         ? row.name.toLowerCase()
@@ -52,7 +51,7 @@ function useViewsRows(workspace: string, tableId: number, query: ViewsQuery) {
       return (x < y ? -1 : x > y ? 1 : a.id - b.id) * direction;
     });
   }, [data, query.q, query.sort, query.order]);
-  return { rows, total: data?.length, isFetching };
+  return { rows, total: data?.length, isFetching: !isReady };
 }
 
 export function ViewsTable({

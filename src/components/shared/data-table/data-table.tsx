@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 
+import { DataTableColumnHeader } from "./data-table-column-header";
 import type { dataTableFeatures } from "./features";
 
 export function DataTable<TData extends RowData, TSelected>({
@@ -30,9 +31,15 @@ export function DataTable<TData extends RowData, TSelected>({
           <TableRow key={headerGroup.id}>
             {headerGroup.headers.map((header) => (
               <TableHead key={header.id}>
-                {header.isPlaceholder
-                  ? null
-                  : flexRender(header.column.columnDef.header, header.getContext())}
+                {header.isPlaceholder ? null : typeof header.column.columnDef.header ===
+                  "string" ? (
+                  <DataTableColumnHeader
+                    column={header.column}
+                    title={header.column.columnDef.header}
+                  />
+                ) : (
+                  flexRender(header.column.columnDef.header, header.getContext())
+                )}
               </TableHead>
             ))}
           </TableRow>

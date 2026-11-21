@@ -1,17 +1,15 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
-import { TrashSheet } from "@/components/workspace/trash/trash-sheet";
 import { TablesTrash } from "@/components/workspace/tables/tables-trash";
-import { deletedTablesQueryOptions } from "@/data/workspace/tables";
+import { TrashSheet } from "@/components/workspace/trash/trash-sheet";
 import { TRASH_RETENTION_DAYS } from "@/lib/records/retention";
+import { requireOnline } from "@/lib/require-online";
 
 export const Route = createFileRoute("/workspaces/$workspace/_core/tables/_list/trash")({
   staticData: { crumb: "Trash" },
-  pendingComponent: () => null,
-  loader: ({ context, params }) => {
-    void context.queryClient
-      .query(deletedTablesQueryOptions(params.workspace))
-      .catch(() => undefined);
+  beforeLoad: ({ context, location, params }) => {
+    if (!context.workspace.isAdmin) throw redirect({ to: "/workspaces/$workspace/tables", params });
+    requireOnline(location);
   },
   component: TablesTrashSheet,
 });

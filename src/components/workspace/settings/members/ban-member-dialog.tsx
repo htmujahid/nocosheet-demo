@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import { useDbClient } from "@tanstack/react-db";
 import { useForm } from "@tanstack/react-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
@@ -28,7 +29,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toastManager } from "@/components/ui/toast";
 import { banUserMutationOptions } from "@/data/admin/ban-user";
 import { adminKeys } from "@/data/admin/keys";
-import { workspaceKeys } from "@/data/workspace/keys";
+import { membersCollection } from "@/data/workspace/members";
 
 const DAY = 60 * 60 * 24;
 
@@ -42,6 +43,7 @@ const durations = [
 export function BanMemberDialog({ userId, name }: { userId: string; name: string }) {
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
+  const dbClient = useDbClient();
 
   const banUser = useMutation({
     ...banUserMutationOptions,
@@ -49,7 +51,7 @@ export function BanMemberDialog({ userId, name }: { userId: string; name: string
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: adminKeys.user(userId) }),
         queryClient.invalidateQueries({ queryKey: adminKeys.sessions(userId) }),
-        queryClient.invalidateQueries({ queryKey: workspaceKeys.members() }),
+        dbClient.collection(membersCollection).utils.refetch(),
       ]);
       toastManager.add({ type: "success", title: `${name} was banned` });
       setOpen(false);

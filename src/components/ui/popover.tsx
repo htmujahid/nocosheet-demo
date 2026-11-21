@@ -1,7 +1,9 @@
 "use client";
 
-import { Popover as PopoverPrimitive } from "@base-ui/react/popover";
 import type React from "react";
+
+import { Popover as PopoverPrimitive } from "@base-ui/react/popover";
+
 import { cn } from "@/lib/utils";
 
 export const PopoverCreateHandle: typeof PopoverPrimitive.createHandle =
@@ -15,11 +17,7 @@ export function PopoverTrigger({
   ...props
 }: PopoverPrimitive.Trigger.Props): React.ReactElement {
   return (
-    <PopoverPrimitive.Trigger
-      className={className}
-      data-slot="popover-trigger"
-      {...props}
-    >
+    <PopoverPrimitive.Trigger className={className} data-slot="popover-trigger" {...props}>
       {children}
     </PopoverPrimitive.Trigger>
   );
@@ -83,9 +81,7 @@ export function PopoverPopup({
   );
 }
 
-export function PopoverClose({
-  ...props
-}: PopoverPrimitive.Close.Props): React.ReactElement {
+export function PopoverClose({ ...props }: PopoverPrimitive.Close.Props): React.ReactElement {
   return <PopoverPrimitive.Close data-slot="popover-close" {...props} />;
 }
 

@@ -65,7 +65,7 @@ export function RecordFieldList({
   tableId,
   columns,
   record,
-  disabled,
+  disabled = false,
   error,
   fieldErrors,
   onFieldEdit,
@@ -75,7 +75,7 @@ export function RecordFieldList({
   tableId: number;
   columns: ViewerColumn[];
   record?: RecordData;
-  disabled: boolean;
+  disabled?: boolean;
   error?: Error | null;
   fieldErrors?: Record<string, string>;
   onFieldEdit?: (key: string) => void;

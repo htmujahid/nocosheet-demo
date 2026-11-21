@@ -3,8 +3,8 @@ import { Link } from "@tanstack/react-router";
 import {
   CreditCardIcon,
   PaletteIcon,
-  ScrollTextIcon,
   ShieldCheckIcon,
+  ScrollTextIcon,
   SlidersHorizontalIcon,
   UsersIcon,
 } from "lucide-react";
@@ -19,47 +19,6 @@ import {
 import { useIsActivePath } from "@/hooks/use-is-active-path";
 import { useWorkspace } from "@/hooks/use-workspace";
 
-const items = [
-  {
-    to: "/workspaces/$workspace/settings",
-    label: "General",
-    icon: SlidersHorizontalIcon,
-    path: "",
-    exact: true,
-  },
-  {
-    to: "/workspaces/$workspace/settings/appearance",
-    label: "Appearance",
-    icon: PaletteIcon,
-    path: "/appearance",
-  },
-  {
-    to: "/workspaces/$workspace/settings/members",
-    label: "Members",
-    icon: UsersIcon,
-    path: "/members",
-  },
-  {
-    to: "/workspaces/$workspace/settings/access",
-    label: "Access",
-    icon: ShieldCheckIcon,
-    path: "/access",
-  },
-  {
-    to: "/workspaces/$workspace/settings/audit-log",
-    label: "Audit Log",
-    icon: ScrollTextIcon,
-    path: "/audit-log",
-    adminOnly: true,
-  },
-  {
-    to: "/workspaces/$workspace/settings/billing",
-    label: "Billing",
-    icon: CreditCardIcon,
-    path: "/billing",
-  },
-] as const;
-
 export function NavSettings({ workspace }: { workspace: string }) {
   const isActive = useIsActivePath();
   const { isAdmin } = useWorkspace();
@@ -68,23 +27,74 @@ export function NavSettings({ workspace }: { workspace: string }) {
     <SidebarGroup>
       <SidebarGroupContent>
         <SidebarMenu>
-          {items
-            .filter((item) => isAdmin || !("adminOnly" in item))
-            .map((item) => (
-              <SidebarMenuItem key={item.to}>
-                <SidebarMenuButton
-                  tooltip={item.label}
-                  isActive={isActive(
-                    `/workspaces/${workspace}/settings${item.path}`,
-                    "exact" in item && item.exact,
-                  )}
-                  render={<Link to={item.to} params={{ workspace }} />}
-                >
-                  <item.icon />
-                  <span>{item.label}</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              tooltip="General"
+              isActive={isActive(`/workspaces/${workspace}/settings`, true)}
+              render={<Link to="/workspaces/$workspace/settings" params={{ workspace }} />}
+            >
+              <SlidersHorizontalIcon />
+              <span>General</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              tooltip="Appearance"
+              isActive={isActive(`/workspaces/${workspace}/settings/appearance`)}
+              render={
+                <Link to="/workspaces/$workspace/settings/appearance" params={{ workspace }} />
+              }
+            >
+              <PaletteIcon />
+              <span>Appearance</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              tooltip="Members"
+              isActive={isActive(`/workspaces/${workspace}/settings/members`)}
+              render={<Link to="/workspaces/$workspace/settings/members" params={{ workspace }} />}
+            >
+              <UsersIcon />
+              <span>Members</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          {isAdmin && (
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                tooltip="Access"
+                isActive={isActive(`/workspaces/${workspace}/settings/access`)}
+                render={<Link to="/workspaces/$workspace/settings/access" params={{ workspace }} />}
+              >
+                <ShieldCheckIcon />
+                <span>Access</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          )}
+          {isAdmin && (
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                tooltip="Audit Log"
+                isActive={isActive(`/workspaces/${workspace}/settings/audit-log`)}
+                render={
+                  <Link to="/workspaces/$workspace/settings/audit-log" params={{ workspace }} />
+                }
+              >
+                <ScrollTextIcon />
+                <span>Audit Log</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          )}
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              tooltip="Billing"
+              isActive={isActive(`/workspaces/${workspace}/settings/billing`)}
+              render={<Link to="/workspaces/$workspace/settings/billing" params={{ workspace }} />}
+            >
+              <CreditCardIcon />
+              <span>Billing</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>

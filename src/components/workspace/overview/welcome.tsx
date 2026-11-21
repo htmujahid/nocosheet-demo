@@ -40,7 +40,11 @@ export function Welcome({ workspace }: { workspace: string }) {
           <Button
             size="sm"
             render={
-              <Link to="/workspaces/$workspace/tables/new" params={{ workspace }} search={{ step: 1 }} />
+              <Link
+                to="/workspaces/$workspace/tables/new"
+                params={{ workspace }}
+                search={{ step: 1 }}
+              />
             }
           >
             <PlusIcon />

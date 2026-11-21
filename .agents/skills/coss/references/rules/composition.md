@@ -13,14 +13,14 @@ Use this when composing complex UI from coss primitives and particles.
 
 ## Caller-owned and built-in parts
 
-| Composition | Caller supplies | COSS wrapper includes |
-| --- | --- | --- |
-| Progress or Meter with custom children ([Progress](../primitives/progress.md), [Meter](../primitives/meter.md)) | Track and indicator, if the bar should remain alongside a label or value | Default track and indicator only when there are no children |
-| Combobox or Autocomplete results ([Combobox](../primitives/combobox.md), [Autocomplete](../primitives/autocomplete.md), [Select](../primitives/select.md)) | `ComboboxList` / `AutocompleteList` around results | `SelectPopup` renders its list |
-| Tabs ([Tabs](../primitives/tabs.md)) | Tabs and panels with matching values | `TabsList` renders its active indicator |
-| Combobox chips ([Combobox](../primitives/combobox.md)) | Selected chip content | `ComboboxChip` renders its remove control |
-| Scrollable content ([Scroll Area](../primitives/scroll-area.md)) | Content | `ScrollArea` renders the viewport and scrollbars |
-| Overlay close affordance ([Dialog](../primitives/dialog.md), [Drawer](../primitives/drawer.md)) | Add a close control to `DrawerPopup` when wanted | Dialog popups show one by default; Drawer does not |
+| Composition                                                                                                                                                | Caller supplies                                                          | COSS wrapper includes                                       |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ | ----------------------------------------------------------- |
+| Progress or Meter with custom children ([Progress](../primitives/progress.md), [Meter](../primitives/meter.md))                                            | Track and indicator, if the bar should remain alongside a label or value | Default track and indicator only when there are no children |
+| Combobox or Autocomplete results ([Combobox](../primitives/combobox.md), [Autocomplete](../primitives/autocomplete.md), [Select](../primitives/select.md)) | `ComboboxList` / `AutocompleteList` around results                       | `SelectPopup` renders its list                              |
+| Tabs ([Tabs](../primitives/tabs.md))                                                                                                                       | Tabs and panels with matching values                                     | `TabsList` renders its active indicator                     |
+| Combobox chips ([Combobox](../primitives/combobox.md))                                                                                                     | Selected chip content                                                    | `ComboboxChip` renders its remove control                   |
+| Scrollable content ([Scroll Area](../primitives/scroll-area.md))                                                                                           | Content                                                                  | `ScrollArea` renders the viewport and scrollbars            |
+| Overlay close affordance ([Dialog](../primitives/dialog.md), [Drawer](../primitives/drawer.md))                                                            | Add a close control to `DrawerPopup` when wanted                         | Dialog popups show one by default; Drawer does not          |
 
 ## Patterns
 

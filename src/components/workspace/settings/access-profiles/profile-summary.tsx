@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge";
-import { summarizeGrants } from "@/lib/access/matrix";
 import { ACTION_LABELS, type AccessGrant, type Scope } from "@/lib/access/grants";
+import { summarizeGrants } from "@/lib/access/matrix";
 
 const SHORT: Record<string, string> = {
   create: "Create",
@@ -24,12 +24,7 @@ export function ProfileSummary({ grants }: { grants: AccessGrant[] }) {
   return (
     <div className="flex flex-wrap items-center gap-1.5">
       {items.map((item) => (
-        <Badge
-          key={item.action}
-          variant="secondary"
-          size="sm"
-          title={ACTION_LABELS[item.action]}
-        >
+        <Badge key={item.action} variant="secondary" size="sm" title={ACTION_LABELS[item.action]}>
           {SHORT[item.action]}
           {SCOPE_SHORT[item.scope]}
         </Badge>

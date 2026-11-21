@@ -2,7 +2,8 @@ import { mutationOptions, queryOptions } from "@tanstack/react-query";
 
 import { fetch } from "void/client";
 
-import { unwrapFetch } from "./api-error";
+import { unwrapFetch } from "@/lib/api-error";
+
 import { workspaceKeys } from "./keys";
 
 export const templatesQueryOptions = (workspace: string) =>

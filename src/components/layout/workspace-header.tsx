@@ -3,14 +3,6 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { WorkspaceBreadcrumbs } from "@/components/workspace/workspace-breadcrumbs";
 import { cn } from "@/lib/utils";
 
-/**
- * Top bar of every workspace page: sidebar trigger and breadcrumbs on the left, the page's
- * actions (children) on the right.
- *
- *   <WorkspaceHeader workspace={workspace}>
- *     <AddMemberDialog />
- *   </WorkspaceHeader>
- */
 export function WorkspaceHeader({
   workspace,
   children,
@@ -30,7 +22,6 @@ export function WorkspaceHeader({
   );
 }
 
-/** Page body under the header. Pass `className="max-w-3xl"` to narrow it (settings pages). */
 export function WorkspaceContent({
   className,
   children,

@@ -2,9 +2,9 @@ import { queryOptions } from "@tanstack/react-query";
 
 import { fetch } from "void/client";
 
+import { unwrapFetch } from "@/lib/api-error";
 import type { AuditQuery } from "@/lib/audit/query";
 
-import { unwrapFetch } from "./api-error";
 import { workspaceKeys } from "./keys";
 
 export const auditQueryOptions = (workspace: string, query: AuditQuery) =>
@@ -23,5 +23,4 @@ export const auditQueryOptions = (workspace: string, query: AuditQuery) =>
           },
         }),
       ),
-    staleTime: 15_000,
   });

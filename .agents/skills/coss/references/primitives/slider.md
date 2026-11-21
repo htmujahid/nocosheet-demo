@@ -20,7 +20,7 @@ npm install @base-ui/react
 ## Canonical imports
 
 ```tsx
-import { Slider, SliderValue } from "@/components/ui/slider"
+import { Slider, SliderValue } from "@/components/ui/slider";
 ```
 
 ## Minimal pattern
@@ -51,7 +51,7 @@ Range slider (two thumbs):
 ```tsx
 <Slider
   defaultValue={[20, 80]}
-  getAriaLabel={(index) => index === 0 ? "Minimum price" : "Maximum price"}
+  getAriaLabel={(index) => (index === 0 ? "Minimum price" : "Maximum price")}
   min={0}
   max={100}
 />

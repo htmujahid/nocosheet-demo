@@ -1,3 +1,4 @@
+import { useDbClient } from "@tanstack/react-db";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { Undo2Icon } from "lucide-react";
@@ -5,14 +6,14 @@ import { Undo2Icon } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { toastManager } from "@/components/ui/toast";
-import { PurgeDialog } from "@/components/workspace/trash/purge-dialog";
 import { TrashRows, type TrashRow } from "@/components/workspace/trash/trash-rows";
-import { workspaceKeys } from "@/data/workspace/keys";
 import {
+  columnsCollection,
   deletedColumnsQueryOptions,
-  purgeColumnMutationOptions,
   restoreColumnMutationOptions,
-} from "@/data/workspace/tables";
+} from "@/data/workspace/columns";
+import { workspaceKeys } from "@/data/workspace/keys";
+import { tablesCollection } from "@/data/workspace/tables";
 import { TRASH_RETENTION_DAYS } from "@/lib/records/retention";
 
 function Actions({
@@ -25,11 +26,15 @@ function Actions({
   row: TrashRow;
 }) {
   const queryClient = useQueryClient();
-  const refresh = () => queryClient.invalidateQueries({ queryKey: workspaceKeys.table(tableId) });
+  const dbClient = useDbClient();
+  const refresh = () =>
+    queryClient.invalidateQueries({ queryKey: workspaceKeys.columnsTrash(tableId) });
 
   const restore = useMutation({
     ...restoreColumnMutationOptions,
-    onSuccess: async () => {
+    onSuccess: async ({ column, table }) => {
+      if (column) dbClient.collection(columnsCollection(tableId)).utils.writeUpsert(column);
+      dbClient.collection(tablesCollection).utils.writeUpsert(table);
       await refresh();
       toastManager.add({ type: "success", title: `${row.name} restored` });
     },
@@ -41,36 +46,16 @@ function Actions({
       }),
   });
 
-  const purge = useMutation({
-    ...purgeColumnMutationOptions,
-    onSuccess: async () => {
-      await refresh();
-      toastManager.add({ type: "success", title: `${row.name} deleted forever` });
-    },
-  });
-
   return (
-    <>
-      <Button
-        variant="outline"
-        size="sm"
-        loading={restore.isPending}
-        onClick={() => restore.mutate({ workspace, id: tableId, columnId: row.id })}
-      >
-        <Undo2Icon />
-        Restore
-      </Button>
-      <PurgeDialog
-        label={row.name}
-        description={`"${row.name}" and all of its values will be removed for good and can't be restored.`}
-        pending={purge.isPending}
-        error={purge.error}
-        onReset={() => purge.reset()}
-        onConfirm={(done) =>
-          purge.mutate({ workspace, id: tableId, columnId: row.id }, { onSuccess: done })
-        }
-      />
-    </>
+    <Button
+      variant="outline"
+      size="sm"
+      loading={restore.isPending}
+      onClick={() => restore.mutate({ workspace, id: tableId, columnId: row.id })}
+    >
+      <Undo2Icon />
+      Restore
+    </Button>
   );
 }
 

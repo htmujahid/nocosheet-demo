@@ -1,18 +1,18 @@
 import { useState } from "react";
 
-import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { eq, useDbClient, useLiveSuspenseQuery } from "@tanstack/react-db";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { notFound } from "@tanstack/react-router";
 
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetClose, SheetFooter, SheetPopup } from "@/components/ui/sheet";
 import { toastManager } from "@/components/ui/toast";
-import { ApiError } from "@/data/workspace/api-error";
+import { columnsCollection } from "@/data/workspace/columns";
 import { workspaceKeys } from "@/data/workspace/keys";
-import { tableQueryOptions } from "@/data/workspace/tables";
-import {
-  restoreRecordMutationOptions,
-  trashEntryQueryOptions,
-  type RestoreFailure,
-} from "@/data/workspace/trash";
+import { recordsCollection } from "@/data/workspace/records";
+import { tablesCollection } from "@/data/workspace/tables";
+import { restoreRecord, trashEntryQueryOptions } from "@/data/workspace/trash";
+import { ApiError } from "@/lib/api-error";
 import { buildCreate, buildPatch, toFormValues } from "@/lib/records/form";
 
 import { buildViewerColumns, type ViewerColumn } from "../columns";
@@ -24,31 +24,34 @@ function RestoreForm({
   workspace,
   tableId,
   tableName,
-  entryId,
+  recordId,
   record,
   columns,
-  failure,
   onRestored,
 }: {
   workspace: string;
   tableId: number;
   tableName: string;
-  entryId: number;
+  recordId: number;
   record: Record<string, unknown>;
   columns: ViewerColumn[];
-  failure?: RestoreFailure;
   onRestored: () => void;
 }) {
   const queryClient = useQueryClient();
   const [initial] = useState(() => toFormValues(columns, record));
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>(
-    failure?.field ? { [failure.field]: failure.message } : {},
-  );
+  const dbClient = useDbClient();
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const restore = useMutation({
-    ...restoreRecordMutationOptions,
+    mutationKey: workspaceKeys.mutation("restore-record"),
+    mutationFn: (values: Record<string, unknown>) =>
+      restoreRecord({ workspace, tableId, recordId, values }),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: workspaceKeys.table(tableId) });
+      await queryClient.invalidateQueries({ queryKey: workspaceKeys.recordsTrash(tableId) });
+      await dbClient
+        .collection(recordsCollection(tableId))
+        .utils.pull()
+        .catch(() => undefined);
       toastManager.add({ type: "success", title: "Record restored" });
       onRestored();
     },
@@ -63,12 +66,7 @@ function RestoreForm({
     validate: (value) => buildCreate(columns, value).errors,
     onSubmit: (value) => {
       setFieldErrors({});
-      restore.mutate({
-        workspace,
-        tableId,
-        entryId,
-        values: buildPatch(columns, value, initial).patch,
-      });
+      restore.mutate(buildPatch(columns, value, initial).patch);
     },
   });
 
@@ -82,7 +80,7 @@ function RestoreForm({
       record={record}
       recordId={Number(record.id)}
       status="In trash"
-      error={restore.error ?? (failure ? new Error(failure.message) : null)}
+      error={restore.error}
       fieldErrors={fieldErrors}
       onFieldEdit={(key) =>
         setFieldErrors((current) => {
@@ -105,21 +103,26 @@ function RestoreForm({
 export function RestoreRecordSheet({
   workspace,
   tableId,
-  entryId,
+  recordId,
   onClose,
 }: {
   workspace: string;
   tableId: number;
-  entryId: number;
+  recordId: number;
   onClose: () => void;
 }) {
-  const queryClient = useQueryClient();
   const [open, setOpen] = useState(true);
-  const [failure] = useState(() =>
-    queryClient.getQueryData<RestoreFailure>(workspaceKeys.restoreError(tableId, entryId)),
+  const { data: table } = useLiveSuspenseQuery((q) =>
+    q
+      .from({ table: tablesCollection })
+      .where(({ table }) => eq(table.id, tableId))
+      .findOne(),
   );
-  const { data: table } = useSuspenseQuery(tableQueryOptions(workspace, tableId));
-  const { data: entry, error } = useQuery(trashEntryQueryOptions(workspace, tableId, entryId));
+  if (!table) throw notFound();
+  const { data: columns } = useLiveSuspenseQuery((q) =>
+    q.from({ column: columnsCollection(tableId) }).orderBy(({ column }) => column.position),
+  );
+  const { data: entry, error } = useQuery(trashEntryQueryOptions(workspace, tableId, recordId));
 
   return (
     <Sheet
@@ -132,14 +135,13 @@ export function RestoreRecordSheet({
       <SheetPopup variant="inset" className="max-w-xl">
         {entry ? (
           <RestoreForm
-            key={entryId}
+            key={recordId}
             workspace={workspace}
             tableId={tableId}
             tableName={table.name}
-            entryId={entryId}
+            recordId={recordId}
             record={entry.record}
-            columns={buildViewerColumns(table)}
-            failure={failure}
+            columns={buildViewerColumns({ titleColumnId: table.titleColumnId, columns })}
             onRestored={() => setOpen(false)}
           />
         ) : (

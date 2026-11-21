@@ -2,7 +2,7 @@ import { mutationOptions } from "@tanstack/react-query";
 
 import { fetch } from "void/client";
 
-import { unwrapFetch } from "@/data/workspace/api-error";
+import { unwrapFetch } from "@/lib/api-error";
 
 import { authKeys } from "./keys";
 

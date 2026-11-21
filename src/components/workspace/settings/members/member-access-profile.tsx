@@ -1,3 +1,4 @@
+import { useDbClient } from "@tanstack/react-db";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "@tanstack/react-router";
 
@@ -18,12 +19,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toastManager } from "@/components/ui/toast";
-import { workspaceKeys } from "@/data/workspace/keys";
+import { grantsCollection } from "@/data/workspace/access";
 import {
   assignProfileMutationOptions,
   profileAssignmentsQueryOptions,
   accessProfilesQueryOptions,
 } from "@/data/workspace/access-profiles";
+import { workspaceKeys } from "@/data/workspace/keys";
 import { isAdmin } from "@/lib/auth/access";
 import { DEFAULT_WORKSPACE } from "@/lib/workspace";
 
@@ -37,6 +39,7 @@ export function MemberAccessProfile({
   role?: string | null;
 }) {
   const queryClient = useQueryClient();
+  const dbClient = useDbClient();
   const router = useRouter();
   const { data: profiles } = useQuery(accessProfilesQueryOptions(DEFAULT_WORKSPACE));
   const { data: assignments } = useQuery(profileAssignmentsQueryOptions(DEFAULT_WORKSPACE));
@@ -46,7 +49,7 @@ export function MemberAccessProfile({
     onSuccess: async (_data, variables) => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: workspaceKeys.accessProfiles() }),
-        queryClient.invalidateQueries({ queryKey: workspaceKeys.access() }),
+        dbClient.collection(grantsCollection).utils.refetch(),
         router.invalidate(),
       ]);
       const label = profiles?.find((item) => item.id === variables.profileId)?.name;

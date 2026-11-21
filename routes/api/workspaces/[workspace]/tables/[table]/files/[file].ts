@@ -2,9 +2,9 @@ import { defineHandler } from "void";
 import { storage } from "void/storage";
 import { z } from "zod";
 
+import { requireAnyAccess } from "@/lib/access/require-access";
 import { fileKey } from "@/lib/files";
 import { httpError, NOT_FOUND } from "@/lib/http";
-import { requireAccessThrough } from "@/lib/access/require-access";
 
 const params = z.object({
   workspace: z.string(),
@@ -13,7 +13,7 @@ const params = z.object({
 });
 
 export const GET = defineHandler.withValidator({ params })(async (c, { params }) => {
-  await requireAccessThrough(c, ["read", "update", "create"], params.table);
+  await requireAnyAccess(c, params.table, ["read", "update", "create"]);
   const object = await storage.get(fileKey(params.workspace, params.table, params.file));
   if (!object) throw httpError(404, NOT_FOUND);
 

@@ -4,8 +4,8 @@ import { ImpersonationBanner } from "@/components/layout/impersonation-banner";
 import { ReadonlyFieldset } from "@/components/layout/readonly-fieldset";
 import { SettingsSidebar } from "@/components/layout/settings-sidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { useSession } from "@/hooks/use-session";
 import { readSidebarDefaultOpen } from "@/hooks/use-preferences";
+import { useSession } from "@/hooks/use-session";
 
 export const Route = createFileRoute("/workspaces/$workspace/settings")({
   staticData: { crumb: "Settings" },

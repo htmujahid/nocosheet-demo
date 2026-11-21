@@ -1,5 +1,6 @@
+import { useDbClient } from "@tanstack/react-db";
 import { useForm } from "@tanstack/react-form";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 
 import { ArrowRightIcon } from "lucide-react";
 
@@ -9,8 +10,7 @@ import { Field, FieldDescription, FieldError, FieldLabel } from "@/components/ui
 import { Form } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { workspaceKeys } from "@/data/workspace/keys";
-import { createTableMutationOptions } from "@/data/workspace/tables";
+import { createTableMutationOptions, tablesCollection } from "@/data/workspace/tables";
 import { useWorkspace } from "@/hooks/use-workspace";
 import { formSchema } from "@/lib/tables/form";
 import { DEFAULT_TABLE_ICON } from "@/lib/tables/icons";
@@ -30,13 +30,13 @@ type TableFormValues = {
 };
 
 export function TableStep({ onDone }: { onDone: (tableId: number) => void }) {
-  const queryClient = useQueryClient();
+  const dbClient = useDbClient();
   const { id: workspace } = useWorkspace();
 
   const createTable = useMutation({
     ...createTableMutationOptions,
-    onSuccess: async (created) => {
-      await queryClient.invalidateQueries({ queryKey: workspaceKeys.tables() });
+    onSuccess: (created) => {
+      dbClient.collection(tablesCollection).utils.writeUpsert(created);
       onDone(created.id);
     },
   });

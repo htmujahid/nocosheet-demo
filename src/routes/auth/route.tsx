@@ -5,10 +5,12 @@ import { Logo } from "@/components/brand/logo";
 import { Card, CardPanel } from "@/components/ui/card";
 import { setupStatusQueryOptions } from "@/data/auth/setup-status";
 import { authSearchSchema } from "@/lib/auth/redirect";
+import { requireOnline } from "@/lib/require-online";
 
 export const Route = createFileRoute("/auth")({
   validateSearch: authSearchSchema,
   beforeLoad: async ({ context, location, search }) => {
+    requireOnline(location);
     if (context.session) throw redirect({ href: search.redirect ?? "/" });
 
     // First run: no users yet, so every auth page funnels into setup, and setup closes afterwards.

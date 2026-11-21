@@ -6,6 +6,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 
 import { z } from "zod";
 
+import { DEMO_MODE } from "@/components/layout/readonly-fieldset";
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Form } from "@/components/ui/form";
@@ -14,8 +15,6 @@ import { AuthError } from "@/data/auth/auth-error";
 import { signInMutationOptions } from "@/data/auth/sign-in";
 import { signInPasskeyMutationOptions } from "@/data/auth/sign-in-passkey";
 import { useCompleteSignIn } from "@/hooks/use-complete-sign-in";
-
-import { DEMO_MODE } from "@/components/layout/readonly-fieldset";
 
 import { AuthErrorAlert } from "./auth-error-alert";
 
@@ -66,7 +65,8 @@ export function SignInForm() {
   }, [startAutofill]);
 
   const form = useForm({
-    defaultValues: DEMO_MODE || import.meta.env.DEV ? DEMO_CREDENTIALS : { identifier: "", password: "" },
+    defaultValues:
+      DEMO_MODE || import.meta.env.DEV ? DEMO_CREDENTIALS : { identifier: "", password: "" },
     validators: { onSubmit: schema },
     onSubmit: ({ value }) => mutation.mutate({ ...value, identifier: value.identifier.trim() }),
   });
