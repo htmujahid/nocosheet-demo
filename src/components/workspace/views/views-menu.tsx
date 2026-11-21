@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { useQuery } from "@tanstack/react-query";
+import { useLiveQuery } from "@tanstack/react-db";
 import { Link } from "@tanstack/react-router";
 
 import { CheckIcon, ChevronDownIcon, LayoutGridIcon, ListIcon, PlusIcon } from "lucide-react";
@@ -15,7 +15,7 @@ import {
   MenuSeparator,
   MenuTrigger,
 } from "@/components/ui/menu";
-import { viewsQueryOptions } from "@/data/workspace/views";
+import { viewsCollection } from "@/data/workspace/views";
 import { useAccess } from "@/hooks/use-access";
 import { ALL_VIEW } from "@/lib/views/constants";
 
@@ -33,7 +33,9 @@ export function ViewsMenu({
 }) {
   const tableId = Number(table);
   const access = useAccess();
-  const { data: views = [] } = useQuery(viewsQueryOptions(workspace, tableId));
+  const { data: views } = useLiveQuery((q) =>
+    q.from({ view: viewsCollection(tableId) }).orderBy(({ view }) => view.position),
+  );
   const [creating, setCreating] = useState(false);
   const active = views.find((view) => view.id === activeView);
 
@@ -49,7 +51,7 @@ export function ViewsMenu({
         </MenuTrigger>
         <MenuPopup align="start" className="min-w-56">
           <MenuGroup>
-            {access.can("read", tableId) && (
+            {access.can(tableId, "read") && (
               <MenuLinkItem
                 render={
                   <Link

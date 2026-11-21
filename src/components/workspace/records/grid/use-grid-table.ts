@@ -35,7 +35,6 @@ export function useGridTable({
         id: column.key,
         accessorFn: (row) => row[column.key],
         header: column.name,
-        meta: { label: column.name },
         enableSorting: column.sortable,
         enableColumnFilter: column.filterable,
         enableHiding: !column.title,

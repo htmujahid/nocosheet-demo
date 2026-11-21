@@ -3,7 +3,6 @@ import { z } from "zod";
 import { conditionError, filterKind, filtersSchema } from "../records/filters";
 import { COLUMN_FORMATS, SEARCHABLE_FORMATS } from "../tables/formats";
 import { columnInputSchema, iconName } from "../tables/validation";
-import { formInputSchema } from "../forms/validation";
 import { viewInputSchema } from "../views/validation";
 
 export const TEMPLATE_VERSION = 1;
@@ -37,14 +36,6 @@ const templateView = z.object({
   filters: filtersSchema.optional(),
 });
 
-const templateForm = z.object({
-  name,
-  icon: iconName,
-  description: text(500).optional(),
-  columns: z.array(name).min(1).max(200),
-  open: z.boolean().optional(),
-});
-
 export const relativeDate = z.object({
   $days: z.number().int(),
   $hour: z.number().int().min(0).max(23).optional(),
@@ -60,13 +51,15 @@ const templateTable = z.object({
   hidden: z.boolean().optional(),
   columns: z.array(templateColumn).min(1).max(200),
   views: z.array(templateView).max(50).optional(),
-  forms: z.array(templateForm).max(50).optional(),
   rows: z.array(z.record(z.string(), z.unknown())).max(2000).optional(),
 });
 
 export const templateSchema = z.object({
   version: z.literal(TEMPLATE_VERSION),
-  id: z.string().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, "Use a lowercase slug").max(64),
+  id: z
+    .string()
+    .regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, "Use a lowercase slug")
+    .max(64),
   name,
   description: text(300),
   icon: iconName,
@@ -126,7 +119,8 @@ export function checkTemplate(template: Template): string[] {
 
     for (const view of table.views ?? []) {
       const parsed = viewInputSchema.safeParse({ ...view, selectColumns: view.columns });
-      if (!parsed.success) problems.push(at(`view "${view.name}": ${parsed.error.issues[0]?.message}`));
+      if (!parsed.success)
+        problems.push(at(`view "${view.name}": ${parsed.error.issues[0]?.message}`));
       for (const columnName of view.columns)
         if (!columns.has(columnName))
           problems.push(at(`view "${view.name}" uses unknown column ${columnName}`));
@@ -138,7 +132,9 @@ export function checkTemplate(template: Template): string[] {
           continue;
         }
         if (!column.filterable)
-          problems.push(at(`view "${view.name}" filters on ${condition.column}, which isn't filterable`));
+          problems.push(
+            at(`view "${view.name}" filters on ${condition.column}, which isn't filterable`),
+          );
         const error = conditionError(kind, condition);
         if (error) problems.push(at(`view "${view.name}", ${condition.column}: ${error}`));
         const known = choices(condition.column);
@@ -148,21 +144,13 @@ export function checkTemplate(template: Template): string[] {
       }
     }
 
-    for (const form of table.forms ?? []) {
-      const parsed = formInputSchema.safeParse({ ...form, selectColumns: form.columns, isOpen: form.open });
-      if (!parsed.success) problems.push(at(`form "${form.name}": ${parsed.error.issues[0]?.message}`));
-      for (const columnName of form.columns)
-        if (!columns.has(columnName))
-          problems.push(at(`form "${form.name}" uses unknown column ${columnName}`));
-      for (const column of table.columns)
-        if (column.required && column.default === undefined && !column.generated && !form.columns.includes(column.name))
-          problems.push(at(`form "${form.name}" must include required column ${column.name}`));
-    }
-
-    const writable = new Set(table.columns.filter((column) => !column.generated).map((c) => c.name));
+    const writable = new Set(
+      table.columns.filter((column) => !column.generated).map((c) => c.name),
+    );
     for (const [index, row] of (table.rows ?? []).entries())
       for (const key of Object.keys(row))
-        if (!writable.has(key)) problems.push(at(`row ${index + 1} has unknown or computed column ${key}`));
+        if (!writable.has(key))
+          problems.push(at(`row ${index + 1} has unknown or computed column ${key}`));
 
     for (const column of table.columns) {
       const known = choices(column.name);
@@ -172,7 +160,9 @@ export function checkTemplate(template: Template): string[] {
         const values = Array.isArray(raw) ? raw : [raw];
         for (const value of values)
           if (value !== undefined && value !== null && !known.includes(String(value)))
-            problems.push(at(`row ${index + 1}: "${String(value)}" isn't a choice of ${column.name}`));
+            problems.push(
+              at(`row ${index + 1}: "${String(value)}" isn't a choice of ${column.name}`),
+            );
       }
     }
 

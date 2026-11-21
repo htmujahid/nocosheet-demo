@@ -1,5 +1,4 @@
 import {
-  createStandardSchemaV1,
   type inferParserType,
   parseAsInteger,
   parseAsNumberLiteral,
@@ -9,7 +8,7 @@ import {
 
 import { createSearchValidator } from "../search-params";
 
-export const TABLE_SORTS = ["name", "groupName", "columnCount", "updatedAt"] as const;
+export const TABLE_SORTS = ["name", "groupName", "updatedAt"] as const;
 export const PAGE_SIZES = [10, 20, 50, 100] as const;
 
 export const tablesSearchParams = {
@@ -21,17 +20,5 @@ export const tablesSearchParams = {
 };
 
 export type TablesQuery = inferParserType<typeof tablesSearchParams>;
-
-export const tablesSearchSchema = createStandardSchemaV1(tablesSearchParams, {
-  partialOutput: true,
-});
-
-export const resolveTablesQuery = (search: Partial<TablesQuery>): TablesQuery => ({
-  page: Math.max(1, search.page ?? tablesSearchParams.page.defaultValue),
-  pageSize: search.pageSize ?? tablesSearchParams.pageSize.defaultValue,
-  sort: search.sort ?? tablesSearchParams.sort.defaultValue,
-  order: search.order ?? tablesSearchParams.order.defaultValue,
-  q: search.q ?? tablesSearchParams.q.defaultValue,
-});
 
 export const validateTablesSearch = createSearchValidator(tablesSearchParams);

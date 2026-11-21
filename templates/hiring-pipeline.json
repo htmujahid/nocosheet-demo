@@ -4,11 +4,7 @@
   "name": "Hiring Pipeline",
   "description": "A fully populated recruiting workspace: open roles, candidates, interviews, interviewers and offers.",
   "icon": "user-search",
-  "tags": [
-    "hiring",
-    "recruiting",
-    "sample"
-  ],
+  "tags": ["hiring", "recruiting", "sample"],
   "tables": [
     {
       "name": "Interviewers",
@@ -46,11 +42,7 @@
           "name": "Active interviewers",
           "icon": "users",
           "description": "People currently available to interview.",
-          "columns": [
-            "Name",
-            "Role",
-            "Email"
-          ],
+          "columns": ["Name", "Role", "Email"],
           "filters": [
             {
               "column": "Active",
@@ -216,13 +208,7 @@
           "name": "Open roles",
           "icon": "door-open",
           "description": "Roles we are actively hiring for.",
-          "columns": [
-            "Title",
-            "Department",
-            "Location",
-            "Openings",
-            "Hiring manager"
-          ],
+          "columns": ["Title", "Department", "Location", "Openings", "Hiring manager"],
           "filters": [
             {
               "column": "Status",
@@ -235,33 +221,13 @@
           "name": "Engineering roles",
           "icon": "code",
           "description": "All engineering positions.",
-          "columns": [
-            "Title",
-            "Status",
-            "Location",
-            "Salary min",
-            "Salary max"
-          ],
+          "columns": ["Title", "Status", "Location", "Salary min", "Salary max"],
           "filters": [
             {
               "column": "Department",
               "op": "is",
               "value": "engineering"
             }
-          ]
-        }
-      ],
-      "forms": [
-        {
-          "name": "Role request",
-          "icon": "clipboard-list",
-          "description": "Ask People to open a new position.",
-          "columns": [
-            "Title",
-            "Department",
-            "Location",
-            "Openings",
-            "Description"
           ]
         }
       ],
@@ -489,23 +455,12 @@
           "name": "Active pipeline",
           "icon": "workflow",
           "description": "Candidates still in the process.",
-          "columns": [
-            "Name",
-            "Job",
-            "Stage",
-            "Rating",
-            "Applied"
-          ],
+          "columns": ["Name", "Job", "Stage", "Rating", "Applied"],
           "filters": [
             {
               "column": "Stage",
               "op": "is_any_of",
-              "value": [
-                "applied",
-                "screening",
-                "interview",
-                "offer"
-              ]
+              "value": ["applied", "screening", "interview", "offer"]
             }
           ]
         },
@@ -513,33 +468,13 @@
           "name": "Referrals",
           "icon": "handshake",
           "description": "Candidates referred by the team.",
-          "columns": [
-            "Name",
-            "Job",
-            "Stage",
-            "Rating"
-          ],
+          "columns": ["Name", "Job", "Stage", "Rating"],
           "filters": [
             {
               "column": "Source",
               "op": "is",
               "value": "referral"
             }
-          ]
-        }
-      ],
-      "forms": [
-        {
-          "name": "Job application",
-          "icon": "inbox",
-          "description": "Apply for one of our open roles.",
-          "columns": [
-            "Name",
-            "Email",
-            "Job",
-            "Location",
-            "Experience (years)",
-            "Notes"
           ]
         }
       ],
@@ -852,12 +787,7 @@
           "name": "Upcoming",
           "icon": "calendar-clock",
           "description": "Interviews that have not happened yet.",
-          "columns": [
-            "Title",
-            "Candidate",
-            "Interviewer",
-            "Scheduled for"
-          ],
+          "columns": ["Title", "Candidate", "Interviewer", "Scheduled for"],
           "filters": [
             {
               "column": "Status",
@@ -870,34 +800,13 @@
           "name": "Completed",
           "icon": "badge-check",
           "description": "Interviews with feedback.",
-          "columns": [
-            "Title",
-            "Candidate",
-            "Interviewer",
-            "Score",
-            "Feedback"
-          ],
+          "columns": ["Title", "Candidate", "Interviewer", "Score", "Feedback"],
           "filters": [
             {
               "column": "Status",
               "op": "is",
               "value": "completed"
             }
-          ]
-        }
-      ],
-      "forms": [
-        {
-          "name": "Interview feedback",
-          "icon": "message-square",
-          "description": "Share your score and notes after an interview.",
-          "columns": [
-            "Title",
-            "Candidate",
-            "Interviewer",
-            "Type",
-            "Score",
-            "Feedback"
           ]
         }
       ],
@@ -1169,13 +1078,7 @@
           "name": "Pending offers",
           "icon": "hourglass",
           "description": "Offers waiting for an answer.",
-          "columns": [
-            "Title",
-            "Candidate",
-            "Job",
-            "Salary",
-            "Sent"
-          ],
+          "columns": ["Title", "Candidate", "Job", "Salary", "Sent"],
           "filters": [
             {
               "column": "Status",

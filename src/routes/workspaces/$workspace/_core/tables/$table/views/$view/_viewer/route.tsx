@@ -1,4 +1,4 @@
-import { createFileRoute, getRouteApi, Outlet, redirect } from "@tanstack/react-router";
+import { createFileRoute, getRouteApi, Outlet } from "@tanstack/react-router";
 
 import { WorkspaceContent, WorkspaceHeader } from "@/components/layout/workspace-header";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -6,12 +6,9 @@ import { TableGridView } from "@/components/workspace/records/grid/table-grid-vi
 import { ViewGridView } from "@/components/workspace/records/grid/view-grid-view";
 import { TableActions } from "@/components/workspace/records/table-actions";
 import { ViewActions } from "@/components/workspace/views/view-actions";
-import { recordsQueryOptions } from "@/data/workspace/records";
-import { viewRecordsQueryOptions, viewsQueryOptions } from "@/data/workspace/views";
+import { recordsCollection } from "@/data/workspace/records";
 import { useAccess } from "@/hooks/use-access";
 import { scopeFor } from "@/lib/access/grants";
-import { resolveRecordsQuery, validateRecordsSearch } from "@/lib/records/query";
-import { ALL_VIEW } from "@/lib/views/constants";
 
 const viewRoute = getRouteApi("/workspaces/$workspace/_core/tables/$table/views/$view");
 
@@ -19,30 +16,12 @@ export const Route = createFileRoute(
   "/workspaces/$workspace/_core/tables/$table/views/$view/_viewer",
 )({
   validateSearch: (search: Record<string, unknown>) => search,
-  loaderDeps: ({ search }) => resolveRecordsQuery(validateRecordsSearch(search)),
-  loader: async ({ context, deps, params }) => {
+  loader: ({ context, params }) => {
     const table = Number(params.table);
-    if (params.view === ALL_VIEW) {
-      if (scopeFor(context.access, "read", table) === "none") {
-        // No access to the table's records: fall back to the first saved view, if any.
-        const [first] = await context.queryClient
-          .query(viewsQueryOptions(params.workspace, table))
-          .catch(() => []);
-        if (first)
-          throw redirect({
-            to: "/workspaces/$workspace/tables/$table/views/$view",
-            params: { ...params, view: String(first.id) },
-            replace: true,
-          });
-        return;
-      }
-      void context.queryClient
-        .query(recordsQueryOptions(params.workspace, table, deps))
-        .catch(() => undefined);
-      return;
-    }
-    void context.queryClient
-      .query(viewRecordsQueryOptions(params.workspace, table, Number(params.view), deps))
+    if (scopeFor(context.access, table, "read") === "none") return;
+    void context.dbClient
+      .collection(recordsCollection(table))
+      .preload()
       .catch(() => undefined);
   },
   component: ViewerPage,
@@ -56,7 +35,11 @@ function ViewerPage() {
 function SavedViewViewer({
   view,
 }: {
-  view: { id: number; selectColumns: Parameters<typeof ViewGridView>[0]["view"]["selectColumns"] };
+  view: {
+    id: number;
+    selectColumns: Parameters<typeof ViewGridView>[0]["view"]["selectColumns"];
+    whereExpression: Parameters<typeof ViewGridView>[0]["view"]["whereExpression"];
+  };
 }) {
   const { workspace, table, view: viewParam } = Route.useParams();
   const navigate = Route.useNavigate();
@@ -70,7 +53,11 @@ function SavedViewViewer({
         <ViewGridView
           workspace={workspace}
           tableId={Number(table)}
-          view={{ id: view.id, selectColumns: view.selectColumns }}
+          view={{
+            id: view.id,
+            selectColumns: view.selectColumns,
+            whereExpression: view.whereExpression,
+          }}
           onOpenRecord={(id) =>
             navigate({
               to: "/workspaces/$workspace/tables/$table/views/$view/$record",
@@ -89,7 +76,7 @@ function TableViewer() {
   const { workspace, table, view: viewParam } = Route.useParams();
   const navigate = Route.useNavigate();
   const access = useAccess();
-  const readable = access.can("read", Number(table));
+  const readable = access.can(Number(table), "read");
 
   if (!readable) {
     return (

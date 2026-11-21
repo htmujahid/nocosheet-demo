@@ -1,4 +1,4 @@
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useLiveSuspenseQuery } from "@tanstack/react-db";
 
 import { SettingsRow } from "@/components/shared/settings-row";
 import { Badge } from "@/components/ui/badge";
@@ -9,13 +9,15 @@ import {
   CardFrameHeader,
   CardFrameTitle,
 } from "@/components/ui/card";
-import { membersQueryOptions } from "@/data/workspace/members";
+import { membersCollection } from "@/data/workspace/members";
 import { useWorkspace } from "@/hooks/use-workspace";
 import { DEFAULT_WORKSPACE, DEFAULT_WORKSPACE_NAME } from "@/lib/workspace";
 
 export function SettingsGeneral() {
-  const { data: members } = useSuspenseQuery(membersQueryOptions);
   const { isAdmin: admin } = useWorkspace();
+  const { data: members } = useLiveSuspenseQuery({
+    query: (q) => q.from({ member: membersCollection }),
+  });
 
   return (
     <CardFrame>

@@ -1,6 +1,6 @@
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { eq, useLiveSuspenseQuery } from "@tanstack/react-db";
 
-import { sidebarQueryOptions } from "@/data/workspace/sidebar";
+import { tablesCollection } from "@/data/workspace/tables";
 import { useAccess } from "@/hooks/use-access";
 
 import { TableShortcuts } from "./overview/table-shortcuts";
@@ -10,9 +10,15 @@ import { Welcome } from "./overview/welcome";
 import { WorkspaceStats } from "./overview/workspace-stats";
 
 export function WorkspaceOverview({ workspace }: { workspace: string }) {
-  const { data: sidebar } = useSuspenseQuery(sidebarQueryOptions(workspace));
+  const { data: tables } = useLiveSuspenseQuery((q) =>
+    q
+      .from({ table: tablesCollection })
+      .where(({ table }) => eq(table.isHidden, false))
+      .orderBy(({ table }) => table.position)
+      .orderBy(({ table }) => table.id),
+  );
+
   const access = useAccess();
-  const tables = sidebar.groups.flatMap((group) => group.tables);
   const showTemplates = access.admin && tables.length === 0;
 
   return (

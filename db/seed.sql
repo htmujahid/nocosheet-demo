@@ -14,6 +14,7 @@ SELECT 'seed-account-' || substr("id", 11), "id", 'credential', "id",
 FROM "user"
 WHERE "id" LIKE 'seed-user-%';
 
+
 INSERT OR IGNORE INTO "default__access_profile_member" ("user_id", "profile_id", "assigned_by", "assigned_at")
 SELECT 'seed-user-maya', "id", 'seed-user-admin', strftime('%s', 'now') * 1000
 FROM "default__access_profile" WHERE "name" = 'Editor';

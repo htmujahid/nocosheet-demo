@@ -1,14 +1,16 @@
 import { useState } from "react";
 
-import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { eq, useDbClient, useLiveSuspenseQuery } from "@tanstack/react-db";
+import { useMutation } from "@tanstack/react-query";
+import { notFound } from "@tanstack/react-router";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { toastManager } from "@/components/ui/toast";
-import { workspaceKeys } from "@/data/workspace/keys";
+import { columnsCollection } from "@/data/workspace/columns";
 import {
-  discardTableMutationOptions,
-  tableQueryOptions,
+  deleteTablesMutationOptions,
+  tablesCollection,
   updateTableMutationOptions,
 } from "@/data/workspace/tables";
 import { useWorkspace } from "@/hooks/use-workspace";
@@ -28,35 +30,42 @@ export function ColumnsStep({
   onDiscarded: () => void;
   onFinished: () => void;
 }) {
-  const queryClient = useQueryClient();
+  const dbClient = useDbClient();
   const { id: workspace } = useWorkspace();
-  const { data: table } = useSuspenseQuery(tableQueryOptions(workspace, tableId));
+  const { data: table } = useLiveSuspenseQuery((q) =>
+    q
+      .from({ table: tablesCollection })
+      .where(({ table }) => eq(table.id, tableId))
+      .findOne(),
+  );
+  if (!table) throw notFound();
+  const { data: columns } = useLiveSuspenseQuery((q) =>
+    q.from({ column: columnsCollection(tableId) }).orderBy(({ column }) => column.position),
+  );
   const [choice, setChoice] = useState<string | null | undefined>(undefined);
-
-  const refresh = () => queryClient.invalidateQueries({ queryKey: workspaceKeys.tables() });
 
   const updateTable = useMutation({
     ...updateTableMutationOptions,
-    onSuccess: async () => {
-      await refresh();
+    onSuccess: (updated) => {
+      dbClient.collection(tablesCollection).utils.writeUpsert(updated);
       toastManager.add({ type: "success", title: `${table.name} was created` });
       onFinished();
     },
   });
 
   const discardTable = useMutation({
-    ...discardTableMutationOptions,
-    onSuccess: async () => {
-      await refresh();
+    ...deleteTablesMutationOptions,
+    onSuccess: () => {
+      dbClient.collection(tablesCollection).utils.writeDelete(tableId);
       onDiscarded();
     },
   });
 
-  const titleOptions = table.columns
+  const titleOptions = columns
     .filter((column) => TITLE_FORMATS.includes(column.format as never))
     .map((column) => ({ value: column.columnName, label: column.name }));
-  const savedTitle = table.columns.find((column) => column.id === table.titleColumnId)?.columnName;
-  const firstText = table.columns.find((column) => column.format === "text")?.columnName;
+  const savedTitle = columns.find((column) => column.id === table.titleColumnId)?.columnName;
+  const firstText = columns.find((column) => column.format === "text")?.columnName;
   const preferred = choice !== undefined ? choice : (savedTitle ?? firstText ?? null);
   const activeTitle = titleOptions.some((option) => option.value === preferred) ? preferred : null;
 
@@ -94,7 +103,7 @@ export function ColumnsStep({
       <WizardFooter hint="Finish saves the title column.">
         <Button
           variant="outline"
-          onClick={() => discardTable.mutate({ workspace, id: tableId })}
+          onClick={() => discardTable.mutate({ workspace, ids: [tableId] })}
           loading={discardTable.isPending}
           disabled={updateTable.isPending}
         >

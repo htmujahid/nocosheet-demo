@@ -1,6 +1,6 @@
 import { createFileRoute, notFound, Outlet } from "@tanstack/react-router";
 
-import { viewQueryOptions } from "@/data/workspace/views";
+import { viewsCollection } from "@/data/workspace/views";
 import { ALL_VIEW } from "@/lib/views/constants";
 
 export const Route = createFileRoute("/workspaces/$workspace/_core/tables/$table/views/$view")({
@@ -15,14 +15,18 @@ export const Route = createFileRoute("/workspaces/$workspace/_core/tables/$table
     if (!Number.isInteger(viewId) || viewId < 1) throw notFound();
     return { viewId };
   },
-  loader: ({ context, params }) => {
+  loader: async ({ context, params }) => {
     if (context.viewId === null) return null;
 
-    return context.queryClient
-      .query(viewQueryOptions(params.workspace, Number(params.table), context.viewId))
-      .catch(() => {
-        throw notFound();
-      });
+    const views = context.dbClient.collection(viewsCollection(Number(params.table)));
+    await views.preload();
+    let view = views.get(context.viewId);
+    if (!view && navigator.onLine) {
+      await views.utils.refetch().catch(() => undefined);
+      view = views.get(context.viewId);
+    }
+    if (!view) throw notFound();
+    return view;
   },
   component: Outlet,
 });

@@ -1,12 +1,8 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-
 import { toastManager } from "@/components/ui/toast";
-import { recordQueryOptions, updateRecordMutationOptions } from "@/data/workspace/records";
 
 import type { ViewerColumn } from "./columns";
 import type { ViewerRow } from "./records-grid";
-
-type Page = { rows: ViewerRow[] };
+import { useRecordWrites } from "./use-record-writes";
 
 const payloadOf = (column: ViewerColumn, value: unknown) => {
   if (value === undefined || value === "") return null;
@@ -14,26 +10,10 @@ const payloadOf = (column: ViewerColumn, value: unknown) => {
   return value;
 };
 
-export function useUpdateCell({
-  workspace,
-  tableId,
-  viewId,
-  queryKey,
-}: {
-  workspace: string;
-  tableId: number;
-  viewId?: number;
-  queryKey: readonly unknown[];
-}) {
-  const queryClient = useQueryClient();
-  const mutation = useMutation(updateRecordMutationOptions);
+export function useUpdateCell({ tableId }: { tableId: number }) {
+  const writes = useRecordWrites(tableId);
 
-  const replaceRow = (recordId: number, next: ViewerRow) =>
-    queryClient.setQueryData<Page>(queryKey, (page) =>
-      page ? { ...page, rows: page.rows.map((row) => (row.id === recordId ? next : row)) } : page,
-    );
-
-  return async (original: ViewerRow, draft: ViewerRow, column: ViewerColumn) => {
+  return (original: ViewerRow, draft: ViewerRow, column: ViewerColumn) => {
     if (JSON.stringify(original[column.key]) === JSON.stringify(draft[column.key])) return;
 
     const value = payloadOf(column, draft[column.key]);
@@ -42,28 +22,6 @@ export function useUpdateCell({
     if (typeof value === "number" && Number.isNaN(value))
       return toastManager.add({ type: "error", title: `${column.name} must be a number` });
 
-    const recordId = original.id;
-    await queryClient.cancelQueries({ queryKey });
-    replaceRow(recordId, draft);
-
-    try {
-      await mutation.mutateAsync({
-        workspace,
-        tableId,
-        viewId,
-        recordId,
-        values: { [column.key]: value },
-      });
-      await queryClient.invalidateQueries({
-        queryKey: recordQueryOptions(workspace, tableId, recordId, viewId).queryKey,
-      });
-    } catch (error) {
-      replaceRow(recordId, original);
-      toastManager.add({
-        type: "error",
-        title: `Couldn't save ${column.name}`,
-        description: error instanceof Error ? error.message : undefined,
-      });
-    }
+    writes.update(original.id, { [column.key]: value });
   };
 }

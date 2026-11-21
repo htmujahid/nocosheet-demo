@@ -1,19 +1,22 @@
 import { defineHandler } from "void";
 import { requireAuth } from "void/auth";
 
+import { assignProfile, findProfile, listAssignments } from "@/lib/access/repository";
+import { profileAssignSchema } from "@/lib/access/validation";
 import { isAdmin } from "@/lib/auth/access";
 import { findUserById } from "@/lib/auth/repository";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { httpError } from "@/lib/http";
-import { assignProfile, findProfile, listAssignments } from "@/lib/access/repository";
-import { profileAssignSchema } from "@/lib/access/validation";
 
 export const GET = defineHandler(async (c) => {
   requireAdmin(c);
   return listAssignments();
 });
 
-export const PUT = defineHandler.withValidator({ body: profileAssignSchema })(async (c, { body }) => {
+export const PUT = defineHandler.withValidator({ body: profileAssignSchema })(async (
+  c,
+  { body },
+) => {
   requireAdmin(c);
   const member = await findUserById(body.userId);
   if (!member) throw httpError(404, "Member not found.");

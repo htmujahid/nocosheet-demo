@@ -1,3 +1,4 @@
+import { useDbClient } from "@tanstack/react-db";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 
@@ -17,7 +18,7 @@ import { adminKeys } from "@/data/admin/keys";
 import { unbanUserMutationOptions } from "@/data/admin/unban-user";
 import { adminUserQueryOptions } from "@/data/admin/user";
 import { useRefreshSession } from "@/data/auth/session-refresh";
-import { workspaceKeys } from "@/data/workspace/keys";
+import { membersCollection } from "@/data/workspace/members";
 import { formatRelativeTime } from "@/lib/format-relative-time";
 import { DEFAULT_WORKSPACE } from "@/lib/workspace";
 
@@ -26,6 +27,7 @@ import { ConfirmAction } from "./confirm-action";
 
 export function MemberStatus({ userId }: { userId: string }) {
   const queryClient = useQueryClient();
+  const dbClient = useDbClient();
   const navigate = useNavigate();
   const refreshSession = useRefreshSession();
   const { data: member } = useSuspenseQuery(adminUserQueryOptions(userId));
@@ -35,7 +37,7 @@ export function MemberStatus({ userId }: { userId: string }) {
     onSuccess: async () => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: adminKeys.user(userId) }),
-        queryClient.invalidateQueries({ queryKey: workspaceKeys.members() }),
+        dbClient.collection(membersCollection).utils.refetch(),
       ]);
       toastManager.add({ type: "success", title: `${member.name} was unbanned` });
     },
@@ -46,7 +48,6 @@ export function MemberStatus({ userId }: { userId: string }) {
   const impersonate = useMutation({
     ...impersonateUserMutationOptions,
     onSuccess: async () => {
-      // Everything cached so far belongs to the admin, so start fresh as the member.
       await refreshSession({ signedOut: true });
       await navigate({ to: "/workspaces/$workspace", params: { workspace: DEFAULT_WORKSPACE } });
     },
@@ -59,7 +60,6 @@ export function MemberStatus({ userId }: { userId: string }) {
   });
 
   const banExpires = member.banExpires ? new Date(member.banExpires) : null;
-  // The ban is lifted automatically once it expires.
   const banned = Boolean(member.banned) && (!banExpires || banExpires.getTime() > Date.now());
 
   return (

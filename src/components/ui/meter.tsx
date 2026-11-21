@@ -1,7 +1,9 @@
 "use client";
 
-import { Meter as MeterPrimitive } from "@base-ui/react/meter";
 import type React from "react";
+
+import { Meter as MeterPrimitive } from "@base-ui/react/meter";
+
 import { cn } from "@/lib/utils";
 
 export function Meter({
@@ -10,10 +12,7 @@ export function Meter({
   ...props
 }: MeterPrimitive.Root.Props): React.ReactElement {
   return (
-    <MeterPrimitive.Root
-      className={cn("flex w-full flex-col gap-2", className)}
-      {...props}
-    >
+    <MeterPrimitive.Root className={cn("flex w-full flex-col gap-2", className)} {...props}>
       {children ? (
         children
       ) : (

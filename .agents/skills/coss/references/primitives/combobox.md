@@ -41,7 +41,7 @@ import {
   ComboboxValue,
   createComboboxItems,
   useComboboxFilter,
-} from "@/components/ui/combobox"
+} from "@/components/ui/combobox";
 ```
 
 ## Minimal pattern
@@ -85,7 +85,11 @@ Combobox with label in a Field:
     <ComboboxPopup>
       <ComboboxEmpty>No results found.</ComboboxEmpty>
       <ComboboxList>
-        {(item) => <ComboboxItem key={item.value} value={item}>{item.label}</ComboboxItem>}
+        {(item) => (
+          <ComboboxItem key={item.value} value={item}>
+            {item.label}
+          </ComboboxItem>
+        )}
       </ComboboxList>
     </ComboboxPopup>
   </Combobox>

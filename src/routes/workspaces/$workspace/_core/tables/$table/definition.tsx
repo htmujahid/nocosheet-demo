@@ -8,9 +8,13 @@ import { DeleteTablesDialog } from "@/components/workspace/tables/delete-tables-
 import { TableDefinition } from "@/components/workspace/tables/table-definition";
 import { TableDefinitionView } from "@/components/workspace/tables/table-definition-view";
 import { useWorkspace } from "@/hooks/use-workspace";
+import { requireOnline } from "@/lib/require-online";
 
 export const Route = createFileRoute("/workspaces/$workspace/_core/tables/$table/definition")({
   staticData: { crumb: "Definition" },
+  beforeLoad: ({ context, location }) => {
+    if (context.workspace.isAdmin) requireOnline(location);
+  },
   component: DefinitionPage,
 });
 

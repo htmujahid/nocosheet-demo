@@ -69,44 +69,47 @@ export function TrashRows<TRow extends TrashRow>({
 
   return (
     <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>{nameLabel}</TableHead>
-            <TableHead>Deleted</TableHead>
-            <TableHead>Deleted forever</TableHead>
-            <TableHead>Deleted by</TableHead>
-            <TableHead>
-              <span className="sr-only">Actions</span>
-            </TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {rows.map((row) => (
-            <TableRow key={row.id} className="hover:bg-accent!">
-              <TableCell>
-                <div className="flex items-center gap-3">
-                  <NamedIcon name={row.icon ?? null} className="size-4 shrink-0 text-muted-foreground" />
-                  <div className="flex min-w-0 flex-col">
-                    <span className="truncate font-medium">{row.name}</span>
-                    {detail?.(row)}
-                  </div>
+      <TableHeader>
+        <TableRow>
+          <TableHead>{nameLabel}</TableHead>
+          <TableHead>Deleted</TableHead>
+          <TableHead>Deleted forever</TableHead>
+          <TableHead>Deleted by</TableHead>
+          <TableHead>
+            <span className="sr-only">Actions</span>
+          </TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {rows.map((row) => (
+          <TableRow key={row.id} className="hover:bg-accent!">
+            <TableCell>
+              <div className="flex items-center gap-3">
+                <NamedIcon
+                  name={row.icon ?? null}
+                  className="size-4 shrink-0 text-muted-foreground"
+                />
+                <div className="flex min-w-0 flex-col">
+                  <span className="truncate font-medium">{row.name}</span>
+                  {detail?.(row)}
                 </div>
-              </TableCell>
-              <TableCell>
-                <When at={row.deletedAt} />
-              </TableCell>
-              <TableCell>
-                <When at={trashExpiry(row.deletedAt)} />
-              </TableCell>
-              <TableCell>
-                {row.deletedBy?.label ?? <span className="text-muted-foreground">—</span>}
-              </TableCell>
-              <TableCell>
-                <div className="flex items-center justify-end gap-1">{actions(row)}</div>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
+              </div>
+            </TableCell>
+            <TableCell>
+              <When at={row.deletedAt} />
+            </TableCell>
+            <TableCell>
+              <When at={trashExpiry(row.deletedAt)} />
+            </TableCell>
+            <TableCell>
+              {row.deletedBy?.label ?? <span className="text-muted-foreground">—</span>}
+            </TableCell>
+            <TableCell>
+              <div className="flex items-center justify-end gap-1">{actions(row)}</div>
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
     </Table>
   );
 }

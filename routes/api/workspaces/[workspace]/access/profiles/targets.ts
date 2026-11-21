@@ -1,7 +1,7 @@
 import { defineHandler } from "void";
 
-import { requireAdmin } from "@/lib/auth/require-admin";
 import { listGrantTargets } from "@/lib/access/repository";
+import { requireAdmin } from "@/lib/auth/require-admin";
 
 export const GET = defineHandler(async (c) => {
   requireAdmin(c);

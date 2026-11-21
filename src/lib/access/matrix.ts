@@ -17,7 +17,7 @@ export type Matrix = {
 
 export function grantsToMatrix(grants: AccessGrant[]): Matrix {
   const workspace = Object.fromEntries(
-    ACTIONS.map((action) => [action, levelOf(grants, action, null) ?? "none"]),
+    ACTIONS.map((action) => [action, levelOf(grants, null, action) ?? "none"]),
   ) as Record<Action, Scope>;
 
   const tables: Matrix["tables"] = {};
@@ -25,7 +25,7 @@ export function grantsToMatrix(grants: AccessGrant[]): Matrix {
     if (entry.resourceId === null) continue;
     const action = actionOf(entry.grant);
     const row = (tables[entry.resourceId] ??= {});
-    row[action] = levelOf([entry], action, entry.resourceId) ?? "none";
+    row[action] = levelOf([entry], entry.resourceId, action) ?? "none";
   }
 
   return { workspace, tables };
@@ -54,10 +54,10 @@ export function scopeLabel(action: Action, scope: Scope) {
   return scope === "none" ? "None" : scope === "own" ? "Own records" : "All records";
 }
 
-export function summarizeGrants(grants: AccessGrant[], resourceId: number | null = null) {
+export function summarizeGrants(grants: AccessGrant[], tableId: number | null = null) {
   return ACTIONS.map((action) => ({
     action,
     label: ACTION_LABELS[action],
-    scope: levelOf(grants, action, resourceId) ?? "none",
+    scope: levelOf(grants, tableId, action) ?? "none",
   }));
 }

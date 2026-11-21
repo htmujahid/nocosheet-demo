@@ -1,7 +1,5 @@
 import { defineHandler } from "void";
 
-import { requireAdmin } from "@/lib/auth/require-admin";
-import { httpError } from "@/lib/http";
 import { assertGrantable } from "@/lib/access/guard";
 import {
   createProfile,
@@ -11,13 +9,18 @@ import {
   replaceGrants,
 } from "@/lib/access/repository";
 import { profileCreateSchema } from "@/lib/access/validation";
+import { requireAdmin } from "@/lib/auth/require-admin";
+import { httpError } from "@/lib/http";
 
 export const GET = defineHandler(async (c) => {
   requireAdmin(c);
   return listProfilesWithGrants();
 });
 
-export const POST = defineHandler.withValidator({ body: profileCreateSchema })(async (c, { body }) => {
+export const POST = defineHandler.withValidator({ body: profileCreateSchema })(async (
+  c,
+  { body },
+) => {
   requireAdmin(c);
   if (await findProfileByName(body.name))
     throw httpError(409, `An access profile named "${body.name}" already exists.`);

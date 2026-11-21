@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import { useDbClient } from "@tanstack/react-db";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { TrashIcon } from "lucide-react";
@@ -18,7 +19,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { toastManager } from "@/components/ui/toast";
 import { workspaceKeys } from "@/data/workspace/keys";
-import { deleteTablesMutationOptions } from "@/data/workspace/tables";
+import { deleteTablesMutationOptions, tablesCollection } from "@/data/workspace/tables";
 import { TRASH_RETENTION_DAYS } from "@/lib/records/retention";
 
 type DeleteTablesProps = {
@@ -40,15 +41,20 @@ export function DeleteTablesAlert({
   trigger?: React.ReactElement;
 }) {
   const queryClient = useQueryClient();
+  const dbClient = useDbClient();
   const count = ids.length;
   const noun = count === 1 ? "table" : "tables";
 
   const deleteTables = useMutation({
     ...deleteTablesMutationOptions,
-    onSuccess: async () => {
+    onSuccess: async ({ ids: deleted }) => {
       onOpenChange(false);
       await onDeleted(count);
-      await queryClient.invalidateQueries({ queryKey: workspaceKeys.tables() });
+      const tableRows = dbClient.collection(tablesCollection);
+      tableRows.utils.writeBatch(() => {
+        for (const id of deleted) tableRows.utils.writeDelete(id);
+      });
+      await queryClient.invalidateQueries({ queryKey: workspaceKeys.tablesTrash() });
       toastManager.add({ type: "success", title: `${count} ${noun} moved to trash` });
     },
   });

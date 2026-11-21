@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { useQueryClient } from "@tanstack/react-query";
+import { useDbClient } from "@tanstack/react-db";
 import { Link, useNavigate } from "@tanstack/react-router";
 
 import {
@@ -26,18 +26,15 @@ import {
   MenuSeparator,
   MenuTrigger,
 } from "@/components/ui/menu";
-import { FormsMenu } from "@/components/workspace/forms/forms-menu";
 import { DeleteTablesAlert } from "@/components/workspace/tables/delete-tables-dialog";
-import { workspaceKeys } from "@/data/workspace/keys";
+import { recordsCollection } from "@/data/workspace/records";
 import { useAccess } from "@/hooks/use-access";
+import { useOnline } from "@/hooks/use-online";
 import { ALL_VIEW } from "@/lib/views/constants";
 
+import { PendingRecords } from "./pending-records";
 import { useExportRecords } from "./use-export-records";
 
-/**
- * Header actions for a table. `newRecord` picks where New record goes: a sheet over the grid
- * (default) or the full-page form.
- */
 export function TableActions({
   workspace,
   table,
@@ -48,16 +45,18 @@ export function TableActions({
   newRecord?: "sheet" | "page";
 }) {
   const access = useAccess();
-  const queryClient = useQueryClient();
+  const online = useOnline();
+  const dbClient = useDbClient();
   const navigate = useNavigate();
   const [deleting, setDeleting] = useState(false);
   const tableId = Number(table);
   const exportRecords = useExportRecords(workspace, tableId);
-  const canCreate = access.can("create", tableId);
-  const canExport = access.can("export", tableId) && access.can("read", tableId);
+  const canCreate = access.can(tableId, "create");
+  const canExport = access.can(tableId, "export") && access.can(tableId, "read");
 
   return (
     <div className="flex items-center gap-2">
+      <PendingRecords tableId={tableId} />
       <Menu>
         <MenuTrigger
           render={
@@ -76,7 +75,10 @@ export function TableActions({
           <MenuGroup>
             <MenuItem
               onClick={() =>
-                void queryClient.invalidateQueries({ queryKey: workspaceKeys.table(tableId) })
+                void dbClient
+                  .collection(recordsCollection(tableId))
+                  .utils.pull()
+                  .catch(() => undefined)
               }
             >
               <RefreshCwIcon aria-hidden="true" />
@@ -87,20 +89,26 @@ export function TableActions({
             <>
               <MenuSeparator />
               <MenuGroup>
-                {canCreate && (
-                  <MenuLinkItem
-                    render={
-                      <Link
-                        to="/workspaces/$workspace/tables/$table/views/$view/import"
-                        params={{ workspace, table, view: ALL_VIEW }}
-                        search={(previous) => previous}
-                      />
-                    }
-                  >
-                    <UploadIcon aria-hidden="true" />
-                    Import
-                  </MenuLinkItem>
-                )}
+                {canCreate &&
+                  (online ? (
+                    <MenuLinkItem
+                      render={
+                        <Link
+                          to="/workspaces/$workspace/tables/$table/views/$view/import"
+                          params={{ workspace, table, view: ALL_VIEW }}
+                          search={(previous) => previous}
+                        />
+                      }
+                    >
+                      <UploadIcon aria-hidden="true" />
+                      Import
+                    </MenuLinkItem>
+                  ) : (
+                    <MenuItem disabled>
+                      <UploadIcon aria-hidden="true" />
+                      Import (needs a connection)
+                    </MenuItem>
+                  ))}
                 {canExport && (
                   <MenuItem
                     disabled={exportRecords.isPending}
@@ -173,7 +181,6 @@ export function TableActions({
             <span className="max-sm:hidden">New record</span>
           </Button>
         )}
-        <FormsMenu workspace={workspace} table={table} grouped={canCreate} />
       </Group>
       {access.admin && (
         <DeleteTablesAlert

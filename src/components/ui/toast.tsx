@@ -1,5 +1,7 @@
 "use client";
 
+import type React from "react";
+
 import { Toast } from "@base-ui/react/toast";
 import {
   CircleAlertIcon,
@@ -8,9 +10,9 @@ import {
   LoaderCircleIcon,
   TriangleAlertIcon,
 } from "lucide-react";
-import type React from "react";
-import { cn } from "@/lib/utils";
+
 import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 const TOAST_ICONS = {
   error: CircleAlertIcon,
@@ -31,9 +33,7 @@ type ToastData = {
 };
 
 function getSwipeDirection(position: ToastPosition): SwipeDirection[] {
-  const verticalDirection: SwipeDirection = position.startsWith("top")
-    ? "up"
-    : "down";
+  const verticalDirection: SwipeDirection = position.startsWith("top") ? "up" : "down";
 
   if (position.includes("center")) {
     return [verticalDirection];
@@ -46,10 +46,7 @@ function getSwipeDirection(position: ToastPosition): SwipeDirection[] {
   return ["right", verticalDirection];
 }
 
-function upsertReplayClassName(toast: {
-  type?: string;
-  updateKey?: number;
-}): string | undefined {
+function upsertReplayClassName(toast: { type?: string; updateKey?: number }): string | undefined {
   const k = toast.updateKey ?? 0;
   if (k <= 0) return undefined;
   const isEven = k % 2 === 0;
@@ -90,9 +87,7 @@ function Toasts({
         data-slot="toast-viewport"
       >
         {toasts.map((toast) => {
-          const Icon = toast.type
-            ? TOAST_ICONS[toast.type as keyof typeof TOAST_ICONS]
-            : null;
+          const Icon = toast.type ? TOAST_ICONS[toast.type as keyof typeof TOAST_ICONS] : null;
           const toastData = toast.data as ToastData | undefined;
 
           return (
@@ -160,10 +155,7 @@ function Toasts({
                   )}
 
                   <div className="flex flex-col gap-0.5">
-                    <Toast.Title
-                      className="font-medium"
-                      data-slot="toast-title"
-                    />
+                    <Toast.Title className="font-medium" data-slot="toast-title" />
                     <Toast.Description
                       className="text-muted-foreground"
                       data-slot="toast-description"
@@ -171,10 +163,7 @@ function Toasts({
                   </div>
                 </div>
                 {toast.actionProps && (
-                  <Toast.Action
-                    className={buttonVariants({ size: "xs" })}
-                    data-slot="toast-action"
-                  >
+                  <Toast.Action className={buttonVariants({ size: "xs" })} data-slot="toast-action">
                     {toast.actionProps.children}
                   </Toast.Action>
                 )}
@@ -196,14 +185,9 @@ function AnchoredToasts({
 
   return (
     <Toast.Portal data-slot="toast-portal-anchored" {...portalProps}>
-      <Toast.Viewport
-        className="outline-none"
-        data-slot="toast-viewport-anchored"
-      >
+      <Toast.Viewport className="outline-none" data-slot="toast-viewport-anchored">
         {toasts.map((toast) => {
-          const Icon = toast.type
-            ? TOAST_ICONS[toast.type as keyof typeof TOAST_ICONS]
-            : null;
+          const Icon = toast.type ? TOAST_ICONS[toast.type as keyof typeof TOAST_ICONS] : null;
           const toastData = toast.data as ToastData | undefined;
           const tooltipStyle = toastData?.tooltipStyle ?? false;
           const positionerProps = toast.positionerProps;
@@ -249,10 +233,7 @@ function AnchoredToasts({
                       )}
 
                       <div className="flex flex-col gap-0.5">
-                        <Toast.Title
-                          className="font-medium"
-                          data-slot="toast-title"
-                        />
+                        <Toast.Title className="font-medium" data-slot="toast-title" />
                         <Toast.Description
                           className="text-muted-foreground"
                           data-slot="toast-description"
@@ -278,8 +259,7 @@ function AnchoredToasts({
   );
 }
 
-export const toastManager: ReturnType<typeof Toast.createToastManager> =
-  Toast.createToastManager();
+export const toastManager: ReturnType<typeof Toast.createToastManager> = Toast.createToastManager();
 
 export const anchoredToastManager: ReturnType<typeof Toast.createToastManager> =
   Toast.createToastManager();

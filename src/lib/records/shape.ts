@@ -30,3 +30,24 @@ export function shapeRecord(row: Record<string, unknown>, columns: ShapeColumn[]
   }
   return record;
 }
+
+export function shapeSyncRow(row: Record<string, unknown>, columns: ShapeColumn[]) {
+  const record: Record<string, unknown> = {
+    id: row.id,
+    created_at: row.created_at,
+    updated_at: row.updated_at,
+    created_by: row.created_by ?? null,
+    updated_by: row.updated_by ?? null,
+    created_by_label: row.created_by_label ?? null,
+    updated_by_label: row.updated_by_label ?? null,
+  };
+  for (const column of columns) {
+    const value = row[column.columnName];
+    if (column.format === "checkbox")
+      record[column.columnName] = value == null ? null : value === 1;
+    else if (["multi_select", "json", "file", "image"].includes(column.format))
+      record[column.columnName] = parse(value) ?? null;
+    else record[column.columnName] = value ?? null;
+  }
+  return record;
+}

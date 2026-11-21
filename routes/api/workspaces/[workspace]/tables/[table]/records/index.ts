@@ -2,123 +2,111 @@ import { defineHandler } from "void";
 import { requireAuth } from "void/auth";
 import { z } from "zod";
 
+import { requireAccess } from "@/lib/access/require-access";
+import { logRecordAudit } from "@/lib/audit/log";
 import { auditCreated, auditDeleted } from "@/lib/audit/records";
 import { httpError, NOT_FOUND, writeFailure } from "@/lib/http";
 import { deleteRecords } from "@/lib/records/deletion";
-import { targetsOfColumns, parseFilters } from "@/lib/records/filter-param";
 import { checkLinks } from "@/lib/records/links";
 import {
-  recordsApiSchema,
-  recordsDeleteSchema,
-  resolveRecordsQuery,
-  withFilters,
-} from "@/lib/records/query";
-import {
   countOwnedRecords,
-  countRecordsInView,
-  createRecordRow,
-  findRecords,
-  viewScope,
+  createRecordRows,
+  findRecordsForResponse,
+  findRecordTable,
+  findSyncRows,
+  serverClock,
 } from "@/lib/records/repository";
-import { sortKeyOf } from "@/lib/records/sort-param";
-import { checkRecordsQuery } from "@/lib/records/validation";
-import { findMissingRequired, parseRecordValues, recordPatchSchema } from "@/lib/records/values";
-import { requireAccess } from "@/lib/access/require-access";
-import { findTable, listColumns } from "@/lib/tables/repository";
-import { viewScopeSchema } from "@/lib/views/query";
-import { findView } from "@/lib/views/repository";
+import { findMissingRequired, type ParsedValue, parseRecordValues } from "@/lib/records/values";
+import { type Column, listColumns } from "@/lib/tables/repository";
 
 const params = z.object({ workspace: z.string(), table: z.coerce.number().int().positive() });
 
-export const GET = defineHandler.withValidator({ params, query: recordsApiSchema })(async (
-  c,
-  { params, query },
-) => {
-  const { ownerId } = await requireAccess(c, "read", params.table);
-  const table = await findTable(params.table);
+const MAX_BATCH = 100;
+
+const recordId = z.number().int().positive().max(Number.MAX_SAFE_INTEGER);
+
+const createSchema = z.object({
+  rows: z
+    .array(z.object({ values: z.record(z.string(), z.unknown()) }))
+    .min(1)
+    .max(MAX_BATCH),
+});
+
+const deleteSchema = z.object({ ids: z.array(recordId).min(1).max(500) });
+
+export const GET = defineHandler.withValidator({
+  params,
+  query: z.object({ since: z.coerce.number().int().nonnegative().optional() }),
+})(async (c, { params, query }) => {
+  const { ownerId } = await requireAccess(c, params.table, "read");
+  const table = await findRecordTable(c.get("workspaceId"), params.table);
   if (!table) throw httpError(404, NOT_FOUND);
-  const columns = await listColumns(table.id);
-  const parsed = parseFilters(resolveRecordsQuery(query).filter, targetsOfColumns(columns));
-  if (parsed.errors.length) throw httpError(400, parsed.errors[0]);
-  const requested = resolveRecordsQuery(query);
-  const sort = sortKeyOf(columns, requested.sort);
-  if (sort === undefined) throw httpError(400, `"${requested.sort}" can't be sorted.`);
-  const resolved = { ...withFilters(requested, parsed.filters), sort };
-
-  const problem = checkRecordsQuery(columns, resolved);
-  if (problem) throw httpError(400, problem);
-
-  try {
-    return await findRecords(c.get("workspaceId"), table, columns, resolved, ownerId);
-  } catch (error) {
-    throw httpError(
-      400,
-      error instanceof Error ? error.message : "The records could not be loaded.",
-    );
-  }
+  const syncedAt = await serverClock();
+  const rows = await findSyncRows(c.get("workspaceId"), table, { since: query.since, ownerId });
+  return { rows, syncedAt };
 });
 
 export const POST = defineHandler.withValidator({
   params,
-  body: recordPatchSchema,
+  body: createSchema,
 })(async (c, { params, body }) => {
   const workspace = c.get("workspaceId");
-  await requireAccess(c, "create", params.table);
-  const table = await findTable(params.table);
+  const user = requireAuth(c);
+  await requireAccess(c, params.table, "create");
+  const table = await findRecordTable(c.get("workspaceId"), params.table);
   if (!table) throw httpError(404, NOT_FOUND);
   const columns = await listColumns(table.id);
 
-  const parsed = parseRecordValues(columns, body.values);
-  if (!parsed.ok) throw httpError(400, parsed.message, parsed.field);
+  const records: ParsedValue<Column>[][] = [];
+  for (const row of body.rows) {
+    const parsed = parseRecordValues(columns, row.values);
+    if (!parsed.ok) throw httpError(400, parsed.message, parsed.field);
+    const broken = await checkLinks(workspace, parsed.values);
+    if (broken) throw httpError(400, broken.message, broken.field);
+    const missing = findMissingRequired(columns, parsed.values);
+    if (missing)
+      throw httpError(400, `${missing.name}: This field is required`, missing.columnName);
+    records.push(parsed.values);
+  }
 
-  const broken = await checkLinks(workspace, parsed.values);
-  if (broken) throw httpError(400, broken.message, broken.field);
-
-  const missing = findMissingRequired(columns, parsed.values);
-  if (missing) throw httpError(400, `${missing.name}: This field is required`, missing.columnName);
-
-  const user = requireAuth(c);
+  let ids: number[];
   try {
-    const created = await createRecordRow(workspace, table, parsed.values, user.id);
-    if (!created) throw httpError(400, "The record could not be created.");
+    ids = await createRecordRows(workspace, table, records, user.id);
+  } catch (error) {
+    writeFailure(error, columns);
+  }
+
+  if (ids.length === 1)
     await auditCreated(
       user,
       table,
       columns,
-      parsed.values.map((item) => item.column),
-      created,
+      records[0].map((item) => item.column),
+      { id: ids[0] },
     );
-    return { id: created.id };
-  } catch (error) {
-    writeFailure(error, columns);
-  }
+  else await logRecordAudit(user, table, { action: "import", recordIds: ids });
+
+  return { rows: await findRecordsForResponse(workspace, table, ids) };
 });
 
 export const DELETE = defineHandler.withValidator({
   params,
-  query: viewScopeSchema,
-  body: recordsDeleteSchema,
-})(async (c, { params, query, body }) => {
+  body: deleteSchema,
+})(async (c, { params, body }) => {
   const workspace = c.get("workspaceId");
   const user = requireAuth(c);
-  const { ownerId } = await requireAccess(c, "delete", params.table, query.view);
-  const table = await findTable(params.table);
+  const { ownerId } = await requireAccess(c, params.table, "delete");
+  const table = await findRecordTable(c.get("workspaceId"), params.table);
   if (!table) throw httpError(404, NOT_FOUND);
 
   const ids = [...new Set(body.ids)];
-  const view = query.view ? await findView(table.id, query.view) : undefined;
-  const scope = view && viewScope(await listColumns(table.id), view.whereExpression);
-  if (scope && (await countRecordsInView(workspace, table, scope, ids)) !== ids.length)
-    throw httpError(404, NOT_FOUND);
   if (ownerId && (await countOwnedRecords(workspace, table, ids, ownerId)) !== ids.length)
     throw httpError(403, "You can only delete records you created.");
 
-  const result = await deleteRecords(workspace, table, body.ids, user.id);
-  if (!result.ok)
-    throw httpError(
-      result.reason === "not_found" ? 404 : result.reason === "linked" ? 409 : 400,
-      result.message,
-    );
-  await auditDeleted(user, table, ids);
-  return { trash: result.trash };
+  const result = await deleteRecords(workspace, table, ids, user.id);
+  if (!result.ok) throw httpError(result.reason === "linked" ? 409 : 400, result.message);
+  if (result.deleted.length) await auditDeleted(user, table, result.deleted);
+  return {
+    rows: await findRecordsForResponse(workspace, table, result.deleted, { deleted: true }),
+  };
 });

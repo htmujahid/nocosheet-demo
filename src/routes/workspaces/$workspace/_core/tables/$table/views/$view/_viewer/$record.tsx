@@ -1,12 +1,11 @@
-import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, getRouteApi, redirect } from "@tanstack/react-router";
 
+import { useRecord } from "@/components/workspace/records/grid/use-record-rows";
 import { DetailRecordSheet } from "@/components/workspace/records/record-sheet/detail-record-sheet";
 import { UpdateRecordSheet } from "@/components/workspace/records/record-sheet/update-record-sheet";
-import { recordQueryOptions } from "@/data/workspace/records";
+import { useRecordScope } from "@/components/workspace/records/use-record-scope";
 import { useAccess } from "@/hooks/use-access";
 import { scopeFor } from "@/lib/access/grants";
-import { ALL_VIEW } from "@/lib/views/constants";
 
 const back = (params: { workspace: string; table: string; view: string }) =>
   redirect({
@@ -23,21 +22,7 @@ export const Route = createFileRoute(
 )({
   pendingComponent: () => null,
   beforeLoad: ({ context, params }) => {
-    const viewId = params.view === ALL_VIEW ? undefined : Number(params.view);
-    if (scopeFor(context.access, "read", Number(params.table), viewId) === "none")
-      throw back(params);
-  },
-  loader: async ({ context, params }) => {
-    const tableId = Number(params.table);
-    const viewId = params.view === ALL_VIEW ? undefined : Number(params.view);
-    const record = context.queryClient
-      .query(recordQueryOptions(params.workspace, tableId, Number(params.record), viewId))
-      .catch(() => undefined);
-
-    // With `read:own` the record decides whether the user may open it, so it is awaited.
-    if (scopeFor(context.access, "read", tableId, viewId) !== "own") return;
-    const owner = ((await record)?.created_by as { id?: string } | null | undefined)?.id;
-    if (!owner || owner !== context.session?.user.id) throw back(params);
+    if (scopeFor(context.access, Number(params.table), "read") === "none") throw back(params);
   },
   component: RecordPage,
 });
@@ -48,12 +33,11 @@ function RecordPage() {
   const navigate = Route.useNavigate();
   const access = useAccess();
   const tableId = Number(table);
-  // `loaded` is null on the table grid: no view scoping for access or columns.
-  const viewId = loaded?.id;
-  const { data } = useQuery(recordQueryOptions(workspace, tableId, Number(record), viewId));
+  const scope = useRecordScope(workspace, tableId, loaded ?? undefined);
+  const { record: data } = useRecord(tableId, Number(record), scope.columns);
 
   const owner = (data?.created_by as { id?: string } | null | undefined)?.id;
-  const editable = access.canOn("update", tableId, owner, viewId);
+  const editable = access.canOn(tableId, "update", owner);
   const sheetProps = {
     workspace,
     tableId,
@@ -67,7 +51,7 @@ function RecordPage() {
       }),
   };
 
-  const canDelete = access.canOn("delete", tableId, owner, viewId);
+  const canDelete = access.canOn(tableId, "delete", owner);
 
   return editable ? (
     <UpdateRecordSheet {...sheetProps} canDelete={canDelete} />

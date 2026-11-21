@@ -1,10 +1,10 @@
 import { defineHandler } from "void";
 import { z } from "zod";
 
+import { requireAccess } from "@/lib/access/require-access";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { conflictOrBadRequest, httpError, NOT_FOUND } from "@/lib/http";
-import { requireAccess } from "@/lib/access/require-access";
-import { findTable, listColumns } from "@/lib/tables/repository";
+import { findTable } from "@/lib/tables/repository";
 import { deleteViews, findView, updateView } from "@/lib/views/repository";
 import { viewPatchSchema } from "@/lib/views/validation";
 
@@ -15,20 +15,13 @@ const params = z.object({
 });
 
 export const GET = defineHandler.withValidator({ params })(async (c, { params }) => {
-  await requireAccess(c, "read", params.table, params.view);
+  await requireAccess(c, params.table, "read");
   const table = await findTable(params.table);
   if (!table) throw httpError(404, NOT_FOUND);
   const view = await findView(table.id, params.view);
   if (!view) throw httpError(404, NOT_FOUND);
 
-  const columns = (await listColumns(table.id)).filter((column) =>
-    view.selectColumns.includes(column.columnName),
-  );
-  return {
-    ...view,
-    table: { id: table.id, name: table.name, titleColumnId: table.titleColumnId },
-    columns,
-  };
+  return view;
 });
 
 export const PATCH = defineHandler.withValidator({ params, body: viewPatchSchema })(async (
@@ -52,5 +45,5 @@ export const DELETE = defineHandler.withValidator({ params })(async (c, { params
   requireAdmin(c);
   if (!(await findView(params.table, params.view))) throw httpError(404, NOT_FOUND);
   await deleteViews([params.view]);
-  return { ok: true };
+  return { ids: [params.view] };
 });

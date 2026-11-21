@@ -1,6 +1,8 @@
 import { useOptimistic, useState, useTransition } from "react";
 
-import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { eq, useDbClient, useLiveSuspenseQuery } from "@tanstack/react-db";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { notFound } from "@tanstack/react-router";
 
 import { PlusIcon } from "lucide-react";
 
@@ -16,25 +18,23 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { toastManager } from "@/components/ui/toast";
-import { workspaceKeys } from "@/data/workspace/keys";
 import {
   createColumnMutationOptions,
   deleteColumnMutationOptions,
   reorderColumnsMutationOptions,
-  tableQueryOptions,
   updateColumnMutationOptions,
-} from "@/data/workspace/tables";
+  type ColumnRow,
+  columnsCollection,
+} from "@/data/workspace/columns";
+import { workspaceKeys } from "@/data/workspace/keys";
+import { tablesCollection } from "@/data/workspace/tables";
 import { TRASH_RETENTION_DAYS } from "@/lib/records/retention";
 
 import { ColumnDialog } from "./column-dialog";
 import { columnToDraft, type ColumnDraft } from "./column-draft";
 import { ColumnsList } from "./columns-list";
 
-function useTableData(workspace: string, tableId: number) {
-  return useSuspenseQuery(tableQueryOptions(workspace, tableId));
-}
-
-type EditorColumn = ReturnType<typeof useTableData>["data"]["columns"][number];
+type EditorColumn = ColumnRow;
 
 export function ColumnsEditor({
   workspace,
@@ -46,10 +46,20 @@ export function ColumnsEditor({
   actions?: React.ReactNode;
 }) {
   const queryClient = useQueryClient();
-  const { data: table } = useTableData(workspace, tableId);
-  const [columns, setColumns] = useOptimistic(
-    table.columns,
-    (_current, next: EditorColumn[]) => next,
+  const dbClient = useDbClient();
+  const { data: table } = useLiveSuspenseQuery((q) =>
+    q
+      .from({ table: tablesCollection })
+      .where(({ table }) => eq(table.id, tableId))
+      .findOne(),
+  );
+  if (!table) throw notFound();
+  const { data: tableColumns } = useLiveSuspenseQuery((q) =>
+    q.from({ column: columnsCollection(tableId) }).orderBy(({ column }) => column.position),
+  );
+  const [columns, setColumns] = useOptimistic<EditorColumn[], EditorColumn[]>(
+    tableColumns,
+    (_current, next) => next,
   );
   const [, startTransition] = useTransition();
 
@@ -58,17 +68,29 @@ export function ColumnsEditor({
   );
   const [removing, setRemoving] = useState<EditorColumn | null>(null);
 
-  const refresh = () => queryClient.invalidateQueries({ queryKey: workspaceKeys.tables() });
+  const columnRows = dbClient.collection(columnsCollection(tableId));
+  const tableRows = dbClient.collection(tablesCollection);
 
-  const createColumn = useMutation({ ...createColumnMutationOptions, onSuccess: refresh });
-  const updateColumn = useMutation({ ...updateColumnMutationOptions, onSuccess: refresh });
+  const createColumn = useMutation({
+    ...createColumnMutationOptions,
+    onSuccess: ({ column, table }) => {
+      columnRows.utils.writeUpsert(column);
+      tableRows.utils.writeUpsert(table);
+    },
+  });
+  const updateColumn = useMutation({
+    ...updateColumnMutationOptions,
+    onSuccess: ({ column, table }) => {
+      if (column) columnRows.utils.writeUpsert(column);
+      tableRows.utils.writeUpsert(table);
+    },
+  });
   const deleteColumn = useMutation({
     ...deleteColumnMutationOptions,
-    onSuccess: async () => {
-      await Promise.all([
-        refresh(),
-        queryClient.invalidateQueries({ queryKey: workspaceKeys.columnsTrash(tableId) }),
-      ]);
+    onSuccess: async ({ id, table }) => {
+      columnRows.utils.writeDelete(id);
+      tableRows.utils.writeUpsert(table);
+      await queryClient.invalidateQueries({ queryKey: workspaceKeys.columnsTrash(tableId) });
       setRemoving(null);
     },
   });
@@ -81,7 +103,12 @@ export function ColumnsEditor({
         title: "Couldn't reorder the columns",
         description: error.message,
       }),
-    onSettled: refresh,
+    onSuccess: ({ columns, table }) => {
+      columnRows.utils.writeBatch(() => {
+        for (const column of columns) columnRows.utils.writeUpsert(column);
+      });
+      tableRows.utils.writeUpsert(table);
+    },
   });
 
   const reorder = (next: EditorColumn[]) =>

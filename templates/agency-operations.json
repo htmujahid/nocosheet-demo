@@ -4,10 +4,7 @@
   "name": "Agency Operations",
   "description": "A fully populated workspace for running an agency: team, clients, projects, tasks, invoices, products, bug reports, a content calendar and brand assets.",
   "icon": "sparkles",
-  "tags": [
-    "agency",
-    "sample"
-  ],
+  "tags": ["agency", "sample"],
   "tables": [
     {
       "name": "Team Members",
@@ -114,12 +111,7 @@
           "name": "Active team",
           "icon": "users",
           "description": "Team members who are currently active.",
-          "columns": [
-            "Name",
-            "Role",
-            "Location",
-            "Skills"
-          ],
+          "columns": ["Name", "Role", "Location", "Skills"],
           "filters": [
             {
               "column": "Active",
@@ -132,12 +124,7 @@
           "name": "Engineers",
           "icon": "code",
           "description": "Everyone with the Engineer role.",
-          "columns": [
-            "Name",
-            "Email",
-            "Location",
-            "Skills"
-          ],
+          "columns": ["Name", "Email", "Location", "Skills"],
           "filters": [
             {
               "column": "Role",
@@ -157,10 +144,7 @@
             "$days": -720
           },
           "Active": true,
-          "Skills": [
-            "backend",
-            "devops"
-          ]
+          "Skills": ["backend", "devops"]
         },
         {
           "Name": "Kai Morgan",
@@ -171,10 +155,7 @@
             "$days": -610
           },
           "Active": true,
-          "Skills": [
-            "design",
-            "frontend"
-          ]
+          "Skills": ["design", "frontend"]
         },
         {
           "Name": "Priya Nair",
@@ -185,10 +166,7 @@
             "$days": -540
           },
           "Active": true,
-          "Skills": [
-            "data",
-            "writing"
-          ]
+          "Skills": ["data", "writing"]
         },
         {
           "Name": "Diego Alvarez",
@@ -199,9 +177,7 @@
             "$days": -430
           },
           "Active": true,
-          "Skills": [
-            "frontend"
-          ]
+          "Skills": ["frontend"]
         },
         {
           "Name": "Hannah Becker",
@@ -212,9 +188,7 @@
             "$days": -380
           },
           "Active": true,
-          "Skills": [
-            "writing"
-          ]
+          "Skills": ["writing"]
         },
         {
           "Name": "Omar Haddad",
@@ -236,9 +210,7 @@
             "$days": -260
           },
           "Active": true,
-          "Skills": [
-            "data"
-          ]
+          "Skills": ["data"]
         },
         {
           "Name": "Liam O'Connor",
@@ -249,10 +221,7 @@
             "$days": -200
           },
           "Active": false,
-          "Skills": [
-            "backend",
-            "data"
-          ]
+          "Skills": ["backend", "data"]
         },
         {
           "Name": "Yuki Tanaka",
@@ -263,9 +232,7 @@
             "$days": -120
           },
           "Active": true,
-          "Skills": [
-            "design"
-          ]
+          "Skills": ["design"]
         },
         {
           "Name": "Zara Ahmed",
@@ -380,12 +347,7 @@
           "name": "Active clients",
           "icon": "badge-check",
           "description": "Accounts we are currently working with.",
-          "columns": [
-            "Company",
-            "Industry",
-            "Contact email",
-            "Annual revenue"
-          ],
+          "columns": ["Company", "Industry", "Contact email", "Annual revenue"],
           "filters": [
             {
               "column": "Status",
@@ -398,32 +360,13 @@
           "name": "Open leads",
           "icon": "target",
           "description": "Prospects that have not signed yet.",
-          "columns": [
-            "Company",
-            "Industry",
-            "Contact email",
-            "Website"
-          ],
+          "columns": ["Company", "Industry", "Contact email", "Website"],
           "filters": [
             {
               "column": "Status",
               "op": "is",
               "value": "lead"
             }
-          ]
-        }
-      ],
-      "forms": [
-        {
-          "name": "Lead intake",
-          "icon": "inbox",
-          "description": "Tell us about a company that wants to work with us.",
-          "columns": [
-            "Company",
-            "Industry",
-            "Contact email",
-            "Website",
-            "Notes"
           ]
         }
       ],
@@ -645,14 +588,7 @@
           "name": "In progress",
           "icon": "loader",
           "description": "Projects being worked on right now.",
-          "columns": [
-            "Name",
-            "Client",
-            "Owner",
-            "Priority",
-            "Due date",
-            "Progress"
-          ],
+          "columns": ["Name", "Client", "Owner", "Priority", "Due date", "Progress"],
           "filters": [
             {
               "column": "Status",
@@ -665,37 +601,13 @@
           "name": "High priority",
           "icon": "flag",
           "description": "High and urgent projects.",
-          "columns": [
-            "Name",
-            "Client",
-            "Status",
-            "Due date",
-            "Budget"
-          ],
+          "columns": ["Name", "Client", "Status", "Due date", "Budget"],
           "filters": [
             {
               "column": "Priority",
               "op": "is_any_of",
-              "value": [
-                "high",
-                "urgent"
-              ]
+              "value": ["high", "urgent"]
             }
-          ]
-        }
-      ],
-      "forms": [
-        {
-          "name": "Project proposal",
-          "icon": "lightbulb",
-          "description": "Propose a new project with its client, budget and timeline.",
-          "columns": [
-            "Name",
-            "Client",
-            "Owner",
-            "Budget",
-            "Due date",
-            "Description"
           ]
         }
       ],
@@ -1019,14 +931,7 @@
           "name": "Open tasks",
           "icon": "list-todo",
           "description": "Tasks that are not done yet.",
-          "columns": [
-            "Title",
-            "Project",
-            "Assignee",
-            "Status",
-            "Priority",
-            "Due date"
-          ],
+          "columns": ["Title", "Project", "Assignee", "Status", "Priority", "Due date"],
           "filters": [
             {
               "column": "Done",
@@ -1039,13 +944,7 @@
           "name": "Urgent and open",
           "icon": "siren",
           "description": "Urgent tasks still to do.",
-          "columns": [
-            "Title",
-            "Assignee",
-            "Status",
-            "Due date",
-            "Estimate (hours)"
-          ],
+          "columns": ["Title", "Assignee", "Status", "Due date", "Estimate (hours)"],
           "filters": [
             {
               "column": "Priority",
@@ -1057,20 +956,6 @@
               "op": "is",
               "value": false
             }
-          ]
-        }
-      ],
-      "forms": [
-        {
-          "name": "Request a task",
-          "icon": "clipboard-list",
-          "description": "Ask the team to pick up a piece of work.",
-          "columns": [
-            "Title",
-            "Project",
-            "Priority",
-            "Due date",
-            "Notes"
           ]
         }
       ],
@@ -1086,9 +971,7 @@
             "$days": -38
           },
           "Done": true,
-          "Tags": [
-            "research"
-          ]
+          "Tags": ["research"]
         },
         {
           "Title": "Implement responsive navigation",
@@ -1101,9 +984,7 @@
             "$days": 3
           },
           "Done": false,
-          "Tags": [
-            "frontend"
-          ]
+          "Tags": ["frontend"]
         },
         {
           "Title": "Write product page copy",
@@ -1116,9 +997,7 @@
             "$days": 8
           },
           "Done": false,
-          "Tags": [
-            "content"
-          ]
+          "Tags": ["content"]
         },
         {
           "Title": "Set up redirects for old URLs",
@@ -1131,9 +1010,7 @@
             "$days": 14
           },
           "Done": false,
-          "Tags": [
-            "backend"
-          ]
+          "Tags": ["backend"]
         },
         {
           "Title": "Offline sync architecture",
@@ -1146,9 +1023,7 @@
             "$days": 7
           },
           "Done": false,
-          "Tags": [
-            "backend"
-          ],
+          "Tags": ["backend"],
           "Notes": "Evaluating CRDTs versus a simple last-write-wins strategy."
         },
         {
@@ -1162,10 +1037,7 @@
             "$days": -15
           },
           "Done": true,
-          "Tags": [
-            "design",
-            "mobile"
-          ]
+          "Tags": ["design", "mobile"]
         },
         {
           "Title": "Biometric login",
@@ -1178,9 +1050,7 @@
             "$days": 16
           },
           "Done": false,
-          "Tags": [
-            "mobile"
-          ]
+          "Tags": ["mobile"]
         },
         {
           "Title": "Gather stakeholder requirements",
@@ -1193,9 +1063,7 @@
             "$days": 6
           },
           "Done": false,
-          "Tags": [
-            "research"
-          ]
+          "Tags": ["research"]
         },
         {
           "Title": "Prototype appointment booking",
@@ -1208,9 +1076,7 @@
             "$days": 40
           },
           "Done": false,
-          "Tags": [
-            "design"
-          ]
+          "Tags": ["design"]
         },
         {
           "Title": "Inventory source systems",
@@ -1223,9 +1089,7 @@
             "$days": -70
           },
           "Done": true,
-          "Tags": [
-            "data"
-          ]
+          "Tags": ["data"]
         },
         {
           "Title": "Map legacy schemas",
@@ -1238,9 +1102,7 @@
             "$days": 10
           },
           "Done": false,
-          "Tags": [
-            "data"
-          ],
+          "Tags": ["data"],
           "Notes": "Blocked on documentation from the client's DBA."
         },
         {
@@ -1254,10 +1116,7 @@
             "$days": 35
           },
           "Done": false,
-          "Tags": [
-            "data",
-            "devops"
-          ]
+          "Tags": ["data", "devops"]
         },
         {
           "Title": "Finalise logo variations",
@@ -1270,9 +1129,7 @@
             "$days": -90
           },
           "Done": true,
-          "Tags": [
-            "design"
-          ]
+          "Tags": ["design"]
         },
         {
           "Title": "Define core KPIs",
@@ -1285,9 +1142,7 @@
             "$days": 20
           },
           "Done": false,
-          "Tags": [
-            "research"
-          ]
+          "Tags": ["research"]
         },
         {
           "Title": "Wireframe dashboard",
@@ -1300,9 +1155,7 @@
             "$days": 34
           },
           "Done": false,
-          "Tags": [
-            "design"
-          ]
+          "Tags": ["design"]
         },
         {
           "Title": "Interview new students",
@@ -1315,9 +1168,7 @@
             "$days": -18
           },
           "Done": true,
-          "Tags": [
-            "research"
-          ]
+          "Tags": ["research"]
         },
         {
           "Title": "Build progress checklist",
@@ -1330,9 +1181,7 @@
             "$days": 11
           },
           "Done": false,
-          "Tags": [
-            "frontend"
-          ]
+          "Tags": ["frontend"]
         },
         {
           "Title": "Publish API docs",
@@ -1345,9 +1194,7 @@
             "$days": -75
           },
           "Done": true,
-          "Tags": [
-            "docs"
-          ]
+          "Tags": ["docs"]
         },
         {
           "Title": "Automate invoice reminders",
@@ -1360,9 +1207,7 @@
             "$days": 9
           },
           "Done": false,
-          "Tags": [
-            "automation"
-          ]
+          "Tags": ["automation"]
         },
         {
           "Title": "Migrate wiki to the new workspace",
@@ -1375,9 +1220,7 @@
             "$days": 28
           },
           "Done": false,
-          "Tags": [
-            "content"
-          ]
+          "Tags": ["content"]
         }
       ]
     },
@@ -1470,13 +1313,7 @@
           "name": "Unpaid invoices",
           "icon": "wallet",
           "description": "Invoices that have not been paid.",
-          "columns": [
-            "Number",
-            "Client",
-            "Amount",
-            "Status",
-            "Due"
-          ],
+          "columns": ["Number", "Client", "Amount", "Status", "Due"],
           "filters": [
             {
               "column": "Paid",
@@ -1489,33 +1326,13 @@
           "name": "Overdue invoices",
           "icon": "triangle-alert",
           "description": "Invoices past their due date.",
-          "columns": [
-            "Number",
-            "Client",
-            "Project",
-            "Amount",
-            "Due"
-          ],
+          "columns": ["Number", "Client", "Project", "Amount", "Due"],
           "filters": [
             {
               "column": "Status",
               "op": "is",
               "value": "overdue"
             }
-          ]
-        }
-      ],
-      "forms": [
-        {
-          "name": "Invoice request",
-          "icon": "receipt",
-          "description": "Request a new invoice for a client project.",
-          "columns": [
-            "Number",
-            "Client",
-            "Project",
-            "Amount",
-            "Due"
           ]
         }
       ],
@@ -1784,13 +1601,7 @@
           "name": "Low stock",
           "icon": "trending-down",
           "description": "Products with fewer than 10 units left.",
-          "columns": [
-            "SKU",
-            "Name",
-            "Stock",
-            "Reorder level",
-            "Supplier"
-          ],
+          "columns": ["SKU", "Name", "Stock", "Reorder level", "Supplier"],
           "filters": [
             {
               "column": "Stock",
@@ -1803,13 +1614,7 @@
           "name": "Active catalog",
           "icon": "package-check",
           "description": "Products that are still on sale.",
-          "columns": [
-            "SKU",
-            "Name",
-            "Category",
-            "Price",
-            "Stock"
-          ],
+          "columns": ["SKU", "Name", "Category", "Price", "Stock"],
           "filters": [
             {
               "column": "Discontinued",
@@ -1817,21 +1622,6 @@
               "value": false
             }
           ]
-        }
-      ],
-      "forms": [
-        {
-          "name": "Product suggestion",
-          "icon": "package",
-          "description": "Suggest a product to add to the catalog.",
-          "columns": [
-            "SKU",
-            "Name",
-            "Category",
-            "Price",
-            "Supplier"
-          ],
-          "open": false
         }
       ],
       "rows": [
@@ -2059,41 +1849,18 @@
           "name": "Needs attention",
           "icon": "bug",
           "description": "High and critical bugs that are not fixed.",
-          "columns": [
-            "Title",
-            "Severity",
-            "Status",
-            "Project",
-            "Reporter",
-            "Votes"
-          ],
+          "columns": ["Title", "Severity", "Status", "Project", "Reporter", "Votes"],
           "filters": [
             {
               "column": "Severity",
               "op": "is_any_of",
-              "value": [
-                "high",
-                "critical"
-              ]
+              "value": ["high", "critical"]
             },
             {
               "column": "Status",
               "op": "is_not",
               "value": "fixed"
             }
-          ]
-        }
-      ],
-      "forms": [
-        {
-          "name": "Report a bug",
-          "icon": "bug",
-          "description": "Tell us what went wrong and how to reproduce it.",
-          "columns": [
-            "Title",
-            "Severity",
-            "Project",
-            "Steps to reproduce"
           ]
         }
       ],
@@ -2353,12 +2120,7 @@
           "name": "Scheduled posts",
           "icon": "calendar-clock",
           "description": "Posts ready to go out.",
-          "columns": [
-            "Title",
-            "Channel",
-            "Author",
-            "Publish date"
-          ],
+          "columns": ["Title", "Channel", "Author", "Publish date"],
           "filters": [
             {
               "column": "Status",
@@ -2371,33 +2133,13 @@
           "name": "Published",
           "icon": "calendar-check",
           "description": "Everything that is already live.",
-          "columns": [
-            "Title",
-            "Channel",
-            "Author",
-            "Publish date",
-            "URL",
-            "Quality"
-          ],
+          "columns": ["Title", "Channel", "Author", "Publish date", "URL", "Quality"],
           "filters": [
             {
               "column": "Status",
               "op": "is",
               "value": "published"
             }
-          ]
-        }
-      ],
-      "forms": [
-        {
-          "name": "Content idea",
-          "icon": "lightbulb",
-          "description": "Pitch a post for the content calendar.",
-          "columns": [
-            "Title",
-            "Channel",
-            "Author",
-            "Publish date"
           ]
         }
       ],
@@ -2565,11 +2307,7 @@
           "name": "Logos",
           "icon": "image",
           "description": "Logo files only.",
-          "columns": [
-            "Name",
-            "Preview",
-            "Files"
-          ],
+          "columns": ["Name", "Preview", "Files"],
           "filters": [
             {
               "column": "Category",

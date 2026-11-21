@@ -10,7 +10,6 @@ import { useRefreshSession } from "@/data/auth/session-refresh";
 import { useSession } from "@/hooks/use-session";
 import { DEFAULT_WORKSPACE } from "@/lib/workspace";
 
-/** Shown on every page while an admin is signed in as someone else. */
 export function ImpersonationBanner() {
   const session = useSession();
   const navigate = useNavigate();

@@ -6,7 +6,8 @@ import { WorkspaceContent, WorkspaceHeader } from "@/components/layout/workspace
 import { Frame, FrameDescription, FrameHeader, FrameTitle } from "@/components/ui/frame";
 import { ColumnsStep } from "@/components/workspace/tables/columns-step";
 import { TableStep } from "@/components/workspace/tables/table-step";
-import { tableQueryOptions } from "@/data/workspace/tables";
+import { tablesCollection } from "@/data/workspace/tables";
+import { requireOnline } from "@/lib/require-online";
 
 const searchSchema = z.object({
   step: z.union([z.literal(1), z.literal(2)]).catch(1),
@@ -16,7 +17,8 @@ const searchSchema = z.object({
 export const Route = createFileRoute("/workspaces/$workspace/_core/tables/new")({
   staticData: { crumb: "New table" },
   validateSearch: searchSchema,
-  beforeLoad: ({ context, search, params }) => {
+  beforeLoad: ({ context, location, search, params }) => {
+    requireOnline(location);
     if (!context.workspace.isAdmin)
       throw redirect({ to: "/workspaces/$workspace", params: { workspace: params.workspace } });
     if (search.step === 2 && !search.table)
@@ -29,12 +31,13 @@ export const Route = createFileRoute("/workspaces/$workspace/_core/tables/new")(
       });
   },
   loaderDeps: ({ search }) => ({ table: search.table }),
-  // The table being set up can't render without its data, so it is awaited.
-  loader: ({ context, deps, params }) => {
+  loader: async ({ context, deps }) => {
     if (!deps.table) return null;
-    return context.queryClient.query(tableQueryOptions(params.workspace, deps.table)).catch(() => {
-      throw notFound();
-    });
+    const tables = context.dbClient.collection(tablesCollection);
+    await tables.preload();
+    const table = tables.get(deps.table);
+    if (!table) throw notFound();
+    return table;
   },
   component: NewTablePage,
 });
@@ -60,8 +63,12 @@ function NewTablePage() {
           ) : (
             <ColumnsStep
               tableId={tableId}
-              onDiscarded={() => navigate({ to: "/workspaces/$workspace/tables", params: { workspace } })}
-              onFinished={() => navigate({ to: "/workspaces/$workspace/tables", params: { workspace } })}
+              onDiscarded={() =>
+                navigate({ to: "/workspaces/$workspace/tables", params: { workspace } })
+              }
+              onFinished={() =>
+                navigate({ to: "/workspaces/$workspace/tables", params: { workspace } })
+              }
             />
           )}
         </Frame>

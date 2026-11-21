@@ -1,6 +1,7 @@
+import { eq, useDbClient, useLiveSuspenseQuery } from "@tanstack/react-db";
 import { useForm } from "@tanstack/react-form";
-import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
-import { useRouter } from "@tanstack/react-router";
+import { useMutation } from "@tanstack/react-query";
+import { useRouter, notFound } from "@tanstack/react-router";
 
 import { z } from "zod";
 
@@ -20,8 +21,8 @@ import { Form } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toastManager } from "@/components/ui/toast";
-import { workspaceKeys } from "@/data/workspace/keys";
-import { tableQueryOptions, updateTableMutationOptions } from "@/data/workspace/tables";
+import { columnsCollection } from "@/data/workspace/columns";
+import { updateTableMutationOptions, tablesCollection } from "@/data/workspace/tables";
 import { formSchema } from "@/lib/tables/form";
 import { TITLE_FORMATS } from "@/lib/tables/formats";
 import { tableInputSchema } from "@/lib/tables/validation";
@@ -44,20 +45,29 @@ type DefinitionValues = {
 const schema = z.object({ name: tableInputSchema.shape.name });
 
 export function TableDefinition({ workspace, tableId }: { workspace: string; tableId: number }) {
-  const queryClient = useQueryClient();
+  const dbClient = useDbClient();
   const router = useRouter();
-  const { data: table } = useSuspenseQuery(tableQueryOptions(workspace, tableId));
+  const { data: table } = useLiveSuspenseQuery((q) =>
+    q
+      .from({ table: tablesCollection })
+      .where(({ table }) => eq(table.id, tableId))
+      .findOne(),
+  );
+  if (!table) throw notFound();
+  const { data: columns } = useLiveSuspenseQuery((q) =>
+    q.from({ column: columnsCollection(tableId) }).orderBy(({ column }) => column.position),
+  );
 
-  const titleOptions = table.columns
+  const titleOptions = columns
     .filter((column) => TITLE_FORMATS.includes(column.format as never))
     .map((column) => ({ value: column.columnName, label: column.name }));
   const savedTitle =
-    table.columns.find((column) => column.id === table.titleColumnId)?.columnName ?? null;
+    columns.find((column) => column.id === table.titleColumnId)?.columnName ?? null;
 
   const updateTable = useMutation({
     ...updateTableMutationOptions,
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: workspaceKeys.tables() });
+    onSuccess: async (updated) => {
+      dbClient.collection(tablesCollection).utils.writeUpsert(updated);
       await router.invalidate();
       toastManager.add({ type: "success", title: "Table saved" });
     },

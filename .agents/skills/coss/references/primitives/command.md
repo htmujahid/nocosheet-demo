@@ -26,6 +26,7 @@ npm install @base-ui/react
 ## Canonical imports
 
 ```tsx
+import { Button } from "@/components/ui/button";
 import {
   Command,
   CommandCollection,
@@ -42,8 +43,7 @@ import {
   CommandPanel,
   CommandSeparator,
   CommandShortcut,
-} from "@/components/ui/command"
-import { Button } from "@/components/ui/button"
+} from "@/components/ui/command";
 ```
 
 ## Minimal pattern

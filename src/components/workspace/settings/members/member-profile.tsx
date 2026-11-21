@@ -2,10 +2,10 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 
 import { adminUserQueryOptions } from "@/data/admin/user";
 
+import { MemberAccessProfile } from "./member-access-profile";
 import { MemberAccount } from "./member-account";
 import { MemberDangerZone } from "./member-danger-zone";
 import { MemberProfileForm } from "./member-profile-form";
-import { MemberAccessProfile } from "./member-access-profile";
 
 export function MemberProfile({ userId, isSelf }: { userId: string; isSelf: boolean }) {
   const { data: member } = useSuspenseQuery(adminUserQueryOptions(userId));

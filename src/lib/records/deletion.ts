@@ -1,48 +1,60 @@
+import { db } from "void/db";
+
 import { classifyDbError } from "../db-errors";
-import { NOT_FOUND } from "../http";
 import type { Column, Table } from "../tables/repository";
 import { listColumns } from "../tables/repository";
 import {
+  buildSoftDeletes,
+  type ClearStep,
+  type DeletionStep,
   findLinkedIds,
-  findRows,
+  findRecordsByIds,
   listReferencingColumns,
-  type Snapshot,
-  trashAndDeleteRows,
-} from "./trash-repository";
+} from "./repository";
 
-export async function planDeletion(
+type Plan = { deletions: DeletionStep[]; clears: ClearStep[] };
+
+const onDeleteOf = (column: Column) => (column.options as { onDelete?: string }).onDelete;
+const keyOf = (table: Table, id: number) => `${table.id}:${id}`;
+
+async function expand(
   workspace: string,
   table: Table,
-  ids: unknown[],
-  seen: Set<string> = new Set(),
-  plan: Snapshot[] = [],
-  columns?: Column[],
-) {
-  const fresh = ids.filter((id) => !seen.has(`${table.id}:${String(id)}`));
-  fresh.forEach((id) => seen.add(`${table.id}:${String(id)}`));
-  if (fresh.length === 0) return plan;
-
-  const rows = await findRows(workspace, table, columns ?? (await listColumns(table.id)), fresh);
-  if (rows.length === 0) return plan;
-  plan.push({ table, rows });
+  ids: number[],
+  plan: Plan,
+  seen: Set<string>,
+): Promise<void> {
+  const fresh = ids.filter((id) => !seen.has(keyOf(table, id)));
+  if (fresh.length === 0) return;
+  for (const id of fresh) seen.add(keyOf(table, id));
+  plan.deletions.push({ table, ids: fresh });
 
   for (const { column, table: source } of await listReferencingColumns(table.id)) {
-    if ((column.options as { onDelete?: string }).onDelete !== "cascade") continue;
-    const linked = await findLinkedIds(
-      workspace,
-      source,
-      column,
-      rows.map((row) => row.id),
-    );
-    await planDeletion(workspace, source, linked, seen, plan);
+    if (onDeleteOf(column) !== "cascade") continue;
+    const linked = await findLinkedIds(workspace, source, column, fresh);
+    await expand(workspace, source, linked, plan, seen);
   }
+}
 
-  return plan;
+async function inspect(workspace: string, plan: Plan, seen: Set<string>) {
+  for (const { table, ids } of plan.deletions) {
+    for (const { column, table: source } of await listReferencingColumns(table.id)) {
+      const mode = onDeleteOf(column);
+      if (mode === "cascade") continue;
+      const outside = (await findLinkedIds(workspace, source, column, ids)).filter(
+        (id) => !seen.has(keyOf(source, id)),
+      );
+      if (outside.length === 0) continue;
+      if (mode === "restrict") return true;
+      plan.clears.push({ table: source, column, ids: outside });
+    }
+  }
+  return false;
 }
 
 export type DeleteResult =
-  | { ok: true; trash: number[] }
-  | { ok: false; reason: "not_found" | "linked" | "failed"; message: string };
+  | { ok: true; deleted: number[] }
+  | { ok: false; reason: "linked" | "failed"; message: string };
 
 export async function deleteRecords(
   workspace: string,
@@ -50,27 +62,27 @@ export async function deleteRecords(
   ids: number[],
   userId: string,
 ): Promise<DeleteResult> {
-  const plan = await planDeletion(workspace, table, [...new Set(ids)]);
-  const top = plan[0];
-  if (!top) return { ok: false, reason: "not_found", message: NOT_FOUND };
+  const columns = await listColumns(table.id);
+  const live = (await findRecordsByIds(workspace, table, columns, [...new Set(ids)]))
+    .filter((row) => row.deleted_at === null)
+    .map((row) => Number(row.id));
+  if (live.length === 0) return { ok: true, deleted: [] };
+
+  const plan: Plan = { deletions: [], clears: [] };
+  const seen = new Set<string>();
+  await expand(workspace, table, live, plan, seen);
+
+  if (await inspect(workspace, plan, seen))
+    return {
+      ok: false,
+      reason: "linked",
+      message: "Some of these records are still linked from other records.",
+    };
 
   try {
-    const trash = await trashAndDeleteRows(
-      workspace,
-      table,
-      plan,
-      top.rows.map((row) => row.id),
-      userId,
-    );
-    return { ok: true, trash };
+    await db.batch(buildSoftDeletes(workspace, plan.deletions, plan.clears, userId) as never);
+    return { ok: true, deleted: live };
   } catch (error) {
-    const failure = classifyDbError(error);
-    return failure.kind === "foreign_key"
-      ? {
-          ok: false,
-          reason: "linked",
-          message: "Some of these records are still linked from other records.",
-        }
-      : { ok: false, reason: "failed", message: failure.message };
+    return { ok: false, reason: "failed", message: classifyDbError(error).message };
   }
 }

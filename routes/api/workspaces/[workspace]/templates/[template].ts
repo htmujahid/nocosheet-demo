@@ -10,10 +10,7 @@ import { findTemplate } from "@/lib/templates/catalog";
 const params = z.object({ workspace: z.string(), template: z.string() });
 const body = z.object({ sampleData: z.boolean().default(false) });
 
-export const POST = defineHandler.withValidator({ params, body })(async (
-  c,
-  { params, body },
-) => {
+export const POST = defineHandler.withValidator({ params, body })(async (c, { params, body }) => {
   requireAdmin(c);
   const template = findTemplate(params.template);
   if (!template) throw httpError(404, NOT_FOUND);

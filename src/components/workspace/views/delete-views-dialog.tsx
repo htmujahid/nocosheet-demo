@@ -1,6 +1,7 @@
 import { useState } from "react";
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useDbClient } from "@tanstack/react-db";
+import { useMutation } from "@tanstack/react-query";
 
 import { TrashIcon } from "lucide-react";
 
@@ -17,8 +18,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { toastManager } from "@/components/ui/toast";
-import { workspaceKeys } from "@/data/workspace/keys";
-import { deleteViewsMutationOptions } from "@/data/workspace/views";
+import { deleteViewsMutationOptions, viewsCollection } from "@/data/workspace/views";
 
 export function DeleteViewsDialog({
   workspace,
@@ -32,16 +32,19 @@ export function DeleteViewsDialog({
   onDeleted: (count: number) => Promise<unknown> | void;
 }) {
   const [open, setOpen] = useState(false);
-  const queryClient = useQueryClient();
+  const dbClient = useDbClient();
   const count = ids.length;
   const noun = count === 1 ? "view" : "views";
 
   const deleteViews = useMutation({
     ...deleteViewsMutationOptions,
-    onSuccess: async () => {
+    onSuccess: async ({ ids: deleted }) => {
+      const viewRows = dbClient.collection(viewsCollection(tableId));
+      viewRows.utils.writeBatch(() => {
+        for (const id of deleted) viewRows.utils.writeDelete(id);
+      });
       setOpen(false);
       await onDeleted(count);
-      await queryClient.invalidateQueries({ queryKey: workspaceKeys.views(tableId) });
       toastManager.add({ type: "success", title: `${count} ${noun} deleted` });
     },
   });

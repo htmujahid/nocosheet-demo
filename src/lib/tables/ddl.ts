@@ -117,6 +117,8 @@ const trackingDefinitions = () => [
   `"updated_at" INTEGER NOT NULL DEFAULT ${NOW_MS}`,
   `"created_by" TEXT REFERENCES "user" ("id") ON DELETE SET NULL`,
   `"updated_by" TEXT REFERENCES "user" ("id") ON DELETE SET NULL`,
+  `"deleted_at" INTEGER`,
+  `"deleted_by" TEXT REFERENCES "user" ("id") ON DELETE SET NULL`,
 ];
 
 export function buildCreateTable(physicalName: string, columns: string[] = []) {
@@ -124,6 +126,11 @@ export function buildCreateTable(physicalName: string, columns: string[] = []) {
 
   return `CREATE TABLE ${quoteIdent(physicalName)} (\n  ${[id, ...trackingDefinitions(), ...columns].join(",\n  ")}\n)`;
 }
+
+export const buildSystemIndexes = (physicalName: string) => [
+  `CREATE INDEX ${quoteIdent(`${physicalName}__ix_updated`)} ON ${quoteIdent(physicalName)} ("updated_at")`,
+  `CREATE INDEX ${quoteIdent(`${physicalName}__ix_deleted`)} ON ${quoteIdent(physicalName)} ("deleted_at") WHERE "deleted_at" IS NOT NULL`,
+];
 
 export type IndexKind = "uq" | "idx";
 
@@ -142,7 +149,7 @@ export const buildCreateIndex = (
 ) => {
   const target = quoteIdent(columnName);
   if (kind === "uq")
-    return `CREATE UNIQUE INDEX ${quoteIdent(name)} ON ${quoteIdent(physicalName)} (${target})`;
+    return `CREATE UNIQUE INDEX ${quoteIdent(name)} ON ${quoteIdent(physicalName)} (${target}) WHERE "deleted_at" IS NULL`;
   const collate = NOCASE_FORMATS.includes(format) ? " COLLATE NOCASE" : "";
   return `CREATE INDEX ${quoteIdent(name)} ON ${quoteIdent(physicalName)} (${target}${collate}, "id")`;
 };

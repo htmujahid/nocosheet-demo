@@ -8,7 +8,6 @@ const DOTS: Record<AuditAction, string> = {
   update: "bg-sky-500",
   delete: "bg-red-500",
   restore: "bg-amber-500",
-  purge: "bg-red-700",
   import: "bg-muted-foreground/64",
 };
 

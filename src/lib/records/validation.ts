@@ -1,6 +1,6 @@
-import { SYSTEM_SORT_KEYS } from "./sort-param";
 import { conditionError, filterKind, isSortableFormat } from "./filters";
 import type { TypedRecordsQuery } from "./query";
+import { SYSTEM_SORT_KEYS } from "./sort-param";
 
 type QueryColumn = {
   columnName: string;
@@ -9,7 +9,6 @@ type QueryColumn = {
   isFilterable: boolean;
   isSortable: boolean;
 };
-
 
 export function checkRecordsQuery(columns: QueryColumn[], query: TypedRecordsQuery) {
   const byName = new Map(columns.map((column) => [column.columnName, column]));

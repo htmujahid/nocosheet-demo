@@ -1,5 +1,10 @@
-import { useRouteContext } from "@tanstack/react-router";
+import { useLiveQuery } from "@tanstack/react-db";
+
+import { sessionCollection } from "@/data/auth/session";
 
 export function useSession() {
-  return useRouteContext({ from: "__root__", select: (context) => context.session });
+  const { data } = useLiveQuery({
+    query: (q) => q.from({ session: sessionCollection }).findOne(),
+  });
+  return data ?? null;
 }

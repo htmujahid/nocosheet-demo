@@ -7,11 +7,22 @@ import { RouterProvider, createRouter } from "@tanstack/react-router";
 import { RouteError } from "@/components/layout/route-error";
 import { RouteNotFound } from "@/components/layout/route-not-found";
 import { RoutePending } from "@/components/layout/route-pending";
+import { isNetworkError } from "@/lib/api-error";
+import { registerServiceWorker } from "@/lib/register-service-worker";
 import { routeTree } from "@/routeTree.gen";
 
 import "./index.css";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      networkMode: "always",
+      retry: (failureCount, error) =>
+        navigator.onLine && failureCount < 3 && !isNetworkError(error),
+    },
+    mutations: { networkMode: "always" },
+  },
+});
 
 const router = createRouter({
   routeTree,
@@ -31,6 +42,8 @@ declare module "@tanstack/react-router" {
     router: typeof router;
   }
 }
+
+registerServiceWorker();
 
 const rootElement = document.getElementById("app")!;
 

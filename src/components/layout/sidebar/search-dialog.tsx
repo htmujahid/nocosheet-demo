@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useState } from "react";
 
-import { useQuery } from "@tanstack/react-query";
+import { eq, useLiveQuery } from "@tanstack/react-db";
 import { useNavigate } from "@tanstack/react-router";
 
 import {
@@ -38,7 +38,7 @@ import {
 } from "@/components/ui/command";
 import { Kbd, KbdGroup } from "@/components/ui/kbd";
 import { NamedIcon } from "@/components/workspace/tables/named-icon";
-import { sidebarQueryOptions } from "@/data/workspace/sidebar";
+import { tablesCollection } from "@/data/workspace/tables";
 import { useWorkspace } from "@/hooks/use-workspace";
 
 type Item = {
@@ -64,7 +64,13 @@ const settings: SettingsItem[] = [
   { value: "general", label: "General", icon: SlidersHorizontalIcon, path: "/settings" },
   { value: "appearance", label: "Appearance", icon: PaletteIcon, path: "/settings/appearance" },
   { value: "members", label: "Members", icon: UsersIcon, path: "/settings/members" },
-  { value: "access", label: "Access", icon: ShieldCheckIcon, path: "/settings/access" },
+  {
+    value: "access",
+    label: "Access",
+    icon: ShieldCheckIcon,
+    path: "/settings/access",
+    adminOnly: true,
+  },
   {
     value: "audit-log",
     label: "Audit Log",
@@ -75,16 +81,20 @@ const settings: SettingsItem[] = [
   { value: "billing", label: "Billing", icon: CreditCardIcon, path: "/settings/billing" },
 ];
 
-/** Outline trigger plus command palette to jump to a page, table or settings section. */
 export function SearchDialog({ workspace }: { workspace: string }) {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
   const { isAdmin } = useWorkspace();
-  const { data: sidebar } = useQuery(sidebarQueryOptions(workspace));
-  const tables = sidebar?.groups.flatMap((group) => group.tables) ?? [];
+  const { data: tables } = useLiveQuery((q) =>
+    q
+      .from({ table: tablesCollection })
+      .where(({ table }) => eq(table.isHidden, false))
+      .orderBy(({ table }) => table.position)
+      .orderBy(({ table }) => table.id),
+  );
 
   const groups: Group[] = [
-    { value: "Pages", items: isAdmin ? [homePage, allTablesPage] : [homePage] },
+    { value: "Pages", items: [homePage, allTablesPage] },
     {
       value: "Tables",
       items: tables.map((table) => ({

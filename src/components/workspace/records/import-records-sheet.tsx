@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 
-import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { useLiveSuspenseQuery, eq } from "@tanstack/react-db";
+import { notFound } from "@tanstack/react-router";
 
 import { UploadIcon } from "lucide-react";
 
@@ -35,20 +36,22 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { toastManager } from "@/components/ui/toast";
-import { workspaceKeys } from "@/data/workspace/keys";
-import { importRecordsMutationOptions } from "@/data/workspace/records";
-import { tableQueryOptions } from "@/data/workspace/tables";
+import { columnsCollection } from "@/data/workspace/columns";
+import { tablesCollection } from "@/data/workspace/tables";
 import {
   convertCell,
   type ImportResult,
+  type ImportRowError,
   isImportableFormat,
   matchHeaders,
+  MAX_IMPORT_ERRORS,
   MAX_IMPORT_ROWS,
 } from "@/lib/records/import";
 
 import { buildViewerColumns } from "./columns";
 import { CsvSourceFields } from "./csv-source-fields";
 import { useCsvSource } from "./use-csv-source";
+import { useRecordWrites } from "./use-record-writes";
 
 const SKIP = "__skip";
 const PREVIEW_ROWS = 20;
@@ -63,9 +66,21 @@ function ImportForm({
   tableId: number;
   onDone: () => void;
 }) {
-  const queryClient = useQueryClient();
-  const { data: table } = useSuspenseQuery(tableQueryOptions(workspace, tableId));
-  const allColumns = buildViewerColumns(table);
+  const writes = useRecordWrites(tableId);
+  const { data: table } = useLiveSuspenseQuery((q) =>
+    q
+      .from({ table: tablesCollection })
+      .where(({ table }) => eq(table.id, tableId))
+      .findOne(),
+  );
+  if (!table) throw notFound();
+  const { data: tableColumns } = useLiveSuspenseQuery((q) =>
+    q.from({ column: columnsCollection(tableId) }).orderBy(({ column }) => column.position),
+  );
+  const allColumns = buildViewerColumns({
+    titleColumnId: table.titleColumnId,
+    columns: tableColumns,
+  });
   const columns = allColumns.filter(
     (column) => !column.readOnly && isImportableFormat(column.format),
   );
@@ -95,26 +110,8 @@ function ImportForm({
   const mapped = mapping.filter((key): key is string => key !== null);
   const byKey = new Map(columns.map((column) => [column.key, column]));
 
-  const importRecords = useMutation({
-    ...importRecordsMutationOptions,
-    onSuccess: async (data) => {
-      setResult(data);
-      if (data.failed > 0) return;
-      await queryClient.invalidateQueries({
-        queryKey: workspaceKeys.table(tableId),
-        predicate: (query) => query.queryKey[3] !== "record",
-      });
-      toastManager.add({
-        type: "success",
-        title: `Imported ${data.created} ${data.created === 1 ? "record" : "records"}`,
-      });
-      onDone();
-    },
-  });
-
   function resetResult() {
     setResult(undefined);
-    importRecords.reset();
   }
 
   const preview = useMemo(() => {
@@ -138,7 +135,7 @@ function ImportForm({
       });
     });
     return { issues, count };
-  }, [rows, mapping.join("|"), table]);
+  }, [rows, mapping.join("|"), table, tableColumns]);
 
   const shown = mapping
     .flatMap((key, index) => (key && byKey.has(key) ? [{ index, column: byKey.get(key)! }] : []))
@@ -170,13 +167,37 @@ function ImportForm({
   ];
 
   function submit() {
-    if (!canImport || importRecords.isPending) return;
-    const payload = rows.map((cells) =>
-      Object.fromEntries(
-        mapping.flatMap((key, index) => (key ? [[key, cells[index] ?? ""] as const] : [])),
-      ),
-    );
-    importRecords.mutate({ workspace, tableId, rows: payload });
+    if (!canImport) return;
+    const errors: ImportRowError[] = [];
+    let failed = 0;
+    const converted: Record<string, unknown>[] = [];
+    rows.forEach((cells, rowIndex) => {
+      const values: Record<string, unknown> = {};
+      let message: string | undefined;
+      mapping.forEach((key, index) => {
+        const column = key ? byKey.get(key) : undefined;
+        if (!key || !column || message) return;
+        const result = convertCell(column, cells[index] ?? "");
+        if (result === null) {
+          if (column.required && column.defaultValue === null)
+            message = `${column.name}: This field is required`;
+          return;
+        }
+        if (!result.ok) message = `${column.name}: ${result.message}`;
+        else values[key] = result.value;
+      });
+      if (message) {
+        failed++;
+        if (errors.length < MAX_IMPORT_ERRORS) errors.push({ row: rowIndex + 1, message });
+      } else converted.push(values);
+    });
+    if (failed > 0) return setResult({ created: 0, failed, errors });
+    writes.createMany(converted);
+    toastManager.add({
+      type: "success",
+      title: `Imported ${converted.length} ${converted.length === 1 ? "record" : "records"}`,
+    });
+    onDone();
   }
 
   return (
@@ -316,11 +337,6 @@ function ImportForm({
           </>
         )}
 
-        {importRecords.error && (
-          <Alert variant="error">
-            <AlertDescription>{importRecords.error.message}</AlertDescription>
-          </Alert>
-        )}
         {result && result.failed > 0 && (
           <Alert variant="error">
             <AlertTitle>
@@ -344,12 +360,7 @@ function ImportForm({
       </SheetPanel>
       <SheetFooter>
         <SheetClose render={<Button type="button" variant="ghost" />}>Cancel</SheetClose>
-        <Button
-          type="button"
-          disabled={!canImport}
-          loading={importRecords.isPending}
-          onClick={submit}
-        >
+        <Button type="button" disabled={!canImport} onClick={submit}>
           <UploadIcon aria-hidden="true" />
           Import {rows.length > 0 ? rows.length : ""}
           <Kbd className="max-sm:hidden">Ctrl ↵</Kbd>

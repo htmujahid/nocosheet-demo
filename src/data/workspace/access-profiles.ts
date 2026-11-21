@@ -3,8 +3,8 @@ import { mutationOptions, queryOptions } from "@tanstack/react-query";
 import { fetch } from "void/client";
 
 import type { ProfileCreateInput, ProfileUpdateInput } from "@/lib/access/validation";
+import { unwrapFetch } from "@/lib/api-error";
 
-import { unwrapFetch } from "./api-error";
 import { workspaceKeys } from "./keys";
 
 export const accessProfilesQueryOptions = (workspace: string) =>

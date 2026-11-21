@@ -8,7 +8,7 @@ import { ALL_VIEW } from "@/lib/views/constants";
 export const Route = createFileRoute("/workspaces/$workspace/_core/tables/$table/new")({
   staticData: { crumb: "New record" },
   beforeLoad: ({ context, params }) => {
-    if (scopeFor(context.access, "create", Number(params.table)) === "none")
+    if (scopeFor(context.access, Number(params.table), "create") === "none")
       throw redirect({ to: "/workspaces/$workspace/tables/$table", params, replace: true });
   },
   component: NewRecordPage,

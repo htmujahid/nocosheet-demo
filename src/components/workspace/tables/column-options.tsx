@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useLiveQuery } from "@tanstack/react-db";
 
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -9,7 +9,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { tablesQueryOptions } from "@/data/workspace/tables";
+import { tablesCollection } from "@/data/workspace/tables";
+import { useSession } from "@/hooks/use-session";
 import { useWorkspace } from "@/hooks/use-workspace";
 import {
   CURRENCIES,
@@ -96,16 +97,11 @@ function RelationOptions({
   options: Options;
   onChange: (o: Options) => void;
 }) {
-  const { data } = useQuery(
-    tablesQueryOptions(useWorkspace().id, {
-      page: 1,
-      pageSize: 100,
-      sort: "name",
-      order: "asc",
-      q: "",
-    }),
+  const workspace = useWorkspace().id;
+  const { data: tables } = useLiveQuery((q) =>
+    q.from({ table: tablesCollection }).orderBy(({ table }) => table.name),
   );
-  const items = (data?.rows ?? []).map((table) => ({ value: String(table.id), label: table.name }));
+  const items = (tables ?? []).map((table) => ({ value: String(table.id), label: table.name }));
 
   return (
     <>

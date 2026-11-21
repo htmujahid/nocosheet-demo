@@ -1,7 +1,7 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 
-import { MemberStatus } from "@/components/workspace/settings/members/member-status";
 import { MemberSecurity } from "@/components/workspace/settings/members/member-security";
+import { MemberStatus } from "@/components/workspace/settings/members/member-status";
 
 export const Route = createFileRoute("/workspaces/$workspace/settings/members/$userId/security")({
   staticData: { crumb: "Security" },

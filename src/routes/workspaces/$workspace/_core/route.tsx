@@ -3,8 +3,8 @@ import { createFileRoute, Outlet } from "@tanstack/react-router";
 import { ImpersonationBanner } from "@/components/layout/impersonation-banner";
 import { WorkspaceSidebar } from "@/components/layout/workspace-sidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { useSession } from "@/hooks/use-session";
 import { readSidebarDefaultOpen } from "@/hooks/use-preferences";
+import { useSession } from "@/hooks/use-session";
 
 export const Route = createFileRoute("/workspaces/$workspace/_core")({
   component: AppLayout,
