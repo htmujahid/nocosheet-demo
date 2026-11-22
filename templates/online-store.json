@@ -1,0 +1,1101 @@
+{
+  "version": 1,
+  "id": "online-store",
+  "name": "Online Store",
+  "description": "A small e-commerce shop: customers, product catalog with stock value, orders, order items and returns.",
+  "icon": "shopping-bag",
+  "tags": ["ecommerce", "retail", "sample"],
+  "tables": [
+    {
+      "name": "Customers",
+      "icon": "users",
+      "group": "Sales",
+      "description": "People who have bought from you.",
+      "title": "Name",
+      "audit": true,
+      "columns": [
+        {
+          "name": "Name",
+          "format": "text",
+          "required": true,
+          "searchable": true
+        },
+        {
+          "name": "Email",
+          "format": "email",
+          "required": true,
+          "unique": true
+        },
+        {
+          "name": "Phone",
+          "format": "phone"
+        },
+        {
+          "name": "City",
+          "format": "text"
+        },
+        {
+          "name": "Joined",
+          "format": "date"
+        },
+        {
+          "name": "Marketing opt-in",
+          "format": "checkbox",
+          "filterable": true,
+          "sortable": true,
+          "default": "false"
+        },
+        {
+          "name": "Notes",
+          "format": "long_text"
+        }
+      ],
+      "views": [
+        {
+          "name": "Newsletter list",
+          "icon": "mail",
+          "description": "Customers who opted in to marketing.",
+          "columns": ["Name", "Email", "City"],
+          "filters": [
+            {
+              "column": "Marketing opt-in",
+              "op": "is",
+              "value": true
+            }
+          ]
+        }
+      ],
+      "rows": [
+        {
+          "Name": "Emma Clarke",
+          "Email": "emma.clarke@example.com",
+          "Phone": "+1 555 0510",
+          "City": "Austin, TX",
+          "Joined": {
+            "$days": -400
+          },
+          "Marketing opt-in": true
+        },
+        {
+          "Name": "Liam Nguyen",
+          "Email": "liam.nguyen@example.com",
+          "Phone": "+1 555 0511",
+          "City": "Seattle, WA",
+          "Joined": {
+            "$days": -350
+          },
+          "Marketing opt-in": true
+        },
+        {
+          "Name": "Olivia Martinez",
+          "Email": "olivia.martinez@example.com",
+          "Phone": "+1 555 0512",
+          "City": "Miami, FL",
+          "Joined": {
+            "$days": -280
+          },
+          "Marketing opt-in": false,
+          "Notes": "Prefers email over phone."
+        },
+        {
+          "Name": "Noah Williams",
+          "Email": "noah.williams@example.com",
+          "Phone": "+1 555 0513",
+          "City": "Denver, CO",
+          "Joined": {
+            "$days": -210
+          },
+          "Marketing opt-in": true
+        },
+        {
+          "Name": "Ava Johnson",
+          "Email": "ava.johnson@example.com",
+          "Phone": "+1 555 0514",
+          "City": "Chicago, IL",
+          "Joined": {
+            "$days": -190
+          },
+          "Marketing opt-in": true,
+          "Notes": "VIP – repeat buyer."
+        },
+        {
+          "Name": "Ethan Brown",
+          "Email": "ethan.brown@example.com",
+          "Phone": "+1 555 0515",
+          "City": "Portland, OR",
+          "Joined": {
+            "$days": -120
+          },
+          "Marketing opt-in": false
+        },
+        {
+          "Name": "Sophia Davis",
+          "Email": "sophia.davis@example.com",
+          "Phone": "+1 555 0516",
+          "City": "Boston, MA",
+          "Joined": {
+            "$days": -95
+          },
+          "Marketing opt-in": true
+        },
+        {
+          "Name": "Mason Garcia",
+          "Email": "mason.garcia@example.com",
+          "Phone": "+1 555 0517",
+          "City": "Phoenix, AZ",
+          "Joined": {
+            "$days": -60
+          },
+          "Marketing opt-in": false
+        },
+        {
+          "Name": "Isabella Lee",
+          "Email": "isabella.lee@example.com",
+          "Phone": "+1 555 0518",
+          "City": "San Diego, CA",
+          "Joined": {
+            "$days": -30
+          },
+          "Marketing opt-in": true
+        },
+        {
+          "Name": "Lucas Wilson",
+          "Email": "lucas.wilson@example.com",
+          "Phone": "+1 555 0519",
+          "City": "Nashville, TN",
+          "Joined": {
+            "$days": -12
+          },
+          "Marketing opt-in": true
+        }
+      ]
+    },
+    {
+      "name": "Products",
+      "icon": "package",
+      "group": "Catalog",
+      "description": "What you sell, with price, cost and stock value.",
+      "title": "Name",
+      "audit": true,
+      "columns": [
+        {
+          "name": "Name",
+          "format": "text",
+          "required": true,
+          "searchable": true
+        },
+        {
+          "name": "SKU",
+          "format": "text",
+          "required": true,
+          "unique": true
+        },
+        {
+          "name": "Category",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Apparel",
+                "value": "apparel"
+              },
+              {
+                "label": "Accessories",
+                "value": "accessories"
+              },
+              {
+                "label": "Home",
+                "value": "home"
+              },
+              {
+                "label": "Beauty",
+                "value": "beauty"
+              }
+            ]
+          },
+          "filterable": true,
+          "sortable": true
+        },
+        {
+          "name": "Price",
+          "format": "currency",
+          "options": {
+            "currency": "USD",
+            "precision": 2
+          },
+          "required": true,
+          "check": "{Price} > 0"
+        },
+        {
+          "name": "Cost",
+          "format": "currency",
+          "options": {
+            "currency": "USD",
+            "precision": 2
+          },
+          "check": "{Cost} >= 0"
+        },
+        {
+          "name": "Stock",
+          "format": "integer",
+          "filterable": true,
+          "sortable": true,
+          "default": "0",
+          "check": "{Stock} >= 0"
+        },
+        {
+          "name": "Reorder level",
+          "format": "integer",
+          "default": "0"
+        },
+        {
+          "name": "Stock value",
+          "format": "currency",
+          "options": {
+            "currency": "USD",
+            "precision": 2
+          },
+          "generated": "{Cost} * {Stock}"
+        },
+        {
+          "name": "Active",
+          "format": "checkbox",
+          "filterable": true,
+          "sortable": true,
+          "default": "true"
+        }
+      ],
+      "views": [
+        {
+          "name": "Low stock",
+          "icon": "trending-down",
+          "description": "Products with fewer than 10 units left.",
+          "columns": ["Name", "SKU", "Stock", "Reorder level"],
+          "filters": [
+            {
+              "column": "Stock",
+              "op": "lt",
+              "value": 10
+            }
+          ]
+        },
+        {
+          "name": "Active catalog",
+          "icon": "package-check",
+          "description": "Products on sale.",
+          "columns": ["Name", "Category", "Price", "Stock"],
+          "filters": [
+            {
+              "column": "Active",
+              "op": "is",
+              "value": true
+            }
+          ]
+        }
+      ],
+      "rows": [
+        {
+          "Name": "Classic Cotton Tee",
+          "SKU": "AP-1001",
+          "Category": "apparel",
+          "Price": 28,
+          "Cost": 9,
+          "Stock": 120,
+          "Reorder level": 30,
+          "Active": true
+        },
+        {
+          "Name": "Zip Hoodie",
+          "SKU": "AP-1002",
+          "Category": "apparel",
+          "Price": 64,
+          "Cost": 24,
+          "Stock": 45,
+          "Reorder level": 20,
+          "Active": true
+        },
+        {
+          "Name": "Canvas Tote Bag",
+          "SKU": "AC-2001",
+          "Category": "accessories",
+          "Price": 22,
+          "Cost": 7,
+          "Stock": 80,
+          "Reorder level": 25,
+          "Active": true
+        },
+        {
+          "Name": "Leather Card Holder",
+          "SKU": "AC-2002",
+          "Category": "accessories",
+          "Price": 35,
+          "Cost": 12,
+          "Stock": 8,
+          "Reorder level": 15,
+          "Active": true
+        },
+        {
+          "Name": "Wool Beanie",
+          "SKU": "AC-2003",
+          "Category": "accessories",
+          "Price": 24,
+          "Cost": 8,
+          "Stock": 60,
+          "Reorder level": 20,
+          "Active": true
+        },
+        {
+          "Name": "Scented Soy Candle",
+          "SKU": "HM-3001",
+          "Category": "home",
+          "Price": 19,
+          "Cost": 6,
+          "Stock": 95,
+          "Reorder level": 30,
+          "Active": true
+        },
+        {
+          "Name": "Ceramic Mug Set",
+          "SKU": "HM-3002",
+          "Category": "home",
+          "Price": 42,
+          "Cost": 15,
+          "Stock": 32,
+          "Reorder level": 12,
+          "Active": true
+        },
+        {
+          "Name": "Linen Throw Blanket",
+          "SKU": "HM-3003",
+          "Category": "home",
+          "Price": 78,
+          "Cost": 30,
+          "Stock": 14,
+          "Reorder level": 10,
+          "Active": true
+        },
+        {
+          "Name": "Hydrating Face Cream",
+          "SKU": "BT-4001",
+          "Category": "beauty",
+          "Price": 32,
+          "Cost": 10,
+          "Stock": 70,
+          "Reorder level": 25,
+          "Active": true
+        },
+        {
+          "Name": "Lip Balm Trio",
+          "SKU": "BT-4002",
+          "Category": "beauty",
+          "Price": 15,
+          "Cost": 4,
+          "Stock": 6,
+          "Reorder level": 30,
+          "Active": true
+        },
+        {
+          "Name": "Bamboo Hair Brush",
+          "SKU": "BT-4003",
+          "Category": "beauty",
+          "Price": 18,
+          "Cost": 6,
+          "Stock": 50,
+          "Reorder level": 15,
+          "Active": true
+        },
+        {
+          "Name": "Summer Linen Shirt",
+          "SKU": "AP-1003",
+          "Category": "apparel",
+          "Price": 58,
+          "Cost": 22,
+          "Stock": 0,
+          "Reorder level": 15,
+          "Active": false
+        }
+      ]
+    },
+    {
+      "name": "Orders",
+      "icon": "shopping-cart",
+      "group": "Sales",
+      "description": "Every customer order from placed to delivered.",
+      "title": "Number",
+      "audit": true,
+      "columns": [
+        {
+          "name": "Number",
+          "format": "text",
+          "required": true,
+          "searchable": true
+        },
+        {
+          "name": "Customer",
+          "format": "relation",
+          "options": {
+            "onDelete": "set null"
+          },
+          "relation": "Customers"
+        },
+        {
+          "name": "Status",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "New",
+                "value": "new"
+              },
+              {
+                "label": "Paid",
+                "value": "paid"
+              },
+              {
+                "label": "Packed",
+                "value": "packed"
+              },
+              {
+                "label": "Shipped",
+                "value": "shipped"
+              },
+              {
+                "label": "Delivered",
+                "value": "delivered"
+              },
+              {
+                "label": "Cancelled",
+                "value": "cancelled"
+              },
+              {
+                "label": "Refunded",
+                "value": "refunded"
+              }
+            ]
+          },
+          "filterable": true,
+          "sortable": true,
+          "default": "new"
+        },
+        {
+          "name": "Channel",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Website",
+                "value": "website"
+              },
+              {
+                "label": "Instagram",
+                "value": "instagram"
+              },
+              {
+                "label": "Marketplace",
+                "value": "marketplace"
+              },
+              {
+                "label": "In person",
+                "value": "in_person"
+              }
+            ]
+          },
+          "filterable": true,
+          "sortable": true
+        },
+        {
+          "name": "Total",
+          "format": "currency",
+          "options": {
+            "currency": "USD",
+            "precision": 2
+          },
+          "required": true,
+          "check": "{Total} >= 0"
+        },
+        {
+          "name": "Ordered",
+          "format": "date"
+        },
+        {
+          "name": "Shipped",
+          "format": "date"
+        },
+        {
+          "name": "Tracking number",
+          "format": "text"
+        },
+        {
+          "name": "Notes",
+          "format": "long_text"
+        }
+      ],
+      "views": [
+        {
+          "name": "To fulfil",
+          "icon": "box",
+          "description": "Paid or packed orders waiting to ship.",
+          "columns": ["Number", "Customer", "Status", "Total", "Ordered"],
+          "filters": [
+            {
+              "column": "Status",
+              "op": "is_any_of",
+              "value": ["new", "paid", "packed"]
+            }
+          ]
+        },
+        {
+          "name": "In transit",
+          "icon": "truck",
+          "description": "Shipped, not yet delivered.",
+          "columns": ["Number", "Customer", "Shipped", "Tracking number"],
+          "filters": [
+            {
+              "column": "Status",
+              "op": "is",
+              "value": "shipped"
+            }
+          ]
+        }
+      ],
+      "rows": [
+        {
+          "Number": "ORD-1001",
+          "Customer": "Emma Clarke",
+          "Status": "delivered",
+          "Channel": "website",
+          "Total": 50,
+          "Ordered": {
+            "$days": -45
+          },
+          "Shipped": {
+            "$days": -43
+          },
+          "Tracking number": "TRK100001"
+        },
+        {
+          "Number": "ORD-1002",
+          "Customer": "Liam Nguyen",
+          "Status": "delivered",
+          "Channel": "instagram",
+          "Total": 64,
+          "Ordered": {
+            "$days": -40
+          },
+          "Shipped": {
+            "$days": -38
+          },
+          "Tracking number": "TRK100002"
+        },
+        {
+          "Number": "ORD-1003",
+          "Customer": "Ava Johnson",
+          "Status": "delivered",
+          "Channel": "website",
+          "Total": 93,
+          "Ordered": {
+            "$days": -33
+          },
+          "Shipped": {
+            "$days": -31
+          },
+          "Tracking number": "TRK100003"
+        },
+        {
+          "Number": "ORD-1004",
+          "Customer": "Noah Williams",
+          "Status": "delivered",
+          "Channel": "marketplace",
+          "Total": 35,
+          "Ordered": {
+            "$days": -28
+          },
+          "Shipped": {
+            "$days": -26
+          },
+          "Tracking number": "TRK100004"
+        },
+        {
+          "Number": "ORD-1005",
+          "Customer": "Olivia Martinez",
+          "Status": "refunded",
+          "Channel": "website",
+          "Total": 42,
+          "Ordered": {
+            "$days": -24
+          },
+          "Shipped": {
+            "$days": -22
+          },
+          "Tracking number": "TRK100005"
+        },
+        {
+          "Number": "ORD-1006",
+          "Customer": "Sophia Davis",
+          "Status": "delivered",
+          "Channel": "website",
+          "Total": 70,
+          "Ordered": {
+            "$days": -18
+          },
+          "Shipped": {
+            "$days": -16
+          },
+          "Tracking number": "TRK100006"
+        },
+        {
+          "Number": "ORD-1007",
+          "Customer": "Ethan Brown",
+          "Status": "delivered",
+          "Channel": "in_person",
+          "Total": 24,
+          "Ordered": {
+            "$days": -15
+          },
+          "Shipped": {
+            "$days": -15
+          }
+        },
+        {
+          "Number": "ORD-1008",
+          "Customer": "Ava Johnson",
+          "Status": "shipped",
+          "Channel": "website",
+          "Total": 110,
+          "Ordered": {
+            "$days": -4
+          },
+          "Shipped": {
+            "$days": -2
+          },
+          "Tracking number": "TRK100008"
+        },
+        {
+          "Number": "ORD-1009",
+          "Customer": "Mason Garcia",
+          "Status": "shipped",
+          "Channel": "instagram",
+          "Total": 56,
+          "Ordered": {
+            "$days": -3
+          },
+          "Shipped": {
+            "$days": -1
+          },
+          "Tracking number": "TRK100009"
+        },
+        {
+          "Number": "ORD-1010",
+          "Customer": "Isabella Lee",
+          "Status": "packed",
+          "Channel": "website",
+          "Total": 47,
+          "Ordered": {
+            "$days": -2
+          }
+        },
+        {
+          "Number": "ORD-1011",
+          "Customer": "Lucas Wilson",
+          "Status": "paid",
+          "Channel": "marketplace",
+          "Total": 32,
+          "Ordered": {
+            "$days": -1
+          }
+        },
+        {
+          "Number": "ORD-1012",
+          "Customer": "Liam Nguyen",
+          "Status": "new",
+          "Channel": "website",
+          "Total": 78,
+          "Ordered": {
+            "$days": 0
+          }
+        },
+        {
+          "Number": "ORD-1013",
+          "Customer": "Emma Clarke",
+          "Status": "cancelled",
+          "Channel": "website",
+          "Total": 22,
+          "Ordered": {
+            "$days": -8
+          }
+        },
+        {
+          "Number": "ORD-1014",
+          "Customer": "Sophia Davis",
+          "Status": "new",
+          "Channel": "instagram",
+          "Total": 64,
+          "Ordered": {
+            "$days": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "Order Items",
+      "icon": "list",
+      "group": "Sales",
+      "description": "Products in each order.",
+      "title": "Line",
+      "columns": [
+        {
+          "name": "Line",
+          "format": "text",
+          "required": true,
+          "searchable": true
+        },
+        {
+          "name": "Order",
+          "format": "relation",
+          "options": {
+            "onDelete": "set null"
+          },
+          "relation": "Orders"
+        },
+        {
+          "name": "Product",
+          "format": "relation",
+          "options": {
+            "onDelete": "set null"
+          },
+          "relation": "Products"
+        },
+        {
+          "name": "Quantity",
+          "format": "integer",
+          "default": "1",
+          "check": "{Quantity} >= 1",
+          "filterable": true
+        },
+        {
+          "name": "Unit price",
+          "format": "currency",
+          "options": {
+            "currency": "USD",
+            "precision": 2
+          },
+          "check": "{Unit price} >= 0"
+        },
+        {
+          "name": "Line total",
+          "format": "currency",
+          "options": {
+            "currency": "USD",
+            "precision": 2
+          },
+          "generated": "{Quantity} * {Unit price}"
+        }
+      ],
+      "views": [
+        {
+          "name": "Multi-unit lines",
+          "icon": "layers",
+          "description": "Lines with more than one unit.",
+          "columns": ["Line", "Order", "Product", "Quantity", "Line total"],
+          "filters": [
+            {
+              "column": "Quantity",
+              "op": "gt",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "rows": [
+        {
+          "Line": "ORD-1001 – Classic Cotton Tee",
+          "Order": "ORD-1001",
+          "Product": "Classic Cotton Tee",
+          "Quantity": 1,
+          "Unit price": 28
+        },
+        {
+          "Line": "ORD-1001 – Canvas Tote Bag",
+          "Order": "ORD-1001",
+          "Product": "Canvas Tote Bag",
+          "Quantity": 1,
+          "Unit price": 22
+        },
+        {
+          "Line": "ORD-1002 – Zip Hoodie",
+          "Order": "ORD-1002",
+          "Product": "Zip Hoodie",
+          "Quantity": 1,
+          "Unit price": 64
+        },
+        {
+          "Line": "ORD-1003 – Linen Throw Blanket",
+          "Order": "ORD-1003",
+          "Product": "Linen Throw Blanket",
+          "Quantity": 1,
+          "Unit price": 78
+        },
+        {
+          "Line": "ORD-1003 – Lip Balm Trio",
+          "Order": "ORD-1003",
+          "Product": "Lip Balm Trio",
+          "Quantity": 1,
+          "Unit price": 15
+        },
+        {
+          "Line": "ORD-1004 – Leather Card Holder",
+          "Order": "ORD-1004",
+          "Product": "Leather Card Holder",
+          "Quantity": 1,
+          "Unit price": 35
+        },
+        {
+          "Line": "ORD-1005 – Ceramic Mug Set",
+          "Order": "ORD-1005",
+          "Product": "Ceramic Mug Set",
+          "Quantity": 1,
+          "Unit price": 42
+        },
+        {
+          "Line": "ORD-1006 – Scented Soy Candle",
+          "Order": "ORD-1006",
+          "Product": "Scented Soy Candle",
+          "Quantity": 2,
+          "Unit price": 19
+        },
+        {
+          "Line": "ORD-1006 – Hydrating Face Cream",
+          "Order": "ORD-1006",
+          "Product": "Hydrating Face Cream",
+          "Quantity": 1,
+          "Unit price": 32
+        },
+        {
+          "Line": "ORD-1007 – Wool Beanie",
+          "Order": "ORD-1007",
+          "Product": "Wool Beanie",
+          "Quantity": 1,
+          "Unit price": 24
+        },
+        {
+          "Line": "ORD-1008 – Zip Hoodie",
+          "Order": "ORD-1008",
+          "Product": "Zip Hoodie",
+          "Quantity": 1,
+          "Unit price": 64
+        },
+        {
+          "Line": "ORD-1008 – Bamboo Hair Brush",
+          "Order": "ORD-1008",
+          "Product": "Bamboo Hair Brush",
+          "Quantity": 1,
+          "Unit price": 18
+        },
+        {
+          "Line": "ORD-1008 – Classic Cotton Tee",
+          "Order": "ORD-1008",
+          "Product": "Classic Cotton Tee",
+          "Quantity": 1,
+          "Unit price": 28
+        },
+        {
+          "Line": "ORD-1009 – Hydrating Face Cream",
+          "Order": "ORD-1009",
+          "Product": "Hydrating Face Cream",
+          "Quantity": 1,
+          "Unit price": 32
+        },
+        {
+          "Line": "ORD-1009 – Wool Beanie",
+          "Order": "ORD-1009",
+          "Product": "Wool Beanie",
+          "Quantity": 1,
+          "Unit price": 24
+        },
+        {
+          "Line": "ORD-1010 – Classic Cotton Tee",
+          "Order": "ORD-1010",
+          "Product": "Classic Cotton Tee",
+          "Quantity": 1,
+          "Unit price": 28
+        },
+        {
+          "Line": "ORD-1010 – Scented Soy Candle",
+          "Order": "ORD-1010",
+          "Product": "Scented Soy Candle",
+          "Quantity": 1,
+          "Unit price": 19
+        },
+        {
+          "Line": "ORD-1011 – Hydrating Face Cream",
+          "Order": "ORD-1011",
+          "Product": "Hydrating Face Cream",
+          "Quantity": 1,
+          "Unit price": 32
+        },
+        {
+          "Line": "ORD-1012 – Linen Throw Blanket",
+          "Order": "ORD-1012",
+          "Product": "Linen Throw Blanket",
+          "Quantity": 1,
+          "Unit price": 78
+        },
+        {
+          "Line": "ORD-1014 – Zip Hoodie",
+          "Order": "ORD-1014",
+          "Product": "Zip Hoodie",
+          "Quantity": 1,
+          "Unit price": 64
+        }
+      ]
+    },
+    {
+      "name": "Returns",
+      "icon": "undo-2",
+      "group": "Sales",
+      "description": "Return requests and refunds.",
+      "title": "Return",
+      "columns": [
+        {
+          "name": "Return",
+          "format": "text",
+          "required": true,
+          "searchable": true
+        },
+        {
+          "name": "Order",
+          "format": "relation",
+          "options": {
+            "onDelete": "set null"
+          },
+          "relation": "Orders"
+        },
+        {
+          "name": "Reason",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Wrong size",
+                "value": "wrong_size"
+              },
+              {
+                "label": "Damaged",
+                "value": "damaged"
+              },
+              {
+                "label": "Not as described",
+                "value": "not_as_described"
+              },
+              {
+                "label": "Changed mind",
+                "value": "changed_mind"
+              }
+            ]
+          },
+          "filterable": true,
+          "sortable": true
+        },
+        {
+          "name": "Status",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Requested",
+                "value": "requested"
+              },
+              {
+                "label": "Approved",
+                "value": "approved"
+              },
+              {
+                "label": "Received",
+                "value": "received"
+              },
+              {
+                "label": "Refunded",
+                "value": "refunded"
+              },
+              {
+                "label": "Rejected",
+                "value": "rejected"
+              }
+            ]
+          },
+          "filterable": true,
+          "sortable": true,
+          "default": "requested"
+        },
+        {
+          "name": "Refund amount",
+          "format": "currency",
+          "options": {
+            "currency": "USD",
+            "precision": 2
+          },
+          "check": "{Refund amount} >= 0"
+        },
+        {
+          "name": "Requested",
+          "format": "date"
+        }
+      ],
+      "views": [
+        {
+          "name": "Open returns",
+          "icon": "inbox",
+          "description": "Requests that still need action.",
+          "columns": ["Return", "Order", "Reason", "Status"],
+          "filters": [
+            {
+              "column": "Status",
+              "op": "is_any_of",
+              "value": ["requested", "approved", "received"]
+            }
+          ]
+        }
+      ],
+      "rows": [
+        {
+          "Return": "RET-001",
+          "Order": "ORD-1005",
+          "Reason": "damaged",
+          "Status": "refunded",
+          "Refund amount": 42,
+          "Requested": {
+            "$days": -20
+          }
+        },
+        {
+          "Return": "RET-002",
+          "Order": "ORD-1007",
+          "Reason": "wrong_size",
+          "Status": "rejected",
+          "Requested": {
+            "$days": -10
+          }
+        },
+        {
+          "Return": "RET-003",
+          "Order": "ORD-1006",
+          "Reason": "not_as_described",
+          "Status": "approved",
+          "Refund amount": 32,
+          "Requested": {
+            "$days": -5
+          }
+        },
+        {
+          "Return": "RET-004",
+          "Order": "ORD-1004",
+          "Reason": "changed_mind",
+          "Status": "requested",
+          "Requested": {
+            "$days": -1
+          }
+        }
+      ]
+    }
+  ]
+}

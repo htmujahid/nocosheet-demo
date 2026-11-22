@@ -1,0 +1,1021 @@
+{
+  "version": 1,
+  "id": "home-services",
+  "name": "Home Services",
+  "description": "For plumbers, electricians and handymen: customers, technicians, jobs, quotes and invoices.",
+  "icon": "wrench",
+  "tags": ["trades", "field-service", "sample"],
+  "tables": [
+    {
+      "name": "Technicians",
+      "icon": "hard-hat",
+      "group": "Team",
+      "description": "Your crew and their trades.",
+      "title": "Name",
+      "columns": [
+        {
+          "name": "Name",
+          "format": "text",
+          "required": true,
+          "searchable": true
+        },
+        {
+          "name": "Trades",
+          "format": "multi_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Plumbing",
+                "value": "plumbing"
+              },
+              {
+                "label": "Electrical",
+                "value": "electrical"
+              },
+              {
+                "label": "HVAC",
+                "value": "hvac"
+              },
+              {
+                "label": "Carpentry",
+                "value": "carpentry"
+              },
+              {
+                "label": "Painting",
+                "value": "painting"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Phone",
+          "format": "phone"
+        },
+        {
+          "name": "Hourly rate",
+          "format": "currency",
+          "options": {
+            "currency": "USD",
+            "precision": 2
+          },
+          "check": "{Hourly rate} >= 0"
+        },
+        {
+          "name": "Active",
+          "format": "checkbox",
+          "filterable": true,
+          "sortable": true,
+          "default": "true"
+        }
+      ],
+      "views": [
+        {
+          "name": "Active crew",
+          "icon": "users",
+          "description": "Technicians taking jobs.",
+          "columns": ["Name", "Trades", "Phone", "Hourly rate"],
+          "filters": [
+            {
+              "column": "Active",
+              "op": "is",
+              "value": true
+            }
+          ]
+        }
+      ],
+      "rows": [
+        {
+          "Name": "Frank Dillon",
+          "Trades": ["plumbing"],
+          "Phone": "+1 555 0901",
+          "Hourly rate": 55,
+          "Active": true
+        },
+        {
+          "Name": "Maria Lopez",
+          "Trades": ["electrical"],
+          "Phone": "+1 555 0902",
+          "Hourly rate": 62,
+          "Active": true
+        },
+        {
+          "Name": "Ben Carter",
+          "Trades": ["hvac"],
+          "Phone": "+1 555 0903",
+          "Hourly rate": 65,
+          "Active": true
+        },
+        {
+          "Name": "Sam Whitaker",
+          "Trades": ["carpentry", "painting"],
+          "Phone": "+1 555 0904",
+          "Hourly rate": 48,
+          "Active": true
+        },
+        {
+          "Name": "Ivan Petrenko",
+          "Trades": ["plumbing", "hvac"],
+          "Phone": "+1 555 0905",
+          "Hourly rate": 58,
+          "Active": false
+        }
+      ]
+    },
+    {
+      "name": "Customers",
+      "icon": "contact",
+      "group": "Sales",
+      "description": "People and businesses you work for.",
+      "title": "Name",
+      "audit": true,
+      "columns": [
+        {
+          "name": "Name",
+          "format": "text",
+          "required": true,
+          "searchable": true
+        },
+        {
+          "name": "Phone",
+          "format": "phone"
+        },
+        {
+          "name": "Email",
+          "format": "email"
+        },
+        {
+          "name": "Address",
+          "format": "text"
+        },
+        {
+          "name": "City",
+          "format": "text"
+        },
+        {
+          "name": "Type",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Homeowner",
+                "value": "homeowner"
+              },
+              {
+                "label": "Landlord",
+                "value": "landlord"
+              },
+              {
+                "label": "Business",
+                "value": "business"
+              }
+            ]
+          },
+          "filterable": true,
+          "sortable": true
+        },
+        {
+          "name": "Notes",
+          "format": "long_text"
+        }
+      ],
+      "views": [
+        {
+          "name": "Landlords & businesses",
+          "icon": "building",
+          "description": "Repeat commercial customers.",
+          "columns": ["Name", "Type", "Phone", "Address"],
+          "filters": [
+            {
+              "column": "Type",
+              "op": "is_any_of",
+              "value": ["landlord", "business"]
+            }
+          ]
+        }
+      ],
+      "rows": [
+        {
+          "Name": "Patricia Holloway",
+          "Phone": "+1 555 1010",
+          "Email": "patricia.holloway@example.com",
+          "Address": "12 Birch Lane",
+          "City": "Springfield",
+          "Type": "homeowner"
+        },
+        {
+          "Name": "Robert & Linda Chen",
+          "Phone": "+1 555 1011",
+          "Email": "robert.linda.chen@example.com",
+          "Address": "88 Cedar Ave",
+          "City": "Springfield",
+          "Type": "homeowner",
+          "Notes": "Dog in backyard."
+        },
+        {
+          "Name": "Westside Rentals",
+          "Phone": "+1 555 1012",
+          "Email": "westside.rentals@example.com",
+          "Address": "410 Main Street",
+          "City": "Springfield",
+          "Type": "landlord",
+          "Notes": "Manages 12 units; pays on 30-day terms."
+        },
+        {
+          "Name": "Greta Hansen",
+          "Phone": "+1 555 1013",
+          "Email": "greta.hansen@example.com",
+          "Address": "5 Willow Court",
+          "City": "Springfield",
+          "Type": "homeowner"
+        },
+        {
+          "Name": "Brew & Bean Café",
+          "Phone": "+1 555 1014",
+          "Email": "brew.bean.cafe@example.com",
+          "Address": "77 Market Street",
+          "City": "Springfield",
+          "Type": "business",
+          "Notes": "Work after 6pm only."
+        },
+        {
+          "Name": "Aaron Mitchell",
+          "Phone": "+1 555 1015",
+          "Email": "aaron.mitchell@example.com",
+          "Address": "29 Pine Road",
+          "City": "Springfield",
+          "Type": "homeowner"
+        },
+        {
+          "Name": "Sunrise Dental",
+          "Phone": "+1 555 1016",
+          "Email": "sunrise.dental@example.com",
+          "Address": "301 Oak Boulevard",
+          "City": "Springfield",
+          "Type": "business"
+        },
+        {
+          "Name": "Yusuf Karim",
+          "Phone": "+1 555 1017",
+          "Email": "yusuf.karim@example.com",
+          "Address": "16 Elm Street",
+          "City": "Springfield",
+          "Type": "homeowner",
+          "Notes": "Elderly parent lives at home."
+        }
+      ]
+    },
+    {
+      "name": "Jobs",
+      "icon": "wrench",
+      "group": "Operations",
+      "description": "Every job from lead to completion.",
+      "title": "Title",
+      "audit": true,
+      "columns": [
+        {
+          "name": "Title",
+          "format": "text",
+          "required": true,
+          "searchable": true
+        },
+        {
+          "name": "Customer",
+          "format": "relation",
+          "options": {
+            "onDelete": "set null"
+          },
+          "relation": "Customers"
+        },
+        {
+          "name": "Technician",
+          "format": "relation",
+          "options": {
+            "onDelete": "set null"
+          },
+          "relation": "Technicians"
+        },
+        {
+          "name": "Trade",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Plumbing",
+                "value": "plumbing"
+              },
+              {
+                "label": "Electrical",
+                "value": "electrical"
+              },
+              {
+                "label": "HVAC",
+                "value": "hvac"
+              },
+              {
+                "label": "Carpentry",
+                "value": "carpentry"
+              },
+              {
+                "label": "Painting",
+                "value": "painting"
+              }
+            ]
+          },
+          "filterable": true,
+          "sortable": true
+        },
+        {
+          "name": "Status",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Lead",
+                "value": "lead"
+              },
+              {
+                "label": "Quoted",
+                "value": "quoted"
+              },
+              {
+                "label": "Scheduled",
+                "value": "scheduled"
+              },
+              {
+                "label": "In progress",
+                "value": "in_progress"
+              },
+              {
+                "label": "Completed",
+                "value": "completed"
+              },
+              {
+                "label": "Cancelled",
+                "value": "cancelled"
+              }
+            ]
+          },
+          "filterable": true,
+          "sortable": true,
+          "default": "lead"
+        },
+        {
+          "name": "Priority",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Low",
+                "value": "low"
+              },
+              {
+                "label": "Normal",
+                "value": "normal"
+              },
+              {
+                "label": "Urgent",
+                "value": "urgent"
+              }
+            ]
+          },
+          "filterable": true,
+          "sortable": true,
+          "default": "normal"
+        },
+        {
+          "name": "Scheduled for",
+          "format": "datetime"
+        },
+        {
+          "name": "Estimated hours",
+          "format": "decimal",
+          "options": {
+            "precision": 1
+          },
+          "check": "{Estimated hours} >= 0"
+        },
+        {
+          "name": "Description",
+          "format": "long_text"
+        }
+      ],
+      "views": [
+        {
+          "name": "This week",
+          "icon": "calendar-clock",
+          "description": "Scheduled and in-progress work.",
+          "columns": ["Title", "Customer", "Technician", "Scheduled for", "Priority"],
+          "filters": [
+            {
+              "column": "Status",
+              "op": "is_any_of",
+              "value": ["scheduled", "in_progress"]
+            }
+          ]
+        },
+        {
+          "name": "Urgent",
+          "icon": "siren",
+          "description": "Jobs that cannot wait.",
+          "columns": ["Title", "Customer", "Status", "Technician"],
+          "filters": [
+            {
+              "column": "Priority",
+              "op": "is",
+              "value": "urgent"
+            }
+          ]
+        },
+        {
+          "name": "Leads & quotes",
+          "icon": "funnel",
+          "description": "Work that is not booked yet.",
+          "columns": ["Title", "Customer", "Trade", "Status"],
+          "filters": [
+            {
+              "column": "Status",
+              "op": "is_any_of",
+              "value": ["lead", "quoted"]
+            }
+          ]
+        }
+      ],
+      "rows": [
+        {
+          "Title": "Replace water heater",
+          "Customer": "Patricia Holloway",
+          "Technician": "Frank Dillon",
+          "Trade": "plumbing",
+          "Status": "completed",
+          "Priority": "normal",
+          "Estimated hours": 5,
+          "Description": "Swap 40-gal tank for new unit.",
+          "Scheduled for": {
+            "$days": -14,
+            "$hour": 10
+          }
+        },
+        {
+          "Title": "Rewire kitchen outlets",
+          "Customer": "Robert & Linda Chen",
+          "Technician": "Maria Lopez",
+          "Trade": "electrical",
+          "Status": "completed",
+          "Priority": "normal",
+          "Estimated hours": 6,
+          "Description": "Add GFCI protection.",
+          "Scheduled for": {
+            "$days": -9,
+            "$hour": 9
+          }
+        },
+        {
+          "Title": "AC not cooling",
+          "Customer": "Brew & Bean Café",
+          "Technician": "Ben Carter",
+          "Trade": "hvac",
+          "Status": "completed",
+          "Priority": "urgent",
+          "Estimated hours": 3,
+          "Description": "Recharge refrigerant, replace capacitor.",
+          "Scheduled for": {
+            "$days": -5,
+            "$hour": 19
+          }
+        },
+        {
+          "Title": "Fix leaking pipe in unit 4B",
+          "Customer": "Westside Rentals",
+          "Technician": "Frank Dillon",
+          "Trade": "plumbing",
+          "Status": "in_progress",
+          "Priority": "urgent",
+          "Estimated hours": 4,
+          "Description": "Tenant reports water under the sink.",
+          "Scheduled for": {
+            "$days": 0,
+            "$hour": 9
+          }
+        },
+        {
+          "Title": "Build deck railing",
+          "Customer": "Greta Hansen",
+          "Technician": "Sam Whitaker",
+          "Trade": "carpentry",
+          "Status": "scheduled",
+          "Priority": "normal",
+          "Estimated hours": 12,
+          "Description": "Cedar railing, 24 feet.",
+          "Scheduled for": {
+            "$days": 3,
+            "$hour": 8
+          }
+        },
+        {
+          "Title": "Interior repaint – living room",
+          "Customer": "Aaron Mitchell",
+          "Technician": "Sam Whitaker",
+          "Trade": "painting",
+          "Status": "scheduled",
+          "Priority": "low",
+          "Estimated hours": 10,
+          "Description": "Two coats, customer supplies colour.",
+          "Scheduled for": {
+            "$days": 6,
+            "$hour": 9
+          }
+        },
+        {
+          "Title": "Annual furnace service",
+          "Customer": "Yusuf Karim",
+          "Technician": "Ben Carter",
+          "Trade": "hvac",
+          "Status": "scheduled",
+          "Priority": "normal",
+          "Estimated hours": 2,
+          "Description": "Includes filter replacement.",
+          "Scheduled for": {
+            "$days": 2,
+            "$hour": 13
+          }
+        },
+        {
+          "Title": "Install ceiling fans",
+          "Customer": "Sunrise Dental",
+          "Technician": "Maria Lopez",
+          "Trade": "electrical",
+          "Status": "quoted",
+          "Priority": "normal",
+          "Estimated hours": 5,
+          "Description": "Three fans in the waiting area."
+        },
+        {
+          "Title": "Bathroom remodel",
+          "Customer": "Robert & Linda Chen",
+          "Technician": "Sam Whitaker",
+          "Trade": "carpentry",
+          "Status": "quoted",
+          "Priority": "low",
+          "Estimated hours": 40,
+          "Description": "Full remodel; quote pending approval."
+        },
+        {
+          "Title": "Unclog main drain",
+          "Customer": "Aaron Mitchell",
+          "Technician": "Frank Dillon",
+          "Trade": "plumbing",
+          "Status": "completed",
+          "Priority": "urgent",
+          "Estimated hours": 2,
+          "Description": "Camera inspection included.",
+          "Scheduled for": {
+            "$days": -20,
+            "$hour": 15
+          }
+        },
+        {
+          "Title": "Replace breaker panel",
+          "Customer": "Westside Rentals",
+          "Technician": "Maria Lopez",
+          "Trade": "electrical",
+          "Status": "lead",
+          "Priority": "normal",
+          "Estimated hours": 8,
+          "Description": "Site visit needed."
+        },
+        {
+          "Title": "Paint storefront trim",
+          "Customer": "Brew & Bean Café",
+          "Technician": "Sam Whitaker",
+          "Trade": "painting",
+          "Status": "cancelled",
+          "Priority": "low",
+          "Estimated hours": 6,
+          "Description": "Customer postponed to spring.",
+          "Scheduled for": {
+            "$days": -3,
+            "$hour": 9
+          }
+        }
+      ]
+    },
+    {
+      "name": "Quotes",
+      "icon": "file-text",
+      "group": "Sales",
+      "description": "Estimates sent to customers.",
+      "title": "Number",
+      "audit": true,
+      "columns": [
+        {
+          "name": "Number",
+          "format": "text",
+          "required": true,
+          "searchable": true
+        },
+        {
+          "name": "Customer",
+          "format": "relation",
+          "options": {
+            "onDelete": "set null"
+          },
+          "relation": "Customers"
+        },
+        {
+          "name": "Job",
+          "format": "relation",
+          "options": {
+            "onDelete": "set null"
+          },
+          "relation": "Jobs"
+        },
+        {
+          "name": "Amount",
+          "format": "currency",
+          "options": {
+            "currency": "USD",
+            "precision": 2
+          },
+          "required": true,
+          "check": "{Amount} > 0"
+        },
+        {
+          "name": "Status",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Draft",
+                "value": "draft"
+              },
+              {
+                "label": "Sent",
+                "value": "sent"
+              },
+              {
+                "label": "Accepted",
+                "value": "accepted"
+              },
+              {
+                "label": "Declined",
+                "value": "declined"
+              }
+            ]
+          },
+          "filterable": true,
+          "sortable": true,
+          "default": "draft"
+        },
+        {
+          "name": "Sent",
+          "format": "date"
+        },
+        {
+          "name": "Valid until",
+          "format": "date"
+        }
+      ],
+      "views": [
+        {
+          "name": "Awaiting answer",
+          "icon": "hourglass",
+          "description": "Quotes sent and not yet accepted.",
+          "columns": ["Number", "Customer", "Job", "Amount", "Valid until"],
+          "filters": [
+            {
+              "column": "Status",
+              "op": "is",
+              "value": "sent"
+            }
+          ]
+        }
+      ],
+      "rows": [
+        {
+          "Number": "Q-1001",
+          "Customer": "Patricia Holloway",
+          "Job": "Replace water heater",
+          "Amount": 1850,
+          "Status": "accepted",
+          "Sent": {
+            "$days": -25
+          },
+          "Valid until": {
+            "$days": -5
+          }
+        },
+        {
+          "Number": "Q-1002",
+          "Customer": "Robert & Linda Chen",
+          "Job": "Rewire kitchen outlets",
+          "Amount": 1320,
+          "Status": "accepted",
+          "Sent": {
+            "$days": -18
+          },
+          "Valid until": {
+            "$days": 12
+          }
+        },
+        {
+          "Number": "Q-1003",
+          "Customer": "Brew & Bean Café",
+          "Job": "AC not cooling",
+          "Amount": 780,
+          "Status": "accepted",
+          "Sent": {
+            "$days": -6
+          },
+          "Valid until": {
+            "$days": 24
+          }
+        },
+        {
+          "Number": "Q-1004",
+          "Customer": "Greta Hansen",
+          "Job": "Build deck railing",
+          "Amount": 1900,
+          "Status": "accepted",
+          "Sent": {
+            "$days": -12
+          },
+          "Valid until": {
+            "$days": 18
+          }
+        },
+        {
+          "Number": "Q-1005",
+          "Customer": "Sunrise Dental",
+          "Job": "Install ceiling fans",
+          "Amount": 1150,
+          "Status": "sent",
+          "Sent": {
+            "$days": -4
+          },
+          "Valid until": {
+            "$days": 26
+          }
+        },
+        {
+          "Number": "Q-1006",
+          "Customer": "Robert & Linda Chen",
+          "Job": "Bathroom remodel",
+          "Amount": 14800,
+          "Status": "sent",
+          "Sent": {
+            "$days": -7
+          },
+          "Valid until": {
+            "$days": 23
+          }
+        },
+        {
+          "Number": "Q-1007",
+          "Customer": "Aaron Mitchell",
+          "Job": "Interior repaint – living room",
+          "Amount": 1400,
+          "Status": "accepted",
+          "Sent": {
+            "$days": -10
+          },
+          "Valid until": {
+            "$days": 20
+          }
+        },
+        {
+          "Number": "Q-1008",
+          "Customer": "Westside Rentals",
+          "Job": "Replace breaker panel",
+          "Amount": 2600,
+          "Status": "draft"
+        }
+      ]
+    },
+    {
+      "name": "Invoices",
+      "icon": "receipt",
+      "group": "Sales",
+      "description": "Billing and payment status.",
+      "title": "Number",
+      "audit": true,
+      "columns": [
+        {
+          "name": "Number",
+          "format": "text",
+          "required": true,
+          "searchable": true
+        },
+        {
+          "name": "Customer",
+          "format": "relation",
+          "options": {
+            "onDelete": "set null"
+          },
+          "relation": "Customers"
+        },
+        {
+          "name": "Job",
+          "format": "relation",
+          "options": {
+            "onDelete": "set null"
+          },
+          "relation": "Jobs"
+        },
+        {
+          "name": "Amount",
+          "format": "currency",
+          "options": {
+            "currency": "USD",
+            "precision": 2
+          },
+          "required": true,
+          "check": "{Amount} > 0"
+        },
+        {
+          "name": "Status",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Draft",
+                "value": "draft"
+              },
+              {
+                "label": "Sent",
+                "value": "sent"
+              },
+              {
+                "label": "Paid",
+                "value": "paid"
+              },
+              {
+                "label": "Overdue",
+                "value": "overdue"
+              }
+            ]
+          },
+          "filterable": true,
+          "sortable": true,
+          "default": "draft"
+        },
+        {
+          "name": "Issued",
+          "format": "date"
+        },
+        {
+          "name": "Due",
+          "format": "date"
+        },
+        {
+          "name": "Paid",
+          "format": "checkbox",
+          "filterable": true,
+          "sortable": true,
+          "default": "false"
+        }
+      ],
+      "views": [
+        {
+          "name": "Unpaid invoices",
+          "icon": "wallet",
+          "description": "Money still to collect.",
+          "columns": ["Number", "Customer", "Amount", "Status", "Due"],
+          "filters": [
+            {
+              "column": "Paid",
+              "op": "is",
+              "value": false
+            }
+          ]
+        },
+        {
+          "name": "Overdue",
+          "icon": "triangle-alert",
+          "description": "Past due and needs chasing.",
+          "columns": ["Number", "Customer", "Amount", "Due"],
+          "filters": [
+            {
+              "column": "Status",
+              "op": "is",
+              "value": "overdue"
+            }
+          ]
+        }
+      ],
+      "rows": [
+        {
+          "Number": "INV-2001",
+          "Customer": "Patricia Holloway",
+          "Job": "Replace water heater",
+          "Amount": 1850,
+          "Status": "paid",
+          "Issued": {
+            "$days": -13
+          },
+          "Due": {
+            "$days": 17
+          },
+          "Paid": true
+        },
+        {
+          "Number": "INV-2002",
+          "Customer": "Robert & Linda Chen",
+          "Job": "Rewire kitchen outlets",
+          "Amount": 1320,
+          "Status": "paid",
+          "Issued": {
+            "$days": -8
+          },
+          "Due": {
+            "$days": 22
+          },
+          "Paid": true
+        },
+        {
+          "Number": "INV-2003",
+          "Customer": "Brew & Bean Café",
+          "Job": "AC not cooling",
+          "Amount": 780,
+          "Status": "sent",
+          "Issued": {
+            "$days": -4
+          },
+          "Due": {
+            "$days": 10
+          },
+          "Paid": false
+        },
+        {
+          "Number": "INV-2004",
+          "Customer": "Aaron Mitchell",
+          "Job": "Unclog main drain",
+          "Amount": 260,
+          "Status": "paid",
+          "Issued": {
+            "$days": -19
+          },
+          "Due": {
+            "$days": -4
+          },
+          "Paid": true
+        },
+        {
+          "Number": "INV-2005",
+          "Customer": "Westside Rentals",
+          "Job": "Fix leaking pipe in unit 4B",
+          "Amount": 640,
+          "Status": "draft",
+          "Issued": {
+            "$days": 0
+          },
+          "Due": {
+            "$days": 30
+          },
+          "Paid": false
+        },
+        {
+          "Number": "INV-2006",
+          "Customer": "Greta Hansen",
+          "Job": "Build deck railing",
+          "Amount": 950,
+          "Status": "overdue",
+          "Issued": {
+            "$days": -45
+          },
+          "Due": {
+            "$days": -15
+          },
+          "Paid": false
+        },
+        {
+          "Number": "INV-2007",
+          "Customer": "Yusuf Karim",
+          "Job": "Annual furnace service",
+          "Amount": 180,
+          "Status": "sent",
+          "Issued": {
+            "$days": -1
+          },
+          "Due": {
+            "$days": 29
+          },
+          "Paid": false
+        },
+        {
+          "Number": "INV-2008",
+          "Customer": "Westside Rentals",
+          "Job": "Replace breaker panel",
+          "Amount": 1300,
+          "Status": "overdue",
+          "Issued": {
+            "$days": -60
+          },
+          "Due": {
+            "$days": -30
+          },
+          "Paid": false
+        }
+      ]
+    }
+  ]
+}

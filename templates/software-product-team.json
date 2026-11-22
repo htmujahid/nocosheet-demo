@@ -1,0 +1,935 @@
+{
+  "version": 1,
+  "id": "software-product-team",
+  "name": "Software Product Team",
+  "description": "A small dev team's workspace: sprints, issues and bugs, releases and a feature request board.",
+  "icon": "code",
+  "tags": ["software", "engineering", "sample"],
+  "tables": [
+    {
+      "name": "Team Members",
+      "icon": "users",
+      "group": "Team",
+      "description": "Engineers, designers and product people.",
+      "title": "Name",
+      "columns": [
+        {
+          "name": "Name",
+          "format": "text",
+          "required": true,
+          "searchable": true
+        },
+        {
+          "name": "Email",
+          "format": "email",
+          "required": true,
+          "unique": true
+        },
+        {
+          "name": "Role",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Engineer",
+                "value": "engineer"
+              },
+              {
+                "label": "Designer",
+                "value": "designer"
+              },
+              {
+                "label": "Product manager",
+                "value": "product_manager"
+              },
+              {
+                "label": "QA",
+                "value": "qa"
+              },
+              {
+                "label": "DevOps",
+                "value": "devops"
+              }
+            ]
+          },
+          "filterable": true,
+          "sortable": true
+        },
+        {
+          "name": "Active",
+          "format": "checkbox",
+          "filterable": true,
+          "sortable": true,
+          "default": "true"
+        }
+      ],
+      "views": [
+        {
+          "name": "Engineers",
+          "icon": "code",
+          "description": "Everyone writing code.",
+          "columns": ["Name", "Email"],
+          "filters": [
+            {
+              "column": "Role",
+              "op": "is",
+              "value": "engineer"
+            }
+          ]
+        }
+      ],
+      "rows": [
+        {
+          "Name": "Alex Rivera",
+          "Email": "alex.rivera@example.com",
+          "Role": "engineer",
+          "Active": true
+        },
+        {
+          "Name": "Bianca Costa",
+          "Email": "bianca.costa@example.com",
+          "Role": "engineer",
+          "Active": true
+        },
+        {
+          "Name": "Chen Wei",
+          "Email": "chen.wei@example.com",
+          "Role": "engineer",
+          "Active": true
+        },
+        {
+          "Name": "Dmitri Volkov",
+          "Email": "dmitri.volkov@example.com",
+          "Role": "devops",
+          "Active": true
+        },
+        {
+          "Name": "Eva Lindholm",
+          "Email": "eva.lindholm@example.com",
+          "Role": "designer",
+          "Active": true
+        },
+        {
+          "Name": "Farid Nasser",
+          "Email": "farid.nasser@example.com",
+          "Role": "qa",
+          "Active": true
+        },
+        {
+          "Name": "Gina Park",
+          "Email": "gina.park@example.com",
+          "Role": "product_manager",
+          "Active": true
+        }
+      ]
+    },
+    {
+      "name": "Sprints",
+      "icon": "repeat",
+      "group": "Planning",
+      "description": "Two-week iterations.",
+      "title": "Name",
+      "columns": [
+        {
+          "name": "Name",
+          "format": "text",
+          "required": true,
+          "searchable": true
+        },
+        {
+          "name": "Goal",
+          "format": "text"
+        },
+        {
+          "name": "Status",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Planned",
+                "value": "planned"
+              },
+              {
+                "label": "Active",
+                "value": "active"
+              },
+              {
+                "label": "Completed",
+                "value": "completed"
+              }
+            ]
+          },
+          "filterable": true,
+          "sortable": true,
+          "default": "planned"
+        },
+        {
+          "name": "Start",
+          "format": "date"
+        },
+        {
+          "name": "End",
+          "format": "date"
+        }
+      ],
+      "views": [
+        {
+          "name": "Current sprint",
+          "icon": "play",
+          "description": "The sprint in progress.",
+          "columns": ["Name", "Goal", "Start", "End"],
+          "filters": [
+            {
+              "column": "Status",
+              "op": "is",
+              "value": "active"
+            }
+          ]
+        }
+      ],
+      "rows": [
+        {
+          "Name": "Sprint 11",
+          "Goal": "Onboarding revamp",
+          "Status": "completed",
+          "Start": {
+            "$days": -42
+          },
+          "End": {
+            "$days": -29
+          }
+        },
+        {
+          "Name": "Sprint 12",
+          "Goal": "Billing and invoices",
+          "Status": "completed",
+          "Start": {
+            "$days": -28
+          },
+          "End": {
+            "$days": -15
+          }
+        },
+        {
+          "Name": "Sprint 13",
+          "Goal": "Performance and API stability",
+          "Status": "active",
+          "Start": {
+            "$days": -14
+          },
+          "End": {
+            "$days": 0
+          }
+        },
+        {
+          "Name": "Sprint 14",
+          "Goal": "Team workspaces",
+          "Status": "planned",
+          "Start": {
+            "$days": 1
+          },
+          "End": {
+            "$days": 14
+          }
+        }
+      ]
+    },
+    {
+      "name": "Releases",
+      "icon": "rocket",
+      "group": "Planning",
+      "description": "What shipped and when.",
+      "title": "Version",
+      "columns": [
+        {
+          "name": "Version",
+          "format": "text",
+          "required": true,
+          "searchable": true
+        },
+        {
+          "name": "Status",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Planned",
+                "value": "planned"
+              },
+              {
+                "label": "Released",
+                "value": "released"
+              },
+              {
+                "label": "Rolled back",
+                "value": "rolled_back"
+              }
+            ]
+          },
+          "filterable": true,
+          "sortable": true,
+          "default": "planned"
+        },
+        {
+          "name": "Release date",
+          "format": "date"
+        },
+        {
+          "name": "Notes",
+          "format": "long_text"
+        }
+      ],
+      "views": [
+        {
+          "name": "Released",
+          "icon": "badge-check",
+          "description": "Versions in production.",
+          "columns": ["Version", "Release date", "Notes"],
+          "filters": [
+            {
+              "column": "Status",
+              "op": "is",
+              "value": "released"
+            }
+          ]
+        }
+      ],
+      "rows": [
+        {
+          "Version": "v2.3.0",
+          "Status": "released",
+          "Release date": {
+            "$days": -40
+          },
+          "Notes": "New onboarding flow."
+        },
+        {
+          "Version": "v2.3.1",
+          "Status": "rolled_back",
+          "Release date": {
+            "$days": -33
+          },
+          "Notes": "Rolled back after a login regression."
+        },
+        {
+          "Version": "v2.4.0",
+          "Status": "released",
+          "Release date": {
+            "$days": -14
+          },
+          "Notes": "Invoices and PDF export."
+        },
+        {
+          "Version": "v2.4.1",
+          "Status": "released",
+          "Release date": {
+            "$days": -6
+          },
+          "Notes": "Hotfixes for webhook retries."
+        },
+        {
+          "Version": "v2.5.0",
+          "Status": "planned",
+          "Release date": {
+            "$days": 12
+          },
+          "Notes": "Team workspaces beta."
+        }
+      ]
+    },
+    {
+      "name": "Issues",
+      "icon": "list-checks",
+      "group": "Delivery",
+      "description": "Backlog and sprint work.",
+      "title": "Title",
+      "audit": true,
+      "columns": [
+        {
+          "name": "Title",
+          "format": "text",
+          "required": true,
+          "searchable": true
+        },
+        {
+          "name": "Type",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Feature",
+                "value": "feature"
+              },
+              {
+                "label": "Bug",
+                "value": "bug"
+              },
+              {
+                "label": "Chore",
+                "value": "chore"
+              },
+              {
+                "label": "Spike",
+                "value": "spike"
+              }
+            ]
+          },
+          "filterable": true,
+          "sortable": true
+        },
+        {
+          "name": "Status",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Backlog",
+                "value": "backlog"
+              },
+              {
+                "label": "To do",
+                "value": "to_do"
+              },
+              {
+                "label": "In progress",
+                "value": "in_progress"
+              },
+              {
+                "label": "In review",
+                "value": "in_review"
+              },
+              {
+                "label": "Done",
+                "value": "done"
+              }
+            ]
+          },
+          "filterable": true,
+          "sortable": true,
+          "default": "backlog"
+        },
+        {
+          "name": "Priority",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Low",
+                "value": "low"
+              },
+              {
+                "label": "Medium",
+                "value": "medium"
+              },
+              {
+                "label": "High",
+                "value": "high"
+              },
+              {
+                "label": "Critical",
+                "value": "critical"
+              }
+            ]
+          },
+          "filterable": true,
+          "sortable": true,
+          "default": "medium"
+        },
+        {
+          "name": "Assignee",
+          "format": "relation",
+          "options": {
+            "onDelete": "set null"
+          },
+          "relation": "Team Members"
+        },
+        {
+          "name": "Sprint",
+          "format": "relation",
+          "options": {
+            "onDelete": "set null"
+          },
+          "relation": "Sprints"
+        },
+        {
+          "name": "Release",
+          "format": "relation",
+          "options": {
+            "onDelete": "set null"
+          },
+          "relation": "Releases"
+        },
+        {
+          "name": "Points",
+          "format": "integer",
+          "check": "{Points} >= 0"
+        },
+        {
+          "name": "Labels",
+          "format": "multi_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Frontend",
+                "value": "frontend"
+              },
+              {
+                "label": "Backend",
+                "value": "backend"
+              },
+              {
+                "label": "API",
+                "value": "api"
+              },
+              {
+                "label": "Infra",
+                "value": "infra"
+              },
+              {
+                "label": "UX",
+                "value": "ux"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Created",
+          "format": "date"
+        },
+        {
+          "name": "Description",
+          "format": "long_text"
+        }
+      ],
+      "views": [
+        {
+          "name": "Current work",
+          "icon": "loader",
+          "description": "In progress or in review.",
+          "columns": ["Title", "Type", "Assignee", "Priority", "Points"],
+          "filters": [
+            {
+              "column": "Status",
+              "op": "is_any_of",
+              "value": ["in_progress", "in_review"]
+            }
+          ]
+        },
+        {
+          "name": "Open bugs",
+          "icon": "bug",
+          "description": "Bugs that are not done.",
+          "columns": ["Title", "Priority", "Assignee", "Status"],
+          "filters": [
+            {
+              "column": "Type",
+              "op": "is",
+              "value": "bug"
+            },
+            {
+              "column": "Status",
+              "op": "is_not",
+              "value": "done"
+            }
+          ]
+        },
+        {
+          "name": "Backlog",
+          "icon": "inbox",
+          "description": "Unscheduled work.",
+          "columns": ["Title", "Type", "Priority", "Points"],
+          "filters": [
+            {
+              "column": "Status",
+              "op": "is",
+              "value": "backlog"
+            }
+          ]
+        }
+      ],
+      "rows": [
+        {
+          "Title": "Redesign onboarding checklist",
+          "Type": "feature",
+          "Status": "done",
+          "Priority": "medium",
+          "Points": 5,
+          "Labels": ["frontend", "ux"],
+          "Created": {
+            "$days": -45
+          },
+          "Assignee": "Eva Lindholm",
+          "Sprint": "Sprint 11",
+          "Release": "v2.3.0"
+        },
+        {
+          "Title": "Fix login redirect loop",
+          "Type": "bug",
+          "Status": "done",
+          "Priority": "critical",
+          "Points": 3,
+          "Labels": ["frontend"],
+          "Created": {
+            "$days": -36
+          },
+          "Assignee": "Alex Rivera",
+          "Sprint": "Sprint 11",
+          "Release": "v2.3.1"
+        },
+        {
+          "Title": "Invoice PDF generation",
+          "Type": "feature",
+          "Status": "done",
+          "Priority": "high",
+          "Points": 8,
+          "Labels": ["backend"],
+          "Created": {
+            "$days": -30
+          },
+          "Assignee": "Bianca Costa",
+          "Sprint": "Sprint 12",
+          "Release": "v2.4.0"
+        },
+        {
+          "Title": "Stripe webhook retries",
+          "Type": "bug",
+          "Status": "done",
+          "Priority": "high",
+          "Points": 5,
+          "Labels": ["backend", "api"],
+          "Created": {
+            "$days": -20
+          },
+          "Assignee": "Chen Wei",
+          "Sprint": "Sprint 12",
+          "Release": "v2.4.1"
+        },
+        {
+          "Title": "Add CSV export to reports",
+          "Type": "feature",
+          "Status": "done",
+          "Priority": "medium",
+          "Points": 3,
+          "Labels": ["frontend", "api"],
+          "Created": {
+            "$days": -27
+          },
+          "Assignee": "Alex Rivera",
+          "Sprint": "Sprint 12",
+          "Release": "v2.4.0"
+        },
+        {
+          "Title": "Slow dashboard query",
+          "Type": "bug",
+          "Status": "in_review",
+          "Priority": "high",
+          "Points": 5,
+          "Labels": ["backend"],
+          "Created": {
+            "$days": -10
+          },
+          "Assignee": "Chen Wei",
+          "Sprint": "Sprint 13"
+        },
+        {
+          "Title": "Rate limiting for public API",
+          "Type": "feature",
+          "Status": "in_progress",
+          "Priority": "high",
+          "Points": 8,
+          "Labels": ["api", "infra"],
+          "Created": {
+            "$days": -12
+          },
+          "Assignee": "Bianca Costa",
+          "Sprint": "Sprint 13"
+        },
+        {
+          "Title": "Upgrade Postgres to 16",
+          "Type": "chore",
+          "Status": "in_progress",
+          "Priority": "medium",
+          "Points": 5,
+          "Labels": ["infra"],
+          "Created": {
+            "$days": -11
+          },
+          "Assignee": "Dmitri Volkov",
+          "Sprint": "Sprint 13"
+        },
+        {
+          "Title": "Dark mode contrast fixes",
+          "Type": "bug",
+          "Status": "to_do",
+          "Priority": "low",
+          "Points": 2,
+          "Labels": ["frontend", "ux"],
+          "Created": {
+            "$days": -8
+          },
+          "Assignee": "Eva Lindholm",
+          "Sprint": "Sprint 13"
+        },
+        {
+          "Title": "Write API changelog",
+          "Type": "chore",
+          "Status": "to_do",
+          "Priority": "low",
+          "Points": 1,
+          "Labels": ["api"],
+          "Created": {
+            "$days": -7
+          },
+          "Assignee": "Gina Park",
+          "Sprint": "Sprint 13"
+        },
+        {
+          "Title": "Team workspace data model",
+          "Type": "feature",
+          "Status": "to_do",
+          "Priority": "high",
+          "Points": 8,
+          "Labels": ["backend"],
+          "Created": {
+            "$days": -6
+          },
+          "Assignee": "Bianca Costa",
+          "Sprint": "Sprint 14",
+          "Release": "v2.5.0"
+        },
+        {
+          "Title": "Invite teammates flow",
+          "Type": "feature",
+          "Status": "to_do",
+          "Priority": "high",
+          "Points": 5,
+          "Labels": ["frontend", "ux"],
+          "Created": {
+            "$days": -6
+          },
+          "Assignee": "Alex Rivera",
+          "Sprint": "Sprint 14",
+          "Release": "v2.5.0"
+        },
+        {
+          "Title": "Role-based permissions spike",
+          "Type": "spike",
+          "Status": "backlog",
+          "Priority": "medium",
+          "Points": 3,
+          "Labels": ["backend"],
+          "Created": {
+            "$days": -5
+          },
+          "Assignee": "Chen Wei",
+          "Sprint": "Sprint 14"
+        },
+        {
+          "Title": "Regression test suite for billing",
+          "Type": "chore",
+          "Status": "backlog",
+          "Priority": "medium",
+          "Points": 5,
+          "Labels": ["backend"],
+          "Created": {
+            "$days": -9
+          },
+          "Assignee": "Farid Nasser"
+        },
+        {
+          "Title": "Email notification preferences",
+          "Type": "feature",
+          "Status": "backlog",
+          "Priority": "low",
+          "Points": 3,
+          "Labels": ["frontend", "backend"],
+          "Created": {
+            "$days": -4
+          }
+        },
+        {
+          "Title": "Mobile layout bug on settings",
+          "Type": "bug",
+          "Status": "backlog",
+          "Priority": "medium",
+          "Points": 2,
+          "Labels": ["frontend"],
+          "Created": {
+            "$days": -3
+          }
+        },
+        {
+          "Title": "Set up staging environment alerts",
+          "Type": "chore",
+          "Status": "backlog",
+          "Priority": "low",
+          "Points": 2,
+          "Labels": ["infra"],
+          "Created": {
+            "$days": -2
+          },
+          "Assignee": "Dmitri Volkov"
+        },
+        {
+          "Title": "Webhooks delivery log UI",
+          "Type": "feature",
+          "Status": "backlog",
+          "Priority": "medium",
+          "Points": 5,
+          "Labels": ["frontend", "api"],
+          "Created": {
+            "$days": -1
+          }
+        }
+      ]
+    },
+    {
+      "name": "Feature Requests",
+      "icon": "lightbulb",
+      "group": "Product",
+      "description": "Ideas from customers and the team.",
+      "title": "Title",
+      "columns": [
+        {
+          "name": "Title",
+          "format": "text",
+          "required": true,
+          "searchable": true
+        },
+        {
+          "name": "Source",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Customer",
+                "value": "customer"
+              },
+              {
+                "label": "Internal",
+                "value": "internal"
+              },
+              {
+                "label": "Sales",
+                "value": "sales"
+              }
+            ]
+          },
+          "filterable": true,
+          "sortable": true
+        },
+        {
+          "name": "Votes",
+          "format": "integer",
+          "default": "0",
+          "sortable": true,
+          "check": "{Votes} >= 0"
+        },
+        {
+          "name": "Status",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "New",
+                "value": "new"
+              },
+              {
+                "label": "Planned",
+                "value": "planned"
+              },
+              {
+                "label": "Shipped",
+                "value": "shipped"
+              },
+              {
+                "label": "Declined",
+                "value": "declined"
+              }
+            ]
+          },
+          "filterable": true,
+          "sortable": true,
+          "default": "new"
+        },
+        {
+          "name": "Requested by",
+          "format": "text"
+        }
+      ],
+      "views": [
+        {
+          "name": "Most wanted",
+          "icon": "thumbs-up",
+          "description": "Requests still open.",
+          "columns": ["Title", "Source", "Votes", "Requested by"],
+          "filters": [
+            {
+              "column": "Status",
+              "op": "is_any_of",
+              "value": ["new", "planned"]
+            }
+          ]
+        }
+      ],
+      "rows": [
+        {
+          "Title": "SSO with Google and Okta",
+          "Source": "sales",
+          "Votes": 24,
+          "Status": "planned",
+          "Requested by": "Acme Corp"
+        },
+        {
+          "Title": "Dark mode",
+          "Source": "customer",
+          "Votes": 31,
+          "Status": "shipped",
+          "Requested by": "Multiple users"
+        },
+        {
+          "Title": "Zapier integration",
+          "Source": "customer",
+          "Votes": 18,
+          "Status": "new",
+          "Requested by": "Beacon Labs"
+        },
+        {
+          "Title": "Bulk edit records",
+          "Source": "customer",
+          "Votes": 15,
+          "Status": "planned",
+          "Requested by": "Northwind"
+        },
+        {
+          "Title": "Audit log export",
+          "Source": "sales",
+          "Votes": 9,
+          "Status": "new",
+          "Requested by": "Globex"
+        },
+        {
+          "Title": "Native mobile app",
+          "Source": "customer",
+          "Votes": 27,
+          "Status": "declined",
+          "Requested by": "Multiple users"
+        },
+        {
+          "Title": "Slack notifications",
+          "Source": "internal",
+          "Votes": 12,
+          "Status": "planned",
+          "Requested by": "Support team"
+        },
+        {
+          "Title": "Custom domains",
+          "Source": "sales",
+          "Votes": 7,
+          "Status": "new",
+          "Requested by": "Initech"
+        }
+      ]
+    }
+  ]
+}

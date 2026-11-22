@@ -1,0 +1,1044 @@
+{
+  "version": 1,
+  "id": "event-planning",
+  "name": "Event Planning",
+  "description": "For a small events business: clients, vendors, events, task checklists and expenses.",
+  "icon": "party-popper",
+  "tags": ["events", "planning", "sample"],
+  "tables": [
+    {
+      "name": "Clients",
+      "icon": "contact",
+      "group": "Sales",
+      "description": "People and organisations you plan events for.",
+      "title": "Name",
+      "columns": [
+        {
+          "name": "Name",
+          "format": "text",
+          "required": true,
+          "searchable": true
+        },
+        {
+          "name": "Type",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Individual",
+                "value": "individual"
+              },
+              {
+                "label": "Company",
+                "value": "company"
+              },
+              {
+                "label": "Non-profit",
+                "value": "non_profit"
+              }
+            ]
+          },
+          "filterable": true,
+          "sortable": true
+        },
+        {
+          "name": "Email",
+          "format": "email",
+          "required": true,
+          "unique": true
+        },
+        {
+          "name": "Phone",
+          "format": "phone"
+        },
+        {
+          "name": "Notes",
+          "format": "long_text"
+        }
+      ],
+      "views": [
+        {
+          "name": "Companies",
+          "icon": "building",
+          "description": "Corporate clients.",
+          "columns": ["Name", "Email", "Phone"],
+          "filters": [
+            {
+              "column": "Type",
+              "op": "is",
+              "value": "company"
+            }
+          ]
+        }
+      ],
+      "rows": [
+        {
+          "Name": "Lena & Tobias Vogel",
+          "Type": "individual",
+          "Email": "vogel.wedding@example.com",
+          "Phone": "+49 30 555 0101",
+          "Notes": "Garden wedding, 80 guests, vegetarian menu."
+        },
+        {
+          "Name": "Brightside Software",
+          "Type": "company",
+          "Email": "events@brightside.example.com",
+          "Phone": "+49 30 555 0102",
+          "Notes": "Annual team offsite and product launch."
+        },
+        {
+          "Name": "Maria Kovács",
+          "Type": "individual",
+          "Email": "maria.kovacs@example.com",
+          "Phone": "+36 1 555 0103",
+          "Notes": "50th birthday party."
+        },
+        {
+          "Name": "Helping Hands e.V.",
+          "Type": "non_profit",
+          "Email": "office@helpinghands.example.com",
+          "Phone": "+49 30 555 0104",
+          "Notes": "Yearly charity gala."
+        },
+        {
+          "Name": "Nordlicht Consulting",
+          "Type": "company",
+          "Email": "hello@nordlicht.example.com",
+          "Phone": "+49 40 555 0105",
+          "Notes": "Quarterly client dinners."
+        },
+        {
+          "Name": "Sven Larsson",
+          "Type": "individual",
+          "Email": "sven.larsson@example.com",
+          "Phone": "+46 8 555 0106",
+          "Notes": "Engagement party."
+        }
+      ]
+    },
+    {
+      "name": "Vendors",
+      "icon": "store",
+      "group": "Network",
+      "description": "Suppliers and venues you work with.",
+      "title": "Name",
+      "columns": [
+        {
+          "name": "Name",
+          "format": "text",
+          "required": true,
+          "searchable": true
+        },
+        {
+          "name": "Category",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Venue",
+                "value": "venue"
+              },
+              {
+                "label": "Catering",
+                "value": "catering"
+              },
+              {
+                "label": "Photography",
+                "value": "photography"
+              },
+              {
+                "label": "Music & DJ",
+                "value": "music_dj"
+              },
+              {
+                "label": "Florals",
+                "value": "florals"
+              },
+              {
+                "label": "Rentals",
+                "value": "rentals"
+              }
+            ]
+          },
+          "filterable": true,
+          "sortable": true
+        },
+        {
+          "name": "Email",
+          "format": "email"
+        },
+        {
+          "name": "Phone",
+          "format": "phone"
+        },
+        {
+          "name": "Rating",
+          "format": "rating",
+          "options": {
+            "max": 5
+          }
+        },
+        {
+          "name": "Preferred",
+          "format": "checkbox",
+          "filterable": true,
+          "sortable": true,
+          "default": "false"
+        }
+      ],
+      "views": [
+        {
+          "name": "Preferred vendors",
+          "icon": "star",
+          "description": "Our go-to partners.",
+          "columns": ["Name", "Category", "Email", "Rating"],
+          "filters": [
+            {
+              "column": "Preferred",
+              "op": "is",
+              "value": true
+            }
+          ]
+        }
+      ],
+      "rows": [
+        {
+          "Name": "Villa Rosengarten",
+          "Category": "venue",
+          "Email": "book@rosengarten.example.com",
+          "Phone": "+49 30 555 0210",
+          "Rating": 4,
+          "Preferred": true
+        },
+        {
+          "Name": "The Loft Berlin",
+          "Category": "venue",
+          "Email": "hello@theloft.example.com",
+          "Phone": "+49 30 555 0211",
+          "Rating": 5,
+          "Preferred": true
+        },
+        {
+          "Name": "Taste & Co. Catering",
+          "Category": "catering",
+          "Email": "orders@tasteco.example.com",
+          "Phone": "+49 30 555 0212",
+          "Rating": 5,
+          "Preferred": true
+        },
+        {
+          "Name": "Grüne Küche",
+          "Category": "catering",
+          "Email": "info@gruenekueche.example.com",
+          "Phone": "+49 30 555 0213",
+          "Rating": 4,
+          "Preferred": false
+        },
+        {
+          "Name": "Lumen Photography",
+          "Category": "photography",
+          "Email": "studio@lumen.example.com",
+          "Phone": "+49 30 555 0214",
+          "Rating": 5,
+          "Preferred": true
+        },
+        {
+          "Name": "DJ Matteo",
+          "Category": "music_dj",
+          "Email": "bookings@djmatteo.example.com",
+          "Phone": "+49 30 555 0215",
+          "Rating": 4,
+          "Preferred": false
+        },
+        {
+          "Name": "Blütenzauber Florals",
+          "Category": "florals",
+          "Email": "shop@bluetenzauber.example.com",
+          "Phone": "+49 30 555 0216",
+          "Rating": 4,
+          "Preferred": true
+        },
+        {
+          "Name": "EventRent GmbH",
+          "Category": "rentals",
+          "Email": "rent@eventrent.example.com",
+          "Phone": "+49 30 555 0217",
+          "Rating": 3,
+          "Preferred": false
+        }
+      ]
+    },
+    {
+      "name": "Events",
+      "icon": "party-popper",
+      "group": "Planning",
+      "description": "Every event from enquiry to wrap-up.",
+      "title": "Name",
+      "audit": true,
+      "columns": [
+        {
+          "name": "Name",
+          "format": "text",
+          "required": true,
+          "searchable": true
+        },
+        {
+          "name": "Client",
+          "format": "relation",
+          "options": {
+            "onDelete": "set null"
+          },
+          "relation": "Clients"
+        },
+        {
+          "name": "Type",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Wedding",
+                "value": "wedding"
+              },
+              {
+                "label": "Corporate",
+                "value": "corporate"
+              },
+              {
+                "label": "Birthday",
+                "value": "birthday"
+              },
+              {
+                "label": "Conference",
+                "value": "conference"
+              },
+              {
+                "label": "Fundraiser",
+                "value": "fundraiser"
+              }
+            ]
+          },
+          "filterable": true,
+          "sortable": true
+        },
+        {
+          "name": "Status",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Inquiry",
+                "value": "inquiry"
+              },
+              {
+                "label": "Quoted",
+                "value": "quoted"
+              },
+              {
+                "label": "Booked",
+                "value": "booked"
+              },
+              {
+                "label": "Completed",
+                "value": "completed"
+              },
+              {
+                "label": "Cancelled",
+                "value": "cancelled"
+              }
+            ]
+          },
+          "filterable": true,
+          "sortable": true,
+          "default": "inquiry"
+        },
+        {
+          "name": "Event date",
+          "format": "date"
+        },
+        {
+          "name": "Guests",
+          "format": "integer",
+          "check": "{Guests} >= 0"
+        },
+        {
+          "name": "Budget",
+          "format": "currency",
+          "options": {
+            "currency": "EUR",
+            "precision": 0
+          },
+          "check": "{Budget} >= 0"
+        },
+        {
+          "name": "Venue",
+          "format": "relation",
+          "options": {
+            "onDelete": "set null"
+          },
+          "relation": "Vendors"
+        },
+        {
+          "name": "Notes",
+          "format": "long_text"
+        }
+      ],
+      "views": [
+        {
+          "name": "Upcoming events",
+          "icon": "calendar-clock",
+          "description": "Booked events still to run.",
+          "columns": ["Name", "Client", "Event date", "Guests", "Venue"],
+          "filters": [
+            {
+              "column": "Status",
+              "op": "is",
+              "value": "booked"
+            }
+          ]
+        },
+        {
+          "name": "Pipeline",
+          "icon": "funnel",
+          "description": "Enquiries and quotes awaiting a decision.",
+          "columns": ["Name", "Client", "Type", "Budget"],
+          "filters": [
+            {
+              "column": "Status",
+              "op": "is_any_of",
+              "value": ["inquiry", "quoted"]
+            }
+          ]
+        }
+      ],
+      "rows": [
+        {
+          "Name": "Vogel Garden Wedding",
+          "Client": "Lena & Tobias Vogel",
+          "Type": "wedding",
+          "Status": "booked",
+          "Event date": {
+            "$days": 60
+          },
+          "Guests": 80,
+          "Budget": 32000,
+          "Venue": "Villa Rosengarten",
+          "Notes": "Ceremony at 15:00, dinner at 18:30."
+        },
+        {
+          "Name": "Brightside Team Offsite",
+          "Client": "Brightside Software",
+          "Type": "corporate",
+          "Status": "booked",
+          "Event date": {
+            "$days": 25
+          },
+          "Guests": 60,
+          "Budget": 18000,
+          "Venue": "The Loft Berlin",
+          "Notes": "Workshops in the morning, dinner and DJ in the evening."
+        },
+        {
+          "Name": "Kovács 50th Birthday",
+          "Client": "Maria Kovács",
+          "Type": "birthday",
+          "Status": "quoted",
+          "Event date": {
+            "$days": 40
+          },
+          "Guests": 45,
+          "Budget": 9000,
+          "Venue": "The Loft Berlin"
+        },
+        {
+          "Name": "Helping Hands Charity Gala",
+          "Client": "Helping Hands e.V.",
+          "Type": "fundraiser",
+          "Status": "booked",
+          "Event date": {
+            "$days": 90
+          },
+          "Guests": 150,
+          "Budget": 26000,
+          "Venue": "Villa Rosengarten",
+          "Notes": "Silent auction and three-course dinner."
+        },
+        {
+          "Name": "Nordlicht Client Dinner Q3",
+          "Client": "Nordlicht Consulting",
+          "Type": "corporate",
+          "Status": "completed",
+          "Event date": {
+            "$days": -20
+          },
+          "Guests": 24,
+          "Budget": 6500,
+          "Venue": "The Loft Berlin",
+          "Notes": "Feedback was excellent."
+        },
+        {
+          "Name": "Larsson Engagement Party",
+          "Client": "Sven Larsson",
+          "Type": "birthday",
+          "Status": "completed",
+          "Event date": {
+            "$days": -45
+          },
+          "Guests": 35,
+          "Budget": 7000,
+          "Venue": "Villa Rosengarten"
+        },
+        {
+          "Name": "Spring Product Summit",
+          "Client": "Brightside Software",
+          "Type": "conference",
+          "Status": "inquiry",
+          "Event date": {
+            "$days": 120
+          },
+          "Guests": 200,
+          "Budget": 55000,
+          "Notes": "Early enquiry, venue not chosen."
+        },
+        {
+          "Name": "Nordlicht Client Dinner Q4",
+          "Client": "Nordlicht Consulting",
+          "Type": "corporate",
+          "Status": "inquiry",
+          "Event date": {
+            "$days": 75
+          },
+          "Guests": 24,
+          "Budget": 6500
+        }
+      ]
+    },
+    {
+      "name": "Event Tasks",
+      "icon": "list-checks",
+      "group": "Planning",
+      "description": "Checklist per event.",
+      "title": "Title",
+      "columns": [
+        {
+          "name": "Title",
+          "format": "text",
+          "required": true,
+          "searchable": true
+        },
+        {
+          "name": "Event",
+          "format": "relation",
+          "options": {
+            "onDelete": "set null"
+          },
+          "relation": "Events"
+        },
+        {
+          "name": "Owner",
+          "format": "text"
+        },
+        {
+          "name": "Due date",
+          "format": "date"
+        },
+        {
+          "name": "Status",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "To do",
+                "value": "to_do"
+              },
+              {
+                "label": "In progress",
+                "value": "in_progress"
+              },
+              {
+                "label": "Done",
+                "value": "done"
+              }
+            ]
+          },
+          "filterable": true,
+          "sortable": true,
+          "default": "to_do"
+        },
+        {
+          "name": "Priority",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Low",
+                "value": "low"
+              },
+              {
+                "label": "Medium",
+                "value": "medium"
+              },
+              {
+                "label": "High",
+                "value": "high"
+              }
+            ]
+          },
+          "filterable": true,
+          "sortable": true,
+          "default": "medium"
+        }
+      ],
+      "views": [
+        {
+          "name": "Open tasks",
+          "icon": "list-todo",
+          "description": "Tasks not finished yet.",
+          "columns": ["Title", "Event", "Owner", "Due date", "Priority"],
+          "filters": [
+            {
+              "column": "Status",
+              "op": "is_not",
+              "value": "done"
+            }
+          ]
+        },
+        {
+          "name": "High priority",
+          "icon": "flag",
+          "description": "Critical to-dos.",
+          "columns": ["Title", "Event", "Status", "Due date"],
+          "filters": [
+            {
+              "column": "Priority",
+              "op": "is",
+              "value": "high"
+            }
+          ]
+        }
+      ],
+      "rows": [
+        {
+          "Title": "Confirm final guest count",
+          "Event": "Vogel Garden Wedding",
+          "Owner": "Anna",
+          "Due date": {
+            "$days": 30
+          },
+          "Status": "to_do",
+          "Priority": "high"
+        },
+        {
+          "Title": "Book photographer",
+          "Event": "Vogel Garden Wedding",
+          "Owner": "Anna",
+          "Due date": {
+            "$days": -10
+          },
+          "Status": "done",
+          "Priority": "high"
+        },
+        {
+          "Title": "Taste menu with caterer",
+          "Event": "Vogel Garden Wedding",
+          "Owner": "Anna",
+          "Due date": {
+            "$days": 14
+          },
+          "Status": "in_progress",
+          "Priority": "medium"
+        },
+        {
+          "Title": "Send save-the-dates",
+          "Event": "Vogel Garden Wedding",
+          "Owner": "Jonas",
+          "Due date": {
+            "$days": -30
+          },
+          "Status": "done",
+          "Priority": "medium"
+        },
+        {
+          "Title": "Finalise workshop agenda",
+          "Event": "Brightside Team Offsite",
+          "Owner": "Jonas",
+          "Due date": {
+            "$days": 10
+          },
+          "Status": "in_progress",
+          "Priority": "high"
+        },
+        {
+          "Title": "Arrange shuttle buses",
+          "Event": "Brightside Team Offsite",
+          "Owner": "Jonas",
+          "Due date": {
+            "$days": 15
+          },
+          "Status": "to_do",
+          "Priority": "medium"
+        },
+        {
+          "Title": "Order name badges",
+          "Event": "Brightside Team Offsite",
+          "Owner": "Anna",
+          "Due date": {
+            "$days": 18
+          },
+          "Status": "to_do",
+          "Priority": "low"
+        },
+        {
+          "Title": "Send quote",
+          "Event": "Kovács 50th Birthday",
+          "Owner": "Anna",
+          "Due date": {
+            "$days": -2
+          },
+          "Status": "done",
+          "Priority": "high"
+        },
+        {
+          "Title": "Follow up on quote",
+          "Event": "Kovács 50th Birthday",
+          "Owner": "Anna",
+          "Due date": {
+            "$days": 5
+          },
+          "Status": "to_do",
+          "Priority": "medium"
+        },
+        {
+          "Title": "Secure auction items",
+          "Event": "Helping Hands Charity Gala",
+          "Owner": "Jonas",
+          "Due date": {
+            "$days": 40
+          },
+          "Status": "in_progress",
+          "Priority": "high"
+        },
+        {
+          "Title": "Print programmes",
+          "Event": "Helping Hands Charity Gala",
+          "Owner": "Anna",
+          "Due date": {
+            "$days": 70
+          },
+          "Status": "to_do",
+          "Priority": "low"
+        },
+        {
+          "Title": "Book DJ",
+          "Event": "Helping Hands Charity Gala",
+          "Owner": "Jonas",
+          "Due date": {
+            "$days": -5
+          },
+          "Status": "done",
+          "Priority": "medium"
+        },
+        {
+          "Title": "Send thank-you notes",
+          "Event": "Nordlicht Client Dinner Q3",
+          "Owner": "Anna",
+          "Due date": {
+            "$days": -15
+          },
+          "Status": "done",
+          "Priority": "low"
+        },
+        {
+          "Title": "Invoice client",
+          "Event": "Nordlicht Client Dinner Q3",
+          "Owner": "Jonas",
+          "Due date": {
+            "$days": -18
+          },
+          "Status": "done",
+          "Priority": "high"
+        },
+        {
+          "Title": "Draft venue shortlist",
+          "Event": "Spring Product Summit",
+          "Owner": "Anna",
+          "Due date": {
+            "$days": 20
+          },
+          "Status": "to_do",
+          "Priority": "medium"
+        },
+        {
+          "Title": "Photo selection",
+          "Event": "Larsson Engagement Party",
+          "Owner": "Jonas",
+          "Due date": {
+            "$days": -38
+          },
+          "Status": "done",
+          "Priority": "low"
+        }
+      ]
+    },
+    {
+      "name": "Expenses",
+      "icon": "receipt",
+      "group": "Finance",
+      "description": "Costs per event and vendor.",
+      "title": "Description",
+      "columns": [
+        {
+          "name": "Description",
+          "format": "text",
+          "required": true,
+          "searchable": true
+        },
+        {
+          "name": "Event",
+          "format": "relation",
+          "options": {
+            "onDelete": "set null"
+          },
+          "relation": "Events"
+        },
+        {
+          "name": "Vendor",
+          "format": "relation",
+          "options": {
+            "onDelete": "set null"
+          },
+          "relation": "Vendors"
+        },
+        {
+          "name": "Category",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Venue",
+                "value": "venue"
+              },
+              {
+                "label": "Catering",
+                "value": "catering"
+              },
+              {
+                "label": "Photography",
+                "value": "photography"
+              },
+              {
+                "label": "Music & DJ",
+                "value": "music_dj"
+              },
+              {
+                "label": "Florals",
+                "value": "florals"
+              },
+              {
+                "label": "Rentals",
+                "value": "rentals"
+              },
+              {
+                "label": "Other",
+                "value": "other"
+              }
+            ]
+          },
+          "filterable": true,
+          "sortable": true
+        },
+        {
+          "name": "Amount",
+          "format": "currency",
+          "options": {
+            "currency": "EUR",
+            "precision": 2
+          },
+          "required": true,
+          "check": "{Amount} > 0"
+        },
+        {
+          "name": "Due date",
+          "format": "date"
+        },
+        {
+          "name": "Paid",
+          "format": "checkbox",
+          "filterable": true,
+          "sortable": true,
+          "default": "false"
+        }
+      ],
+      "views": [
+        {
+          "name": "Unpaid",
+          "icon": "wallet",
+          "description": "Bills still to be paid.",
+          "columns": ["Description", "Event", "Vendor", "Amount", "Due date"],
+          "filters": [
+            {
+              "column": "Paid",
+              "op": "is",
+              "value": false
+            }
+          ]
+        }
+      ],
+      "rows": [
+        {
+          "Description": "Venue deposit",
+          "Event": "Vogel Garden Wedding",
+          "Vendor": "Villa Rosengarten",
+          "Category": "venue",
+          "Amount": 8000,
+          "Due date": {
+            "$days": -60
+          },
+          "Paid": true
+        },
+        {
+          "Description": "Catering deposit",
+          "Event": "Vogel Garden Wedding",
+          "Vendor": "Taste & Co. Catering",
+          "Category": "catering",
+          "Amount": 6000,
+          "Due date": {
+            "$days": -30
+          },
+          "Paid": true
+        },
+        {
+          "Description": "Photography package",
+          "Event": "Vogel Garden Wedding",
+          "Vendor": "Lumen Photography",
+          "Category": "photography",
+          "Amount": 2400,
+          "Due date": {
+            "$days": 30
+          },
+          "Paid": false
+        },
+        {
+          "Description": "Floral arrangements",
+          "Event": "Vogel Garden Wedding",
+          "Vendor": "Blütenzauber Florals",
+          "Category": "florals",
+          "Amount": 1800,
+          "Due date": {
+            "$days": 45
+          },
+          "Paid": false
+        },
+        {
+          "Description": "Loft rental",
+          "Event": "Brightside Team Offsite",
+          "Vendor": "The Loft Berlin",
+          "Category": "venue",
+          "Amount": 5500,
+          "Due date": {
+            "$days": 10
+          },
+          "Paid": false
+        },
+        {
+          "Description": "Catering for 60",
+          "Event": "Brightside Team Offsite",
+          "Vendor": "Grüne Küche",
+          "Category": "catering",
+          "Amount": 4200,
+          "Due date": {
+            "$days": 20
+          },
+          "Paid": false
+        },
+        {
+          "Description": "DJ and sound",
+          "Event": "Brightside Team Offsite",
+          "Vendor": "DJ Matteo",
+          "Category": "music_dj",
+          "Amount": 900,
+          "Due date": {
+            "$days": 24
+          },
+          "Paid": false
+        },
+        {
+          "Description": "Gala venue deposit",
+          "Event": "Helping Hands Charity Gala",
+          "Vendor": "Villa Rosengarten",
+          "Category": "venue",
+          "Amount": 7500,
+          "Due date": {
+            "$days": -10
+          },
+          "Paid": true
+        },
+        {
+          "Description": "Gala catering",
+          "Event": "Helping Hands Charity Gala",
+          "Vendor": "Taste & Co. Catering",
+          "Category": "catering",
+          "Amount": 9800,
+          "Due date": {
+            "$days": 60
+          },
+          "Paid": false
+        },
+        {
+          "Description": "Table and chair hire",
+          "Event": "Helping Hands Charity Gala",
+          "Vendor": "EventRent GmbH",
+          "Category": "rentals",
+          "Amount": 1350,
+          "Due date": {
+            "$days": 80
+          },
+          "Paid": false
+        },
+        {
+          "Description": "Dinner venue",
+          "Event": "Nordlicht Client Dinner Q3",
+          "Vendor": "The Loft Berlin",
+          "Category": "venue",
+          "Amount": 2200,
+          "Due date": {
+            "$days": -22
+          },
+          "Paid": true
+        },
+        {
+          "Description": "Dinner catering",
+          "Event": "Nordlicht Client Dinner Q3",
+          "Vendor": "Taste & Co. Catering",
+          "Category": "catering",
+          "Amount": 2800,
+          "Due date": {
+            "$days": -22
+          },
+          "Paid": true
+        },
+        {
+          "Description": "Engagement venue",
+          "Event": "Larsson Engagement Party",
+          "Vendor": "Villa Rosengarten",
+          "Category": "venue",
+          "Amount": 3000,
+          "Due date": {
+            "$days": -50
+          },
+          "Paid": true
+        },
+        {
+          "Description": "Flowers",
+          "Event": "Larsson Engagement Party",
+          "Vendor": "Blütenzauber Florals",
+          "Category": "florals",
+          "Amount": 650,
+          "Due date": {
+            "$days": -48
+          },
+          "Paid": true
+        }
+      ]
+    }
+  ]
+}
