@@ -33,7 +33,7 @@ function SignUpPage() {
           </EmptyMedia>
           <EmptyTitle>Sign-up is disabled</EmptyTitle>
           <EmptyDescription>
-            This workspace is invite-only. Ask an administrator to create an account for you.
+            Sign-up is invite-only. Ask an administrator to create an account for you.
           </EmptyDescription>
         </EmptyHeader>
         <EmptyContent>
@@ -55,7 +55,11 @@ function SignUpPage() {
       </div>
       <AuthFooter>
         Already have an account?{" "}
-        <Link to="/auth/sign-in" search={(prev) => prev} className="text-foreground underline underline-offset-4">
+        <Link
+          to="/auth/sign-in"
+          search={(prev) => prev}
+          className="text-foreground underline underline-offset-4"
+        >
           Sign in
         </Link>
       </AuthFooter>

@@ -1,4 +1,5 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useDbClient } from "@tanstack/react-db";
+import { useMutation } from "@tanstack/react-query";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
@@ -12,8 +13,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { toastManager } from "@/components/ui/toast";
-import { workspaceKeys } from "@/data/workspace/keys";
-import { deleteViewMutationOptions } from "@/data/workspace/views";
+import { deleteViewMutationOptions, viewsCollection } from "@/data/workspace/views";
 
 export function DeleteViewDialog({
   workspace,
@@ -30,14 +30,17 @@ export function DeleteViewDialog({
   onOpenChange: (open: boolean) => void;
   onDeleted: () => void;
 }) {
-  const queryClient = useQueryClient();
+  const dbClient = useDbClient();
 
   const deleteView = useMutation({
     ...deleteViewMutationOptions,
-    onSuccess: async () => {
+    onSuccess: ({ ids }) => {
+      const viewRows = dbClient.collection(viewsCollection(tableId));
+      viewRows.utils.writeBatch(() => {
+        for (const id of ids) viewRows.utils.writeDelete(id);
+      });
       onOpenChange(false);
       onDeleted();
-      await queryClient.invalidateQueries({ queryKey: workspaceKeys.views(tableId) });
       toastManager.add({ type: "success", title: `${view.name} deleted` });
     },
   });

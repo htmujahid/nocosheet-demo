@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState } from "react";
 
-import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { useDbClient, useLiveSuspenseQuery } from "@tanstack/react-db";
+import { useMutation } from "@tanstack/react-query";
 
 import { UploadIcon } from "lucide-react";
 
@@ -30,10 +31,8 @@ import {
 import { toastManager } from "@/components/ui/toast";
 import { CsvSourceFields } from "@/components/workspace/records/csv-source-fields";
 import { useCsvSource } from "@/components/workspace/records/use-csv-source";
-import { workspaceKeys } from "@/data/workspace/keys";
-import { importRecordsMutationOptions } from "@/data/workspace/records";
-import { createColumnMutationOptions, tableQueryOptions } from "@/data/workspace/tables";
-import { convertCell, MAX_IMPORT_ROWS } from "@/lib/records/import";
+import { columnsCollection, createColumnMutationOptions } from "@/data/workspace/columns";
+import { tablesCollection } from "@/data/workspace/tables";
 import { IMPORT_COLUMN_FORMATS, inferFormat } from "@/lib/records/infer";
 import type { ColumnFormat } from "@/lib/tables/formats";
 import { defaultOptions } from "@/lib/tables/validation";
@@ -52,8 +51,10 @@ function ImportColumnsForm({
   tableId: number;
   onDone: () => void;
 }) {
-  const queryClient = useQueryClient();
-  const { data: table } = useSuspenseQuery(tableQueryOptions(workspace, tableId));
+  const dbClient = useDbClient();
+  const { data: columns } = useLiveSuspenseQuery((q) =>
+    q.from({ column: columnsCollection(tableId) }).orderBy(({ column }) => column.position),
+  );
   const [edits, setEdits] = useState<{ key: string; map: Record<number, Edit> }>({
     key: "",
     map: {},
@@ -61,20 +62,23 @@ function ImportColumnsForm({
   const [progress, setProgress] = useState<string>();
   const [error, setError] = useState<string>();
   const [running, setRunning] = useState(false);
-  const created = useRef(new Map<number, string>());
-  const imported = useRef(0);
+  const created = useRef(new Set<number>());
 
   const csv = useCsvSource(() => {
-    created.current = new Map();
-    imported.current = 0;
+    created.current = new Set();
     setError(undefined);
   });
   const { headers, rows, hasHeader } = csv;
   const editsKey = `${hasHeader}|${headers.join("\u0000")}`;
   const current = edits.key === editsKey ? edits.map : {};
 
-  const createColumn = useMutation(createColumnMutationOptions);
-  const importRecords = useMutation(importRecordsMutationOptions);
+  const createColumn = useMutation({
+    ...createColumnMutationOptions,
+    onSuccess: ({ column, table }) => {
+      dbClient.collection(columnsCollection(tableId)).utils.writeUpsert(column);
+      dbClient.collection(tablesCollection).utils.writeUpsert(table);
+    },
+  });
 
   const inferred = useMemo(
     () =>
@@ -94,7 +98,7 @@ function ImportColumnsForm({
     setEdits({ key: editsKey, map: { ...current, [index]: { ...current[index], ...patch } } });
   }
 
-  const taken = new Set(table.columns.map((column) => column.name.toLowerCase()));
+  const taken = new Set(columns.map((column) => column.name.toLowerCase()));
   const nameIssue = (name: string, index: number) => {
     const trimmed = name.trim();
     if (!trimmed) return "Name is required";
@@ -110,18 +114,6 @@ function ImportColumnsForm({
     return undefined;
   };
 
-  const dataIssues = new Map<number, string>();
-  for (const draft of active) {
-    const column = { format: draft.format, options: defaultOptions(draft.format) };
-    for (const cells of rows) {
-      const converted = convertCell(column, cells[draft.index] ?? "");
-      if (converted && !converted.ok) {
-        dataIssues.set(draft.index, converted.message);
-        break;
-      }
-    }
-  }
-
   const blocker =
     headers.length === 0
       ? undefined
@@ -129,9 +121,7 @@ function ImportColumnsForm({
         ? "Choose at least one column to create."
         : active.some((draft) => nameIssue(draft.name, draft.index))
           ? "Fix the column names marked below."
-          : dataIssues.size > 0
-            ? "Some values don't fit their column type. Change the type or leave the column out."
-            : undefined;
+          : undefined;
   const canRun = headers.length > 0 && !blocker && !running;
 
   async function run() {
@@ -139,11 +129,11 @@ function ImportColumnsForm({
     setRunning(true);
     setError(undefined);
     try {
-      const base = table.columns.reduce((max, column) => Math.max(max, column.position), -1) + 1;
+      const base = columns.reduce((max, column) => Math.max(max, column.position), -1) + 1;
       for (const [order, draft] of active.entries()) {
         if (created.current.has(draft.index)) continue;
         setProgress(`Creating column ${order + 1} of ${active.length}`);
-        const column = await createColumn.mutateAsync({
+        await createColumn.mutateAsync({
           workspace,
           id: tableId,
           column: {
@@ -154,41 +144,14 @@ function ImportColumnsForm({
             position: base + order,
           },
         });
-        created.current.set(draft.index, column.columnName);
+        created.current.add(draft.index);
       }
-
-      const payload = rows.map((cells) =>
-        Object.fromEntries(
-          active.map((draft) => [created.current.get(draft.index)!, cells[draft.index] ?? ""]),
-        ),
-      );
-      while (imported.current < payload.length) {
-        setProgress(
-          `Importing records ${imported.current + 1}–${Math.min(imported.current + MAX_IMPORT_ROWS, payload.length)} of ${payload.length}`,
-        );
-        const result = await importRecords.mutateAsync({
-          workspace,
-          tableId,
-          rows: payload.slice(imported.current, imported.current + MAX_IMPORT_ROWS),
-        });
-        if (result.failed > 0) {
-          const first = result.errors[0];
-          throw new Error(
-            `Row ${imported.current + (first?.row ?? 1)}: ${first?.message ?? "The records couldn't be imported."}`,
-          );
-        }
-        imported.current += result.created;
-      }
-
-      await queryClient.invalidateQueries({ queryKey: workspaceKeys.tables() });
-      await queryClient.invalidateQueries({ queryKey: workspaceKeys.table(tableId) });
       toastManager.add({
         type: "success",
-        title: `Added ${active.length} ${active.length === 1 ? "column" : "columns"} and ${payload.length} ${payload.length === 1 ? "record" : "records"}`,
+        title: `Added ${active.length} ${active.length === 1 ? "column" : "columns"}`,
       });
       onDone();
     } catch (failure) {
-      await queryClient.invalidateQueries({ queryKey: workspaceKeys.tables() });
       setError(failure instanceof Error ? failure.message : "Something went wrong");
     } finally {
       setRunning(false);
@@ -200,9 +163,7 @@ function ImportColumnsForm({
     <div className="flex min-h-0 flex-1 flex-col">
       <SheetHeader>
         <SheetTitle>Import from CSV</SheetTitle>
-        <SheetDescription>
-          Create columns from the file's headers, then import its rows as records.
-        </SheetDescription>
+        <SheetDescription>Create columns from the file's headers.</SheetDescription>
       </SheetHeader>
       <SheetPanel className="flex flex-col gap-6">
         <CsvSourceFields
@@ -223,7 +184,6 @@ function ImportColumnsForm({
             <TableBody>
               {drafts.map((draft) => {
                 const issue = draft.include ? nameIssue(draft.name, draft.index) : undefined;
-                const dataIssue = draft.include ? dataIssues.get(draft.index) : undefined;
                 return (
                   <TableRow key={draft.index}>
                     <TableCell>
@@ -261,17 +221,12 @@ function ImportColumnsForm({
                       </div>
                     </TableCell>
                     <TableCell>
-                      <div className="flex flex-col gap-1">
-                        <FormatSelect
-                          formats={IMPORT_COLUMN_FORMATS}
-                          value={draft.format}
-                          disabled={!draft.include}
-                          onValueChange={(format) => edit(draft.index, { format })}
-                        />
-                        {dataIssue && (
-                          <span className="text-destructive-foreground text-xs">{dataIssue}</span>
-                        )}
-                      </div>
+                      <FormatSelect
+                        formats={IMPORT_COLUMN_FORMATS}
+                        value={draft.format}
+                        disabled={!draft.include}
+                        onValueChange={(format) => edit(draft.index, { format })}
+                      />
                     </TableCell>
                   </TableRow>
                 );
@@ -280,13 +235,6 @@ function ImportColumnsForm({
           </Table>
         )}
 
-        {headers.length > 0 && rows.length === 0 && (
-          <Alert variant="warning">
-            <AlertDescription>
-              The data has no records, so only columns will be created.
-            </AlertDescription>
-          </Alert>
-        )}
         {blocker && (
           <Alert variant="warning">
             <AlertDescription>{blocker}</AlertDescription>
@@ -309,7 +257,7 @@ function ImportColumnsForm({
         <Button type="button" disabled={!canRun} loading={running} onClick={() => void run()}>
           <UploadIcon aria-hidden="true" />
           {progress ??
-            `Create ${active.length || ""} ${active.length === 1 ? "column" : "columns"}${rows.length > 0 ? ` & import ${rows.length}` : ""}`}
+            `Create ${active.length || ""} ${active.length === 1 ? "column" : "columns"}`}
         </Button>
       </SheetFooter>
     </div>

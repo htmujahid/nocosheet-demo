@@ -8,7 +8,7 @@ import { ALL_VIEW } from "@/lib/views/constants";
 
 export const Route = createFileRoute("/workspaces/$workspace/_core/tables/$table/")({
   beforeLoad: ({ context, params }) => {
-    if (scopeFor(context.access, "read", Number(params.table)) === "none")
+    if (scopeFor(context.access, Number(params.table), "read") === "none")
       throw redirect({
         to: "/workspaces/$workspace/tables/$table/views/$view",
         params: { ...params, view: ALL_VIEW },

@@ -1,12 +1,11 @@
 import { defineHandler } from "void";
 import { requireAuth } from "void/auth";
 
+import { loadAccess } from "@/lib/access/load-access";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { conflictOrBadRequest, httpError, NOT_FOUND } from "@/lib/http";
-import { resolveTablesQuery, tablesSearchSchema } from "@/lib/tables/query";
 import {
   createTable,
-  dropTables,
   findLinkingColumns,
   findTables,
   listTables,
@@ -14,12 +13,15 @@ import {
 } from "@/lib/tables/repository";
 import { tableInputSchema, tablesDeleteSchema } from "@/lib/tables/validation";
 
-export const GET = defineHandler.withValidator({ query: tablesSearchSchema })(async (
-  c,
-  { query },
-) => {
-  requireAdmin(c);
-  return listTables(resolveTablesQuery(query));
+export const GET = defineHandler(async (c) => {
+  const user = requireAuth(c);
+  const [access, rows] = await Promise.all([loadAccess(user), listTables()]);
+  if (access.admin) return rows;
+  return rows.filter((row) =>
+    (["read", "create", "update"] as const).some(
+      (action) => access.scope(row.id, action) !== "none",
+    ),
+  );
 });
 
 export const POST = defineHandler.withValidator({ body: tableInputSchema })(async (c, { body }) => {
@@ -51,13 +53,12 @@ export const DELETE = defineHandler.withValidator({ body: tablesDeleteSchema })(
     );
 
   try {
-    if (body.permanent) await dropTables(c.get("workspaceId"), tables);
-    else await softDeleteTables(ids, requireAuth(c).id);
+    await softDeleteTables(ids, requireAuth(c).id);
   } catch (error) {
     throw httpError(
       409,
       error instanceof Error ? error.message : "The tables could not be deleted.",
     );
   }
-  return { ok: true };
+  return { ids };
 });

@@ -1,18 +1,17 @@
 "use client";
 
-import { PreviewCard as PreviewCardPrimitive } from "@base-ui/react/preview-card";
 import type React from "react";
+
+import { PreviewCard as PreviewCardPrimitive } from "@base-ui/react/preview-card";
+
 import { cn } from "@/lib/utils";
 
-export const PreviewCard: typeof PreviewCardPrimitive.Root =
-  PreviewCardPrimitive.Root;
+export const PreviewCard: typeof PreviewCardPrimitive.Root = PreviewCardPrimitive.Root;
 
 export function PreviewCardTrigger({
   ...props
 }: PreviewCardPrimitive.Trigger.Props): React.ReactElement {
-  return (
-    <PreviewCardPrimitive.Trigger data-slot="preview-card-trigger" {...props} />
-  );
+  return <PreviewCardPrimitive.Trigger data-slot="preview-card-trigger" {...props} />;
 }
 
 export function PreviewCardPopup({

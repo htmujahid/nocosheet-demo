@@ -5,7 +5,7 @@ import { useMutation } from "@tanstack/react-query";
 import { FileIcon, UploadIcon, XIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { uploadFileMutationOptions } from "@/data/workspace/records";
+import { uploadFileMutationOptions } from "@/data/workspace/files";
 import {
   asFiles,
   FILE_MAX_BYTES,

@@ -1,10 +1,7 @@
 import { useState } from "react";
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-
 import { TrashIcon } from "lucide-react";
 
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   AlertDialog,
   AlertDialogCreateHandle,
@@ -18,10 +15,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { toastManager } from "@/components/ui/toast";
-import { workspaceKeys } from "@/data/workspace/keys";
-import { deleteRecordsMutationOptions } from "@/data/workspace/records";
 
-import { useRestoreRecord } from "./use-restore-record";
+import { useRecordWrites } from "./use-record-writes";
 
 export type DeleteRecordsPayload = { ids: number[] };
 
@@ -30,41 +25,25 @@ export const createDeleteRecordsHandle = () => AlertDialogCreateHandle<DeleteRec
 type DeleteRecordsProps = {
   workspace: string;
   tableId: number;
-  viewId?: number;
   onDeleted: (count: number) => void;
 };
 
 function DeleteRecordsPopup({
-  workspace,
   tableId,
-  viewId,
   ids,
   onDeleted,
   onClose,
 }: DeleteRecordsProps & { ids: number[]; onClose: () => void }) {
-  const queryClient = useQueryClient();
-  const restore = useRestoreRecord(workspace, tableId);
+  const writes = useRecordWrites(tableId);
   const count = ids.length;
   const noun = count === 1 ? "record" : "records";
 
-  const deleteRecords = useMutation({
-    ...deleteRecordsMutationOptions,
-    onSuccess: async (result) => {
-      onClose();
-      onDeleted(count);
-      await queryClient.invalidateQueries({
-        queryKey: workspaceKeys.table(tableId),
-        predicate: (query) => query.queryKey[3] !== "record",
-      });
-      for (const id of ids)
-        queryClient.removeQueries({ queryKey: workspaceKeys.record(tableId, id) });
-      toastManager.add({
-        type: "success",
-        title: `${count} ${noun} moved to trash`,
-        actionProps: { children: "Undo", onClick: () => void restore(result.trash) },
-      });
-    },
-  });
+  const deleteRecords = () => {
+    writes.remove(ids);
+    onClose();
+    onDeleted(count);
+    toastManager.add({ type: "success", title: `${count} ${noun} moved to trash` });
+  };
 
   return (
     <AlertDialogPopup>
@@ -77,20 +56,9 @@ function DeleteRecordsPopup({
           {count === 1 ? "it" : "them"}.
         </AlertDialogDescription>
       </AlertDialogHeader>
-      {deleteRecords.error && (
-        <div className="px-6 pb-2">
-          <Alert variant="error">
-            <AlertDescription>{deleteRecords.error.message}</AlertDescription>
-          </Alert>
-        </div>
-      )}
       <AlertDialogFooter>
         <AlertDialogClose render={<Button variant="ghost" />}>Cancel</AlertDialogClose>
-        <Button
-          variant="destructive"
-          loading={deleteRecords.isPending}
-          onClick={() => deleteRecords.mutate({ workspace, tableId, viewId, ids })}
-        >
+        <Button variant="destructive" onClick={deleteRecords}>
           Delete {noun}
         </Button>
       </AlertDialogFooter>

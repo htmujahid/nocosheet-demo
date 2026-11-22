@@ -52,9 +52,7 @@ function ColumnRow<T extends ListColumn>({
       />
       <div className="flex min-w-0 flex-1 flex-col">
         <span className="truncate font-medium text-sm">{column.name}</span>
-        <span className="truncate text-muted-foreground text-xs">
-          {format.label}
-        </span>
+        <span className="truncate text-muted-foreground text-xs">{format.label}</span>
       </div>
       <div className="hidden items-center gap-1 sm:flex">
         {column.id === titleColumnId && <Badge>Title</Badge>}

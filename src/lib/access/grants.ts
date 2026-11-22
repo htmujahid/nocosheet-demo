@@ -7,7 +7,6 @@ export type Action = (typeof ACTIONS)[number];
 export const SCOPES = ["none", "own", "all"] as const;
 export type Scope = (typeof SCOPES)[number];
 
-/** What a grant says: an action, plus a scope for the actions that have one. */
 export const GRANTS = [
   "create",
   "create:none",
@@ -25,7 +24,6 @@ export const GRANTS = [
 ] as const;
 export type Grant = (typeof GRANTS)[number];
 
-/** A grant on one resource (a table, view or form), or on the whole workspace when `resourceId` is null. */
 export type AccessGrant = { resourceId: number | null; grant: Grant };
 
 export const actionOf = (grant: Grant) => grant.split(":")[0] as Action;
@@ -38,46 +36,25 @@ export const isScopedAction = (action: Action): action is (typeof SCOPED_ACTIONS
 
 export function levelOf(
   grants: AccessGrant[],
-  action: Action,
   tableId: number | null,
-  resourceId?: number | null,
+  action: Action,
 ): Scope | undefined {
   const find = (id: number | null) =>
     grants.find((entry) => entry.resourceId === id && actionOf(entry.grant) === action);
-  const entry =
-    (resourceId != null ? find(resourceId) : undefined) ??
-    (tableId !== null ? find(tableId) : undefined) ??
-    find(null);
+  const entry = (tableId !== null ? find(tableId) : undefined) ?? find(null);
   if (!entry) return undefined;
   if (isScopedAction(action)) return entry.grant.split(":")[1] as Scope;
   return entry.grant.endsWith(":none") ? "none" : "all";
 }
 
-export const scopeOf = (
-  grants: AccessGrant[],
-  action: Action,
-  tableId: number | null,
-  resourceId?: number | null,
-) => levelOf(grants, action, tableId, resourceId) ?? "none";
+export const scopeOf = (grants: AccessGrant[], tableId: number | null, action: Action) =>
+  levelOf(grants, tableId, action) ?? "none";
 
 export const scopeFor = (
   access: { admin: boolean; grants: AccessGrant[] },
-  action: Action,
   tableId: number | null,
-  resourceId?: number | null,
-): Scope => (access.admin ? "all" : scopeOf(access.grants, action, tableId, resourceId));
-
-export const FORM_ACTIONS: readonly Action[] = ["create"];
-
-export const VIEW_ACTIONS: readonly Action[] = ["read", "update", "delete", "export"];
-
-export function isViewGrantAllowed(entry: AccessGrant) {
-  return VIEW_ACTIONS.includes(actionOf(entry.grant));
-}
-
-export function isFormGrantAllowed(entry: AccessGrant) {
-  return FORM_ACTIONS.includes(actionOf(entry.grant));
-}
+  action: Action,
+): Scope => (access.admin ? "all" : scopeOf(access.grants, tableId, action));
 
 export const ACTION_LABELS: Record<Action, string> = {
   create: "Create records",

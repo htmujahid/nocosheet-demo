@@ -1,7 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import type { ColumnDef } from "@tanstack/react-table";
 
-import { DataTableColumnHeader } from "@/components/shared/data-table/data-table-column-header";
 import type { dataTableFeatures } from "@/components/shared/data-table/features";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -51,10 +50,9 @@ export const tablesColumns: ColumnDef<typeof dataTableFeatures, TablesRow>[] = [
   },
   {
     id: "name",
-    meta: { label: "Name" },
     enableHiding: false,
     accessorKey: "name",
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Name" />,
+    header: "Name",
     cell: ({ row }) => (
       <div className="flex items-center gap-3">
         <NamedIcon name={row.original.icon} className="size-4 shrink-0 text-muted-foreground" />
@@ -74,9 +72,8 @@ export const tablesColumns: ColumnDef<typeof dataTableFeatures, TablesRow>[] = [
   },
   {
     id: "groupName",
-    meta: { label: "Group" },
     accessorKey: "groupName",
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Group" />,
+    header: "Group",
     cell: ({ row }) =>
       row.original.groupName ? (
         <Badge variant="outline">{row.original.groupName}</Badge>
@@ -85,17 +82,9 @@ export const tablesColumns: ColumnDef<typeof dataTableFeatures, TablesRow>[] = [
       ),
   },
   {
-    id: "columnCount",
-    meta: { label: "Columns" },
-    accessorKey: "columnCount",
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Columns" />,
-    cell: ({ row }) => <span className="tabular-nums">{row.original.columnCount}</span>,
-  },
-  {
     id: "updatedAt",
-    meta: { label: "Updated" },
     accessorKey: "updatedAt",
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Updated" />,
+    header: "Updated",
     cell: ({ row }) => (
       <span
         className="text-muted-foreground"

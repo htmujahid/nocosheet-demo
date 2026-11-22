@@ -1,5 +1,3 @@
-import { Link } from "@tanstack/react-router";
-
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import {
@@ -15,7 +13,6 @@ import { RecordFieldList } from "./record-sheet/record-form";
 import { useCreateRecord } from "./record-sheet/use-create-record";
 import { useRecordScope } from "./use-record-scope";
 
-/** Full-page counterpart of CreateRecordSheet. `cancel` is where Cancel goes; `onCreated` runs after saving. */
 export function CreateRecordPage({
   workspace,
   tableId,
@@ -28,12 +25,7 @@ export function CreateRecordPage({
   onCreated: () => void;
 }) {
   const scope = useRecordScope(workspace, tableId);
-  const { form, create } = useCreateRecord({
-    workspace,
-    tableId,
-    columns: scope.columns,
-    onCreated,
-  });
+  const { form } = useCreateRecord({ tableId, columns: scope.columns, onCreated });
 
   return (
     <Form
@@ -53,17 +45,13 @@ export function CreateRecordPage({
             workspace={workspace}
             tableId={tableId}
             columns={scope.columns}
-            disabled={create.isPending}
-            error={create.error}
           />
         </FramePanel>
         <FrameFooter className="flex items-center justify-end gap-2 px-3 py-3">
           <Button type="button" variant="ghost" render={cancel}>
             Cancel
           </Button>
-          <Button type="submit" loading={create.isPending}>
-            Create record
-          </Button>
+          <Button type="submit">Create record</Button>
         </FrameFooter>
       </Frame>
     </Form>

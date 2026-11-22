@@ -1,15 +1,9 @@
 import { useState } from "react";
 
-import { useQuery } from "@tanstack/react-query";
+import { eq, useLiveQuery } from "@tanstack/react-db";
 import { Link } from "@tanstack/react-router";
 
-import {
-  ChevronDownIcon,
-  LayoutGridIcon,
-  ListIcon,
-  PlusIcon,
-  TableIcon,
-} from "lucide-react";
+import { ChevronDownIcon, LayoutGridIcon, ListIcon, PlusIcon, TableIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -23,10 +17,12 @@ import {
   MenuSeparator,
   MenuTrigger,
 } from "@/components/ui/menu";
-import { recordsCountQueryOptions } from "@/data/workspace/records";
-import { tableQueryOptions } from "@/data/workspace/tables";
-import { viewsQueryOptions } from "@/data/workspace/views";
+import { columnsCollection } from "@/data/workspace/columns";
+import { recordsCollection } from "@/data/workspace/records";
+import { tablesCollection } from "@/data/workspace/tables";
+import { viewsCollection } from "@/data/workspace/views";
 import { useAccess } from "@/hooks/use-access";
+import { useSession } from "@/hooks/use-session";
 import { ALL_VIEW } from "@/lib/views/constants";
 
 import { ViewDialog } from "../views/view-dialog";
@@ -45,19 +41,32 @@ function Stat({ label, value }: { label: string; value: React.ReactNode }) {
 export function TableOverview({ workspace, table }: { workspace: string; table: string }) {
   const tableId = Number(table);
   const access = useAccess();
-  const { data: info } = useQuery(tableQueryOptions(workspace, tableId));
+  const session = useSession();
+  const { data: info } = useLiveQuery((q) =>
+    q
+      .from({ table: tablesCollection })
+      .where(({ table }) => eq(table.id, tableId))
+      .findOne(),
+  );
 
-  const records = access.scope("read", tableId) === "own" ? "My records" : "All records";
-  const { data: counted } = useQuery(recordsCountQueryOptions(workspace, tableId));
+  const records = access.scope(tableId, "read") === "own" ? "My records" : "All records";
+  const { data: stored, isReady: recordsReady } = useLiveQuery((q) =>
+    q.from({ record: recordsCollection(tableId) }),
+  );
 
-  const recordsLabel = counted
-    ? `${counted.count.toLocaleString()}${counted.capped ? "+" : ""}`
-    : "—";
-  const { data: views = [] } = useQuery(viewsQueryOptions(workspace, tableId));
+  const readOwner = access.scope(tableId, "read") === "own" ? session?.user.id : undefined;
+  const visible = readOwner ? stored.filter((record) => record.created_by === readOwner) : stored;
+  const recordsLabel = recordsReady ? visible.length.toLocaleString() : "—";
+  const { data: views } = useLiveQuery((q) =>
+    q.from({ view: viewsCollection(tableId) }).orderBy(({ view }) => view.position),
+  );
   const [creating, setCreating] = useState(false);
-  const columnCount = info?.columns?.length;
+  const { data: columns, isReady: columnsReady } = useLiveQuery((q) =>
+    q.from({ column: columnsCollection(tableId) }),
+  );
+  const columnCount = columnsReady ? columns.length : undefined;
   const titleColumn =
-    info?.columns?.find((column) => column.id === info.titleColumnId)?.columnName ?? null;
+    columns.find((column) => column.id === info?.titleColumnId)?.columnName ?? null;
 
   return (
     <div className="flex flex-col gap-6 pt-2">

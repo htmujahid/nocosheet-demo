@@ -1,14 +1,11 @@
 import { useState } from "react";
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-
 import { toastManager } from "@/components/ui/toast";
-import { workspaceKeys } from "@/data/workspace/keys";
-import { createRecordMutationOptions } from "@/data/workspace/records";
 
 import { cellMode } from "./cells";
 import type { ViewerColumn } from "./columns";
 import type { ViewerRow } from "./records-grid-columns";
+import { useRecordWrites } from "./use-record-writes";
 
 export const DRAFT_ID = -1;
 
@@ -32,38 +29,21 @@ const payloadOf = (column: ViewerColumn, value: unknown) => {
 };
 
 export function useDraftRow({
-  workspace,
   tableId,
   columns,
 }: {
-  workspace: string;
   tableId: number;
   columns: ViewerColumn[];
 }): DraftRow {
-  const queryClient = useQueryClient();
+  const writes = useRecordWrites(tableId);
   const [row, setRow] = useState<ViewerRow | null>(null);
-
-  const create = useMutation({
-    ...createRecordMutationOptions,
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: workspaceKeys.table(tableId) });
-      toastManager.add({ type: "success", title: "Record created" });
-      setRow(null);
-    },
-    onError: (error) =>
-      toastManager.add({
-        type: "error",
-        title: "Couldn't create the record",
-        description: error instanceof Error ? error.message : undefined,
-      }),
-  });
 
   const open = (values: Record<string, unknown> = {}) =>
     setRow((current) => current ?? { ...values, id: DRAFT_ID });
 
   return {
     row,
-    saving: create.isPending,
+    saving: false,
     new: () => open(),
     duplicate: (source) => {
       const values: Record<string, unknown> = {};
@@ -93,7 +73,9 @@ export function useDraftRow({
           title: "Fill in the required columns",
           description: missing.join(", "),
         });
-      create.mutate({ workspace, tableId, values });
+      writes.create(values);
+      toastManager.add({ type: "success", title: "Record created" });
+      setRow(null);
     },
   };
 }

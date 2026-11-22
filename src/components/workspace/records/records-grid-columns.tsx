@@ -2,7 +2,14 @@ import { useMemo } from "react";
 
 import type { ReactTable } from "@tanstack/react-table";
 
-import { ArrowDownIcon, ArrowUpIcon, CheckIcon, HashIcon, Maximize2Icon, XIcon } from "lucide-react";
+import {
+  ArrowDownIcon,
+  ArrowUpIcon,
+  CheckIcon,
+  HashIcon,
+  Maximize2Icon,
+  XIcon,
+} from "lucide-react";
 import type { Column, RenderEditCellContentProps } from "react-data-grid";
 
 import type { dataTableFeatures } from "@/components/shared/data-table/features";

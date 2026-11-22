@@ -1,7 +1,6 @@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 
-/** Table-level flags, rendered as checkboxes like the column flags in the column dialog. */
 export const TABLE_FLAGS = [
   { name: "isAudit", label: "Auditable" },
   { name: "isHidden", label: "Hidden" },

@@ -1,8 +1,9 @@
 import { useMemo, useState } from "react";
 
+import { eq, useDbClient, useLiveQuery, useLiveSuspenseQuery } from "@tanstack/react-db";
 import { useForm } from "@tanstack/react-form";
-import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
+import { useMutation } from "@tanstack/react-query";
+import { notFound } from "@tanstack/react-router";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -32,12 +33,12 @@ import { Form } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { IconPicker } from "@/components/workspace/tables/icon-picker";
-import { workspaceKeys } from "@/data/workspace/keys";
-import { tableQueryOptions } from "@/data/workspace/tables";
+import { columnsCollection } from "@/data/workspace/columns";
+import { tablesCollection } from "@/data/workspace/tables";
 import {
   createViewMutationOptions,
   updateViewMutationOptions,
-  viewsQueryOptions,
+  viewsCollection,
 } from "@/data/workspace/views";
 import type { FilterCondition } from "@/lib/records/filters";
 import { formSchema } from "@/lib/tables/form";
@@ -116,17 +117,29 @@ function ViewForm({
   onSaved: () => void;
 }) {
   const [error, setError] = useState<string | null>(null);
-  const queryClient = useQueryClient();
-  const navigate = useNavigate();
-  const { data: table } = useSuspenseQuery(tableQueryOptions(workspace, tableId));
-  const { data: views } = useQuery(viewsQueryOptions(workspace, tableId));
+  const dbClient = useDbClient();
+  const viewRows = dbClient.collection(viewsCollection(tableId));
+  const { data: table } = useLiveSuspenseQuery((q) =>
+    q
+      .from({ table: tablesCollection })
+      .where(({ table }) => eq(table.id, tableId))
+      .findOne(),
+  );
+  if (!table) throw notFound();
+  const { data: tableColumns } = useLiveSuspenseQuery((q) =>
+    q.from({ column: columnsCollection(tableId) }).orderBy(({ column }) => column.position),
+  );
+  const { data: views } = useLiveQuery((q) => q.from({ view: viewsCollection(tableId) }));
   const createView = useMutation(createViewMutationOptions);
   const updateView = useMutation(updateViewMutationOptions);
 
-  const columns = useMemo(() => buildViewerColumns(table), [table]);
+  const columns = useMemo(
+    () => buildViewerColumns({ titleColumnId: table.titleColumnId, columns: tableColumns }),
+    [table.titleColumnId, tableColumns],
+  );
   const userColumns = useMemo(
-    () => columns.filter((column) => table.columns.some((item) => item.columnName === column.key)),
-    [columns, table],
+    () => columns.filter((column) => tableColumns.some((item) => item.columnName === column.key)),
+    [columns, tableColumns],
   );
   const items = useMemo(
     () => userColumns.map((column) => ({ value: column.key, label: column.name })),
@@ -159,7 +172,7 @@ function ViewForm({
       const values: ViewInput = { ...value, name: value.name.trim() };
       try {
         if (view) {
-          await updateView.mutateAsync({
+          const updated = await updateView.mutateAsync({
             workspace,
             tableId,
             viewId: view.id,
@@ -167,17 +180,11 @@ function ViewForm({
             name: values.name,
             description: values.description,
           });
+          viewRows.utils.writeUpsert(updated);
         } else {
           const created = await createView.mutateAsync({ workspace, tableId, ...values });
-          await queryClient.invalidateQueries({ queryKey: workspaceKeys.table(tableId) });
-          onSaved();
-          void navigate({
-            to: "/workspaces/$workspace/tables/$table/views/$view",
-            params: { workspace, table: String(tableId), view: String(created.id) },
-          });
-          return;
+          viewRows.utils.writeUpsert(created);
         }
-        await queryClient.invalidateQueries({ queryKey: workspaceKeys.table(tableId) });
         onSaved();
       } catch (failure) {
         setError(failure instanceof Error ? failure.message : "Something went wrong");

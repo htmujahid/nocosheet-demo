@@ -15,7 +15,7 @@ export type TemplateSummary = {
   description: string;
   icon: string | null;
   tags: string[];
-  tables: { name: string; icon: string | null; columns: number; views: number; forms: number; rows: number }[];
+  tables: { name: string; icon: string | null; columns: number; views: number; rows: number }[];
 };
 
 export const summarize = (template: Template): TemplateSummary => ({
@@ -29,7 +29,6 @@ export const summarize = (template: Template): TemplateSummary => ({
     icon: table.icon,
     columns: table.columns.length,
     views: table.views?.length ?? 0,
-    forms: table.forms?.length ?? 0,
     rows: table.rows?.length ?? 0,
   })),
 });

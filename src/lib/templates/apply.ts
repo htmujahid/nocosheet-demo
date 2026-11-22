@@ -1,12 +1,12 @@
 import { columnTable, tableTable } from "@db/schema";
 import { db, eq, isNull, sql } from "void/db";
 
-import { buildFormStatements } from "../forms/repository";
 import { buildRecordInserts } from "../records/repository";
 import {
   buildColumnInsert,
   buildTableStatements,
   dropTables,
+  findTables,
   type Table,
 } from "../tables/repository";
 import { buildViewStatements } from "../views/repository";
@@ -37,7 +37,10 @@ export async function applyTemplate(
 ) {
   const taken = new Set(
     (
-      await db.select({ name: tableTable.name }).from(tableTable).where(isNull(tableTable.deletedAt))
+      await db
+        .select({ name: tableTable.name })
+        .from(tableTable)
+        .where(isNull(tableTable.deletedAt))
     ).map((row) => row.name.toLowerCase()),
   );
 
@@ -93,7 +96,6 @@ export async function applyTemplate(
 
       for (const view of table.views)
         groups.push([...buildViewStatements(row, table.columns, view, userId)]);
-      for (const form of table.forms) groups.push([...buildFormStatements(row, form, userId)]);
     });
 
     for (const index of plan.rowOrder) {
@@ -117,5 +119,6 @@ export async function applyTemplate(
     throw error;
   }
 
-  return { tables: created.map(({ id, name }) => ({ id, name })) };
+  const rows = await findTables(created.map(({ id }) => id));
+  return { tables: created.flatMap(({ id }) => rows.filter((row) => row.id === id)) };
 }

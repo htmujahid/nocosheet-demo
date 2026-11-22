@@ -34,7 +34,7 @@ import {
   CardHeader,
   CardPanel,
   CardTitle,
-} from "@/components/ui/card"
+} from "@/components/ui/card";
 ```
 
 `CardPanel` is also exported as `CardContent`.

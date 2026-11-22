@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useLiveSuspenseQuery } from "@tanstack/react-db";
 import { Link } from "@tanstack/react-router";
 
 import { CheckIcon, CopyIcon, SearchIcon } from "lucide-react";
@@ -16,7 +16,7 @@ import {
   CardFrameTitle,
 } from "@/components/ui/card";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
-import { membersQueryOptions } from "@/data/workspace/members";
+import { membersCollection } from "@/data/workspace/members";
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
 import { useWorkspace } from "@/hooks/use-workspace";
 import { formatRelativeTime } from "@/lib/format-relative-time";
@@ -43,7 +43,9 @@ function CopyIdButton({ id }: { id: string }) {
 export function MembersList({ workspace }: { workspace: string }) {
   const { isAdmin } = useWorkspace();
   const [query, setQuery] = useState("");
-  const { data: members } = useSuspenseQuery(membersQueryOptions);
+  const { data: members } = useLiveSuspenseQuery({
+    query: (q) => q.from({ member: membersCollection }).orderBy(({ member }) => member.name),
+  });
 
   const needle = query.trim().toLowerCase();
   const visible = needle

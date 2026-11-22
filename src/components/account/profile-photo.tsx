@@ -44,7 +44,7 @@ export function ProfilePhoto({ user }: ProfilePhotoProps) {
   const busy = uploadAvatar.isPending || removeAvatar.isPending || updateUser.isPending;
 
   return (
-    <SettingsRow title="Profile Photo" description="Shown in the header and across your workspace.">
+    <SettingsRow title="Profile Photo" description="Shown in the header and across the app.">
       <div className="flex items-center gap-3">
         <Avatar className="size-10">
           {user.image && <AvatarImage src={user.image} alt="" />}

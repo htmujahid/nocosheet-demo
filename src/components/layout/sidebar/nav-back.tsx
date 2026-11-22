@@ -10,7 +10,6 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 
-/** Pinned to the bottom of the settings sidebar, where the app sidebar has its Settings link. */
 export function NavBack({ workspace }: { workspace: string }) {
   return (
     <SidebarGroup className="mt-auto">

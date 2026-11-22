@@ -21,7 +21,7 @@ function CreateForm({
   columns: ViewerColumn[];
   onCreated: () => void;
 }) {
-  const { form, create } = useCreateRecord({ workspace, tableId, columns, onCreated });
+  const { form } = useCreateRecord({ tableId, columns, onCreated });
 
   return (
     <RecordForm
@@ -30,13 +30,10 @@ function CreateForm({
       tableId={tableId}
       tableName={tableName}
       columns={columns}
-      error={create.error}
     >
       <SheetFooter>
         <SheetClose render={<Button type="button" variant="ghost" />}>Cancel</SheetClose>
-        <Button type="submit" loading={create.isPending}>
-          Create record
-        </Button>
+        <Button type="submit">Create record</Button>
       </SheetFooter>
     </RecordForm>
   );

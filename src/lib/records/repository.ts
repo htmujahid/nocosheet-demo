@@ -2,242 +2,107 @@ import { columnTable, tableTable } from "@db/schema";
 import { and, db, eq, inArray, isNull, sql } from "void/db";
 import { integer, sqliteTable, text } from "void/schema-d1";
 
-import { NOCASE_FORMATS, SEARCHABLE_FORMATS } from "../tables/formats";
+import {
+  buildCreateIndex,
+  buildDropIndex,
+  buildSystemIndexes,
+  indexKind,
+  indexName,
+} from "../tables/ddl";
+import type { ColumnFormat } from "../tables/formats";
 import { physicalTableName, quoteIdent } from "../tables/naming";
-import type { Column, Table } from "../tables/repository";
-import { conditionText } from "./condition";
-import { decodeCursor, encodeCursor, type RecordCursor } from "./cursor";
-import { type FilterCondition, filterKind } from "./filters";
-import type { TypedRecordsQuery } from "./query";
-import { shapeRecord } from "./shape";
-import { SYSTEM_SORT_KEYS } from "./sort-param";
+import { type Column, findTable, listColumns, type Table } from "../tables/repository";
+import type { TrashQuery } from "../trash/query";
 import type { ParsedValue } from "./values";
 
 type Fragment = ReturnType<typeof sql>;
+export type Row = Record<string, unknown>;
 
-const RECORD_OPTIONS_LIMIT = 10;
-const EXPORT_LIMIT = 10_000;
+const CHUNK = 50;
+const NOW = sql`cast(unixepoch('subsec') * 1000 as integer)`;
 
 const raw = (text: string) => sql.raw(text);
-const col = (name: string) => raw(`t.${quoteIdent(name)}`);
-const like = (value: string) => `%${value.replaceAll(/[\\%_]/g, "\\$&")}%`;
-
-async function recordSource(workspace: string, table: Table, columns: Column[]) {
-  const targetIds = columns
-    .filter((column) => column.format === "relation")
-    .map((column) => Number((column.options as { tableId?: number }).tableId));
-  const targets = new Map<number, { physicalName: string; label: string }>();
-  if (targetIds.length) {
-    const rows = await db
-      .select({ id: tableTable.id, tableName: tableTable.tableName, title: columnTable.columnName })
-      .from(tableTable)
-      .leftJoin(columnTable, eq(columnTable.id, tableTable.titleColumnId))
-      .where(inArray(tableTable.id, targetIds));
-    for (const row of rows)
-      targets.set(row.id, {
-        physicalName: physicalTableName(workspace, row.tableName),
-        label: row.title ?? "id",
-      });
-  }
-
-  const selects = ['t."id" as "id"'];
-  selects.push('t."created_at" as "created_at"', 't."updated_at" as "updated_at"');
-  for (const name of ["created_by", "updated_by"])
-    selects.push(
-      `t."${name}" as "${name}"`,
-      `(select u."name" from "user" u where u."id" = t."${name}") as "${name}__label"`,
-    );
-  for (const column of columns) {
-    selects.push(`t.${quoteIdent(column.columnName)} as ${quoteIdent(column.columnName)}`);
-    if (column.format === "relation") {
-      const target = targets.get(Number((column.options as { tableId?: number }).tableId));
-      if (target) {
-        selects.push(
-          `(select cast(r.${quoteIdent(target.label)} as text) from ${quoteIdent(target.physicalName)} r where r."id" = t.${quoteIdent(column.columnName)}) as ${quoteIdent(`${column.columnName}__label`)}`,
-        );
-      }
-    }
-  }
-
-  return {
-    select: raw(selects.join(", ")),
-    from: sql`${raw(quoteIdent(physicalTableName(workspace, table.tableName)))} t`,
-  };
-}
-
-function conditionsWhere(columns: Column[], filters: FilterCondition[], strict = false) {
-  const byName = new Map(columns.map((column) => [column.columnName, column]));
-  const params: (string | number)[] = [];
-  const bind = (value: string | number) => {
-    params.push(value);
-    return "?";
-  };
-
-  const conditions: string[] = [];
-  for (const condition of filters) {
-    const column = byName.get(condition.column);
-    const kind = column ? filterKind(column.format) : null;
-    if (column && kind) conditions.push(conditionText(column, kind, condition, bind));
-    else if (strict) conditions.push("1 = 0");
-  }
-  if (!conditions.length) return undefined;
-
-  const parts = `(${conditions.join(" and ")})`.split("?");
-  return sql.join(
-    parts.flatMap((part, index) =>
-      index < params.length ? [raw(part), sql`${params[index]}`] : [raw(part)],
-    ),
-    raw(""),
-  );
-}
-
-export const viewScope = (columns: Column[], filters: FilterCondition[]) =>
-  conditionsWhere(columns, filters, true);
-
-export type ViewScope = ReturnType<typeof viewScope>;
-
-function filterWhere(
-  columns: Column[],
-  query: TypedRecordsQuery,
-  ownerId?: string,
-  scope?: ViewScope,
-) {
-  const where: Fragment[] = ownerId ? [sql`t."created_by" = ${ownerId}`] : [];
-  if (scope) where.push(scope);
-
-  const filtered = conditionsWhere(columns, query.filters);
-  if (filtered) where.push(filtered);
-
-  if (query.q) {
-    const searchable = columns.filter(
-      (column) => column.isSearchable && SEARCHABLE_FORMATS.includes(column.format as never),
-    );
-    if (searchable.length)
-      where.push(
-        sql`(${sql.join(
-          searchable.map(
-            (column) => sql`${col(column.columnName)} like ${like(query.q)} escape '\\'`,
-          ),
-          sql` or `,
-        )})`,
-      );
-  }
-
-  return where.length ? sql`${sql.join(where, sql` and `)}` : sql`1 = 1`;
-}
-
-type SortSpec = { name: string; nocase: boolean; direction: "asc" | "desc" };
-
-function sortSpec(columns: Column[], query: TypedRecordsQuery): SortSpec {
-  const fallback: SortSpec = { name: "id", nocase: false, direction: "asc" };
-  if (!query.sort) return fallback;
-  const direction = query.order === "desc" ? "desc" : "asc";
-
-  if (SYSTEM_SORT_KEYS.includes(query.sort)) return { name: query.sort, nocase: false, direction };
-
-  const column = columns.find((item) => item.columnName === query.sort);
-  if (!column) return fallback;
-  return {
-    name: column.columnName,
-    nocase: NOCASE_FORMATS.includes(column.format as never),
-    direction,
-  };
-}
-
-const sortTarget = (spec: SortSpec) =>
-  raw(`t.${quoteIdent(spec.name)}${spec.nocase ? " collate nocase" : ""}`);
-
-type Key = { expr: Fragment; desc: boolean };
-
-function sortKeys(spec: SortSpec): Key[] {
-  const desc = spec.direction === "desc";
-  const id = { expr: sql`t."id"`, desc };
-  return spec.name === "id" ? [id] : [{ expr: sortTarget(spec), desc }, id];
-}
-
-const orderOf = (keys: Key[]) =>
+const physical = (workspace: string, table: Table) =>
+  raw(quoteIdent(physicalTableName(workspace, table.tableName)));
+const idList = (ids: unknown[]) =>
   sql.join(
-    keys.map((key) => sql`${key.expr} ${raw(key.desc ? "desc" : "asc")}`),
+    ids.map((id) => sql`${id}`),
     sql`, `,
   );
+const chunks = <T>(items: T[], size: number) =>
+  Array.from({ length: Math.ceil(items.length / size) }, (_, index) =>
+    items.slice(index * size, (index + 1) * size),
+  );
 
-function seekSegments(spec: SortSpec, cursor: RecordCursor): Fragment[] {
-  const ascending = spec.direction === "asc";
-  const idOp = raw(ascending ? ">" : "<");
-  if (spec.name === "id") return [sql`t."id" ${idOp} ${cursor[0]}`];
+const upgraded = new Set<string>();
 
-  const [value, id] = cursor;
-  const bare = col(spec.name);
-
-  if (value === null)
-    return ascending
-      ? [sql`${bare} is null and t."id" > ${id}`, sql`${bare} is not null`]
-      : [sql`${bare} is null and t."id" < ${id}`];
-
-  const target = sortTarget(spec);
-  const inclusive = raw(ascending ? ">=" : "<=");
-  const strict = raw(ascending ? ">" : "<");
-  const after = sql`${target} ${inclusive} ${value} and (${target} ${strict} ${value} or (${target} = ${value} and t."id" ${idOp} ${id}))`;
-  return ascending ? [after] : [after, sql`${bare} is null`];
+export async function ensureRecordSchema(workspace: string, table: Table, columns?: Column[]) {
+  const name = physicalTableName(workspace, table.tableName);
+  if (upgraded.has(name)) return;
+  const present = await db.all<{ name: string }>(
+    sql`select "name" from pragma_table_info(${name}) where "name" = 'deleted_at'`,
+  );
+  if (present.length === 0) {
+    const quoted = quoteIdent(name);
+    await db.run(sql.raw(`ALTER TABLE ${quoted} ADD COLUMN "deleted_at" INTEGER`));
+    await db.run(
+      sql.raw(
+        `ALTER TABLE ${quoted} ADD COLUMN "deleted_by" TEXT REFERENCES "user" ("id") ON DELETE SET NULL`,
+      ),
+    );
+    for (const statement of buildSystemIndexes(name)) await db.run(sql.raw(statement));
+    for (const column of columns ?? (await listColumns(table.id))) {
+      if (indexKind(column) !== "uq") continue;
+      const index = indexName(workspace, column.columnName, "uq");
+      await db.run(sql.raw(buildDropIndex(index)));
+      await db.run(
+        sql.raw(
+          buildCreateIndex(index, name, column.columnName, "uq", column.format as ColumnFormat),
+        ),
+      );
+    }
+  }
+  upgraded.add(name);
 }
 
-export async function findRecords(
+export async function findRecordTable(workspace: string, tableId: number) {
+  const table = await findTable(tableId);
+  if (table) await ensureRecordSchema(workspace, table);
+  return table;
+}
+
+export const SYSTEM_COLUMNS = ["id", "created_at", "updated_at", "created_by", "updated_by"];
+
+export const isSyncedColumn = (column: Column) => column.format !== "binary";
+
+const selectList = (columns: Column[], prefix = "") =>
+  raw(
+    [...SYSTEM_COLUMNS, ...columns.filter(isSyncedColumn).map((column) => column.columnName)]
+      .map((name) => `${prefix}${quoteIdent(name)}`)
+      .join(", "),
+  );
+
+const labelOf = (name: string) =>
+  `(select u."name" from "user" u where u."id" = "${name}") as "${name}_label"`;
+
+const syncSelectList = raw(`*, ${labelOf("created_by")}, ${labelOf("updated_by")}`);
+
+export async function serverClock() {
+  const [row] = await db.all<{ now: number }>(sql`select ${NOW} as now`);
+  return Number(row?.now ?? Date.now());
+}
+
+export async function findSyncRows(
   workspace: string,
   table: Table,
-  columns: Column[],
-  query: TypedRecordsQuery,
-  ownerId?: string,
-  scope?: ViewScope,
+  options: { since?: number; ownerId?: string },
 ) {
-  const { select, from } = await recordSource(workspace, table, columns);
-  const condition = filterWhere(columns, query, ownerId, scope);
-  const forward = sortSpec(columns, query);
-  const backward = query.dir === "prev";
-  const spec: SortSpec = backward
-    ? { ...forward, direction: forward.direction === "asc" ? "desc" : "asc" }
-    : forward;
-  const cursor = query.cursor ? decodeCursor(query.cursor) : null;
-  if (backward && !cursor) throw new Error("The page cursor is invalid.");
-  const limit = query.pageSize + 1;
-
-  const keys = sortKeys(spec);
-  if (cursor && cursor.length !== keys.length) throw new Error("The page cursor is invalid.");
-  const order = orderOf(keys);
-  const segments = cursor ? seekSegments(spec, cursor) : [sql`1 = 1`];
-
-  const found: Record<string, unknown>[] = [];
-  for (const segment of segments) {
-    found.push(
-      ...(await db.all<Record<string, unknown>>(
-        sql`select ${select} from ${from} where ${condition} and ${segment} order by ${order} limit ${limit - found.length}`,
-      )),
-    );
-    if (found.length >= limit) break;
-  }
-
-  const keyOf = (row: Record<string, unknown>) =>
-    encodeCursor(
-      spec.name === "id"
-        ? [row.id as number]
-        : [(row[spec.name] as string | number | null) ?? null, row.id as number],
-    );
-
-  const hasMore = found.length > query.pageSize;
-  const page = found.slice(0, query.pageSize);
-  if (backward) page.reverse();
-
-  const first = page[0];
-  const last = page.at(-1);
-  const startCursor = backward ? (hasMore ? keyOf(found[query.pageSize]) : null) : query.cursor;
-  const nextCursor = last && (backward || hasMore) ? keyOf(last) : null;
-  const prevCursor = first && startCursor ? keyOf(first) : null;
-
-  return {
-    nextCursor,
-    prevCursor,
-    startCursor: startCursor ?? null,
-    rows: page.map((row) => shapeRecord(row, columns)),
-  };
+  const owner = options.ownerId ? sql`and "created_by" = ${options.ownerId}` : sql``;
+  const live =
+    options.since === undefined ? sql`"deleted_at" is null` : sql`"updated_at" >= ${options.since}`;
+  return db.all<Row>(
+    sql`select ${syncSelectList} from ${physical(workspace, table)} where ${live} ${owner} order by "id"`,
+  );
 }
 
 export async function findRecord(
@@ -246,72 +111,27 @@ export async function findRecord(
   columns: Column[],
   recordId: number,
   ownerId?: string,
-  scope?: ViewScope,
 ) {
-  const { select, from } = await recordSource(workspace, table, columns);
-  const [row] = await db.all<Record<string, unknown>>(
-    sql`select ${select} from ${from} where t."id" = ${recordId} ${ownerId ? sql`and t."created_by" = ${ownerId}` : sql``} ${scope ? sql`and ${scope}` : sql``} limit 1`,
+  const [row] = await db.all<Row>(
+    sql`select ${selectList(columns)} from ${physical(workspace, table)} where "id" = ${recordId} and "deleted_at" is null ${ownerId ? sql`and "created_by" = ${ownerId}` : sql``} limit 1`,
   );
-  return row ? shapeRecord(row, columns) : undefined;
+  return row;
 }
 
-function exportWhere(ownerId?: string, scope?: ViewScope) {
-  const where: Fragment[] = ownerId ? [sql`t."created_by" = ${ownerId}`] : [];
-  if (scope) where.push(scope);
-  return where.length ? sql`where ${sql.join(where, sql` and `)}` : sql``;
-}
-
-export async function findExportRecords(
+export async function findRecordsByIds(
   workspace: string,
   table: Table,
   columns: Column[],
-  ownerId?: string,
-  scope?: ViewScope,
+  ids: number[],
 ) {
-  const exported = columns.filter((column) => column.format !== "binary");
-  const names = [
-    "id",
-    "created_at",
-    "updated_at",
-    "created_by",
-    "updated_by",
-    ...exported.map((column) => column.columnName),
-  ];
-
-  const rows = await db.all<Record<string, unknown>>(
-    sql`select ${raw(names.map((name) => `t.${quoteIdent(name)} as ${quoteIdent(name)}`).join(", "))} from ${raw(quoteIdent(physicalTableName(workspace, table.tableName)))} t ${exportWhere(ownerId, scope)} order by t."id" limit ${EXPORT_LIMIT + 1}`,
-  );
-
-  return {
-    rows: rows.slice(0, EXPORT_LIMIT).map((row) => shapeRecord(row, exported)),
-    truncated: rows.length > EXPORT_LIMIT,
-  };
-}
-
-export async function findRecordOptions(
-  workspace: string,
-  table: Table,
-  term: string,
-  ownerId?: string,
-) {
-  const [title] = table.titleColumnId
-    ? await db
-        .select({ columnName: columnTable.columnName })
-        .from(columnTable)
-        .where(and(eq(columnTable.id, table.titleColumnId), isNull(columnTable.deletedAt)))
-        .limit(1)
-    : [];
-  const label = col(title?.columnName ?? "id");
-  const source = raw(`${quoteIdent(physicalTableName(workspace, table.tableName))} t`);
-
-  const conditions: Fragment[] = [];
-  if (ownerId) conditions.push(sql`t."created_by" = ${ownerId}`);
-  if (term) conditions.push(sql`cast(${label} as text) like ${like(term)} escape '\\'`);
-  const where = conditions.length ? sql`where ${sql.join(conditions, sql` and `)}` : sql``;
-
-  return db.all<{ id: number; label: string | null }>(
-    sql`select t."id" as "id", ${title ? sql`cast(${label} as text)` : sql`null`} as "label" from ${source} ${where} order by t."id" limit ${RECORD_OPTIONS_LIMIT}`,
-  );
+  const rows: Row[] = [];
+  for (const part of chunks(ids, CHUNK))
+    rows.push(
+      ...(await db.all<Row>(
+        sql`select ${selectList(columns)}, "deleted_at" from ${physical(workspace, table)} where "id" in (${idList(part)})`,
+      )),
+    );
+  return rows;
 }
 
 export type BrokenLink = { column: Column; reason: "table" | "record" };
@@ -323,7 +143,7 @@ export async function findBrokenLink(
   for (const { column, value } of parsed) {
     if (column.format !== "relation" || value === null) continue;
     const [target] = await db
-      .select({ tableName: tableTable.tableName })
+      .select()
       .from(tableTable)
       .where(
         and(
@@ -333,8 +153,9 @@ export async function findBrokenLink(
       )
       .limit(1);
     if (!target) return { column, reason: "table" };
+    await ensureRecordSchema(workspace, target);
     const [found] = await db.all<{ found: number }>(
-      sql`select 1 as found from ${raw(quoteIdent(physicalTableName(workspace, target.tableName)))} where "id" = ${value} limit 1`,
+      sql`select 1 as found from ${raw(quoteIdent(physicalTableName(workspace, target.tableName)))} where "id" = ${value} and "deleted_at" is null limit 1`,
     );
     if (!found) return { column, reason: "record" };
   }
@@ -349,21 +170,17 @@ export async function findExistingRecordIds(
   const existing = new Set<number>();
   if (!ids.length) return existing;
   const [target] = await db
-    .select({ tableName: tableTable.tableName })
+    .select()
     .from(tableTable)
     .where(and(eq(tableTable.id, targetTableId), isNull(tableTable.deletedAt)))
     .limit(1);
   if (!target) return existing;
+  await ensureRecordSchema(workspace, target);
 
   const source = raw(quoteIdent(physicalTableName(workspace, target.tableName)));
-  const unique = [...new Set(ids)];
-  for (let start = 0; start < unique.length; start += 50) {
-    const part = unique.slice(start, start + 50);
+  for (const part of chunks([...new Set(ids)], CHUNK)) {
     const rows = await db.all<{ id: number }>(
-      sql`select "id" as "id" from ${source} where "id" in (${sql.join(
-        part.map((id) => sql`${id}`),
-        sql`, `,
-      )})`,
+      sql`select "id" as "id" from ${source} where "id" in (${idList(part)}) and "deleted_at" is null`,
     );
     for (const row of rows) existing.add(row.id);
   }
@@ -402,30 +219,6 @@ function buildInsert(
   return { target, query: db.insert(target).values(row) };
 }
 
-export function insertRecord(
-  workspace: string,
-  table: Table,
-  parsed: ParsedValue<Column>[],
-  system: Record<string, unknown>,
-) {
-  const { target, query } = buildInsert(workspace, table, parsed, system);
-  return query.returning({ id: target.id });
-}
-
-export async function createRecordRow(
-  workspace: string,
-  table: Table,
-  parsed: ParsedValue<Column>[],
-  userId: string,
-) {
-  const { query } = buildInsert(workspace, table, parsed, {
-    created_by: userId,
-    updated_by: userId,
-  });
-  const [created] = (await query.returning()) as (Record<string, unknown> & { id: number })[];
-  return created;
-}
-
 export function buildRecordInserts(
   workspace: string,
   table: Table,
@@ -452,11 +245,27 @@ export async function createRecordRows(
   rows: ParsedValue<Column>[][],
   userId: string,
 ) {
-  if (!rows.length) return [];
   const results = (await db.batch(
     buildRecordInserts(workspace, table, rows, userId) as unknown as Parameters<typeof db.batch>[0],
   )) as unknown as { id: number }[][];
-  return results.flatMap((inserted) => inserted.map((row) => row.id));
+  return results.flat().map((row) => Number(row.id));
+}
+
+export async function findRecordsForResponse(
+  workspace: string,
+  table: Table,
+  ids: number[],
+  options: { deleted?: boolean } = {},
+) {
+  const state = options.deleted ? sql`"deleted_at" is not null` : sql`"deleted_at" is null`;
+  const rows: Row[] = [];
+  for (let index = 0; index < ids.length; index += CHUNK)
+    rows.push(
+      ...(await db.all<Row>(
+        sql`select ${syncSelectList} from ${physical(workspace, table)} where ${state} and "id" in (${idList(ids.slice(index, index + CHUNK))}) order by "id"`,
+      )),
+    );
+  return rows;
 }
 
 export async function updateRecordRow(
@@ -466,20 +275,16 @@ export async function updateRecordRow(
   parsed: ParsedValue<Column>[],
   userId: string,
   ownerId?: string,
-  scope?: ViewScope,
 ) {
   const assignments = parsed.map(
     ({ column, value }) => sql`${raw(quoteIdent(column.columnName))} = ${value}`,
   );
-  assignments.push(
-    sql`"updated_at" = cast(unixepoch('subsec') * 1000 as integer)`,
-    sql`"updated_by" = ${userId}`,
-  );
+  assignments.push(sql`"updated_at" = ${NOW}`, sql`"updated_by" = ${userId}`);
 
   const updated = await db.all(
-    sql`update ${raw(quoteIdent(physicalTableName(workspace, table.tableName)))} set ${sql.join(assignments, sql`, `)} where "id" = ${recordId} ${ownerId ? sql`and "created_by" = ${ownerId}` : sql``} ${scope ? sql`and "id" in (select t."id" from ${raw(quoteIdent(physicalTableName(workspace, table.tableName)))} t where ${scope})` : sql``} returning *`,
+    sql`update ${physical(workspace, table)} set ${sql.join(assignments, sql`, `)} where "id" = ${recordId} and "deleted_at" is null ${ownerId ? sql`and "created_by" = ${ownerId}` : sql``} returning *`,
   );
-  return updated[0] as Record<string, unknown> | undefined;
+  return updated[0] as Row | undefined;
 }
 
 export async function countRecordsUpTo(
@@ -488,32 +293,11 @@ export async function countRecordsUpTo(
   limit: number,
   ownerId?: string,
 ) {
-  const owner = ownerId ? sql`where "created_by" = ${ownerId}` : sql``;
+  const owner = ownerId ? sql`and "created_by" = ${ownerId}` : sql``;
   const [row] = await db.all<{ n: number }>(
-    sql`select count(*) as n from (select 1 from ${raw(quoteIdent(physicalTableName(workspace, table.tableName)))} ${owner} limit ${limit})`,
+    sql`select count(*) as n from (select 1 from ${physical(workspace, table)} where "deleted_at" is null ${owner} limit ${limit})`,
   );
   return Number(row?.n ?? 0);
-}
-
-export async function countRecordsInView(
-  workspace: string,
-  table: Table,
-  scope: NonNullable<ViewScope>,
-  ids: number[],
-) {
-  const unique = [...new Set(ids)];
-  let found = 0;
-  for (let start = 0; start < unique.length; start += 50) {
-    const part = unique.slice(start, start + 50);
-    const [row] = await db.all<{ n: number }>(
-      sql`select count(*) as n from ${raw(quoteIdent(physicalTableName(workspace, table.tableName)))} t where t."id" in (${sql.join(
-        part.map((id) => sql`${id}`),
-        sql`, `,
-      )}) and ${scope}`,
-    );
-    found += Number(row?.n ?? 0);
-  }
-  return found;
 }
 
 export async function countOwnedRecords(
@@ -522,17 +306,233 @@ export async function countOwnedRecords(
   ids: number[],
   ownerId: string,
 ) {
-  const unique = [...new Set(ids)];
   let owned = 0;
-  for (let start = 0; start < unique.length; start += 50) {
-    const part = unique.slice(start, start + 50);
+  for (const part of chunks([...new Set(ids)], CHUNK)) {
     const [row] = await db.all<{ n: number }>(
-      sql`select count(*) as n from ${raw(quoteIdent(physicalTableName(workspace, table.tableName)))} where "created_by" = ${ownerId} and "id" in (${sql.join(
-        part.map((id) => sql`${id}`),
-        sql`, `,
-      )})`,
+      sql`select count(*) as n from ${physical(workspace, table)} where "created_by" = ${ownerId} and "id" in (${idList(part)})`,
     );
     owned += Number(row?.n ?? 0);
   }
   return owned;
+}
+
+export async function listReferencingColumns(tableId: number) {
+  const rows = await db
+    .select({ column: columnTable, table: tableTable })
+    .from(columnTable)
+    .innerJoin(tableTable, eq(tableTable.id, columnTable.tableId))
+    .where(
+      and(
+        eq(columnTable.format, "relation"),
+        isNull(columnTable.deletedAt),
+        isNull(tableTable.deletedAt),
+      ),
+    );
+  return rows.filter(
+    ({ column }) => Number((column.options as { tableId?: number }).tableId) === tableId,
+  );
+}
+
+export async function findLinkedIds(
+  workspace: string,
+  source: Table,
+  column: Column,
+  ids: unknown[],
+) {
+  const linked: number[] = [];
+  await ensureRecordSchema(workspace, source);
+  for (const part of chunks(ids, CHUNK))
+    linked.push(
+      ...(
+        await db.all<{ id: number }>(
+          sql`select "id" from ${physical(workspace, source)} where ${raw(quoteIdent(column.columnName))} in (${idList(part)}) and "deleted_at" is null`,
+        )
+      ).map((row) => row.id),
+    );
+  return linked;
+}
+
+export type DeletionStep = { table: Table; ids: number[] };
+export type ClearStep = { table: Table; column: Column; ids: number[] };
+
+export function buildSoftDeletes(
+  workspace: string,
+  deletions: DeletionStep[],
+  clears: ClearStep[],
+  userId: string,
+) {
+  return [
+    ...deletions.flatMap(({ table, ids }) => {
+      const target = recordsTable(workspace, table, [
+        "deleted_at",
+        "updated_at",
+        "deleted_by",
+        "updated_by",
+      ]);
+      return chunks(ids, CHUNK).map((part) =>
+        db
+          .update(target)
+          .set({
+            deleted_at: sql`${NOW}`,
+            updated_at: sql`${NOW}`,
+            deleted_by: userId,
+            updated_by: userId,
+          })
+          .where(and(inArray(target.id, part as unknown as string[]), isNull(target.deleted_at))),
+      );
+    }),
+    ...clears.flatMap(({ table, column, ids }) => {
+      const target = recordsTable(workspace, table, [
+        column.columnName,
+        "updated_at",
+        "updated_by",
+        "deleted_at",
+      ]);
+      return chunks(ids, CHUNK).map((part) =>
+        db
+          .update(target)
+          .set({ [column.columnName]: null, updated_at: sql`${NOW}`, updated_by: userId })
+          .where(and(inArray(target.id, part as unknown as string[]), isNull(target.deleted_at))),
+      );
+    }),
+  ];
+}
+
+export async function restoreRecordRow(
+  workspace: string,
+  table: Table,
+  recordId: number,
+  parsed: ParsedValue<Column>[],
+  userId: string,
+) {
+  const assignments = parsed.map(
+    ({ column, value }) => sql`${raw(quoteIdent(column.columnName))} = ${value}`,
+  );
+  assignments.push(
+    sql`"deleted_at" = null`,
+    sql`"deleted_by" = null`,
+    sql`"updated_at" = ${NOW}`,
+    sql`"updated_by" = ${userId}`,
+  );
+  const restored = await db.all(
+    sql`update ${physical(workspace, table)} set ${sql.join(assignments, sql`, `)} where "id" = ${recordId} and "deleted_at" is not null returning *`,
+  );
+  return restored[0] as Row | undefined;
+}
+
+export async function findTrashedRecord(
+  workspace: string,
+  table: Table,
+  columns: Column[],
+  recordId: number,
+) {
+  const [row] = await db.all<Row>(
+    sql`select ${selectList(columns)}, "deleted_at", "deleted_by" from ${physical(workspace, table)} where "id" = ${recordId} and "deleted_at" is not null limit 1`,
+  );
+  return row;
+}
+
+export async function listTrash(workspace: string, table: Table, query: TrashQuery) {
+  const [title] = table.titleColumnId
+    ? await db
+        .select({ columnName: columnTable.columnName })
+        .from(columnTable)
+        .where(and(eq(columnTable.id, table.titleColumnId), isNull(columnTable.deletedAt)))
+        .limit(1)
+    : [];
+
+  const source = physical(workspace, table);
+  const titleText = title ? sql`cast(t.${raw(quoteIdent(title.columnName))} as text)` : sql`null`;
+  const pattern = query.q ? `%${query.q.replaceAll(/[\\%_]/g, "\\$&")}%` : null;
+  const where: Fragment[] = [sql`t."deleted_at" is not null`];
+  if (pattern)
+    where.push(
+      sql`(${titleText} like ${pattern} escape '\\' or cast(t."id" as text) like ${pattern} escape '\\')`,
+    );
+  const condition = sql.join(where, sql` and `);
+  const direction = raw(query.order === "desc" ? "desc" : "asc");
+  const order =
+    query.sort === "name"
+      ? sql`lower(${titleText}) ${direction}, t."id" asc`
+      : sql`t."deleted_at" ${direction}, t."id" asc`;
+
+  const rows = await db.all<{
+    id: number;
+    title: string | null;
+    deleted_at: number;
+    deleted_by: string | null;
+    deleted_by_name: string | null;
+  }>(
+    sql`select t."id" as "id", ${titleText} as "title", t."deleted_at" as "deleted_at", t."deleted_by" as "deleted_by", (select u."name" from "user" u where u."id" = t."deleted_by") as "deleted_by_name" from ${source} t where ${condition} order by ${order} limit ${query.pageSize} offset ${(query.page - 1) * query.pageSize}`,
+  );
+  const [{ total }] = await db.all<{ total: number }>(
+    sql`select count(*) as total from ${source} t where ${condition}`,
+  );
+
+  return {
+    rows: rows.map((row) => ({
+      id: row.id,
+      title: row.title,
+      deletedAt: Number(row.deleted_at),
+      deletedBy: row.deleted_by ? { id: row.deleted_by, label: row.deleted_by_name } : null,
+    })),
+    total: Number(total),
+  };
+}
+
+export async function findTrashLabels(workspace: string, columns: Column[], row: Row) {
+  const labels: Row = {};
+
+  for (const column of columns) {
+    const value = row[column.columnName];
+    if (column.format !== "relation" || value === null || value === undefined) continue;
+    const [target] = await db
+      .select({ tableName: tableTable.tableName, title: columnTable.columnName })
+      .from(tableTable)
+      .leftJoin(columnTable, eq(columnTable.id, tableTable.titleColumnId))
+      .where(
+        and(
+          eq(tableTable.id, Number((column.options as { tableId?: number }).tableId)),
+          isNull(tableTable.deletedAt),
+        ),
+      )
+      .limit(1);
+    if (!target) continue;
+    const [found] = await db.all<{ label: string | null }>(
+      sql`select cast(${raw(quoteIdent(target.title ?? "id"))} as text) as label from ${raw(quoteIdent(physicalTableName(workspace, target.tableName)))} where "id" = ${value} limit 1`,
+    );
+    if (found) labels[`${column.columnName}__label`] = found.label;
+  }
+
+  for (const key of ["created_by", "updated_by"]) {
+    if (!row[key]) continue;
+    const [user] = await db.all<{ name: string }>(
+      sql`select "name" from "user" where "id" = ${row[key]} limit 1`,
+    );
+    if (user) labels[`${key}__label`] = user.name;
+  }
+
+  return labels;
+}
+
+export async function purgeExpiredRecords(workspace: string, cutoff: Date) {
+  const tables = await db.select().from(tableTable).where(isNull(tableTable.deletedAt));
+  let purged = 0;
+  let pending = tables;
+  for (let pass = 0; pass < 3 && pending.length; pass++) {
+    const failed: typeof tables = [];
+    for (const table of pending) {
+      try {
+        await ensureRecordSchema(workspace, table);
+        const removed = await db.all<{ id: number }>(
+          sql`delete from ${physical(workspace, table)} where "deleted_at" is not null and "deleted_at" < ${cutoff.getTime()} returning "id"`,
+        );
+        purged += removed.length;
+      } catch {
+        failed.push(table);
+      }
+    }
+    pending = failed;
+  }
+  return purged;
 }

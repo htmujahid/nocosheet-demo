@@ -1,5 +1,8 @@
 "use client";
 
+import type React from "react";
+import { createContext, useContext } from "react";
+
 import { Checkbox as CheckboxPrimitive } from "@base-ui/react/checkbox";
 import { Drawer as DrawerPrimitive } from "@base-ui/react/drawer";
 import { mergeProps } from "@base-ui/react/merge-props";
@@ -7,31 +10,27 @@ import { Radio as RadioPrimitive } from "@base-ui/react/radio";
 import { RadioGroup as RadioGroupPrimitive } from "@base-ui/react/radio-group";
 import { useRender } from "@base-ui/react/use-render";
 import { ChevronRightIcon, XIcon } from "lucide-react";
-import type React from "react";
-import { createContext, useContext } from "react";
-import { cn } from "@/lib/utils";
+
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { cn } from "@/lib/utils";
 
 type DrawerPosition = "right" | "left" | "top" | "bottom";
 
-const DrawerContext: React.Context<{ position: DrawerPosition }> =
-  createContext<{ position: DrawerPosition }>({
-    position: "bottom",
-  });
+const DrawerContext: React.Context<{ position: DrawerPosition }> = createContext<{
+  position: DrawerPosition;
+}>({
+  position: "bottom",
+});
 
-const directionMap: Record<
-  DrawerPosition,
-  DrawerPrimitive.Root.Props["swipeDirection"]
-> = {
+const directionMap: Record<DrawerPosition, DrawerPrimitive.Root.Props["swipeDirection"]> = {
   bottom: "down",
   left: "left",
   right: "right",
   top: "up",
 };
 
-export const DrawerCreateHandle: typeof DrawerPrimitive.createHandle =
-  DrawerPrimitive.createHandle;
+export const DrawerCreateHandle: typeof DrawerPrimitive.createHandle = DrawerPrimitive.createHandle;
 
 export function Drawer({
   swipeDirection,
@@ -42,26 +41,18 @@ export function Drawer({
 }): React.ReactElement {
   return (
     <DrawerContext.Provider value={{ position }}>
-      <DrawerPrimitive.Root
-        swipeDirection={swipeDirection ?? directionMap[position]}
-        {...props}
-      />
+      <DrawerPrimitive.Root swipeDirection={swipeDirection ?? directionMap[position]} {...props} />
     </DrawerContext.Provider>
   );
 }
 
-export const DrawerPortal: typeof DrawerPrimitive.Portal =
-  DrawerPrimitive.Portal;
+export const DrawerPortal: typeof DrawerPrimitive.Portal = DrawerPrimitive.Portal;
 
-export function DrawerTrigger(
-  props: DrawerPrimitive.Trigger.Props,
-): React.ReactElement {
+export function DrawerTrigger(props: DrawerPrimitive.Trigger.Props): React.ReactElement {
   return <DrawerPrimitive.Trigger data-slot="drawer-trigger" {...props} />;
 }
 
-export function DrawerClose(
-  props: DrawerPrimitive.Close.Props,
-): React.ReactElement {
+export function DrawerClose(props: DrawerPrimitive.Close.Props): React.ReactElement {
   return <DrawerPrimitive.Close data-slot="drawer-close" {...props} />;
 }
 
@@ -184,14 +175,10 @@ export function DrawerPopup({
               ),
             variant === "default" &&
               cn(
-                position === "bottom" &&
-                  "before:rounded-t-[calc(var(--radius-2xl)-1px)]",
-                position === "top" &&
-                  "before:rounded-b-[calc(var(--radius-2xl)-1px)]",
-                position === "left" &&
-                  "before:rounded-e-[calc(var(--radius-2xl)-1px)]",
-                position === "right" &&
-                  "before:rounded-s-[calc(var(--radius-2xl)-1px)]",
+                position === "bottom" && "before:rounded-t-[calc(var(--radius-2xl)-1px)]",
+                position === "top" && "before:rounded-b-[calc(var(--radius-2xl)-1px)]",
+                position === "left" && "before:rounded-e-[calc(var(--radius-2xl)-1px)]",
+                position === "right" && "before:rounded-s-[calc(var(--radius-2xl)-1px)]",
               ),
             variant === "inset" &&
               "before:hidden sm:rounded-2xl sm:border sm:after:bg-transparent sm:before:rounded-[calc(var(--radius-2xl)-1px)] sm:**:data-[slot=drawer-footer]:rounded-b-[calc(var(--radius-2xl)-1px)]",
@@ -228,9 +215,7 @@ export function DrawerPopup({
   );
 
   return position === "bottom" ? (
-    <DrawerPrimitive.VirtualKeyboardProvider>
-      {popup}
-    </DrawerPrimitive.VirtualKeyboardProvider>
+    <DrawerPrimitive.VirtualKeyboardProvider>{popup}</DrawerPrimitive.VirtualKeyboardProvider>
   ) : (
     popup
   );
@@ -374,9 +359,7 @@ export function DrawerBar({
     "aria-hidden": true as const,
     className: cn(
       "absolute flex touch-none items-center justify-center p-3 before:rounded-full before:bg-input",
-      horizontal
-        ? "inset-y-0 before:h-12 before:w-1"
-        : "inset-x-0 before:h-1 before:w-12",
+      horizontal ? "inset-y-0 before:h-12 before:w-1" : "inset-x-0 before:h-1 before:w-12",
       position === "top" && "bottom-0",
       position === "bottom" && "top-0",
       position === "left" && "right-0",
@@ -393,8 +376,7 @@ export function DrawerBar({
   });
 }
 
-export const DrawerContent: typeof DrawerPrimitive.Content =
-  DrawerPrimitive.Content;
+export const DrawerContent: typeof DrawerPrimitive.Content = DrawerPrimitive.Content;
 
 export function DrawerMenu({
   className,
@@ -480,10 +462,7 @@ export function DrawerMenuGroupLabel({
   ...props
 }: useRender.ComponentProps<"div">): React.ReactElement {
   const defaultProps = {
-    className: cn(
-      "px-2 py-1.5 font-medium text-muted-foreground text-xs",
-      className,
-    ),
+    className: cn("px-2 py-1.5 font-medium text-muted-foreground text-xs", className),
     "data-slot": "drawer-menu-group-label",
   };
 

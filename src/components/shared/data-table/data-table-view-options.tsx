@@ -37,7 +37,7 @@ export function DataTableViewOptions<TData extends RowData, TSelected>({
               closeOnClick={false}
               onCheckedChange={(value) => column.toggleVisibility(!!value)}
             >
-              {column.columnDef.meta?.label ?? column.id}
+              {typeof column.columnDef.header === "string" ? column.columnDef.header : column.id}
             </MenuCheckboxItem>
           ))}
         </MenuGroup>

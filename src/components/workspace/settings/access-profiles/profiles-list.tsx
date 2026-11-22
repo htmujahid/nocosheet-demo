@@ -1,3 +1,4 @@
+import { useDbClient } from "@tanstack/react-db";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { Link, useRouter } from "@tanstack/react-router";
 
@@ -14,24 +15,26 @@ import {
 } from "@/components/ui/card";
 import { toastManager } from "@/components/ui/toast";
 import { ConfirmAction } from "@/components/workspace/settings/members/confirm-action";
-import { workspaceKeys } from "@/data/workspace/keys";
+import { grantsCollection } from "@/data/workspace/access";
 import {
   deleteProfileMutationOptions,
   accessProfilesQueryOptions,
   updateProfileMutationOptions,
 } from "@/data/workspace/access-profiles";
+import { workspaceKeys } from "@/data/workspace/keys";
 
 import { ProfileSummary } from "./profile-summary";
 
 export function ProfilesList({ workspace }: { workspace: string }) {
   const queryClient = useQueryClient();
+  const dbClient = useDbClient();
   const router = useRouter();
   const { data: profiles } = useSuspenseQuery(accessProfilesQueryOptions(workspace));
 
   const refresh = () =>
     Promise.all([
       queryClient.invalidateQueries({ queryKey: workspaceKeys.accessProfiles() }),
-      queryClient.invalidateQueries({ queryKey: workspaceKeys.access() }),
+      dbClient.collection(grantsCollection).utils.refetch(),
       router.invalidate(),
     ]);
 

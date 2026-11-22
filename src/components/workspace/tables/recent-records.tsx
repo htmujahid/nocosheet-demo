@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { eq, gt, useLiveQuery } from "@tanstack/react-db";
 import { Link } from "@tanstack/react-router";
 
 import { ChevronRightIcon } from "lucide-react";
@@ -14,27 +14,16 @@ import {
   CardPanel,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { recordsQueryOptions } from "@/data/workspace/records";
+import { useReadOwner } from "@/components/workspace/records/use-read-owner";
+import { recordsCollection } from "@/data/workspace/records";
 import { formatRelativeTime } from "@/lib/format-relative-time";
-import { resolveRecordsQuery } from "@/lib/records/query";
-import { systemSortName } from "@/lib/records/sort-param";
 import { ALL_VIEW } from "@/lib/views/constants";
 
-type RecordRow = Record<string, unknown>;
-
 const RECENT_SHOWN = 5 as const;
-
-const RECENT_QUERY = {
-  ...resolveRecordsQuery({}),
-  pageSize: RECENT_SHOWN,
-  sort: systemSortName("updated_at"),
-  order: "desc" as const,
-};
 
 const textOf = (value: unknown) =>
   typeof value === "string" || typeof value === "number" ? String(value) : "";
 
-/** The most recently edited records of a table, newest first; each opens its record sheet. */
 export function RecentRecords({
   workspace,
   table,
@@ -42,13 +31,22 @@ export function RecentRecords({
 }: {
   workspace: string;
   table: string;
-  /** `columnName` of the table's title column, if it has one. */
+
   titleColumn: string | null;
 }) {
-  const { data, isPending, error } = useQuery(
-    recordsQueryOptions(workspace, Number(table), RECENT_QUERY),
+  const ownerId = useReadOwner(Number(table));
+  const {
+    data: rows,
+    isReady,
+    isLoadingError: error,
+  } = useLiveQuery((q) =>
+    q
+      .from({ record: recordsCollection(Number(table)) })
+      .where(({ record }) => (ownerId ? eq(record.created_by, ownerId) : gt(record.id, 0)))
+      .orderBy(({ record }) => record.updated_at, "desc")
+      .limit(RECENT_SHOWN),
   );
-  const rows = (data?.rows ?? []) as RecordRow[];
+  const isPending = !isReady && !error;
 
   return (
     <CardFrame>
@@ -91,7 +89,7 @@ export function RecentRecords({
           rows.map((row) => {
             const id = Number(row.id);
             const title = (titleColumn && textOf(row[titleColumn])) || `Record ${id}`;
-            const by = (row.updated_by as { label?: string | null } | null)?.label;
+            const by = row.updated_by_label;
             const at = row.updated_at as number | string | undefined;
             return (
               <Link

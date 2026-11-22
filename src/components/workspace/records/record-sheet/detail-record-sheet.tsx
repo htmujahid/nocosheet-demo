@@ -1,14 +1,12 @@
 import { useState } from "react";
 
-import { useQuery } from "@tanstack/react-query";
-
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetClose, SheetFooter, SheetPopup } from "@/components/ui/sheet";
-import { recordQueryOptions } from "@/data/workspace/records";
 import { toFormValues } from "@/lib/records/form";
 
 import { type ViewerColumn, type ViewScope } from "../columns";
 import { DeleteRecordsDialog } from "../delete-records-dialog";
+import { useRecord } from "../grid/use-record-rows";
 import { useRecordScope } from "../use-record-scope";
 import { RecordForm } from "./record-form";
 import { RecordSheetSkeleton } from "./skeleton";
@@ -17,7 +15,6 @@ import { useRecordForm } from "./use-record-form";
 function DetailForm({
   workspace,
   tableId,
-  viewId,
   tableName,
   recordId,
   record,
@@ -27,7 +24,6 @@ function DetailForm({
 }: {
   workspace: string;
   tableId: number;
-  viewId?: number;
   tableName: string;
   recordId: number;
   record: Record<string, unknown>;
@@ -55,7 +51,6 @@ function DetailForm({
             <DeleteRecordsDialog
               workspace={workspace}
               tableId={tableId}
-              viewId={viewId}
               ids={[recordId]}
               label="Delete"
               onDeleted={onDeleted}
@@ -85,9 +80,7 @@ export function DetailRecordSheet({
 }) {
   const [open, setOpen] = useState(true);
   const scope = useRecordScope(workspace, tableId, view);
-  const { data: record, error } = useQuery(
-    recordQueryOptions(workspace, tableId, recordId, view?.id),
-  );
+  const { record, ready } = useRecord(tableId, recordId, scope.columns);
 
   return (
     <Sheet
@@ -103,7 +96,6 @@ export function DetailRecordSheet({
             key={recordId}
             workspace={workspace}
             tableId={tableId}
-            viewId={view?.id}
             tableName={scope.tableName}
             recordId={recordId}
             record={record}
@@ -115,7 +107,7 @@ export function DetailRecordSheet({
           <RecordSheetSkeleton
             title={`Record ${recordId}`}
             tableName={scope.tableName}
-            error={error}
+            error={ready ? new Error("This record doesn't exist or was deleted.") : null}
           />
         )}
       </SheetPopup>

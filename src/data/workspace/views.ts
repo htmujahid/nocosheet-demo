@@ -1,80 +1,60 @@
-import { mutationOptions, queryOptions } from "@tanstack/react-query";
+import {
+  persistedCollectionOptions,
+  type PersistedCollectionPersistence,
+} from "@tanstack/browser-db-sqlite-persistence";
+import { queryCollectionOptions } from "@tanstack/query-db-collection";
+import { collectionOptions } from "@tanstack/react-db";
+import type { QueryClient } from "@tanstack/react-query";
+import { mutationOptions } from "@tanstack/react-query";
 
 import { fetch } from "void/client";
 
-import { type ResolvedRecordsQuery, recordsKeyOf } from "@/lib/records/query";
+import { unwrapFetch } from "@/lib/api-error";
 import type { ViewInput, ViewPatchInput } from "@/lib/views/validation";
+import { DEFAULT_WORKSPACE } from "@/lib/workspace";
 
-import { unwrapFetch } from "./api-error";
 import { workspaceKeys } from "./keys";
+import { syncRows } from "./sync-state";
 
-/** Every view of a table the user can see; `limit` caps how many come back. */
-export const viewsQueryOptions = (workspace: string, tableId: number, limit?: number) =>
-  queryOptions({
-    queryKey: limit ? [...workspaceKeys.views(tableId), "limit", limit] : workspaceKeys.views(tableId),
-    queryFn: () =>
-      unwrapFetch(
-        fetch("/api/workspaces/:workspace/tables/:table/views", {
-          params: { workspace, table: String(tableId) },
-          query: limit ? { limit } : {},
-        }),
-      ),
-    staleTime: 30_000,
-    retry: false,
+const fetchViewRows = (tableId: number) =>
+  unwrapFetch(
+    fetch("/api/workspaces/:workspace/tables/:table/views", {
+      params: { workspace: DEFAULT_WORKSPACE, table: String(tableId) },
+    }),
+  );
+
+export type ViewRow = Awaited<ReturnType<typeof fetchViewRows>>[number];
+
+const createViewsCollection = (tableId: number) =>
+  collectionOptions(`views:${tableId}`, (client) => {
+    const source = queryCollectionOptions({
+      id: `views:${tableId}`,
+      queryKey: workspaceKeys.views(tableId),
+      queryClient: client.requireDependency<QueryClient>("queryClient"),
+      queryFn: () => syncRows(client, `views:${tableId}`, () => fetchViewRows(tableId)),
+      getKey: (view) => view.id,
+      staleTime: 5 * 60_000,
+    });
+    const persistence = client.getDependency<PersistedCollectionPersistence>("persistence");
+    if (!persistence) return source;
+    return persistedCollectionOptions({
+      ...source,
+      persistence,
+      schemaVersion: 1,
+      initialRender: { strategy: "network-first", networkTimeoutMs: 0 },
+    }) as unknown as typeof source;
   });
 
-export const viewQueryOptions = (workspace: string, tableId: number, viewId: number) =>
-  queryOptions({
-    queryKey: workspaceKeys.view(tableId, viewId),
-    queryFn: () =>
-      unwrapFetch(
-        fetch("/api/workspaces/:workspace/tables/:table/views/:view", {
-          params: { workspace, table: String(tableId), view: String(viewId) },
-        }),
-      ),
-    staleTime: 30_000,
-    retry: false,
-  });
+const viewCollections = new Map<number, ReturnType<typeof createViewsCollection>>();
 
-export const viewExportQueryOptions = (workspace: string, tableId: number, viewId: number) =>
-  queryOptions({
-    queryKey: workspaceKeys.viewExport(tableId, viewId),
-    queryFn: () =>
-      unwrapFetch(
-        fetch("/api/workspaces/:workspace/tables/:table/views/:view/export", {
-          params: { workspace, table: String(tableId), view: String(viewId) },
-        }),
-      ),
-    staleTime: 0,
-    gcTime: 0,
-    retry: false,
-  });
-
-export const viewRecordsQueryOptions = (
-  workspace: string,
-  tableId: number,
-  viewId: number,
-  query: ResolvedRecordsQuery,
-) =>
-  queryOptions({
-    queryKey: workspaceKeys.records(tableId, { view: viewId, ...recordsKeyOf(query) }),
-    queryFn: () =>
-      unwrapFetch(
-        fetch("/api/workspaces/:workspace/tables/:table/views/:view/records", {
-          params: { workspace, table: String(tableId), view: String(viewId) },
-          query: {
-            pageSize: query.pageSize,
-            ...(query.cursor ? { cursor: query.cursor } : {}),
-            ...(query.dir === "prev" ? { dir: query.dir } : {}),
-            ...(query.sort ? { sort: query.sort, order: query.order } : {}),
-            ...(query.q ? { q: query.q } : {}),
-            ...(query.filter ? { filter: query.filter } : {}),
-          },
-        }),
-      ),
-    staleTime: 15_000,
-    retry: false,
-  });
+export function viewsCollection(tableId: number) {
+  let descriptor = viewCollections.get(tableId);
+  if (!descriptor) {
+    descriptor = createViewsCollection(tableId);
+    viewCollections.set(tableId, descriptor);
+  }
+  return descriptor;
+}
 
 export const createViewMutationOptions = mutationOptions({
   mutationKey: workspaceKeys.mutation("create-view"),

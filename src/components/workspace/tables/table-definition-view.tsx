@@ -1,4 +1,5 @@
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useLiveSuspenseQuery, eq } from "@tanstack/react-db";
+import { notFound } from "@tanstack/react-router";
 
 import { SettingsRow } from "@/components/shared/settings-row";
 import {
@@ -9,7 +10,9 @@ import {
   CardFrameTitle,
   CardPanel,
 } from "@/components/ui/card";
-import { tableQueryOptions } from "@/data/workspace/tables";
+import { columnsCollection } from "@/data/workspace/columns";
+import { tablesCollection } from "@/data/workspace/tables";
+import { useSession } from "@/hooks/use-session";
 
 import { ColumnsList } from "./columns-list";
 import { NamedIcon } from "./named-icon";
@@ -21,9 +24,18 @@ export function TableDefinitionView({
   workspace: string;
   tableId: number;
 }) {
-  const { data: table } = useSuspenseQuery(tableQueryOptions(workspace, tableId));
+  const { data: table } = useLiveSuspenseQuery((q) =>
+    q
+      .from({ table: tablesCollection })
+      .where(({ table }) => eq(table.id, tableId))
+      .findOne(),
+  );
+  if (!table) throw notFound();
+  const { data: columns } = useLiveSuspenseQuery((q) =>
+    q.from({ column: columnsCollection(tableId) }).orderBy(({ column }) => column.position),
+  );
 
-  const titleColumn = table.columns.find((column) => column.id === table.titleColumnId);
+  const titleColumn = columns.find((column) => column.id === table.titleColumnId);
 
   return (
     <div className="flex flex-col gap-6">
@@ -57,13 +69,13 @@ export function TableDefinitionView({
         <CardFrameHeader>
           <CardFrameTitle>Columns</CardFrameTitle>
           <CardFrameDescription>
-            {table.columns.length} {table.columns.length === 1 ? "column" : "columns"}
+            {columns.length} {columns.length === 1 ? "column" : "columns"}
           </CardFrameDescription>
         </CardFrameHeader>
         <Card>
           <CardPanel>
             <ColumnsList
-              columns={table.columns}
+              columns={columns}
               titleColumnId={table.titleColumnId}
               empty="This table has no columns yet."
             />

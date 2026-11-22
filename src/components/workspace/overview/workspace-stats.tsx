@@ -1,9 +1,9 @@
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { eq, useLiveSuspenseQuery } from "@tanstack/react-db";
 import { Link } from "@tanstack/react-router";
 
 import { Card, CardPanel } from "@/components/ui/card";
-import { membersQueryOptions } from "@/data/workspace/members";
-import { sidebarQueryOptions } from "@/data/workspace/sidebar";
+import { membersCollection } from "@/data/workspace/members";
+import { tablesCollection } from "@/data/workspace/tables";
 import { useAccess } from "@/hooks/use-access";
 import { scopeLabel, summarizeGrants } from "@/lib/access/matrix";
 
@@ -17,7 +17,10 @@ function Stat({
   label: string;
   value: React.ReactNode;
   hint: string;
-  to?: "/workspaces/$workspace/tables" | "/workspaces/$workspace/settings/members" | "/workspaces/$workspace/settings/access";
+  to?:
+    | "/workspaces/$workspace/tables"
+    | "/workspaces/$workspace/settings/members"
+    | "/workspaces/$workspace/settings/access";
   workspace: string;
 }) {
   return (
@@ -35,12 +38,16 @@ function Stat({
 }
 
 export function WorkspaceStats({ workspace }: { workspace: string }) {
-  const { data: members } = useSuspenseQuery(membersQueryOptions);
-  const { data: sidebar } = useSuspenseQuery(sidebarQueryOptions(workspace));
+  const { data: members } = useLiveSuspenseQuery((q) =>
+    q.from({ member: membersCollection }).orderBy(({ member }) => member.name),
+  );
+  const { data: visible } = useLiveSuspenseQuery((q) =>
+    q.from({ table: tablesCollection }).where(({ table }) => eq(table.isHidden, false)),
+  );
   const access = useAccess();
-  const tables = sidebar.groups.flatMap((group) => group.tables).length;
+  const tables = visible.length;
   const admins = members.filter((member) => member.role === "admin").length;
-  const groups = sidebar.groups.filter((group) => group.name !== null).length;
+  const groups = new Set(visible.flatMap((table) => table.groupName ?? [])).size;
 
   const can = summarizeGrants(access.grants)
     .filter((item) => item.scope !== "none")
@@ -52,7 +59,7 @@ export function WorkspaceStats({ workspace }: { workspace: string }) {
         label="Tables"
         value={tables}
         hint={groups > 0 ? `${groups} ${groups === 1 ? "group" : "groups"}` : "No groups"}
-        to={access.admin ? "/workspaces/$workspace/tables" : undefined}
+        to="/workspaces/$workspace/tables"
         workspace={workspace}
       />
       <Stat

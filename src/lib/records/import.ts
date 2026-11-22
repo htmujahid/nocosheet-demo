@@ -22,9 +22,7 @@ export type ImportResult = { created: number; failed: number; errors: ImportRowE
 
 type ImportColumn = { format: string; options: Record<string, unknown> };
 
-export type CellResult =
-  | { ok: true; value: unknown }
-  | { ok: false; message: string };
+export type CellResult = { ok: true; value: unknown } | { ok: false; message: string };
 
 const ok = (value: unknown): CellResult => ({ ok: true, value });
 const fail = (message: string): CellResult => ({ ok: false, message });
@@ -85,15 +83,21 @@ export function convertCell(column: ImportColumn, raw: string): CellResult | nul
     case "date": {
       if (/^\d{4}-\d{2}-\d{2}$/.test(text)) return ok(text);
       const date = new Date(text);
-      return Number.isNaN(date.getTime()) ? fail("Enter a valid date") : ok(date.toISOString().slice(0, 10));
+      return Number.isNaN(date.getTime())
+        ? fail("Enter a valid date")
+        : ok(date.toISOString().slice(0, 10));
     }
     case "datetime": {
       const date = new Date(/^-?\d+$/.test(text) ? Number(text) : text);
-      return Number.isNaN(date.getTime()) ? fail("Enter a valid date and time") : ok(date.getTime());
+      return Number.isNaN(date.getTime())
+        ? fail("Enter a valid date and time")
+        : ok(date.getTime());
     }
     case "datetime_tz": {
       const date = new Date(text);
-      return Number.isNaN(date.getTime()) ? fail("Enter a valid date and time") : ok(date.toISOString());
+      return Number.isNaN(date.getTime())
+        ? fail("Enter a valid date and time")
+        : ok(date.toISOString());
     }
     case "json":
       try {

@@ -1,36 +1,26 @@
 export const workspaceKeys = {
   all: ["workspace"] as const,
   members: () => [...workspaceKeys.all, "members"] as const,
-  memberApiKeys: (userId: string) => [...workspaceKeys.members(), userId, "api-keys"] as const,
-  access: () => [...workspaceKeys.all, "access"] as const,
+  grants: () => [...workspaceKeys.all, "grants"] as const,
+  profile: () => [...workspaceKeys.all, "profile"] as const,
   accessProfiles: () => [...workspaceKeys.all, "access-profiles"] as const,
   accessProfile: (id: number) => [...workspaceKeys.accessProfiles(), id] as const,
   profileAssignments: () => [...workspaceKeys.accessProfiles(), "assignments"] as const,
   tables: () => [...workspaceKeys.all, "tables"] as const,
-  records: (id: number, query: object) => [...workspaceKeys.table(id), "records", query] as const,
-  record: (id: number, recordId: number) =>
-    [...workspaceKeys.table(id), "record", recordId] as const,
-  recordsExport: (id: number) => [...workspaceKeys.table(id), "export"] as const,
+  tableRows: () => [...workspaceKeys.tables(), "rows"] as const,
+  tablesTrash: () => [...workspaceKeys.tables(), "trash"] as const,
+  table: (id: number) => [...workspaceKeys.tables(), id] as const,
+  tableColumns: (id: number) => [...workspaceKeys.table(id), "columns"] as const,
   columnsTrash: (id: number) => [...workspaceKeys.table(id), "columns-trash"] as const,
   views: (id: number) => [...workspaceKeys.table(id), "views"] as const,
-  view: (id: number, viewId: number) => [...workspaceKeys.views(id), "detail", viewId] as const,
-  viewExport: (id: number, viewId: number) =>
-    [...workspaceKeys.view(id, viewId), "export"] as const,
-  forms: (id: number) => [...workspaceKeys.table(id), "forms"] as const,
-  form: (id: number, formId: number) => [...workspaceKeys.forms(id), "detail", formId] as const,
-  trash: (id: number) => [...workspaceKeys.table(id), "trash"] as const,
-  trashList: (id: number, query: object) => [...workspaceKeys.trash(id), "list", query] as const,
-  trashEntry: (id: number, entryId: number) =>
-    [...workspaceKeys.trash(id), "entry", entryId] as const,
-  restoreError: (id: number, entryId: number) =>
-    [...workspaceKeys.trashEntry(id, entryId), "error"] as const,
-  recordOptions: (id: number, term: string) =>
-    [...workspaceKeys.table(id), "options", term] as const,
-  sidebar: () => [...workspaceKeys.tables(), "sidebar"] as const,
-  tablesTrash: () => [...workspaceKeys.tables(), "trash"] as const,
-  tableList: (query: object) => [...workspaceKeys.tables(), "list", query] as const,
-  table: (id: number) => [...workspaceKeys.tables(), id] as const,
-  auditList: (query: object) => [...workspaceKeys.all, "audit", "list", query] as const,
+  favorites: () => [...workspaceKeys.all, "favorites"] as const,
+  recordsTrash: (id: number) => [...workspaceKeys.table(id), "records-trash"] as const,
+  recordsTrashList: (id: number, query: object) =>
+    [...workspaceKeys.recordsTrash(id), "list", query] as const,
+  recordsTrashEntry: (id: number, record: number) =>
+    [...workspaceKeys.recordsTrash(id), record] as const,
   templates: () => [...workspaceKeys.all, "templates"] as const,
   mutation: (name: string) => [...workspaceKeys.all, name] as const,
+  audit: () => [...workspaceKeys.all, "audit"] as const,
+  auditList: (query: object) => [...workspaceKeys.audit(), "list", query] as const,
 };

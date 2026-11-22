@@ -1,17 +1,15 @@
 import { useState } from "react";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetClose, SheetFooter, SheetPopup } from "@/components/ui/sheet";
 import { toastManager } from "@/components/ui/toast";
-import { workspaceKeys } from "@/data/workspace/keys";
-import { recordQueryOptions, updateRecordMutationOptions } from "@/data/workspace/records";
 import { buildPatch, toFormValues, type FormValues } from "@/lib/records/form";
 
 import { type ViewerColumn, type ViewScope } from "../columns";
 import { DeleteRecordsDialog } from "../delete-records-dialog";
+import { useRecord } from "../grid/use-record-rows";
 import { useRecordScope } from "../use-record-scope";
+import { useRecordWrites } from "../use-record-writes";
 import { RecordForm } from "./record-form";
 import { RecordSheetSkeleton } from "./skeleton";
 import { useRecordForm } from "./use-record-form";
@@ -19,7 +17,6 @@ import { useRecordForm } from "./use-record-form";
 function UpdateForm({
   workspace,
   tableId,
-  viewId,
   tableName,
   recordId,
   record,
@@ -29,7 +26,6 @@ function UpdateForm({
 }: {
   workspace: string;
   tableId: number;
-  viewId?: number;
   tableName: string;
   recordId: number;
   record: Record<string, unknown>;
@@ -37,19 +33,8 @@ function UpdateForm({
   canDelete: boolean;
   onDeleted: () => void;
 }) {
-  const queryClient = useQueryClient();
+  const writes = useRecordWrites(tableId);
   const [initial, setInitial] = useState<FormValues>(() => toFormValues(columns, record));
-
-  const update = useMutation({
-    ...updateRecordMutationOptions,
-    onSuccess: async () => {
-      const next = form.state.values;
-      setInitial(next);
-      form.reset(next);
-      await queryClient.invalidateQueries({ queryKey: workspaceKeys.table(tableId) });
-      toastManager.add({ type: "success", title: "Record saved" });
-    },
-  });
 
   const form = useRecordForm({
     initial,
@@ -57,7 +42,10 @@ function UpdateForm({
     onSubmit: (value) => {
       const { patch } = buildPatch(columns, value, initial);
       if (Object.keys(patch).length === 0) return;
-      update.mutate({ workspace, tableId, viewId, recordId, values: patch });
+      writes.update(recordId, patch);
+      setInitial(value);
+      form.reset(value);
+      toastManager.add({ type: "success", title: "Record saved" });
     },
   });
 
@@ -70,7 +58,6 @@ function UpdateForm({
       columns={columns}
       record={record}
       recordId={recordId}
-      error={update.error}
     >
       <SheetFooter>
         {canDelete && (
@@ -78,7 +65,6 @@ function UpdateForm({
             <DeleteRecordsDialog
               workspace={workspace}
               tableId={tableId}
-              viewId={viewId}
               ids={[recordId]}
               label="Delete"
               onDeleted={onDeleted}
@@ -88,7 +74,7 @@ function UpdateForm({
         <SheetClose render={<Button type="button" variant="ghost" />}>Cancel</SheetClose>
         <form.Subscribe selector={(state) => state.isDirty}>
           {(dirty) => (
-            <Button type="submit" disabled={!dirty} loading={update.isPending}>
+            <Button type="submit" disabled={!dirty}>
               Save changes
             </Button>
           )}
@@ -115,9 +101,7 @@ export function UpdateRecordSheet({
 }) {
   const [open, setOpen] = useState(true);
   const scope = useRecordScope(workspace, tableId, view);
-  const { data: record, error } = useQuery(
-    recordQueryOptions(workspace, tableId, recordId, view?.id),
-  );
+  const { record, ready } = useRecord(tableId, recordId, scope.columns);
 
   return (
     <Sheet
@@ -133,7 +117,6 @@ export function UpdateRecordSheet({
             key={recordId}
             workspace={workspace}
             tableId={tableId}
-            viewId={view?.id}
             tableName={scope.tableName}
             recordId={recordId}
             record={record}
@@ -145,7 +128,7 @@ export function UpdateRecordSheet({
           <RecordSheetSkeleton
             title={`Record ${recordId}`}
             tableName={scope.tableName}
-            error={error}
+            error={ready ? new Error("This record doesn't exist or was deleted.") : null}
           />
         )}
       </SheetPopup>

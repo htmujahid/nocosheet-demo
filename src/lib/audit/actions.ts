@@ -1,4 +1,4 @@
-export const AUDIT_ACTIONS = ["create", "update", "delete", "restore", "purge", "import"] as const;
+export const AUDIT_ACTIONS = ["create", "update", "delete", "restore", "import"] as const;
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
 
 export type AuditChange = { column: string; from: unknown; to: unknown };

@@ -1,37 +1,36 @@
 import { useMemo } from "react";
 
-import { useRouteContext } from "@tanstack/react-router";
+import { useLiveQuery, useLiveSuspenseQuery } from "@tanstack/react-db";
 
+import { grantsCollection } from "@/data/workspace/access";
+import { profileCollection } from "@/data/workspace/profile";
 import { type Action, scopeFor, type Scope } from "@/lib/access/grants";
+import { isAdmin } from "@/lib/auth/access";
 
 import { useSession } from "./use-session";
 
 export function useAccess() {
   const session = useSession();
-  const data = useRouteContext({ from: "/workspaces/$workspace", select: (context) => context.access });
+  const { data: grants } = useLiveSuspenseQuery((q) => q.from({ grant: grantsCollection }));
+  const { data: stored } = useLiveQuery((q) => q.from({ profile: profileCollection }).findOne());
   const userId = session?.user.id;
+  const admin = isAdmin({ role: (session?.user as { role?: string | null } | undefined)?.role });
+  const profile = stored && stored.userId === userId ? stored.profile : null;
 
   return useMemo(() => {
-    const scope = (action: Action, tableId: number, viewId?: number | null): Scope => {
-      return scopeFor(data, action, tableId, viewId);
-    };
+    const access = { admin, grants };
+    const scope = (tableId: number, action: Action): Scope => scopeFor(access, tableId, action);
 
     return {
-      admin: data.admin,
-      profile: data.profile,
-      grants: data.grants,
+      admin,
+      profile,
+      grants,
       scope,
-      can: (action: Action, tableId: number, viewId?: number | null) =>
-        scope(action, tableId, viewId) !== "none",
-      canOn: (
-        action: Action,
-        tableId: number,
-        ownerId: string | null | undefined,
-        viewId?: number | null,
-      ) => {
-        const level = scope(action, tableId, viewId);
+      can: (tableId: number, action: Action) => scope(tableId, action) !== "none",
+      canOn: (tableId: number, action: Action, ownerId: string | null | undefined) => {
+        const level = scope(tableId, action);
         return level === "all" || (level === "own" && !!userId && ownerId === userId);
       },
     };
-  }, [data, userId]);
+  }, [admin, grants, profile, userId]);
 }

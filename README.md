@@ -1,45 +1,37 @@
-# nocosheet
+# Nocosheet
 
-nocosheet is an open-source, fully no-code CMS and spreadsheet-style database. Model your data, manage records and publish content without writing code. It is self-hostable on Cloudflare and uses Cloudflare services for everything it needs.
+An open-source, offline-first no-code database. Build tables, work with records in a spreadsheet-style grid, and share them with your team. Self-host it on Cloudflare, one deployment per team.
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshot-dark.webp">
-  <source media="(prefers-color-scheme: light)" srcset="docs/screenshot-light.webp">
-  <img alt="nocosheet record grid" src="docs/screenshot-light.webp">
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshot-dark.webp" />
+  <img alt="Nocosheet" src="docs/screenshot-light.webp" />
 </picture>
 
 ## Features
 
-### Data
+- **Tables and columns**: create tables with a wizard, import columns from CSV, start from bundled templates.
+- **Records grid**: search, filters, sorting, column summaries, inline editing and record sheets.
+- **Relations and files**: link records with pickers, add file and image columns.
+- **Saved views**: save column subsets and filters as views.
+- **Import and export**: CSV import and export.
+- **Trash**: deleted tables, columns and records are restored from the trash within 30 days.
+- **Access control**: administrators and members, with access profiles that grant per-table permissions.
+- **Workspace**: home page with stats and recent tables, sidebar with search and favorites, members and audit log.
+- **Offline-first**: data is stored in the browser, so tables open instantly and records can be created, edited and deleted offline. Changes sync when the connection returns.
+- **Installable**: works as a PWA and opens without a connection.
+- **Authentication**: password, passkey, two-factor, Google sign-in, and account management.
 
-- **No-code data modeling**: create tables and fields from the UI with a guided new-table wizard; schema changes are applied live
-- **Spreadsheet-style grid**: browse and edit records in a fast, familiar grid
-- **Advanced field types**: select and multi-select, dates, currency, attachments and computed fields
-- **File uploads**: attach and manage files on records and see them in the grid
-- **CSV import**: upload or paste a CSV, match its columns to your fields and preview the records before anything is added
-- **Views**: save a set of columns and filters as its own grid
-- **Forms**: pick the columns a form asks for and let members fill it in; every response becomes a record
-- **Trash and recovery**: deleted tables and views are soft-deleted, protected by dependency checks and purged after 30 days
+## Run locally
 
-### Teams and security
+```sh
+pnpm install
+pnpm dev
+```
 
-- **Members**: invite and manage people in your workspace, and pin your favorite tables
-- **Roles and access profiles**: members are administrators or members. Administrators can do everything; each member has one access profile with workspace-level and per-table grants and own/all record scopes
-- **Audit log**: turn on auditing per table to log every record created, edited or deleted, with who did it and when. Entries are kept for 30 days
-- **Account security**: sign in with a password or passkey, add an authenticator app and manage your sessions
+Copy `example.env` to configure settings. The first run asks you to create the first administrator at `/auth/setup`.
 
-### Developers
+## Deploy
 
-- **REST API and API keys**: read and write records from your own scripts and apps with API keys or bearer tokens, documented with an OpenAPI reference
-
-### Hosting
-
-- **Self-hosted on Cloudflare**: Workers, D1 and R2 on your own account, with no external services required
-
-## Self-hosting
-
-nocosheet runs entirely on your Cloudflare account. Deploy it as a Worker, bind a D1 database and an R2 bucket, and you are done.
-
-## Contributing
-
-nocosheet is open source and contributions are welcome. Open an issue to discuss an idea or send a pull request.
+```sh
+pnpm exec void deploy
+```

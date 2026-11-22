@@ -1,5 +1,6 @@
 import {
   type inferParserType,
+  parseAsInteger,
   parseAsNumberLiteral,
   parseAsString,
   parseAsStringLiteral,
@@ -19,14 +20,15 @@ export const recordsSearchParams = {
   order: parseAsStringLiteral(["asc", "desc"] as const).withDefault("asc"),
   q: parseAsString.withDefault(""),
   filter: parseAsString.withDefault(""),
-  cursor: parseAsString,
+  page: parseAsInteger.withDefault(1),
 };
 
 export type RecordsQuery = inferParserType<typeof recordsSearchParams>;
 
-export const resolveRecordsQuery = (search: Partial<RecordsQuery> & { dir?: "next" | "prev" }) => ({
-  cursor: search.cursor ?? null,
-  dir: search.dir ?? ("next" as "next" | "prev"),
+export const RECORDS_MAX_PAGE = 1000;
+
+export const resolveRecordsQuery = (search: Partial<RecordsQuery>) => ({
+  page: Math.min(Math.max(search.page ?? 1, 1), RECORDS_MAX_PAGE),
   pageSize: search.pageSize ?? recordsSearchParams.pageSize.defaultValue,
   sort: search.sort ?? null,
   order: search.order ?? recordsSearchParams.order.defaultValue,
@@ -37,8 +39,7 @@ export const resolveRecordsQuery = (search: Partial<RecordsQuery> & { dir?: "nex
 export type ResolvedRecordsQuery = ReturnType<typeof resolveRecordsQuery>;
 
 export const recordsKeyOf = (query: ResolvedRecordsQuery) => ({
-  cursor: query.cursor,
-  dir: query.dir,
+  page: query.page,
   pageSize: query.pageSize,
   sort: query.sort,
   order: query.order,
@@ -61,8 +62,7 @@ export function withFilters(
 export const validateRecordsSearch = createSearchValidator(recordsSearchParams);
 
 export const recordsApiSchema = z.object({
-  cursor: z.string().max(1024).optional(),
-  dir: z.enum(["next", "prev"]).optional(),
+  page: z.coerce.number().int().min(1).max(RECORDS_MAX_PAGE).optional(),
   pageSize: z.coerce
     .number()
     .pipe(z.union([z.literal(5), z.literal(10), z.literal(25), z.literal(50), z.literal(100)]))

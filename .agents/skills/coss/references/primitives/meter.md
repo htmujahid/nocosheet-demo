@@ -25,13 +25,7 @@ npm install @base-ui/react
 ## Canonical imports
 
 ```tsx
-import {
-  Meter,
-  MeterIndicator,
-  MeterLabel,
-  MeterTrack,
-  MeterValue,
-} from "@/components/ui/meter"
+import { Meter, MeterIndicator, MeterLabel, MeterTrack, MeterValue } from "@/components/ui/meter";
 ```
 
 ## Minimal pattern

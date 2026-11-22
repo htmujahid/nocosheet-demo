@@ -1,6 +1,7 @@
 import { useId, useState } from "react";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useDbClient } from "@tanstack/react-db";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -29,7 +30,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
 import { toastManager } from "@/components/ui/toast";
 import { NamedIcon } from "@/components/workspace/tables/named-icon";
-import { workspaceKeys } from "@/data/workspace/keys";
+import { tablesCollection } from "@/data/workspace/tables";
 import { applyTemplateMutationOptions, templatesQueryOptions } from "@/data/workspace/templates";
 import type { TemplateSummary } from "@/lib/templates/catalog";
 
@@ -49,7 +50,7 @@ function UseTemplateSheet({
   template: TemplateSummary | null;
   onClose: () => void;
 }) {
-  const queryClient = useQueryClient();
+  const dbClient = useDbClient();
   const navigate = useNavigate();
   const switchId = useId();
   const [sampleData, setSampleData] = useState(true);
@@ -57,7 +58,10 @@ function UseTemplateSheet({
   const apply = useMutation({
     ...applyTemplateMutationOptions,
     onSuccess: async (result) => {
-      await queryClient.invalidateQueries({ queryKey: workspaceKeys.tables() });
+      const rows = dbClient.collection(tablesCollection);
+      rows.utils.writeBatch(() => {
+        for (const row of result.tables) rows.utils.writeUpsert(row);
+      });
       onClose();
       toastManager.add({ type: "success", title: `${template?.name ?? "Template"} created` });
       const first = result.tables[0];
@@ -99,7 +103,6 @@ function UseTemplateSheet({
                     {[
                       count(table.columns, "column"),
                       table.views ? count(table.views, "view") : null,
-                      table.forms ? count(table.forms, "form") : null,
                     ]
                       .filter(Boolean)
                       .join(" · ")}
@@ -150,7 +153,7 @@ export function TemplateGallery({ workspace }: { workspace: string }) {
       <CardFrameHeader>
         <CardFrameTitle>Templates</CardFrameTitle>
         <CardFrameDescription>
-          Pick a template to create your first table, view and form.
+          Pick a template to create your first tables and views.
         </CardFrameDescription>
       </CardFrameHeader>
       <Card>
@@ -160,7 +163,8 @@ export function TemplateGallery({ workspace }: { workspace: string }) {
               {isError ? "Couldn't load templates." : "No templates available."}
             </p>
           )}
-          {!templates && !isError &&
+          {!templates &&
+            !isError &&
             Array.from({ length: 4 }, (_, index) => <Skeleton key={index} className="h-24" />)}
           {templates?.map((template) => (
             <button

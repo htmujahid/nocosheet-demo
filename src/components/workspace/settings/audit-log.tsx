@@ -1,3 +1,4 @@
+import { useLiveSuspenseQuery } from "@tanstack/react-db";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useTable } from "@tanstack/react-table";
 
@@ -23,7 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { auditQueryOptions } from "@/data/workspace/audit";
-import { sidebarQueryOptions } from "@/data/workspace/sidebar";
+import { tablesCollection } from "@/data/workspace/tables";
 import { AUDIT_ACTIONS } from "@/lib/audit/actions";
 import { auditSearchParams, type AuditQuery } from "@/lib/audit/query";
 import { AUDIT_RETENTION_DAYS } from "@/lib/audit/retention";
@@ -44,7 +45,6 @@ const ACTION_ITEMS = [
   { value: "update", label: "Edited" },
   { value: "delete", label: "Deleted" },
   { value: "restore", label: "Restored" },
-  { value: "purge", label: "Deleted forever" },
   { value: "import", label: "Imported" },
 ];
 
@@ -54,15 +54,18 @@ export function SettingsAuditLog({ workspace }: { workspace: string }) {
   const [query, setQuery] = useQueryStates(auditSearchParams, { history: "replace" });
   const onQueryChange = (patch: Partial<AuditQuery>) => void setQuery(patch);
   const { data, isFetching } = useAuditRows(workspace, query);
-  const { data: sidebar } = useQuery(sidebarQueryOptions(workspace));
   const rows = data?.rows ?? [];
+  const { data: tables } = useLiveSuspenseQuery({
+    query: (q) =>
+      q
+        .from({ table: tablesCollection })
+        .orderBy(({ table }) => table.position)
+        .orderBy(({ table }) => table.id),
+  });
 
   const tableItems = [
     { value: ALL, label: "All tables" },
-    ...(sidebar?.groups.flatMap((group) => group.tables) ?? []).map((table) => ({
-      value: String(table.id),
-      label: table.name,
-    })),
+    ...tables.map((table) => ({ value: String(table.id), label: table.name })),
   ];
 
   const table = useTable(

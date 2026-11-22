@@ -1,15 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 import { WorkspaceContent, WorkspaceHeader } from "@/components/layout/workspace-header";
+import { YourAccess } from "@/components/workspace/settings/access-profiles/your-access";
 import { SettingsGeneral } from "@/components/workspace/settings/general";
 import { ResetWorkspaceCard } from "@/components/workspace/settings/reset-workspace";
-import { membersQueryOptions } from "@/data/workspace/members";
+import { membersCollection } from "@/data/workspace/members";
 
 export const Route = createFileRoute("/workspaces/$workspace/settings/")({
   staticData: { crumb: "General" },
   loader: ({ context }) => {
-    void context.queryClient
-      .query({ ...membersQueryOptions, staleTime: "static" })
+    void context.dbClient
+      .collection(membersCollection)
+      .preload()
       .catch(() => undefined);
   },
   component: SettingsPage,
@@ -23,6 +25,7 @@ function SettingsPage() {
       <WorkspaceContent className="max-w-3xl">
         <div className="flex flex-col gap-6">
           <SettingsGeneral />
+          <YourAccess />
           <ResetWorkspaceCard workspace={workspace} />
         </div>
       </WorkspaceContent>

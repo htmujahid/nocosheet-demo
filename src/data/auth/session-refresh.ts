@@ -1,21 +1,16 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "@tanstack/react-router";
 
-import { authKeys } from "@/data/auth/keys";
+import { sessionQueryOptions, loadSession } from "./session";
 
 export function useRefreshSession() {
   const queryClient = useQueryClient();
   const router = useRouter();
 
   return async ({ signedOut = false } = {}) => {
-    if (signedOut) {
-      // Drop every cached user-scoped query, but keep the session query so it can be invalidated.
-      queryClient.removeQueries({
-        predicate: (query) =>
-          query.queryKey[0] !== authKeys.all[0] || query.queryKey[1] !== "session",
-      });
-    }
-    await queryClient.invalidateQueries({ queryKey: authKeys.session() });
+    if (signedOut) queryClient.removeQueries();
+    await queryClient.invalidateQueries({ queryKey: sessionQueryOptions.queryKey });
+    await loadSession(queryClient);
     await router.invalidate();
   };
 }

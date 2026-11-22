@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import { useDbClient } from "@tanstack/react-db";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useRouter } from "@tanstack/react-router";
 
@@ -18,19 +19,21 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { toastManager } from "@/components/ui/toast";
-import { workspaceKeys } from "@/data/workspace/keys";
+import { grantsCollection } from "@/data/workspace/access";
 import {
   grantTargetsQueryOptions,
   accessProfilesQueryOptions,
   updateProfileMutationOptions,
 } from "@/data/workspace/access-profiles";
-import { grantsToMatrix, type Matrix, matrixToGrants } from "@/lib/access/matrix";
+import { workspaceKeys } from "@/data/workspace/keys";
 import type { AccessGrant, ProfileKind } from "@/lib/access/grants";
+import { grantsToMatrix, type Matrix, matrixToGrants } from "@/lib/access/matrix";
 
 import { type GrantTarget, GrantMatrix } from "./grant-matrix";
 
 export function ProfileEditor({ workspace, profileId }: { workspace: string; profileId: number }) {
   const queryClient = useQueryClient();
+  const dbClient = useDbClient();
   const router = useRouter();
   const { data: profiles } = useSuspenseQuery(accessProfilesQueryOptions(workspace));
   const { data: targets } = useSuspenseQuery(grantTargetsQueryOptions(workspace));
@@ -52,7 +55,7 @@ export function ProfileEditor({ workspace, profileId }: { workspace: string; pro
       onSaved={async () => {
         await Promise.all([
           queryClient.invalidateQueries({ queryKey: workspaceKeys.accessProfiles() }),
-          queryClient.invalidateQueries({ queryKey: workspaceKeys.access() }),
+          dbClient.collection(grantsCollection).utils.refetch(),
           router.invalidate(),
         ]);
       }}

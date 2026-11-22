@@ -55,7 +55,6 @@ export function SelectionBar({
           <DeleteRecordsDialog
             workspace={workspace}
             tableId={tableId}
-            viewId={viewId}
             ids={selected.map((row) => row.id)}
             onDeleted={(deleted) => {
               grid.resetRowSelection();

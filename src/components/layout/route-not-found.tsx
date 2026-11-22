@@ -14,7 +14,7 @@ import {
 
 export function RouteNotFound() {
   return (
-    <Empty className="min-h-svh">
+    <Empty className="py-16">
       <EmptyHeader>
         <EmptyMedia variant="icon">
           <FileQuestionIcon aria-hidden="true" />

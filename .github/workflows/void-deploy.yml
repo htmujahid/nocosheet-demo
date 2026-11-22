@@ -13,7 +13,6 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    # Secrets can't be read in a job-level `if`, so expose them via env first.
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -49,9 +48,6 @@ jobs:
         if: steps.check.outputs.enabled == 'true'
         run: pnpm install --frozen-lockfile
 
-      # VITE_* values are public and baked into the client bundle at build time (Void ignores .env in builds).
-      # Set them as repository Variables (Settings > Secrets and variables > Actions > Variables).
-      # Only non-empty ones are exported, so anything unset falls back to its default in env.ts.
       - name: Public build values
         if: steps.check.outputs.enabled == 'true'
         env:
@@ -71,11 +67,8 @@ jobs:
       - name: Deploy
         if: steps.check.outputs.enabled == 'true'
         env:
-          # Required only for PostgreSQL/MySQL provisioning and migrations.
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          # Required in fresh checkouts when a Worker Version has no preview URL.
           CLOUDFLARE_WORKERS_SUBDOMAIN: ${{ vars.CLOUDFLARE_WORKERS_SUBDOMAIN }}
-          # Required only when Cloudflare Access protects Worker readiness.
           CF_ACCESS_CLIENT_ID: ${{ secrets.CF_ACCESS_CLIENT_ID }}
           CF_ACCESS_CLIENT_SECRET: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}
         run: pnpm exec void deploy --platform cloudflare

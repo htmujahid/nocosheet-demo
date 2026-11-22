@@ -6,8 +6,8 @@ import { Outlet, createRootRouteWithContext } from "@tanstack/react-router";
 import { NuqsAdapter } from "nuqs/adapters/tanstack-router";
 
 import { ToastProvider } from "@/components/ui/toast";
-import { sessionQueryOptions } from "@/data/auth/session";
-import { configQueryOptions } from "@/data/config";
+import { loadSession } from "@/data/auth/session";
+import { loadConfig } from "@/data/config";
 
 // Only included in dev builds; tree-shaken from production.
 const Devtools = import.meta.env.DEV ? lazy(() => import("@/components/devtools")) : null;
@@ -15,8 +15,8 @@ const Devtools = import.meta.env.DEV ? lazy(() => import("@/components/devtools"
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   beforeLoad: async ({ context }) => {
     const [session, config] = await Promise.all([
-      context.queryClient.query(sessionQueryOptions),
-      context.queryClient.query(configQueryOptions),
+      loadSession(context.queryClient),
+      loadConfig(context.queryClient),
     ]);
     return { session, config };
   },

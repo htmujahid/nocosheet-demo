@@ -1,4 +1,4 @@
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useLiveSuspenseQuery } from "@tanstack/react-db";
 
 import { SettingsRow } from "@/components/shared/settings-row";
 import { Badge } from "@/components/ui/badge";
@@ -9,14 +9,15 @@ import {
   CardFrameHeader,
   CardFrameTitle,
 } from "@/components/ui/card";
-import { sidebarQueryOptions } from "@/data/workspace/sidebar";
+import { tablesCollection } from "@/data/workspace/tables";
 import { useAccess } from "@/hooks/use-access";
 import { scopeLabel, summarizeGrants } from "@/lib/access/matrix";
 
-export function YourAccess({ workspace }: { workspace: string }) {
+export function YourAccess() {
   const access = useAccess();
-  const { data: sidebar } = useSuspenseQuery(sidebarQueryOptions(workspace));
-  const tables = sidebar.groups.flatMap((group) => group.tables);
+  const { data: tables } = useLiveSuspenseQuery({
+    query: (q) => q.from({ table: tablesCollection }),
+  });
   const overridden = tables.filter((table) =>
     access.grants.some((grant) => grant.resourceId === table.id),
   );

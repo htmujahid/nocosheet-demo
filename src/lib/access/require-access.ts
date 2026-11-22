@@ -2,9 +2,8 @@ import type { Context, Env } from "hono";
 import { type AuthUser, requireAuth } from "void/auth";
 
 import { httpError, NOT_FOUND } from "../http";
-import { type Access, loadAccess } from "./load-access";
 import type { Action } from "./grants";
-import { listTableResourceIds, resourceInTable } from "./repository";
+import { type Access, loadAccess } from "./load-access";
 
 const DENIED: Record<Action, string> = {
   create: "You don't have access to create records here.",
@@ -16,40 +15,34 @@ const DENIED: Record<Action, string> = {
 
 const VISIBLE_ACTIONS: Action[] = ["read", "create", "update"];
 
-function denied(access: Access, action: Action, tableId: number, resourceId?: number | null) {
-  const visible = VISIBLE_ACTIONS.some(
-    (item) => access.scope(item, tableId, resourceId) !== "none",
-  );
+function denied(access: Access, tableId: number, action: Action) {
+  const visible = VISIBLE_ACTIONS.some((item) => access.scope(tableId, item) !== "none");
   return visible ? httpError(403, DENIED[action]) : httpError(404, NOT_FOUND);
 }
 
 export async function requireAccess<E extends Env & { Variables: { user: AuthUser | null } }>(
   c: Context<E>,
-  actions: Action | Action[],
   tableId: number,
-  resourceId?: number | null,
+  actions: Action | Action[],
 ) {
   const user = requireAuth(c);
   const list = Array.isArray(actions) ? actions : [actions];
   const access = await loadAccess(user);
   const granted = list
-    .map((action) => ({ action, scope: access.scope(action, tableId, resourceId) }))
+    .map((action) => ({ action, scope: access.scope(tableId, action) }))
     .filter((item) => item.scope !== "none");
   const best = granted.find((item) => item.scope === "all") ?? granted[0];
-  if (!best) throw denied(access, list[0], tableId, resourceId);
-  if (resourceId && !(await resourceInTable(resourceId, tableId))) throw httpError(404, NOT_FOUND);
+  if (!best) throw denied(access, tableId, list[0]);
   return { ...best, ownerId: best.scope === "own" ? user.id : undefined };
 }
 
-export async function requireAccessThrough<
-  E extends Env & { Variables: { user: AuthUser | null } },
->(c: Context<E>, actions: Action[], tableId: number) {
-  const user = requireAuth(c);
-  const access = await loadAccess(user);
-  const allowed = (resourceId?: number) =>
-    actions.some((action) => access.scope(action, tableId, resourceId) !== "none");
-  if (allowed()) return;
-  const resources = await listTableResourceIds(tableId);
-  if (resources.some((id) => allowed(id))) return;
-  throw denied(access, actions[0], tableId);
+/** Passes when any one of `actions` is allowed on the table. */
+export async function requireAnyAccess<E extends Env & { Variables: { user: AuthUser | null } }>(
+  c: Context<E>,
+  tableId: number,
+  actions: Action[],
+) {
+  const access = await loadAccess(requireAuth(c));
+  if (actions.some((action) => access.scope(tableId, action) !== "none")) return;
+  throw denied(access, tableId, actions[0]);
 }

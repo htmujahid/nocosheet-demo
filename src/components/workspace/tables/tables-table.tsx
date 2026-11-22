@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { useLiveSuspenseQuery } from "@tanstack/react-db";
 import { functionalUpdate, useTable } from "@tanstack/react-table";
 
 import { SearchIcon } from "lucide-react";
@@ -12,19 +12,40 @@ import { DataTableViewOptions } from "@/components/shared/data-table/data-table-
 import { dataTableFeatures } from "@/components/shared/data-table/features";
 import { Frame, FrameFooter } from "@/components/ui/frame";
 import { Input } from "@/components/ui/input";
-import { tablesQueryOptions } from "@/data/workspace/tables";
+import { type TableRow, tablesCollection } from "@/data/workspace/tables";
+import { useAccess } from "@/hooks/use-access";
+import { useSession } from "@/hooks/use-session";
 import { tablesSearchParams, type TablesQuery } from "@/lib/tables/query";
 
 import { DeleteTablesDialog } from "./delete-tables-dialog";
 import { tablesColumns } from "./tables-columns";
 
-export type TablesRow = NonNullable<ReturnType<typeof useTablesRows>["data"]>["rows"][number];
+export type TablesRow = TableRow;
 
-function useTablesRows(workspace: string, query: TablesQuery) {
-  return useQuery({
-    ...tablesQueryOptions(workspace, query),
-    placeholderData: keepPreviousData,
-  });
+const byText = (a: string | null, b: string | null) =>
+  (a ?? "").localeCompare(b ?? "", undefined, { sensitivity: "base" });
+
+const comparers: Record<TablesQuery["sort"], (a: TablesRow, b: TablesRow) => number> = {
+  name: (a, b) => byText(a.name, b.name),
+  groupName: (a, b) => byText(a.groupName, b.groupName),
+  updatedAt: (a, b) => a.updatedAt.localeCompare(b.updatedAt),
+};
+
+function pageOfTables(tables: TablesRow[], query: TablesQuery) {
+  const needle = query.q.trim().toLowerCase();
+  const matching = needle
+    ? tables.filter(
+        (table) =>
+          table.name.toLowerCase().includes(needle) ||
+          table.description?.toLowerCase().includes(needle),
+      )
+    : tables;
+  const direction = query.order === "desc" ? -1 : 1;
+  const sorted = [...matching].sort(
+    (a, b) => direction * comparers[query.sort](a, b) || a.id - b.id,
+  );
+  const start = (query.page - 1) * query.pageSize;
+  return { rows: sorted.slice(start, start + query.pageSize), total: sorted.length };
 }
 
 export function TablesTable({
@@ -38,20 +59,28 @@ export function TablesTable({
 }) {
   const [query, setQuery] = useQueryStates(tablesSearchParams, { history: "replace" });
   const onQueryChange = (patch: Partial<TablesQuery>) => void setQuery(patch);
-  const { data, isFetching } = useTablesRows(workspace, query);
-  const rows = data?.rows ?? [];
-  const total = data?.total ?? 0;
+  const access = useAccess();
+  const { data: tables } = useLiveSuspenseQuery((q) => q.from({ table: tablesCollection }));
+  const columns = useMemo(
+    () => (access.admin ? tablesColumns : tablesColumns.filter((column) => column.id !== "select")),
+    [access.admin],
+  );
+  const listed = useMemo(
+    () => (access.admin ? tables : tables.filter((table) => !table.isHidden)),
+    [tables, access.admin],
+  );
+  const { rows, total } = useMemo(() => pageOfTables(listed, query), [listed, query]);
 
   const table = useTable(
     {
       features: dataTableFeatures,
-      columns: tablesColumns,
+      columns,
       data: rows,
       getRowId: (row) => String(row.id),
       manualPagination: true,
       manualSorting: true,
       manualFiltering: true,
-      enableRowSelection: true,
+      enableRowSelection: access.admin,
       enableMultiSort: false,
       enableSortingRemoval: false,
       rowCount: total,
@@ -104,7 +133,7 @@ export function TablesTable({
     .filter(([, selected]) => selected)
     .map(([id]) => Number(id));
 
-  if (data && total === 0 && !query.q) return placeholder;
+  if (tables.length === 0) return placeholder;
 
   return (
     <div className="flex flex-col gap-4">
@@ -136,7 +165,7 @@ export function TablesTable({
         </div>
       </div>
       <Frame>
-        <DataTable table={table} empty={empty} pending={isFetching} />
+        <DataTable table={table} empty={empty} />
         <FrameFooter className="p-2">
           <DataTablePagination
             page={query.page}

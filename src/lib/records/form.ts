@@ -11,7 +11,15 @@ type FormColumn = {
 export type FormValue = string | boolean | string[] | FileValue[];
 export type FormValues = Record<string, FormValue>;
 
-const NUMBER_FORMATS = ["integer", "decimal", "percent", "currency", "rating", "duration"];
+const NUMBER_FORMATS = [
+  "integer",
+  "decimal",
+  "percent",
+  "currency",
+  "rating",
+  "duration",
+  "relation",
+];
 
 const pad = (value: number) => String(value).padStart(2, "0");
 

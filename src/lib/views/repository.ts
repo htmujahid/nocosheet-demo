@@ -1,4 +1,4 @@
-import { resourceTable, viewTable } from "@db/schema";
+import { nowMs, viewTable } from "@db/schema";
 import { and, asc, db, eq, inArray, sql } from "void/db";
 
 import type { Column, Table } from "../tables/repository";
@@ -34,7 +34,8 @@ export async function findViewsUsingColumn(tableId: number, columnName: string) 
   const views = await db.select().from(viewTable).where(eq(viewTable.tableId, tableId));
   return views.filter(
     (view) =>
-      view.selectColumns.includes(columnName) || view.whereExpression.some((condition) => condition.column === columnName),
+      view.selectColumns.includes(columnName) ||
+      view.whereExpression.some((condition) => condition.column === columnName),
   );
 }
 
@@ -49,11 +50,9 @@ export function buildViewStatements(
     .map((column) => column.columnName);
 
   return [
-    db.insert(resourceTable).values({ kind: "view" }),
     db
       .insert(viewTable)
       .values({
-        id: sql`last_insert_rowid()`,
         tableId: table.id,
         name: body.name,
         description: body.description,
@@ -68,8 +67,13 @@ export function buildViewStatements(
   ] as const;
 }
 
-export async function createView(table: Table, columns: Column[], body: ViewValues, userId: string) {
-  const [, inserted] = await db.batch(buildViewStatements(table, columns, body, userId));
+export async function createView(
+  table: Table,
+  columns: Column[],
+  body: ViewValues,
+  userId: string,
+) {
+  const [inserted] = await db.batch(buildViewStatements(table, columns, body, userId));
   return inserted[0];
 }
 
@@ -80,7 +84,7 @@ export async function updateView(id: number, body: ViewPatchValues) {
       name: body.name,
       description: body.description,
       icon: body.icon,
-      updatedAt: new Date(),
+      updatedAt: nowMs,
     })
     .where(eq(viewTable.id, id))
     .returning();
@@ -88,5 +92,5 @@ export async function updateView(id: number, body: ViewPatchValues) {
 }
 
 export async function deleteViews(ids: number[]) {
-  await db.delete(resourceTable).where(inArray(resourceTable.id, ids));
+  await db.delete(viewTable).where(inArray(viewTable.id, ids));
 }

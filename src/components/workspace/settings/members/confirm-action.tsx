@@ -13,7 +13,6 @@ import {
 import { Button } from "@/components/ui/button";
 
 type ConfirmActionProps = {
-  /** Label of the button that opens the dialog. */
   label: string;
   title: string;
   description: string;
@@ -24,7 +23,6 @@ type ConfirmActionProps = {
   onConfirm: () => Promise<unknown> | void;
 };
 
-/** A button that asks for confirmation before running a one-click admin action. */
 export function ConfirmAction({
   label,
   title,
@@ -64,9 +62,7 @@ export function ConfirmAction({
               try {
                 await onConfirm();
                 setOpen(false);
-              } catch {
-                // The caller reports the failure (toast); keep the dialog open to retry.
-              }
+              } catch {}
             }}
           >
             {confirmLabel}

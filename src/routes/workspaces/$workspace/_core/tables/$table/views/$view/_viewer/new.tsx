@@ -8,7 +8,7 @@ export const Route = createFileRoute(
 )({
   pendingComponent: () => null,
   beforeLoad: ({ context, params }) => {
-    if (scopeFor(context.access, "create", Number(params.table)) === "none")
+    if (scopeFor(context.access, Number(params.table), "create") === "none")
       throw redirect({
         to: "/workspaces/$workspace/tables/$table/views/$view",
         params,

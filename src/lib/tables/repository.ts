@@ -1,32 +1,12 @@
-import {
-  columnTable,
-  favoriteTable,
-  formTable,
-  resourceTable,
-  tableTable,
-  viewTable,
-} from "@db/schema";
-import {
-  and,
-  asc,
-  count,
-  db,
-  desc,
-  eq,
-  inArray,
-  isNotNull,
-  isNull,
-  lt,
-  notInArray,
-  or,
-  sql,
-} from "void/db";
+import { columnTable, favoriteTable, nowMs, resourceTable, tableTable } from "@db/schema";
+import { and, asc, db, desc, eq, inArray, isNotNull, isNull, lt, notInArray, sql } from "void/db";
 
 import { TRASH_LIST_LIMIT } from "../trash/query";
 import {
   buildAddColumn,
   buildCreateIndex,
   buildCreateTable,
+  buildSystemIndexes,
   buildDropColumn,
   buildDropIndex,
   buildDropTable,
@@ -38,7 +18,6 @@ import {
 } from "./ddl";
 import type { ColumnFormat } from "./formats";
 import { newColumnName, newTableName, physicalTableName } from "./naming";
-import type { TablesQuery } from "./query";
 import type { ColumnValues, TableValues } from "./validation";
 
 export type Table = typeof tableTable.$inferSelect;
@@ -169,75 +148,25 @@ export async function listColumns(tableId: number) {
     .orderBy(asc(columnTable.position));
 }
 
-export async function listTables(query: TablesQuery) {
-  const { page, pageSize, sort, order, q } = query;
-
-  const columnCount = sql<number>`(select count(*) from ${columnTable} where ${columnTable.tableId} = ${tableTable}.id and ${columnTable.deletedAt} is null)`;
-  const pattern = q ? `%${q.replaceAll(/[\\%_]/g, "\\$&")}%` : null;
-
-  const where = and(
-    isNull(tableTable.deletedAt),
-    pattern
-      ? or(
-          sql`${tableTable.name} like ${pattern} escape '\\'`,
-          sql`${tableTable.description} like ${pattern} escape '\\'`,
-        )
-      : undefined,
-  );
-
-  const sortExpression = {
-    name: sql`lower(${tableTable.name})`,
-    groupName: sql`lower(${tableTable.groupName})`,
-    columnCount,
-    updatedAt: tableTable.updatedAt,
-  }[sort];
-  const direction = order === "desc" ? desc : asc;
-
-  const [rows, [{ total }]] = await db.batch([
-    db
-      .select({
-        id: tableTable.id,
-        name: tableTable.name,
-        icon: tableTable.icon,
-        groupName: tableTable.groupName,
-        description: tableTable.description,
-        titleColumnId: tableTable.titleColumnId,
-        isHidden: tableTable.isHidden,
-        columnCount,
-        updatedAt: tableTable.updatedAt,
-      })
-      .from(tableTable)
-      .where(where)
-      .orderBy(direction(sortExpression), asc(tableTable.id))
-      .limit(pageSize)
-      .offset((page - 1) * pageSize),
-    db.select({ total: count() }).from(tableTable).where(where),
-  ]);
-
-  return { rows, total };
-}
-
-export async function listSidebarRows(userId: string) {
+export async function listTables() {
   return db
-    .select({
-      id: tableTable.id,
-      name: tableTable.name,
-      icon: tableTable.icon,
-      groupName: tableTable.groupName,
-      updatedAt: tableTable.updatedAt,
-      favoritedAt: favoriteTable.createdAt,
-    })
+    .select()
     .from(tableTable)
-    .leftJoin(
-      favoriteTable,
-      and(eq(favoriteTable.tableId, tableTable.id), eq(favoriteTable.userId, userId)),
-    )
-    .where(and(isNull(tableTable.deletedAt), eq(tableTable.isHidden, false)))
+    .where(isNull(tableTable.deletedAt))
     .orderBy(asc(tableTable.position), asc(tableTable.id));
 }
 
+export async function listFavorites(userId: string) {
+  return db.select().from(favoriteTable).where(eq(favoriteTable.userId, userId));
+}
+
 export async function addFavorite(userId: string, tableId: number) {
-  await db.insert(favoriteTable).values({ userId, tableId }).onConflictDoNothing();
+  const [row] = await db
+    .insert(favoriteTable)
+    .values({ userId, tableId })
+    .onConflictDoUpdate({ target: [favoriteTable.userId, favoriteTable.tableId], set: { userId } })
+    .returning();
+  return row;
 }
 
 export async function removeFavorite(userId: string, tableId: number) {
@@ -278,7 +207,10 @@ export async function createTable(workspace: string, body: TableValues, userId: 
   const physicalName = physicalTableName(workspace, tableName);
 
   const results = (await db.batch(
-    buildTableStatements(tableName, body, userId, [buildCreateTable(physicalName)]) as never,
+    buildTableStatements(tableName, body, userId, [
+      buildCreateTable(physicalName),
+      ...buildSystemIndexes(physicalName),
+    ]) as never,
   )) as unknown[];
   return (results.at(-1) as Table[])[0];
 }
@@ -297,7 +229,7 @@ export async function updateTable(
 ) {
   const [updated] = await db
     .update(tableTable)
-    .set({ ...defined(fields), updatedAt: new Date() })
+    .set({ ...defined(fields), updatedAt: nowMs })
     .where(eq(tableTable.id, id))
     .returning();
   return updated;
@@ -373,8 +305,15 @@ export async function createColumn(
   await db.batch([
     first,
     ...rest,
-    buildColumnInsert(table.id, columnName, body, columnSqliteType(body, targets), check, generated),
-    db.update(tableTable).set({ updatedAt: new Date() }).where(eq(tableTable.id, table.id)),
+    buildColumnInsert(
+      table.id,
+      columnName,
+      body,
+      columnSqliteType(body, targets),
+      check,
+      generated,
+    ),
+    db.update(tableTable).set({ updatedAt: nowMs }).where(eq(tableTable.id, table.id)),
   ]);
 
   return (await findColumnByName(table.id, columnName)) as Column;
@@ -390,7 +329,7 @@ export async function updateColumn(
 
   await db.batch([
     db.update(columnTable).set(changes).where(eq(columnTable.id, column.id)),
-    db.update(tableTable).set({ updatedAt: new Date() }).where(eq(tableTable.id, table.id)),
+    db.update(tableTable).set({ updatedAt: nowMs }).where(eq(tableTable.id, table.id)),
   ] as never);
 
   return findColumn(table.id, column.id);
@@ -404,7 +343,7 @@ export async function reorderColumns(tableId: number, ids: number[]) {
         .set({ position: index })
         .where(and(eq(columnTable.id, id), eq(columnTable.tableId, tableId))),
     ),
-    db.update(tableTable).set({ updatedAt: new Date() }).where(eq(tableTable.id, tableId)),
+    db.update(tableTable).set({ updatedAt: nowMs }).where(eq(tableTable.id, tableId)),
   ] as never);
 }
 
@@ -419,12 +358,12 @@ export async function softDeleteColumn(
     db.run(sql.raw(buildDropIndex(indexName(workspace, column.columnName, "idx")))),
     db
       .update(columnTable)
-      .set({ deletedAt: new Date(), deletedBy: userId })
+      .set({ deletedAt: nowMs, deletedBy: userId })
       .where(eq(columnTable.id, column.id)),
     db
       .update(tableTable)
       .set({
-        updatedAt: new Date(),
+        updatedAt: nowMs,
         ...(table.titleColumnId === column.id ? { titleColumnId: null } : {}),
       })
       .where(eq(tableTable.id, table.id)),
@@ -459,7 +398,7 @@ export async function restoreColumn(workspace: string, table: Table, column: Col
           : "select 1",
       ),
     ),
-    db.update(tableTable).set({ updatedAt: new Date() }).where(eq(tableTable.id, table.id)),
+    db.update(tableTable).set({ updatedAt: nowMs }).where(eq(tableTable.id, table.id)),
   ]);
 }
 
@@ -492,7 +431,7 @@ export async function dropColumn(workspace: string, table: Table, column: Column
     db
       .update(tableTable)
       .set({
-        updatedAt: new Date(),
+        updatedAt: nowMs,
         ...(table.titleColumnId === column.id ? { titleColumnId: null } : {}),
       })
       .where(eq(tableTable.id, table.id)),
@@ -517,7 +456,7 @@ export async function findLinkingColumns(ids: number[], options: { liveOnly: boo
 export async function softDeleteTables(ids: number[], userId: string) {
   await db
     .update(tableTable)
-    .set({ deletedAt: new Date(), deletedBy: userId })
+    .set({ deletedAt: nowMs, deletedBy: userId })
     .where(inArray(tableTable.id, ids));
 }
 
@@ -528,22 +467,6 @@ export async function dropTables(workspace: string, rows: { id: number; tableNam
     ...rows.map((row) =>
       db.run(sql.raw(buildDropTable(physicalTableName(workspace, row.tableName)))),
     ),
-    db
-      .delete(resourceTable)
-      .where(
-        inArray(
-          resourceTable.id,
-          db.select({ id: viewTable.id }).from(viewTable).where(inArray(viewTable.tableId, ids)),
-        ),
-      ),
-    db
-      .delete(resourceTable)
-      .where(
-        inArray(
-          resourceTable.id,
-          db.select({ id: formTable.id }).from(formTable).where(inArray(formTable.tableId, ids)),
-        ),
-      ),
     db.delete(resourceTable).where(inArray(resourceTable.id, ids)),
   ] as never);
 }

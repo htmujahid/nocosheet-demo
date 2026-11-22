@@ -19,8 +19,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { NamedIcon } from "@/components/workspace/tables/named-icon";
-import type { Matrix } from "@/lib/access/matrix";
 import { type Action, ACTION_LABELS } from "@/lib/access/grants";
+import type { Matrix } from "@/lib/access/matrix";
 
 import { ScopeSelect, type ScopeValue } from "./scope-select";
 

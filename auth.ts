@@ -1,17 +1,10 @@
-import { apiKey } from "@better-auth/api-key";
 import { passkey } from "@better-auth/passkey";
 import { APIError } from "better-auth/api";
-import { admin, bearer, openAPI, twoFactor, username } from "better-auth/plugins";
+import { admin, twoFactor, username } from "better-auth/plugins";
 import { defineAuth } from "void/auth";
 import { storage } from "void/storage";
 
 import { ac, ADMIN_ROLES, DEFAULT_ROLE, isAdmin, roles } from "./src/lib/auth/access";
-import {
-  API_KEY_MAX_EXPIRY_DAYS,
-  API_KEY_NAME_MAX,
-  API_KEY_PREFIX,
-  API_KEY_RATE_LIMIT,
-} from "./src/lib/auth/api-keys";
 import { googleCredentials } from "./src/lib/auth/google";
 import { enqueueEmail } from "./src/lib/auth/mail";
 import { kvSecondaryStorage } from "./src/lib/auth/secondary-storage";
@@ -37,21 +30,7 @@ export default defineAuth(({ defaults, env }) => ({
     passkey({ rpName: "Nocosheet" }),
     twoFactor({ issuer: "Nocosheet" }),
     admin({ ac, roles, defaultRole: DEFAULT_ROLE, adminRoles: ADMIN_ROLES }),
-    apiKey({
-      defaultPrefix: API_KEY_PREFIX,
-      requireName: true,
-      maximumNameLength: API_KEY_NAME_MAX,
-      startingCharactersConfig: { shouldStore: true, charactersLength: 8 },
-      keyExpiration: {
-        defaultExpiresIn: null,
-        minExpiresIn: 1,
-        maxExpiresIn: API_KEY_MAX_EXPIRY_DAYS,
-      },
-      rateLimit: { enabled: true, ...API_KEY_RATE_LIMIT },
-    }),
     username({ displayUsername: false, minUsernameLength: 3, maxUsernameLength: 30 }),
-    bearer({ requireSignature: true }),
-    openAPI(),
   ],
   emailAndPassword: {
     ...defaults.emailAndPassword,
@@ -93,10 +72,6 @@ export default defineAuth(({ defaults, env }) => ({
         },
         after: async (user, ctx) => {
           if (isAvatarUrl(user.image)) await storage.delete(avatarKey(user.id));
-          await ctx?.context.adapter.deleteMany({
-            model: "apikey",
-            where: [{ field: "referenceId", value: user.id }],
-          });
         },
       },
     },

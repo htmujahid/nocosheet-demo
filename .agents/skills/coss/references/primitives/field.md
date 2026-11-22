@@ -26,8 +26,8 @@ import {
   FieldError,
   FieldLabel,
   FieldValidity,
-} from "@/components/ui/field"
-import { Input } from "@/components/ui/input"
+} from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
 ```
 
 ## Minimal pattern
@@ -97,7 +97,11 @@ Field wrapping an autocomplete:
     <AutocompleteInput placeholder="Search..." />
     <AutocompletePopup>
       <AutocompleteList>
-        {(item) => <AutocompleteItem key={item.value} value={item}>{item.label}</AutocompleteItem>}
+        {(item) => (
+          <AutocompleteItem key={item.value} value={item}>
+            {item.label}
+          </AutocompleteItem>
+        )}
       </AutocompleteList>
     </AutocompletePopup>
   </Autocomplete>

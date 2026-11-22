@@ -31,5 +31,5 @@ export const PUT = defineHandler.withValidator({ params, body: columnOrderSchema
       error instanceof Error ? error.message : "The columns could not be reordered.",
     );
   }
-  return { ok: true };
+  return { columns: await listColumns(table.id), table: (await findTable(table.id)) ?? table };
 });

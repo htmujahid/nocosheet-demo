@@ -3,7 +3,6 @@ import type { ColumnDef } from "@tanstack/react-table";
 
 import { LayoutGridIcon } from "lucide-react";
 
-import { DataTableColumnHeader } from "@/components/shared/data-table/data-table-column-header";
 import type { dataTableFeatures } from "@/components/shared/data-table/features";
 import { Checkbox } from "@/components/ui/checkbox";
 import { formatRelativeTime } from "@/lib/format-relative-time";
@@ -51,10 +50,9 @@ export function viewsColumns({
       : []),
     {
       id: "name",
-      meta: { label: "Name" },
       enableHiding: false,
       accessorKey: "name",
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Name" />,
+      header: "Name",
       cell: ({ row }) => (
         <div className="flex items-center gap-3">
           <NamedIcon
@@ -63,13 +61,7 @@ export function viewsColumns({
             className="size-4 shrink-0 text-muted-foreground"
           />
           <div className="flex min-w-0 flex-col">
-            <Link
-              to="/workspaces/$workspace/tables/$table/views/$view"
-              params={{ workspace, table, view: String(row.original.id) }}
-              className="truncate font-medium hover:underline"
-            >
-              {row.original.name}
-            </Link>
+            <span className="truncate font-medium">{row.original.name}</span>
             {row.original.description && (
               <span className="truncate text-muted-foreground text-xs">
                 {row.original.description}
@@ -81,16 +73,14 @@ export function viewsColumns({
     },
     {
       id: "columnCount",
-      meta: { label: "Columns" },
       accessorKey: "columnCount",
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Columns" />,
+      header: "Columns",
       cell: ({ row }) => <span className="tabular-nums">{row.original.columnCount}</span>,
     },
     {
       id: "updatedAt",
-      meta: { label: "Updated" },
       accessorKey: "updatedAt",
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Updated" />,
+      header: "Updated",
       cell: ({ row }) => (
         <span
           className="text-muted-foreground"

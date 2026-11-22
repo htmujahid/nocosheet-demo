@@ -11,7 +11,7 @@ import {
   CardPanel,
 } from "@/components/ui/card";
 import { NamedIcon } from "@/components/workspace/tables/named-icon";
-import type { SidebarTable } from "@/data/workspace/sidebar";
+import type { TableRow } from "@/data/workspace/tables";
 import { useAccess } from "@/hooks/use-access";
 import { formatRelativeTime } from "@/lib/format-relative-time";
 
@@ -22,7 +22,7 @@ export function TableShortcuts({
   tables: allTables,
 }: {
   workspace: string;
-  tables: SidebarTable[];
+  tables: TableRow[];
 }) {
   const access = useAccess();
   const tables = [...allTables].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
@@ -71,30 +71,29 @@ export function TableShortcuts({
               </span>
             </Link>
           ))}
-          {empty &&
-            (
-              <CardPanel className="flex flex-col items-center gap-3 py-8 text-center">
-                <p className="text-muted-foreground text-sm">
-                  {access.admin
-                    ? "No tables yet. Create one to get started."
-                    : "No tables yet. An administrator can create them."}
-                </p>
-                {access.admin && (
-                  <Button
-                    size="sm"
-                    render={
-                      <Link
-                        to="/workspaces/$workspace/tables/new"
-                        params={{ workspace }}
-                        search={{ step: 1 }}
-                      />
-                    }
-                  >
-                    New table
-                  </Button>
-                )}
-              </CardPanel>
-            )}
+          {empty && (
+            <CardPanel className="flex flex-col items-center gap-3 py-8 text-center">
+              <p className="text-muted-foreground text-sm">
+                {access.admin
+                  ? "No tables yet. Create one to get started."
+                  : "No tables yet. An administrator can create them."}
+              </p>
+              {access.admin && (
+                <Button
+                  size="sm"
+                  render={
+                    <Link
+                      to="/workspaces/$workspace/tables/new"
+                      params={{ workspace }}
+                      search={{ step: 1 }}
+                    />
+                  }
+                >
+                  New table
+                </Button>
+              )}
+            </CardPanel>
+          )}
         </Card>
       </CardFrame>
     </>

@@ -10,23 +10,23 @@ import {
 } from "void/schema-d1";
 
 import { userTable } from "../.void/better-auth-schema";
+import { GRANTS, PROFILE_KINDS } from "../src/lib/access/grants";
 import { AUDIT_ACTIONS, type AuditChange } from "../src/lib/audit/actions";
 import type { FilterCondition } from "../src/lib/records/filters";
-import { GRANTS, PROFILE_KINDS } from "../src/lib/access/grants";
 
-const RESOURCE_KINDS = ["table", "view", "form"] as const;
+const RESOURCE_KINDS = ["table"] as const;
 
 const lower = (column: AnySQLiteColumn) => sql`lower(${column})`;
 const live = (column: AnySQLiteColumn) => sql`${column} is null`;
 
+export const nowMs = sql`(cast(unixepoch('subsec') * 1000 as integer))`;
+
 const timestamps = {
-  createdAt: integer("created_at", { mode: "timestamp_ms" })
-    .notNull()
-    .$defaultFn(() => new Date()),
+  createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull().default(nowMs),
   updatedAt: integer("updated_at", { mode: "timestamp_ms" })
     .notNull()
-    .$defaultFn(() => new Date())
-    .$onUpdateFn(() => new Date()),
+    .default(nowMs)
+    .$onUpdateFn(() => nowMs),
 };
 
 const deletedAt = () => integer("deleted_at", { mode: "timestamp_ms" });
@@ -135,9 +135,7 @@ export const workspaceSchema = <W extends string = "default">(workspaceId: W = "
   const viewTable = sqliteTable(
     name("view"),
     {
-      id: integer("id")
-        .primaryKey()
-        .references(() => resourceTable.id, { onDelete: "cascade" }),
+      id: integer("id").primaryKey({ autoIncrement: true }),
       tableId: integer("table_id")
         .notNull()
         .references(() => tableTable.id, { onDelete: "cascade" }),
@@ -158,33 +156,6 @@ export const workspaceSchema = <W extends string = "default">(workspaceId: W = "
     ],
   );
 
-  const formTable = sqliteTable(
-    name("form"),
-    {
-      id: integer("id")
-        .primaryKey()
-        .references(() => resourceTable.id, { onDelete: "cascade" }),
-      tableId: integer("table_id")
-        .notNull()
-        .references(() => tableTable.id, { onDelete: "cascade" }),
-      formKey: text("form_key").notNull(),
-      name: text("name").notNull(),
-      description: text("description"),
-      icon: text("icon"),
-      isOpen: integer("is_open", { mode: "boolean" }).notNull().default(false),
-      selectColumns: json<string[]>("select_columns", []),
-      position: integer("position").notNull().default(0),
-      metadata: json<Record<string, unknown>>("metadata", {}),
-      createdBy: createdBy(),
-      ...timestamps,
-    },
-    (t) => [
-      uniqueIndex(name("form_name")).on(t.tableId, lower(t.name)),
-      uniqueIndex(name("form_form_key")).on(t.formKey),
-      index(name("form_table_position")).on(t.tableId, t.position),
-    ],
-  );
-
   const favoriteTable = sqliteTable(
     name("favorite"),
     {
@@ -200,23 +171,6 @@ export const workspaceSchema = <W extends string = "default">(workspaceId: W = "
     (t) => [uniqueIndex(name("favorite_user_table")).on(t.userId, t.tableId)],
   );
 
-  const trashTable = sqliteTable(
-    name("trash"),
-    {
-      id: integer("id").primaryKey({ autoIncrement: true }),
-      tableId: integer("table_id")
-        .notNull()
-        .references(() => tableTable.id, { onDelete: "cascade" }),
-      recordId: text("record_id").notNull(),
-      data: json<Record<string, unknown>>("data", {}),
-      deletedBy: text("deleted_by").references(() => userTable.id, { onDelete: "set null" }),
-      deletedAt: integer("deleted_at", { mode: "timestamp_ms" })
-        .notNull()
-        .$defaultFn(() => new Date()),
-    },
-    (t) => [index(name("trash_table_deleted")).on(t.tableId, t.deletedAt)],
-  );
-
   const auditTable = sqliteTable(
     name("audit"),
     {
@@ -229,9 +183,7 @@ export const workspaceSchema = <W extends string = "default">(workspaceId: W = "
       recordIds: json<number[]>("record_ids", []),
       count: integer("count").notNull().default(1),
       changes: json<AuditChange[]>("changes", []),
-      createdAt: integer("created_at", { mode: "timestamp_ms" })
-        .notNull()
-        .$defaultFn(() => new Date()),
+      createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull().default(nowMs),
     },
     (t) => [
       index(name("audit_created")).on(t.createdAt),
@@ -281,9 +233,7 @@ export const workspaceSchema = <W extends string = "default">(workspaceId: W = "
         .notNull()
         .references(() => accessProfileTable.id, { onDelete: "restrict" }),
       assignedBy: text("assigned_by").references(() => userTable.id, { onDelete: "set null" }),
-      assignedAt: integer("assigned_at", { mode: "timestamp_ms" })
-        .notNull()
-        .$defaultFn(() => new Date()),
+      assignedAt: integer("assigned_at", { mode: "timestamp_ms" }).notNull().default(nowMs),
     },
     (t) => [index(name("access_profile_member_profile")).on(t.profileId)],
   );
@@ -323,9 +273,7 @@ export const workspaceSchema = <W extends string = "default">(workspaceId: W = "
     tableTable,
     columnTable,
     viewTable,
-    formTable,
     favoriteTable,
-    trashTable,
     auditTable,
     accessProfileTable,
     accessProfileMemberTable,
@@ -339,9 +287,7 @@ export const {
   tableTable,
   columnTable,
   viewTable,
-  formTable,
   favoriteTable,
-  trashTable,
   auditTable,
   accessProfileTable,
   accessProfileMemberTable,

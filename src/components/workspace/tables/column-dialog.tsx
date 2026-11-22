@@ -343,7 +343,8 @@ function ColumnForm({
                           onChange={(event) => field.handleChange(event.target.value)}
                         />
                         <FieldDescription>
-                          A SQL condition every value must satisfy. Refer to columns as {"{Column name}"}.
+                          A SQL condition every value must satisfy. Refer to columns as{" "}
+                          {"{Column name}"}.
                         </FieldDescription>
                         <FieldError match={field.state.meta.errors.length > 0}>
                           {field.state.meta.errors.map((item) => item?.message).join(", ")}
@@ -363,7 +364,8 @@ function ColumnForm({
                           onChange={(event) => field.handleChange(event.target.value)}
                         />
                         <FieldDescription>
-                          Makes this a virtual column calculated from other columns, written as {"{Column name}"}. It can't be edited.
+                          Makes this a virtual column calculated from other columns, written as{" "}
+                          {"{Column name}"}. It can't be edited.
                         </FieldDescription>
                         <FieldError match={field.state.meta.errors.length > 0}>
                           {field.state.meta.errors.map((item) => item?.message).join(", ")}
