@@ -60,6 +60,7 @@ import { Route as WorkspacesWorkspaceCoreTablesTableViewsViewViewerRouteRouteImp
 import { Route as WorkspacesWorkspaceCoreTablesTableViewsListIndexRouteImport } from './routes/workspaces/$workspace/_core/tables/$table/views/_list/index'
 import { Route as WorkspacesWorkspaceCoreTablesTableViewsViewViewerIndexRouteImport } from './routes/workspaces/$workspace/_core/tables/$table/views/$view/_viewer/index'
 import { Route as WorkspacesWorkspaceCoreTablesTableViewsViewViewerRecordRouteImport } from './routes/workspaces/$workspace/_core/tables/$table/views/$view/_viewer/$record'
+import { Route as WorkspacesWorkspaceCoreTablesTableViewsViewViewerAssistantRouteImport } from './routes/workspaces/$workspace/_core/tables/$table/views/$view/_viewer/assistant'
 import { Route as WorkspacesWorkspaceCoreTablesTableViewsViewViewerImportRouteImport } from './routes/workspaces/$workspace/_core/tables/$table/views/$view/_viewer/import'
 import { Route as WorkspacesWorkspaceCoreTablesTableViewsViewViewerNewRouteImport } from './routes/workspaces/$workspace/_core/tables/$table/views/$view/_viewer/new'
 
@@ -352,6 +353,13 @@ const WorkspacesWorkspaceCoreTablesTableViewsViewViewerRecordRoute =
     getParentRoute: () =>
       WorkspacesWorkspaceCoreTablesTableViewsViewViewerRouteRoute,
   } as any)
+const WorkspacesWorkspaceCoreTablesTableViewsViewViewerAssistantRoute =
+  WorkspacesWorkspaceCoreTablesTableViewsViewViewerAssistantRouteImport.update({
+    id: '/assistant',
+    path: '/assistant',
+    getParentRoute: () =>
+      WorkspacesWorkspaceCoreTablesTableViewsViewViewerRouteRoute,
+  } as any)
 const WorkspacesWorkspaceCoreTablesTableViewsViewViewerImportRoute =
   WorkspacesWorkspaceCoreTablesTableViewsViewViewerImportRouteImport.update({
     id: '/import',
@@ -414,6 +422,7 @@ export interface FileRoutesByFullPath {
   '/workspaces/$workspace/tables/$table/trash/$record': typeof WorkspacesWorkspaceCoreTablesTableTrashRecordRoute
   '/workspaces/$workspace/tables/$table/views/': typeof WorkspacesWorkspaceCoreTablesTableViewsListIndexRoute
   '/workspaces/$workspace/tables/$table/views/$view/$record': typeof WorkspacesWorkspaceCoreTablesTableViewsViewViewerRecordRoute
+  '/workspaces/$workspace/tables/$table/views/$view/assistant': typeof WorkspacesWorkspaceCoreTablesTableViewsViewViewerAssistantRoute
   '/workspaces/$workspace/tables/$table/views/$view/import': typeof WorkspacesWorkspaceCoreTablesTableViewsViewViewerImportRoute
   '/workspaces/$workspace/tables/$table/views/$view/new': typeof WorkspacesWorkspaceCoreTablesTableViewsViewViewerNewRoute
   '/workspaces/$workspace/tables/$table/views/$view/': typeof WorkspacesWorkspaceCoreTablesTableViewsViewViewerIndexRoute
@@ -456,6 +465,7 @@ export interface FileRoutesByTo {
   '/workspaces/$workspace/tables/$table/definition/trash': typeof WorkspacesWorkspaceCoreTablesTableDefinitionTrashRoute
   '/workspaces/$workspace/tables/$table/trash/$record': typeof WorkspacesWorkspaceCoreTablesTableTrashRecordRoute
   '/workspaces/$workspace/tables/$table/views/$view/$record': typeof WorkspacesWorkspaceCoreTablesTableViewsViewViewerRecordRoute
+  '/workspaces/$workspace/tables/$table/views/$view/assistant': typeof WorkspacesWorkspaceCoreTablesTableViewsViewViewerAssistantRoute
   '/workspaces/$workspace/tables/$table/views/$view/import': typeof WorkspacesWorkspaceCoreTablesTableViewsViewViewerImportRoute
   '/workspaces/$workspace/tables/$table/views/$view/new': typeof WorkspacesWorkspaceCoreTablesTableViewsViewViewerNewRoute
 }
@@ -511,6 +521,7 @@ export interface FileRoutesById {
   '/workspaces/$workspace/_core/tables/$table/views/$view/_viewer': typeof WorkspacesWorkspaceCoreTablesTableViewsViewViewerRouteRouteWithChildren
   '/workspaces/$workspace/_core/tables/$table/views/_list/': typeof WorkspacesWorkspaceCoreTablesTableViewsListIndexRoute
   '/workspaces/$workspace/_core/tables/$table/views/$view/_viewer/$record': typeof WorkspacesWorkspaceCoreTablesTableViewsViewViewerRecordRoute
+  '/workspaces/$workspace/_core/tables/$table/views/$view/_viewer/assistant': typeof WorkspacesWorkspaceCoreTablesTableViewsViewViewerAssistantRoute
   '/workspaces/$workspace/_core/tables/$table/views/$view/_viewer/import': typeof WorkspacesWorkspaceCoreTablesTableViewsViewViewerImportRoute
   '/workspaces/$workspace/_core/tables/$table/views/$view/_viewer/new': typeof WorkspacesWorkspaceCoreTablesTableViewsViewViewerNewRoute
   '/workspaces/$workspace/_core/tables/$table/views/$view/_viewer/': typeof WorkspacesWorkspaceCoreTablesTableViewsViewViewerIndexRoute
@@ -564,6 +575,7 @@ export interface FileRouteTypes {
     | '/workspaces/$workspace/tables/$table/trash/$record'
     | '/workspaces/$workspace/tables/$table/views/'
     | '/workspaces/$workspace/tables/$table/views/$view/$record'
+    | '/workspaces/$workspace/tables/$table/views/$view/assistant'
     | '/workspaces/$workspace/tables/$table/views/$view/import'
     | '/workspaces/$workspace/tables/$table/views/$view/new'
     | '/workspaces/$workspace/tables/$table/views/$view/'
@@ -606,6 +618,7 @@ export interface FileRouteTypes {
     | '/workspaces/$workspace/tables/$table/definition/trash'
     | '/workspaces/$workspace/tables/$table/trash/$record'
     | '/workspaces/$workspace/tables/$table/views/$view/$record'
+    | '/workspaces/$workspace/tables/$table/views/$view/assistant'
     | '/workspaces/$workspace/tables/$table/views/$view/import'
     | '/workspaces/$workspace/tables/$table/views/$view/new'
   id:
@@ -660,6 +673,7 @@ export interface FileRouteTypes {
     | '/workspaces/$workspace/_core/tables/$table/views/$view/_viewer'
     | '/workspaces/$workspace/_core/tables/$table/views/_list/'
     | '/workspaces/$workspace/_core/tables/$table/views/$view/_viewer/$record'
+    | '/workspaces/$workspace/_core/tables/$table/views/$view/_viewer/assistant'
     | '/workspaces/$workspace/_core/tables/$table/views/$view/_viewer/import'
     | '/workspaces/$workspace/_core/tables/$table/views/$view/_viewer/new'
     | '/workspaces/$workspace/_core/tables/$table/views/$view/_viewer/'
@@ -1032,6 +1046,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WorkspacesWorkspaceCoreTablesTableViewsViewViewerRecordRouteImport
       parentRoute: typeof WorkspacesWorkspaceCoreTablesTableViewsViewViewerRouteRoute
     }
+    '/workspaces/$workspace/_core/tables/$table/views/$view/_viewer/assistant': {
+      id: '/workspaces/$workspace/_core/tables/$table/views/$view/_viewer/assistant'
+      path: '/assistant'
+      fullPath: '/workspaces/$workspace/tables/$table/views/$view/assistant'
+      preLoaderRoute: typeof WorkspacesWorkspaceCoreTablesTableViewsViewViewerAssistantRouteImport
+      parentRoute: typeof WorkspacesWorkspaceCoreTablesTableViewsViewViewerRouteRoute
+    }
     '/workspaces/$workspace/_core/tables/$table/views/$view/_viewer/import': {
       id: '/workspaces/$workspace/_core/tables/$table/views/$view/_viewer/import'
       path: '/import'
@@ -1108,6 +1129,7 @@ const WorkspacesWorkspaceCoreTablesTableTrashRouteRouteWithChildren =
 
 interface WorkspacesWorkspaceCoreTablesTableViewsViewViewerRouteRouteChildren {
   WorkspacesWorkspaceCoreTablesTableViewsViewViewerRecordRoute: typeof WorkspacesWorkspaceCoreTablesTableViewsViewViewerRecordRoute
+  WorkspacesWorkspaceCoreTablesTableViewsViewViewerAssistantRoute: typeof WorkspacesWorkspaceCoreTablesTableViewsViewViewerAssistantRoute
   WorkspacesWorkspaceCoreTablesTableViewsViewViewerImportRoute: typeof WorkspacesWorkspaceCoreTablesTableViewsViewViewerImportRoute
   WorkspacesWorkspaceCoreTablesTableViewsViewViewerNewRoute: typeof WorkspacesWorkspaceCoreTablesTableViewsViewViewerNewRoute
   WorkspacesWorkspaceCoreTablesTableViewsViewViewerIndexRoute: typeof WorkspacesWorkspaceCoreTablesTableViewsViewViewerIndexRoute
@@ -1117,6 +1139,8 @@ const WorkspacesWorkspaceCoreTablesTableViewsViewViewerRouteRouteChildren: Works
   {
     WorkspacesWorkspaceCoreTablesTableViewsViewViewerRecordRoute:
       WorkspacesWorkspaceCoreTablesTableViewsViewViewerRecordRoute,
+    WorkspacesWorkspaceCoreTablesTableViewsViewViewerAssistantRoute:
+      WorkspacesWorkspaceCoreTablesTableViewsViewViewerAssistantRoute,
     WorkspacesWorkspaceCoreTablesTableViewsViewViewerImportRoute:
       WorkspacesWorkspaceCoreTablesTableViewsViewViewerImportRoute,
     WorkspacesWorkspaceCoreTablesTableViewsViewViewerNewRoute:

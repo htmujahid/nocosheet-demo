@@ -11,6 +11,7 @@ import {
 import { dataTableFeatures } from "@/components/shared/data-table/features";
 import { fromColumnFilters, toColumnFilters } from "@/lib/records/column-filters";
 import { serializeFilters, targetsOfColumns } from "@/lib/records/filter-param";
+import { SYSTEM_FILTER_COLUMNS } from "@/lib/records/filters";
 
 import type { ViewerColumn } from "../columns";
 import type { ViewerRow } from "../records-grid";
@@ -52,11 +53,12 @@ export function useGridTable({
   );
   const targets = useMemo(
     () =>
-      targetsOfColumns(
-        columns
+      targetsOfColumns([
+        ...columns
           .filter((column) => column.filterable)
           .map((column) => ({ columnName: column.key, name: column.name, format: column.format })),
-      ),
+        ...SYSTEM_FILTER_COLUMNS.map((column) => ({ ...column })),
+      ]),
     [columns],
   );
   const filtersKey = JSON.stringify(query.filters);
