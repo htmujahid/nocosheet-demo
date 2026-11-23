@@ -1,6 +1,7 @@
 import { useQueryStates } from "nuqs";
 
 import { parseFilters, serializeFilters, targetsOfColumns } from "@/lib/records/filter-param";
+import { SYSTEM_FILTER_COLUMNS } from "@/lib/records/filters";
 import { recordsSearchParams, resolveRecordsQuery } from "@/lib/records/query";
 import { sortKeyOf } from "@/lib/records/sort-param";
 
@@ -18,11 +19,12 @@ export function useRecordsQuery(columns: ViewerColumn[]) {
   const nameByKey = new Map(columns.map((column) => [column.key, column.name]));
   const { filters } = parseFilters(
     resolved.filter,
-    targetsOfColumns(
-      columns
+    targetsOfColumns([
+      ...columns
         .filter((column) => column.filterable)
         .map((column) => ({ columnName: column.key, name: column.name, format: column.format })),
-    ),
+      ...SYSTEM_FILTER_COLUMNS.map((column) => ({ ...column })),
+    ]),
   );
 
   const query = {

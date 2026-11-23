@@ -1,0 +1,882 @@
+{
+  "version": 1,
+  "id": "freelancer-business",
+  "name": "Freelancer Business",
+  "description": "Run a solo business: clients, projects, time tracking, invoices and expenses.",
+  "icon": "laptop",
+  "tags": ["freelance", "consulting", "sample"],
+  "tables": [
+    {
+      "name": "Clients",
+      "icon": "contact",
+      "group": "Business",
+      "description": "Who you work for.",
+      "title": "Name",
+      "audit": true,
+      "columns": [
+        {
+          "name": "Name",
+          "format": "text",
+          "required": true,
+          "searchable": true
+        },
+        {
+          "name": "Email",
+          "format": "email"
+        },
+        {
+          "name": "Status",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Lead",
+                "value": "lead"
+              },
+              {
+                "label": "Active",
+                "value": "active"
+              },
+              {
+                "label": "Past",
+                "value": "past"
+              }
+            ]
+          },
+          "filterable": true,
+          "sortable": true,
+          "default": "lead"
+        },
+        {
+          "name": "Hourly rate",
+          "format": "currency",
+          "options": {
+            "currency": "USD",
+            "precision": 0
+          },
+          "check": "{Hourly rate} >= 0"
+        },
+        {
+          "name": "Notes",
+          "format": "long_text"
+        }
+      ],
+      "views": [
+        {
+          "name": "Active clients",
+          "icon": "badge-check",
+          "description": "Current clients.",
+          "columns": ["Name", "Email", "Hourly rate"],
+          "filters": [
+            {
+              "column": "Status",
+              "op": "is",
+              "value": "active"
+            }
+          ]
+        }
+      ],
+      "rows": [
+        {
+          "Name": "Bluebird Studio",
+          "Email": "hello@bluebirdstudio.example.com",
+          "Status": "active",
+          "Hourly rate": 85,
+          "Notes": "Prefers Slack. Pays within a week."
+        },
+        {
+          "Name": "Fernhill Dental",
+          "Email": "hello@fernhilldental.example.com",
+          "Status": "active",
+          "Hourly rate": 75,
+          "Notes": "Slow to give feedback."
+        },
+        {
+          "Name": "Marlowe & Sons",
+          "Email": "hello@marlowesons.example.com",
+          "Status": "past",
+          "Hourly rate": 70
+        },
+        {
+          "Name": "Quill Books",
+          "Email": "hello@quillbooks.example.com",
+          "Status": "active",
+          "Hourly rate": 90,
+          "Notes": "Ongoing retainer."
+        },
+        {
+          "Name": "Tidewater Coffee",
+          "Email": "hello@tidewatercoffee.example.com",
+          "Status": "lead",
+          "Hourly rate": 80,
+          "Notes": "Asked for a website quote."
+        },
+        {
+          "Name": "Atlas Fitness",
+          "Email": "hello@atlasfitness.example.com",
+          "Status": "lead",
+          "Hourly rate": 80
+        }
+      ]
+    },
+    {
+      "name": "Projects",
+      "icon": "briefcase",
+      "group": "Work",
+      "description": "Engagements with budget and deadline.",
+      "title": "Name",
+      "audit": true,
+      "columns": [
+        {
+          "name": "Name",
+          "format": "text",
+          "required": true,
+          "searchable": true
+        },
+        {
+          "name": "Client",
+          "format": "relation",
+          "options": {
+            "onDelete": "set null"
+          },
+          "relation": "Clients"
+        },
+        {
+          "name": "Status",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Proposal",
+                "value": "proposal"
+              },
+              {
+                "label": "In progress",
+                "value": "in_progress"
+              },
+              {
+                "label": "On hold",
+                "value": "on_hold"
+              },
+              {
+                "label": "Completed",
+                "value": "completed"
+              }
+            ]
+          },
+          "filterable": true,
+          "sortable": true,
+          "default": "proposal"
+        },
+        {
+          "name": "Billing",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Hourly",
+                "value": "hourly"
+              },
+              {
+                "label": "Fixed price",
+                "value": "fixed_price"
+              }
+            ]
+          },
+          "filterable": true,
+          "sortable": true
+        },
+        {
+          "name": "Budget",
+          "format": "currency",
+          "options": {
+            "currency": "USD",
+            "precision": 0
+          },
+          "check": "{Budget} >= 0"
+        },
+        {
+          "name": "Start",
+          "format": "date"
+        },
+        {
+          "name": "Deadline",
+          "format": "date"
+        }
+      ],
+      "views": [
+        {
+          "name": "In progress",
+          "icon": "loader",
+          "description": "Projects currently underway.",
+          "columns": ["Name", "Client", "Billing", "Deadline", "Budget"],
+          "filters": [
+            {
+              "column": "Status",
+              "op": "is",
+              "value": "in_progress"
+            }
+          ]
+        }
+      ],
+      "rows": [
+        {
+          "Name": "Bluebird brand refresh",
+          "Client": "Bluebird Studio",
+          "Status": "in_progress",
+          "Billing": "fixed_price",
+          "Budget": 4800,
+          "Start": {
+            "$days": -30
+          },
+          "Deadline": {
+            "$days": 12
+          }
+        },
+        {
+          "Name": "Bluebird landing pages",
+          "Client": "Bluebird Studio",
+          "Status": "completed",
+          "Billing": "hourly",
+          "Budget": 3000,
+          "Start": {
+            "$days": -90
+          },
+          "Deadline": {
+            "$days": -45
+          }
+        },
+        {
+          "Name": "Fernhill website",
+          "Client": "Fernhill Dental",
+          "Status": "in_progress",
+          "Billing": "fixed_price",
+          "Budget": 6500,
+          "Start": {
+            "$days": -45
+          },
+          "Deadline": {
+            "$days": 25
+          }
+        },
+        {
+          "Name": "Quill monthly retainer",
+          "Client": "Quill Books",
+          "Status": "in_progress",
+          "Billing": "hourly",
+          "Budget": 2700,
+          "Start": {
+            "$days": -120
+          },
+          "Deadline": {
+            "$days": 30
+          }
+        },
+        {
+          "Name": "Marlowe catalog design",
+          "Client": "Marlowe & Sons",
+          "Status": "completed",
+          "Billing": "fixed_price",
+          "Budget": 2200,
+          "Start": {
+            "$days": -200
+          },
+          "Deadline": {
+            "$days": -150
+          }
+        },
+        {
+          "Name": "Tidewater website proposal",
+          "Client": "Tidewater Coffee",
+          "Status": "proposal",
+          "Billing": "fixed_price",
+          "Budget": 5200,
+          "Start": {
+            "$days": 7
+          },
+          "Deadline": {
+            "$days": 60
+          }
+        },
+        {
+          "Name": "Quill ebook layout",
+          "Client": "Quill Books",
+          "Status": "on_hold",
+          "Billing": "fixed_price",
+          "Budget": 1800,
+          "Start": {
+            "$days": -20
+          },
+          "Deadline": {
+            "$days": 40
+          }
+        }
+      ]
+    },
+    {
+      "name": "Time Entries",
+      "icon": "timer",
+      "group": "Work",
+      "description": "Hours logged per project.",
+      "title": "Task",
+      "columns": [
+        {
+          "name": "Task",
+          "format": "text",
+          "required": true,
+          "searchable": true
+        },
+        {
+          "name": "Project",
+          "format": "relation",
+          "options": {
+            "onDelete": "set null"
+          },
+          "relation": "Projects"
+        },
+        {
+          "name": "Date",
+          "format": "date"
+        },
+        {
+          "name": "Hours",
+          "format": "decimal",
+          "options": {
+            "precision": 2
+          },
+          "required": true,
+          "check": "{Hours} > 0"
+        },
+        {
+          "name": "Billable",
+          "format": "checkbox",
+          "filterable": true,
+          "sortable": true,
+          "default": "true"
+        },
+        {
+          "name": "Invoiced",
+          "format": "checkbox",
+          "filterable": true,
+          "sortable": true,
+          "default": "false"
+        }
+      ],
+      "views": [
+        {
+          "name": "Unbilled hours",
+          "icon": "clock",
+          "description": "Billable time not yet invoiced.",
+          "columns": ["Task", "Project", "Date", "Hours"],
+          "filters": [
+            {
+              "column": "Billable",
+              "op": "is",
+              "value": true
+            },
+            {
+              "column": "Invoiced",
+              "op": "is",
+              "value": false
+            }
+          ]
+        }
+      ],
+      "rows": [
+        {
+          "Task": "Logo concepts",
+          "Project": "Bluebird brand refresh",
+          "Date": {
+            "$days": -20
+          },
+          "Hours": 5,
+          "Billable": true,
+          "Invoiced": true
+        },
+        {
+          "Task": "Logo revisions",
+          "Project": "Bluebird brand refresh",
+          "Date": {
+            "$days": -14
+          },
+          "Hours": 3.5,
+          "Billable": true,
+          "Invoiced": false
+        },
+        {
+          "Task": "Brand guidelines",
+          "Project": "Bluebird brand refresh",
+          "Date": {
+            "$days": -7
+          },
+          "Hours": 4,
+          "Billable": true,
+          "Invoiced": false
+        },
+        {
+          "Task": "Wireframes",
+          "Project": "Fernhill website",
+          "Date": {
+            "$days": -25
+          },
+          "Hours": 6,
+          "Billable": true,
+          "Invoiced": true
+        },
+        {
+          "Task": "Homepage design",
+          "Project": "Fernhill website",
+          "Date": {
+            "$days": -18
+          },
+          "Hours": 7.5,
+          "Billable": true,
+          "Invoiced": true
+        },
+        {
+          "Task": "Client call",
+          "Project": "Fernhill website",
+          "Date": {
+            "$days": -10
+          },
+          "Hours": 1,
+          "Billable": false,
+          "Invoiced": false
+        },
+        {
+          "Task": "Content structure",
+          "Project": "Fernhill website",
+          "Date": {
+            "$days": -4
+          },
+          "Hours": 3,
+          "Billable": true,
+          "Invoiced": false
+        },
+        {
+          "Task": "Newsletter design",
+          "Project": "Quill monthly retainer",
+          "Date": {
+            "$days": -28
+          },
+          "Hours": 4,
+          "Billable": true,
+          "Invoiced": true
+        },
+        {
+          "Task": "Social graphics",
+          "Project": "Quill monthly retainer",
+          "Date": {
+            "$days": -21
+          },
+          "Hours": 3,
+          "Billable": true,
+          "Invoiced": true
+        },
+        {
+          "Task": "Newsletter design",
+          "Project": "Quill monthly retainer",
+          "Date": {
+            "$days": -7
+          },
+          "Hours": 4,
+          "Billable": true,
+          "Invoiced": false
+        },
+        {
+          "Task": "Landing page build",
+          "Project": "Bluebird landing pages",
+          "Date": {
+            "$days": -60
+          },
+          "Hours": 9,
+          "Billable": true,
+          "Invoiced": true
+        },
+        {
+          "Task": "Final polish",
+          "Project": "Bluebird landing pages",
+          "Date": {
+            "$days": -48
+          },
+          "Hours": 3,
+          "Billable": true,
+          "Invoiced": true
+        },
+        {
+          "Task": "Scope discussion",
+          "Project": "Tidewater website proposal",
+          "Date": {
+            "$days": -3
+          },
+          "Hours": 1.5,
+          "Billable": false,
+          "Invoiced": false
+        },
+        {
+          "Task": "Proposal writing",
+          "Project": "Tidewater website proposal",
+          "Date": {
+            "$days": -1
+          },
+          "Hours": 2.5,
+          "Billable": false,
+          "Invoiced": false
+        }
+      ]
+    },
+    {
+      "name": "Invoices",
+      "icon": "receipt",
+      "group": "Finance",
+      "description": "What you've billed and what's been paid.",
+      "title": "Number",
+      "audit": true,
+      "columns": [
+        {
+          "name": "Number",
+          "format": "text",
+          "required": true,
+          "searchable": true
+        },
+        {
+          "name": "Client",
+          "format": "relation",
+          "options": {
+            "onDelete": "set null"
+          },
+          "relation": "Clients"
+        },
+        {
+          "name": "Project",
+          "format": "relation",
+          "options": {
+            "onDelete": "set null"
+          },
+          "relation": "Projects"
+        },
+        {
+          "name": "Amount",
+          "format": "currency",
+          "options": {
+            "currency": "USD",
+            "precision": 2
+          },
+          "required": true,
+          "check": "{Amount} > 0"
+        },
+        {
+          "name": "Status",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Draft",
+                "value": "draft"
+              },
+              {
+                "label": "Sent",
+                "value": "sent"
+              },
+              {
+                "label": "Paid",
+                "value": "paid"
+              },
+              {
+                "label": "Overdue",
+                "value": "overdue"
+              }
+            ]
+          },
+          "filterable": true,
+          "sortable": true,
+          "default": "draft"
+        },
+        {
+          "name": "Issued",
+          "format": "date"
+        },
+        {
+          "name": "Due",
+          "format": "date"
+        }
+      ],
+      "views": [
+        {
+          "name": "Outstanding",
+          "icon": "wallet",
+          "description": "Sent or overdue.",
+          "columns": ["Number", "Client", "Amount", "Status", "Due"],
+          "filters": [
+            {
+              "column": "Status",
+              "op": "is_any_of",
+              "value": ["sent", "overdue"]
+            }
+          ]
+        }
+      ],
+      "rows": [
+        {
+          "Number": "INV-001",
+          "Client": "Bluebird Studio",
+          "Project": "Bluebird landing pages",
+          "Amount": 3000,
+          "Status": "paid",
+          "Issued": {
+            "$days": -50
+          },
+          "Due": {
+            "$days": -36
+          }
+        },
+        {
+          "Number": "INV-002",
+          "Client": "Marlowe & Sons",
+          "Project": "Marlowe catalog design",
+          "Amount": 2200,
+          "Status": "paid",
+          "Issued": {
+            "$days": -150
+          },
+          "Due": {
+            "$days": -136
+          }
+        },
+        {
+          "Number": "INV-003",
+          "Client": "Quill Books",
+          "Project": "Quill monthly retainer",
+          "Amount": 1350,
+          "Status": "paid",
+          "Issued": {
+            "$days": -40
+          },
+          "Due": {
+            "$days": -26
+          }
+        },
+        {
+          "Number": "INV-004",
+          "Client": "Fernhill Dental",
+          "Project": "Fernhill website",
+          "Amount": 3250,
+          "Status": "paid",
+          "Issued": {
+            "$days": -30
+          },
+          "Due": {
+            "$days": -16
+          }
+        },
+        {
+          "Number": "INV-005",
+          "Client": "Bluebird Studio",
+          "Project": "Bluebird brand refresh",
+          "Amount": 2400,
+          "Status": "sent",
+          "Issued": {
+            "$days": -5
+          },
+          "Due": {
+            "$days": 9
+          }
+        },
+        {
+          "Number": "INV-006",
+          "Client": "Quill Books",
+          "Project": "Quill monthly retainer",
+          "Amount": 1350,
+          "Status": "overdue",
+          "Issued": {
+            "$days": -25
+          },
+          "Due": {
+            "$days": -10
+          }
+        },
+        {
+          "Number": "INV-007",
+          "Client": "Fernhill Dental",
+          "Project": "Fernhill website",
+          "Amount": 3250,
+          "Status": "draft",
+          "Issued": {
+            "$days": 0
+          },
+          "Due": {
+            "$days": 14
+          }
+        }
+      ]
+    },
+    {
+      "name": "Expenses",
+      "icon": "credit-card",
+      "group": "Finance",
+      "description": "Business costs and what clients should reimburse.",
+      "title": "Description",
+      "columns": [
+        {
+          "name": "Description",
+          "format": "text",
+          "required": true,
+          "searchable": true
+        },
+        {
+          "name": "Project",
+          "format": "relation",
+          "options": {
+            "onDelete": "set null"
+          },
+          "relation": "Projects"
+        },
+        {
+          "name": "Category",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Software",
+                "value": "software"
+              },
+              {
+                "label": "Hardware",
+                "value": "hardware"
+              },
+              {
+                "label": "Travel",
+                "value": "travel"
+              },
+              {
+                "label": "Marketing",
+                "value": "marketing"
+              },
+              {
+                "label": "Other",
+                "value": "other"
+              }
+            ]
+          },
+          "filterable": true,
+          "sortable": true
+        },
+        {
+          "name": "Amount",
+          "format": "currency",
+          "options": {
+            "currency": "USD",
+            "precision": 2
+          },
+          "required": true,
+          "check": "{Amount} > 0"
+        },
+        {
+          "name": "Date",
+          "format": "date"
+        },
+        {
+          "name": "Reimbursable",
+          "format": "checkbox",
+          "filterable": true,
+          "sortable": true,
+          "default": "false"
+        }
+      ],
+      "views": [
+        {
+          "name": "Reimbursable",
+          "icon": "undo-2",
+          "description": "Costs to pass on to clients.",
+          "columns": ["Description", "Project", "Amount", "Date"],
+          "filters": [
+            {
+              "column": "Reimbursable",
+              "op": "is",
+              "value": true
+            }
+          ]
+        }
+      ],
+      "rows": [
+        {
+          "Description": "Design software subscription",
+          "Category": "software",
+          "Amount": 54,
+          "Date": {
+            "$days": -30
+          },
+          "Reimbursable": false
+        },
+        {
+          "Description": "Stock photos for Fernhill",
+          "Category": "other",
+          "Amount": 89,
+          "Date": {
+            "$days": -22
+          },
+          "Reimbursable": true,
+          "Project": "Fernhill website"
+        },
+        {
+          "Description": "Domain for Tidewater demo",
+          "Category": "software",
+          "Amount": 15,
+          "Date": {
+            "$days": -2
+          },
+          "Reimbursable": false,
+          "Project": "Tidewater website proposal"
+        },
+        {
+          "Description": "Client meeting travel",
+          "Category": "travel",
+          "Amount": 42,
+          "Date": {
+            "$days": -16
+          },
+          "Reimbursable": true,
+          "Project": "Bluebird brand refresh"
+        },
+        {
+          "Description": "Portfolio ads",
+          "Category": "marketing",
+          "Amount": 120,
+          "Date": {
+            "$days": -12
+          },
+          "Reimbursable": false
+        },
+        {
+          "Description": "External monitor",
+          "Category": "hardware",
+          "Amount": 329,
+          "Date": {
+            "$days": -60
+          },
+          "Reimbursable": false
+        },
+        {
+          "Description": "Font licence",
+          "Category": "software",
+          "Amount": 99,
+          "Date": {
+            "$days": -24
+          },
+          "Reimbursable": true,
+          "Project": "Bluebird brand refresh"
+        },
+        {
+          "Description": "Printing mockups",
+          "Category": "other",
+          "Amount": 36,
+          "Date": {
+            "$days": -9
+          },
+          "Reimbursable": true,
+          "Project": "Quill ebook layout"
+        }
+      ]
+    }
+  ]
+}

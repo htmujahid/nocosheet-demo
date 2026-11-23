@@ -39,6 +39,14 @@ const NOT_SORTABLE: ColumnFormat[] = [
 export const filterKind = (format: string): FilterKind | null =>
   KIND_BY_FORMAT[format as ColumnFormat] ?? null;
 
+export const SYSTEM_FILTER_COLUMNS = [
+  { columnName: "id", name: "Id", format: "integer" },
+  { columnName: "created_at", name: "Created at", format: "datetime" },
+  { columnName: "updated_at", name: "Updated at", format: "datetime" },
+  { columnName: "created_by", name: "Created by", format: "text" },
+  { columnName: "updated_by", name: "Updated by", format: "text" },
+] as const;
+
 export const isSortableFormat = (format: string) => !NOT_SORTABLE.includes(format as ColumnFormat);
 
 const EMPTY = [

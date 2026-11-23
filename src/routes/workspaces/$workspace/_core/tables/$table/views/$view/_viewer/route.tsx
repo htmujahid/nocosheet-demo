@@ -65,6 +65,13 @@ function SavedViewViewer({
               search: (previous) => previous,
             })
           }
+          onOpenAssistant={() =>
+            navigate({
+              to: "/workspaces/$workspace/tables/$table/views/$view/assistant",
+              params: { workspace, table, view: viewParam },
+              search: (previous) => previous,
+            })
+          }
         />
       </WorkspaceContent>
       <Outlet />
@@ -106,6 +113,13 @@ function TableViewer() {
             navigate({
               to: "/workspaces/$workspace/tables/$table/views/$view/$record",
               params: { workspace, table, view: viewParam, record: String(id) },
+              search: (previous) => previous,
+            })
+          }
+          onOpenAssistant={() =>
+            navigate({
+              to: "/workspaces/$workspace/tables/$table/views/$view/assistant",
+              params: { workspace, table, view: viewParam },
               search: (previous) => previous,
             })
           }

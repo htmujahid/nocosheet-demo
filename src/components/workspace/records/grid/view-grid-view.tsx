@@ -3,6 +3,9 @@ import { useEffect, useMemo } from "react";
 import { eq, useLiveSuspenseQuery } from "@tanstack/react-db";
 import { notFound } from "@tanstack/react-router";
 
+import { SparklesIcon } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
 import { columnsCollection } from "@/data/workspace/columns";
 import { tablesCollection } from "@/data/workspace/tables";
 import { useAccess } from "@/hooks/use-access";
@@ -28,11 +31,13 @@ export function ViewGridView({
   tableId,
   view,
   onOpenRecord,
+  onOpenAssistant,
 }: {
   workspace: string;
   tableId: number;
   view: ViewScope & { whereExpression: FilterCondition[] };
   onOpenRecord?: (id: number) => void;
+  onOpenAssistant?: () => void;
 }) {
   const access = useAccess();
   const { data: table } = useLiveSuspenseQuery((q) =>
@@ -106,6 +111,12 @@ export function ViewGridView({
           draft={access.can(tableId, "create") ? draft : undefined}
         >
           <ViewsMenu workspace={workspace} table={String(tableId)} activeView={view.id} />
+          {onOpenAssistant && (
+            <Button variant="outline" onClick={onOpenAssistant}>
+              <SparklesIcon aria-hidden="true" />
+              <span className="max-sm:hidden">Assistant</span>
+            </Button>
+          )}
         </GridToolbar>
       )}
 

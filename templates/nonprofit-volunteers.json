@@ -1,0 +1,1059 @@
+{
+  "version": 1,
+  "id": "nonprofit-volunteers",
+  "name": "Nonprofit & Volunteers",
+  "description": "A small charity: volunteers and shifts, programs, donors and donations with receipt tracking.",
+  "icon": "heart-handshake",
+  "tags": ["nonprofit", "volunteers", "sample"],
+  "tables": [
+    {
+      "name": "Volunteers",
+      "icon": "heart-handshake",
+      "group": "People",
+      "description": "Volunteers with their skills and availability.",
+      "title": "Name",
+      "audit": true,
+      "columns": [
+        {
+          "name": "Name",
+          "format": "text",
+          "required": true,
+          "searchable": true
+        },
+        {
+          "name": "Email",
+          "format": "email",
+          "required": true,
+          "unique": true
+        },
+        {
+          "name": "Phone",
+          "format": "phone"
+        },
+        {
+          "name": "Skills",
+          "format": "multi_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Cooking",
+                "value": "cooking"
+              },
+              {
+                "label": "Driving",
+                "value": "driving"
+              },
+              {
+                "label": "Teaching",
+                "value": "teaching"
+              },
+              {
+                "label": "Fundraising",
+                "value": "fundraising"
+              },
+              {
+                "label": "Admin",
+                "value": "admin"
+              },
+              {
+                "label": "Events",
+                "value": "events"
+              },
+              {
+                "label": "Tech",
+                "value": "tech"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Availability",
+          "format": "multi_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Weekdays",
+                "value": "weekdays"
+              },
+              {
+                "label": "Evenings",
+                "value": "evenings"
+              },
+              {
+                "label": "Weekends",
+                "value": "weekends"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Joined",
+          "format": "date"
+        },
+        {
+          "name": "Active",
+          "format": "checkbox",
+          "filterable": true,
+          "sortable": true,
+          "default": "true"
+        }
+      ],
+      "views": [
+        {
+          "name": "Active volunteers",
+          "icon": "users",
+          "description": "People currently available.",
+          "columns": ["Name", "Skills", "Availability", "Phone"],
+          "filters": [
+            {
+              "column": "Active",
+              "op": "is",
+              "value": true
+            }
+          ]
+        }
+      ],
+      "rows": [
+        {
+          "Name": "Grace Okafor",
+          "Email": "grace@example.org",
+          "Phone": "+1 555 0810",
+          "Skills": ["cooking", "events"],
+          "Availability": ["weekends"],
+          "Joined": {
+            "$days": -600
+          },
+          "Active": true
+        },
+        {
+          "Name": "Henry Lawson",
+          "Email": "henry@example.org",
+          "Phone": "+1 555 0811",
+          "Skills": ["driving"],
+          "Availability": ["weekdays"],
+          "Joined": {
+            "$days": -540
+          },
+          "Active": true
+        },
+        {
+          "Name": "Imani Brooks",
+          "Email": "imani@example.org",
+          "Phone": "+1 555 0812",
+          "Skills": ["teaching"],
+          "Availability": ["evenings", "weekends"],
+          "Joined": {
+            "$days": -420
+          },
+          "Active": true
+        },
+        {
+          "Name": "Jack Thompson",
+          "Email": "jack@example.org",
+          "Phone": "+1 555 0813",
+          "Skills": ["admin"],
+          "Availability": ["weekdays"],
+          "Joined": {
+            "$days": -380
+          },
+          "Active": true
+        },
+        {
+          "Name": "Kavya Reddy",
+          "Email": "kavya@example.org",
+          "Phone": "+1 555 0814",
+          "Skills": ["tech"],
+          "Availability": ["evenings"],
+          "Joined": {
+            "$days": -300
+          },
+          "Active": true
+        },
+        {
+          "Name": "Leila Haddad",
+          "Email": "leila@example.org",
+          "Phone": "+1 555 0815",
+          "Skills": ["events"],
+          "Availability": ["weekends"],
+          "Joined": {
+            "$days": -250
+          },
+          "Active": true
+        },
+        {
+          "Name": "Miguel Santos",
+          "Email": "miguel@example.org",
+          "Phone": "+1 555 0816",
+          "Skills": ["cooking", "events"],
+          "Availability": ["weekdays", "weekends"],
+          "Joined": {
+            "$days": -180
+          },
+          "Active": true
+        },
+        {
+          "Name": "Nina Petrov",
+          "Email": "nina@example.org",
+          "Phone": "+1 555 0817",
+          "Skills": ["fundraising"],
+          "Availability": ["evenings"],
+          "Joined": {
+            "$days": -120
+          },
+          "Active": true
+        },
+        {
+          "Name": "Oscar Lindgren",
+          "Email": "oscar@example.org",
+          "Phone": "+1 555 0818",
+          "Skills": ["driving"],
+          "Availability": ["weekends"],
+          "Joined": {
+            "$days": -60
+          },
+          "Active": true
+        },
+        {
+          "Name": "Pauline Moreau",
+          "Email": "pauline@example.org",
+          "Phone": "+1 555 0819",
+          "Skills": ["teaching"],
+          "Availability": ["weekdays"],
+          "Joined": {
+            "$days": -400
+          },
+          "Active": false
+        }
+      ]
+    },
+    {
+      "name": "Programs",
+      "icon": "layers",
+      "group": "Programs",
+      "description": "Initiatives you run and fund.",
+      "title": "Name",
+      "audit": true,
+      "columns": [
+        {
+          "name": "Name",
+          "format": "text",
+          "required": true,
+          "searchable": true
+        },
+        {
+          "name": "Lead",
+          "format": "text"
+        },
+        {
+          "name": "Status",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Planning",
+                "value": "planning"
+              },
+              {
+                "label": "Running",
+                "value": "running"
+              },
+              {
+                "label": "Paused",
+                "value": "paused"
+              },
+              {
+                "label": "Completed",
+                "value": "completed"
+              }
+            ]
+          },
+          "filterable": true,
+          "sortable": true,
+          "default": "planning"
+        },
+        {
+          "name": "Budget",
+          "format": "currency",
+          "options": {
+            "currency": "USD",
+            "precision": 0
+          },
+          "check": "{Budget} >= 0"
+        },
+        {
+          "name": "Start date",
+          "format": "date"
+        },
+        {
+          "name": "Description",
+          "format": "long_text"
+        }
+      ],
+      "views": [
+        {
+          "name": "Running programs",
+          "icon": "play",
+          "description": "Programs currently active.",
+          "columns": ["Name", "Lead", "Budget", "Start date"],
+          "filters": [
+            {
+              "column": "Status",
+              "op": "is",
+              "value": "running"
+            }
+          ]
+        }
+      ],
+      "rows": [
+        {
+          "Name": "Community Food Pantry",
+          "Lead": "Grace Okafor",
+          "Status": "running",
+          "Budget": 42000,
+          "Start date": {
+            "$days": -700
+          },
+          "Description": "Weekly groceries for local families."
+        },
+        {
+          "Name": "After-School Tutoring",
+          "Lead": "Imani Brooks",
+          "Status": "running",
+          "Budget": 18000,
+          "Start date": {
+            "$days": -400
+          },
+          "Description": "Homework help for grades 4–8."
+        },
+        {
+          "Name": "Senior Meal Delivery",
+          "Lead": "Henry Lawson",
+          "Status": "running",
+          "Budget": 26000,
+          "Start date": {
+            "$days": -250
+          },
+          "Description": "Hot meals delivered to housebound seniors."
+        },
+        {
+          "Name": "Park Clean-Up Days",
+          "Lead": "Leila Haddad",
+          "Status": "planning",
+          "Budget": 4500,
+          "Start date": {
+            "$days": 20
+          },
+          "Description": "Monthly neighborhood clean-up events."
+        },
+        {
+          "Name": "Winter Coat Drive",
+          "Lead": "Nina Petrov",
+          "Status": "completed",
+          "Budget": 6000,
+          "Start date": {
+            "$days": -300
+          },
+          "Description": "Collected and distributed 400 coats."
+        }
+      ]
+    },
+    {
+      "name": "Volunteer Shifts",
+      "icon": "calendar-check",
+      "group": "People",
+      "description": "Who is doing what, and when.",
+      "title": "Title",
+      "columns": [
+        {
+          "name": "Title",
+          "format": "text",
+          "required": true,
+          "searchable": true
+        },
+        {
+          "name": "Program",
+          "format": "relation",
+          "options": {
+            "onDelete": "set null"
+          },
+          "relation": "Programs"
+        },
+        {
+          "name": "Volunteer",
+          "format": "relation",
+          "options": {
+            "onDelete": "set null"
+          },
+          "relation": "Volunteers"
+        },
+        {
+          "name": "Date",
+          "format": "date"
+        },
+        {
+          "name": "Hours",
+          "format": "decimal",
+          "options": {
+            "precision": 1
+          },
+          "check": "{Hours} >= 0"
+        },
+        {
+          "name": "Status",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Scheduled",
+                "value": "scheduled"
+              },
+              {
+                "label": "Completed",
+                "value": "completed"
+              },
+              {
+                "label": "No show",
+                "value": "no_show"
+              }
+            ]
+          },
+          "filterable": true,
+          "sortable": true,
+          "default": "scheduled"
+        },
+        {
+          "name": "Notes",
+          "format": "long_text"
+        }
+      ],
+      "views": [
+        {
+          "name": "Upcoming shifts",
+          "icon": "calendar-clock",
+          "description": "Shifts still to come.",
+          "columns": ["Title", "Program", "Volunteer", "Date", "Hours"],
+          "filters": [
+            {
+              "column": "Status",
+              "op": "is",
+              "value": "scheduled"
+            }
+          ]
+        },
+        {
+          "name": "Completed shifts",
+          "icon": "badge-check",
+          "description": "Hours already given.",
+          "columns": ["Title", "Volunteer", "Date", "Hours"],
+          "filters": [
+            {
+              "column": "Status",
+              "op": "is",
+              "value": "completed"
+            }
+          ]
+        }
+      ],
+      "rows": [
+        {
+          "Title": "Pantry packing – Sat",
+          "Program": "Community Food Pantry",
+          "Volunteer": "Grace Okafor",
+          "Date": {
+            "$days": -9
+          },
+          "Hours": 4,
+          "Status": "completed"
+        },
+        {
+          "Title": "Pantry packing – Sat",
+          "Program": "Community Food Pantry",
+          "Volunteer": "Miguel Santos",
+          "Date": {
+            "$days": -9
+          },
+          "Hours": 4,
+          "Status": "completed"
+        },
+        {
+          "Title": "Pantry packing – Sat",
+          "Program": "Community Food Pantry",
+          "Volunteer": "Oscar Lindgren",
+          "Date": {
+            "$days": -9
+          },
+          "Hours": 3,
+          "Status": "completed"
+        },
+        {
+          "Title": "Tutoring – Tue",
+          "Program": "After-School Tutoring",
+          "Volunteer": "Imani Brooks",
+          "Date": {
+            "$days": -7
+          },
+          "Hours": 2.5,
+          "Status": "completed"
+        },
+        {
+          "Title": "Meal delivery – Wed",
+          "Program": "Senior Meal Delivery",
+          "Volunteer": "Henry Lawson",
+          "Date": {
+            "$days": -6
+          },
+          "Hours": 3,
+          "Status": "completed"
+        },
+        {
+          "Title": "Meal delivery – Wed",
+          "Program": "Senior Meal Delivery",
+          "Volunteer": "Oscar Lindgren",
+          "Date": {
+            "$days": -6
+          },
+          "Hours": 3,
+          "Status": "no_show"
+        },
+        {
+          "Title": "Tutoring – Thu",
+          "Program": "After-School Tutoring",
+          "Volunteer": "Pauline Moreau",
+          "Date": {
+            "$days": -4
+          },
+          "Hours": 2.5,
+          "Status": "completed"
+        },
+        {
+          "Title": "Pantry packing – Sat",
+          "Program": "Community Food Pantry",
+          "Volunteer": "Grace Okafor",
+          "Date": {
+            "$days": -2
+          },
+          "Hours": 4,
+          "Status": "completed"
+        },
+        {
+          "Title": "Pantry packing – Sat",
+          "Program": "Community Food Pantry",
+          "Volunteer": "Miguel Santos",
+          "Date": {
+            "$days": -2
+          },
+          "Hours": 4,
+          "Status": "completed"
+        },
+        {
+          "Title": "Tutoring – Tue",
+          "Program": "After-School Tutoring",
+          "Volunteer": "Imani Brooks",
+          "Date": {
+            "$days": 1
+          },
+          "Hours": 2.5,
+          "Status": "scheduled"
+        },
+        {
+          "Title": "Meal delivery – Wed",
+          "Program": "Senior Meal Delivery",
+          "Volunteer": "Henry Lawson",
+          "Date": {
+            "$days": 2
+          },
+          "Hours": 3,
+          "Status": "scheduled"
+        },
+        {
+          "Title": "Pantry packing – Sat",
+          "Program": "Community Food Pantry",
+          "Volunteer": "Grace Okafor",
+          "Date": {
+            "$days": 5
+          },
+          "Hours": 4,
+          "Status": "scheduled"
+        },
+        {
+          "Title": "Pantry packing – Sat",
+          "Program": "Community Food Pantry",
+          "Volunteer": "Oscar Lindgren",
+          "Date": {
+            "$days": 5
+          },
+          "Hours": 4,
+          "Status": "scheduled"
+        },
+        {
+          "Title": "Clean-up planning",
+          "Program": "Park Clean-Up Days",
+          "Volunteer": "Leila Haddad",
+          "Date": {
+            "$days": 6
+          },
+          "Hours": 2,
+          "Status": "scheduled"
+        },
+        {
+          "Title": "Donor database cleanup",
+          "Program": "Community Food Pantry",
+          "Volunteer": "Jack Thompson",
+          "Date": {
+            "$days": 3
+          },
+          "Hours": 3,
+          "Status": "scheduled"
+        },
+        {
+          "Title": "Website update",
+          "Program": "Senior Meal Delivery",
+          "Volunteer": "Kavya Reddy",
+          "Date": {
+            "$days": 7
+          },
+          "Hours": 2,
+          "Status": "scheduled"
+        }
+      ]
+    },
+    {
+      "name": "Donors",
+      "icon": "gift",
+      "group": "Fundraising",
+      "description": "Individuals, businesses and foundations who give.",
+      "title": "Name",
+      "audit": true,
+      "columns": [
+        {
+          "name": "Name",
+          "format": "text",
+          "required": true,
+          "searchable": true
+        },
+        {
+          "name": "Type",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Individual",
+                "value": "individual"
+              },
+              {
+                "label": "Business",
+                "value": "business"
+              },
+              {
+                "label": "Foundation",
+                "value": "foundation"
+              }
+            ]
+          },
+          "filterable": true,
+          "sortable": true
+        },
+        {
+          "name": "Email",
+          "format": "email"
+        },
+        {
+          "name": "City",
+          "format": "text"
+        },
+        {
+          "name": "First gift",
+          "format": "date"
+        },
+        {
+          "name": "Newsletter",
+          "format": "checkbox",
+          "filterable": true,
+          "sortable": true,
+          "default": "true"
+        }
+      ],
+      "views": [
+        {
+          "name": "Newsletter subscribers",
+          "icon": "mail",
+          "description": "Donors who want updates.",
+          "columns": ["Name", "Email", "City"],
+          "filters": [
+            {
+              "column": "Newsletter",
+              "op": "is",
+              "value": true
+            }
+          ]
+        }
+      ],
+      "rows": [
+        {
+          "Name": "Alan & Judith Pierce",
+          "Type": "individual",
+          "Email": "pierces@example.com",
+          "City": "Springfield",
+          "First gift": {
+            "$days": -600
+          },
+          "Newsletter": true
+        },
+        {
+          "Name": "Bright Bakery",
+          "Type": "business",
+          "Email": "hello@brightbakery.example.com",
+          "City": "Springfield",
+          "First gift": {
+            "$days": -500
+          },
+          "Newsletter": true
+        },
+        {
+          "Name": "Greenfield Foundation",
+          "Type": "foundation",
+          "Email": "grants@greenfield.example.org",
+          "City": "Capital City",
+          "First gift": {
+            "$days": -450
+          },
+          "Newsletter": true
+        },
+        {
+          "Name": "Rosa Delgado",
+          "Type": "individual",
+          "Email": "rosa.delgado@example.com",
+          "City": "Riverton",
+          "First gift": {
+            "$days": -300
+          },
+          "Newsletter": true
+        },
+        {
+          "Name": "Hartley Hardware",
+          "Type": "business",
+          "Email": "owner@hartley.example.com",
+          "City": "Springfield",
+          "First gift": {
+            "$days": -220
+          },
+          "Newsletter": false
+        },
+        {
+          "Name": "Thomas Wright",
+          "Type": "individual",
+          "Email": "thomas.wright@example.com",
+          "City": "Springfield",
+          "First gift": {
+            "$days": -150
+          },
+          "Newsletter": true
+        },
+        {
+          "Name": "Kind Hearts Fund",
+          "Type": "foundation",
+          "Email": "apply@kindhearts.example.org",
+          "City": "Capital City",
+          "First gift": {
+            "$days": -90
+          },
+          "Newsletter": true
+        },
+        {
+          "Name": "Priya Menon",
+          "Type": "individual",
+          "Email": "priya.menon@example.com",
+          "City": "Riverton",
+          "First gift": {
+            "$days": -35
+          },
+          "Newsletter": true
+        }
+      ]
+    },
+    {
+      "name": "Donations",
+      "icon": "hand-coins",
+      "group": "Fundraising",
+      "description": "Gifts received and whether a receipt went out.",
+      "title": "Reference",
+      "audit": true,
+      "columns": [
+        {
+          "name": "Reference",
+          "format": "text",
+          "required": true,
+          "searchable": true
+        },
+        {
+          "name": "Donor",
+          "format": "relation",
+          "options": {
+            "onDelete": "set null"
+          },
+          "relation": "Donors"
+        },
+        {
+          "name": "Program",
+          "format": "relation",
+          "options": {
+            "onDelete": "set null"
+          },
+          "relation": "Programs"
+        },
+        {
+          "name": "Amount",
+          "format": "currency",
+          "options": {
+            "currency": "USD",
+            "precision": 2
+          },
+          "required": true,
+          "check": "{Amount} > 0"
+        },
+        {
+          "name": "Date",
+          "format": "date"
+        },
+        {
+          "name": "Method",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Card",
+                "value": "card"
+              },
+              {
+                "label": "Bank transfer",
+                "value": "bank_transfer"
+              },
+              {
+                "label": "Cash",
+                "value": "cash"
+              },
+              {
+                "label": "Cheque",
+                "value": "cheque"
+              }
+            ]
+          },
+          "filterable": true,
+          "sortable": true
+        },
+        {
+          "name": "Recurring",
+          "format": "checkbox",
+          "filterable": true,
+          "sortable": true,
+          "default": "false"
+        },
+        {
+          "name": "Receipt sent",
+          "format": "checkbox",
+          "filterable": true,
+          "sortable": true,
+          "default": "false"
+        }
+      ],
+      "views": [
+        {
+          "name": "Receipts pending",
+          "icon": "receipt",
+          "description": "Donations awaiting a thank-you receipt.",
+          "columns": ["Reference", "Donor", "Amount", "Date", "Method"],
+          "filters": [
+            {
+              "column": "Receipt sent",
+              "op": "is",
+              "value": false
+            }
+          ]
+        },
+        {
+          "name": "Recurring gifts",
+          "icon": "repeat",
+          "description": "Monthly supporters.",
+          "columns": ["Reference", "Donor", "Program", "Amount"],
+          "filters": [
+            {
+              "column": "Recurring",
+              "op": "is",
+              "value": true
+            }
+          ]
+        }
+      ],
+      "rows": [
+        {
+          "Reference": "DON-001",
+          "Donor": "Alan & Judith Pierce",
+          "Program": "Community Food Pantry",
+          "Amount": 250,
+          "Date": {
+            "$days": -60
+          },
+          "Method": "card",
+          "Recurring": true,
+          "Receipt sent": true
+        },
+        {
+          "Reference": "DON-002",
+          "Donor": "Bright Bakery",
+          "Program": "Community Food Pantry",
+          "Amount": 500,
+          "Date": {
+            "$days": -55
+          },
+          "Method": "bank_transfer",
+          "Recurring": false,
+          "Receipt sent": true
+        },
+        {
+          "Reference": "DON-003",
+          "Donor": "Greenfield Foundation",
+          "Program": "After-School Tutoring",
+          "Amount": 8000,
+          "Date": {
+            "$days": -48
+          },
+          "Method": "bank_transfer",
+          "Recurring": false,
+          "Receipt sent": true
+        },
+        {
+          "Reference": "DON-004",
+          "Donor": "Rosa Delgado",
+          "Program": "Senior Meal Delivery",
+          "Amount": 100,
+          "Date": {
+            "$days": -40
+          },
+          "Method": "card",
+          "Recurring": true,
+          "Receipt sent": true
+        },
+        {
+          "Reference": "DON-005",
+          "Donor": "Hartley Hardware",
+          "Program": "Park Clean-Up Days",
+          "Amount": 750,
+          "Date": {
+            "$days": -33
+          },
+          "Method": "cheque",
+          "Recurring": false,
+          "Receipt sent": true
+        },
+        {
+          "Reference": "DON-006",
+          "Donor": "Thomas Wright",
+          "Program": "Community Food Pantry",
+          "Amount": 60,
+          "Date": {
+            "$days": -27
+          },
+          "Method": "cash",
+          "Recurring": false,
+          "Receipt sent": true
+        },
+        {
+          "Reference": "DON-007",
+          "Donor": "Alan & Judith Pierce",
+          "Program": "Community Food Pantry",
+          "Amount": 250,
+          "Date": {
+            "$days": -30
+          },
+          "Method": "card",
+          "Recurring": true,
+          "Receipt sent": true
+        },
+        {
+          "Reference": "DON-008",
+          "Donor": "Kind Hearts Fund",
+          "Program": "Senior Meal Delivery",
+          "Amount": 5000,
+          "Date": {
+            "$days": -20
+          },
+          "Method": "bank_transfer",
+          "Recurring": false,
+          "Receipt sent": true
+        },
+        {
+          "Reference": "DON-009",
+          "Donor": "Priya Menon",
+          "Program": "After-School Tutoring",
+          "Amount": 40,
+          "Date": {
+            "$days": -14
+          },
+          "Method": "card",
+          "Recurring": true,
+          "Receipt sent": false
+        },
+        {
+          "Reference": "DON-010",
+          "Donor": "Rosa Delgado",
+          "Program": "Senior Meal Delivery",
+          "Amount": 100,
+          "Date": {
+            "$days": -10
+          },
+          "Method": "card",
+          "Recurring": true,
+          "Receipt sent": false
+        },
+        {
+          "Reference": "DON-011",
+          "Donor": "Alan & Judith Pierce",
+          "Program": "Community Food Pantry",
+          "Amount": 250,
+          "Date": {
+            "$days": 0
+          },
+          "Method": "card",
+          "Recurring": true,
+          "Receipt sent": false
+        },
+        {
+          "Reference": "DON-012",
+          "Donor": "Bright Bakery",
+          "Program": "Senior Meal Delivery",
+          "Amount": 300,
+          "Date": {
+            "$days": -6
+          },
+          "Method": "bank_transfer",
+          "Recurring": false,
+          "Receipt sent": false
+        },
+        {
+          "Reference": "DON-013",
+          "Donor": "Thomas Wright",
+          "Program": "Winter Coat Drive",
+          "Amount": 120,
+          "Date": {
+            "$days": -250
+          },
+          "Method": "card",
+          "Recurring": false,
+          "Receipt sent": true
+        },
+        {
+          "Reference": "DON-014",
+          "Donor": "Greenfield Foundation",
+          "Program": "Community Food Pantry",
+          "Amount": 6000,
+          "Date": {
+            "$days": -9
+          },
+          "Method": "bank_transfer",
+          "Recurring": false,
+          "Receipt sent": false
+        }
+      ]
+    }
+  ]
+}

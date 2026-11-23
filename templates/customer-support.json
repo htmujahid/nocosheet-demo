@@ -1,0 +1,742 @@
+{
+  "version": 1,
+  "id": "customer-support",
+  "name": "Customer Support Desk",
+  "description": "A lightweight help desk: agents, customers, tickets with priority and satisfaction, and a help article library.",
+  "icon": "headset",
+  "tags": ["support", "helpdesk", "sample"],
+  "tables": [
+    {
+      "name": "Agents",
+      "icon": "headset",
+      "group": "Team",
+      "description": "People answering customers.",
+      "title": "Name",
+      "columns": [
+        {
+          "name": "Name",
+          "format": "text",
+          "required": true,
+          "searchable": true
+        },
+        {
+          "name": "Email",
+          "format": "email",
+          "required": true,
+          "unique": true
+        },
+        {
+          "name": "Role",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Agent",
+                "value": "agent"
+              },
+              {
+                "label": "Team lead",
+                "value": "team_lead"
+              }
+            ]
+          },
+          "filterable": true,
+          "sortable": true
+        },
+        {
+          "name": "Active",
+          "format": "checkbox",
+          "filterable": true,
+          "sortable": true,
+          "default": "true"
+        }
+      ],
+      "views": [
+        {
+          "name": "Active agents",
+          "icon": "users",
+          "description": "On the support rota.",
+          "columns": ["Name", "Email", "Role"],
+          "filters": [
+            {
+              "column": "Active",
+              "op": "is",
+              "value": true
+            }
+          ]
+        }
+      ],
+      "rows": [
+        {
+          "Name": "Sara Lindqvist",
+          "Email": "sara.lindqvist@example.com",
+          "Role": "team_lead",
+          "Active": true
+        },
+        {
+          "Name": "Tariq Aziz",
+          "Email": "tariq.aziz@example.com",
+          "Role": "agent",
+          "Active": true
+        },
+        {
+          "Name": "Julia Fernandez",
+          "Email": "julia.fernandez@example.com",
+          "Role": "agent",
+          "Active": true
+        },
+        {
+          "Name": "Ben Okoro",
+          "Email": "ben.okoro@example.com",
+          "Role": "agent",
+          "Active": true
+        }
+      ]
+    },
+    {
+      "name": "Customers",
+      "icon": "users",
+      "group": "Customers",
+      "description": "People who contact support.",
+      "title": "Name",
+      "columns": [
+        {
+          "name": "Name",
+          "format": "text",
+          "required": true,
+          "searchable": true
+        },
+        {
+          "name": "Email",
+          "format": "email",
+          "required": true,
+          "unique": true
+        },
+        {
+          "name": "Company",
+          "format": "text"
+        },
+        {
+          "name": "Plan",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Free",
+                "value": "free"
+              },
+              {
+                "label": "Pro",
+                "value": "pro"
+              },
+              {
+                "label": "Business",
+                "value": "business"
+              }
+            ]
+          },
+          "filterable": true,
+          "sortable": true
+        },
+        {
+          "name": "Joined",
+          "format": "date"
+        }
+      ],
+      "views": [
+        {
+          "name": "Business plan",
+          "icon": "building",
+          "description": "Priority accounts.",
+          "columns": ["Name", "Company", "Email", "Joined"],
+          "filters": [
+            {
+              "column": "Plan",
+              "op": "is",
+              "value": "business"
+            }
+          ]
+        }
+      ],
+      "rows": [
+        {
+          "Name": "Oliver Grant",
+          "Email": "oliver.grant@example.com",
+          "Company": "Grant Design",
+          "Plan": "pro",
+          "Joined": {
+            "$days": -300
+          }
+        },
+        {
+          "Name": "Mei Tanaka",
+          "Email": "mei.tanaka@example.com",
+          "Company": "Tanaka Labs",
+          "Plan": "business",
+          "Joined": {
+            "$days": -420
+          }
+        },
+        {
+          "Name": "Hassan Ali",
+          "Email": "hassan.ali@example.com",
+          "Company": "Ali Logistics",
+          "Plan": "business",
+          "Joined": {
+            "$days": -250
+          }
+        },
+        {
+          "Name": "Chloe Dubois",
+          "Email": "chloe.dubois@example.com",
+          "Company": "Dubois Bakery",
+          "Plan": "free",
+          "Joined": {
+            "$days": -90
+          }
+        },
+        {
+          "Name": "Lars Nielsen",
+          "Email": "lars.nielsen@example.com",
+          "Company": "Nielsen & Co",
+          "Plan": "pro",
+          "Joined": {
+            "$days": -200
+          }
+        },
+        {
+          "Name": "Zoe Adams",
+          "Email": "zoe.adams@example.com",
+          "Company": "Adams Realty",
+          "Plan": "pro",
+          "Joined": {
+            "$days": -150
+          }
+        },
+        {
+          "Name": "Ravi Kapoor",
+          "Email": "ravi.kapoor@example.com",
+          "Company": "Kapoor Tech",
+          "Plan": "business",
+          "Joined": {
+            "$days": -380
+          }
+        },
+        {
+          "Name": "Emma Fischer",
+          "Email": "emma.fischer@example.com",
+          "Company": "Fischer Studio",
+          "Plan": "free",
+          "Joined": {
+            "$days": -20
+          }
+        }
+      ]
+    },
+    {
+      "name": "Tickets",
+      "icon": "ticket",
+      "group": "Support",
+      "description": "Every customer request and its status.",
+      "title": "Subject",
+      "audit": true,
+      "columns": [
+        {
+          "name": "Subject",
+          "format": "text",
+          "required": true,
+          "searchable": true
+        },
+        {
+          "name": "Customer",
+          "format": "relation",
+          "options": {
+            "onDelete": "set null"
+          },
+          "relation": "Customers"
+        },
+        {
+          "name": "Assignee",
+          "format": "relation",
+          "options": {
+            "onDelete": "set null"
+          },
+          "relation": "Agents"
+        },
+        {
+          "name": "Channel",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Email",
+                "value": "email"
+              },
+              {
+                "label": "Chat",
+                "value": "chat"
+              },
+              {
+                "label": "Phone",
+                "value": "phone"
+              },
+              {
+                "label": "Social",
+                "value": "social"
+              }
+            ]
+          },
+          "filterable": true,
+          "sortable": true
+        },
+        {
+          "name": "Priority",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Low",
+                "value": "low"
+              },
+              {
+                "label": "Normal",
+                "value": "normal"
+              },
+              {
+                "label": "High",
+                "value": "high"
+              },
+              {
+                "label": "Urgent",
+                "value": "urgent"
+              }
+            ]
+          },
+          "filterable": true,
+          "sortable": true,
+          "default": "normal"
+        },
+        {
+          "name": "Status",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "New",
+                "value": "new"
+              },
+              {
+                "label": "Open",
+                "value": "open"
+              },
+              {
+                "label": "Waiting on customer",
+                "value": "waiting_on_customer"
+              },
+              {
+                "label": "Resolved",
+                "value": "resolved"
+              },
+              {
+                "label": "Closed",
+                "value": "closed"
+              }
+            ]
+          },
+          "filterable": true,
+          "sortable": true,
+          "default": "new"
+        },
+        {
+          "name": "Created",
+          "format": "datetime"
+        },
+        {
+          "name": "Satisfaction",
+          "format": "rating",
+          "options": {
+            "max": 5
+          }
+        },
+        {
+          "name": "Description",
+          "format": "long_text"
+        }
+      ],
+      "views": [
+        {
+          "name": "Open tickets",
+          "icon": "inbox",
+          "description": "New or open tickets.",
+          "columns": ["Subject", "Customer", "Assignee", "Priority", "Created"],
+          "filters": [
+            {
+              "column": "Status",
+              "op": "is_any_of",
+              "value": ["new", "open"]
+            }
+          ]
+        },
+        {
+          "name": "Urgent",
+          "icon": "siren",
+          "description": "Urgent and high priority tickets.",
+          "columns": ["Subject", "Customer", "Status", "Assignee"],
+          "filters": [
+            {
+              "column": "Priority",
+              "op": "is_any_of",
+              "value": ["high", "urgent"]
+            }
+          ]
+        },
+        {
+          "name": "Waiting on customer",
+          "icon": "hourglass",
+          "description": "Ball is in the customer's court.",
+          "columns": ["Subject", "Customer", "Assignee", "Created"],
+          "filters": [
+            {
+              "column": "Status",
+              "op": "is",
+              "value": "waiting_on_customer"
+            }
+          ]
+        }
+      ],
+      "rows": [
+        {
+          "Subject": "Can't reset my password",
+          "Customer": "Chloe Dubois",
+          "Assignee": "Tariq Aziz",
+          "Channel": "email",
+          "Priority": "normal",
+          "Status": "resolved",
+          "Created": {
+            "$days": -6,
+            "$hour": 10
+          },
+          "Satisfaction": 5,
+          "Description": "Reset email never arrives."
+        },
+        {
+          "Subject": "Invoice shows wrong VAT",
+          "Customer": "Mei Tanaka",
+          "Assignee": "Julia Fernandez",
+          "Channel": "email",
+          "Priority": "high",
+          "Status": "open",
+          "Created": {
+            "$days": -2,
+            "$hour": 9
+          },
+          "Description": "VAT number missing from last invoice."
+        },
+        {
+          "Subject": "Export to CSV fails",
+          "Customer": "Hassan Ali",
+          "Assignee": "Ben Okoro",
+          "Channel": "chat",
+          "Priority": "high",
+          "Status": "open",
+          "Created": {
+            "$days": -1,
+            "$hour": 15
+          },
+          "Description": "Large exports time out."
+        },
+        {
+          "Subject": "How do I invite teammates?",
+          "Customer": "Emma Fischer",
+          "Assignee": "Tariq Aziz",
+          "Channel": "chat",
+          "Priority": "low",
+          "Status": "closed",
+          "Created": {
+            "$days": -12,
+            "$hour": 11
+          },
+          "Satisfaction": 4
+        },
+        {
+          "Subject": "Site is down!",
+          "Customer": "Ravi Kapoor",
+          "Assignee": "Sara Lindqvist",
+          "Channel": "phone",
+          "Priority": "urgent",
+          "Status": "resolved",
+          "Created": {
+            "$days": -9,
+            "$hour": 8
+          },
+          "Satisfaction": 5,
+          "Description": "Outage caused by a bad deploy; fixed within the hour."
+        },
+        {
+          "Subject": "Upgrade to Business plan",
+          "Customer": "Zoe Adams",
+          "Assignee": "Julia Fernandez",
+          "Channel": "email",
+          "Priority": "normal",
+          "Status": "waiting_on_customer",
+          "Created": {
+            "$days": -3,
+            "$hour": 14
+          },
+          "Description": "Waiting for billing details."
+        },
+        {
+          "Subject": "Feature request: dark mode",
+          "Customer": "Lars Nielsen",
+          "Assignee": "Ben Okoro",
+          "Channel": "social",
+          "Priority": "low",
+          "Status": "closed",
+          "Created": {
+            "$days": -20,
+            "$hour": 16
+          },
+          "Satisfaction": 3
+        },
+        {
+          "Subject": "Cannot upload files over 10MB",
+          "Customer": "Oliver Grant",
+          "Assignee": "Tariq Aziz",
+          "Channel": "email",
+          "Priority": "normal",
+          "Status": "new",
+          "Created": {
+            "$days": 0,
+            "$hour": 9
+          },
+          "Description": "Upload bar stalls at 90%."
+        },
+        {
+          "Subject": "Refund request",
+          "Customer": "Chloe Dubois",
+          "Assignee": "Julia Fernandez",
+          "Channel": "email",
+          "Priority": "normal",
+          "Status": "resolved",
+          "Created": {
+            "$days": -15,
+            "$hour": 13
+          },
+          "Satisfaction": 4,
+          "Description": "Charged twice in March."
+        },
+        {
+          "Subject": "API key stopped working",
+          "Customer": "Mei Tanaka",
+          "Assignee": "Sara Lindqvist",
+          "Channel": "chat",
+          "Priority": "urgent",
+          "Status": "open",
+          "Created": {
+            "$days": 0,
+            "$hour": 10
+          },
+          "Description": "401 errors since this morning."
+        },
+        {
+          "Subject": "Billing cycle question",
+          "Customer": "Lars Nielsen",
+          "Assignee": "Tariq Aziz",
+          "Channel": "email",
+          "Priority": "low",
+          "Status": "resolved",
+          "Created": {
+            "$days": -7,
+            "$hour": 12
+          },
+          "Satisfaction": 5
+        },
+        {
+          "Subject": "Account locked after login attempts",
+          "Customer": "Zoe Adams",
+          "Assignee": "Ben Okoro",
+          "Channel": "phone",
+          "Priority": "high",
+          "Status": "resolved",
+          "Created": {
+            "$days": -4,
+            "$hour": 17
+          },
+          "Satisfaction": 4
+        }
+      ]
+    },
+    {
+      "name": "Help Articles",
+      "icon": "book-open",
+      "group": "Knowledge base",
+      "description": "Self-service docs for customers.",
+      "title": "Title",
+      "columns": [
+        {
+          "name": "Title",
+          "format": "text",
+          "required": true,
+          "searchable": true
+        },
+        {
+          "name": "Category",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Getting started",
+                "value": "getting_started"
+              },
+              {
+                "label": "Billing",
+                "value": "billing"
+              },
+              {
+                "label": "Account",
+                "value": "account"
+              },
+              {
+                "label": "Troubleshooting",
+                "value": "troubleshooting"
+              }
+            ]
+          },
+          "filterable": true,
+          "sortable": true
+        },
+        {
+          "name": "Status",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Draft",
+                "value": "draft"
+              },
+              {
+                "label": "Published",
+                "value": "published"
+              }
+            ]
+          },
+          "filterable": true,
+          "sortable": true,
+          "default": "draft"
+        },
+        {
+          "name": "Views",
+          "format": "integer",
+          "default": "0",
+          "check": "{Views} >= 0"
+        },
+        {
+          "name": "Updated",
+          "format": "date"
+        },
+        {
+          "name": "URL",
+          "format": "url"
+        }
+      ],
+      "views": [
+        {
+          "name": "Published",
+          "icon": "badge-check",
+          "description": "Live articles.",
+          "columns": ["Title", "Category", "Views", "Updated"],
+          "filters": [
+            {
+              "column": "Status",
+              "op": "is",
+              "value": "published"
+            }
+          ]
+        },
+        {
+          "name": "Drafts",
+          "icon": "pencil",
+          "description": "Articles to finish.",
+          "columns": ["Title", "Category", "Updated"],
+          "filters": [
+            {
+              "column": "Status",
+              "op": "is",
+              "value": "draft"
+            }
+          ]
+        }
+      ],
+      "rows": [
+        {
+          "Title": "Getting started in 5 minutes",
+          "Category": "getting_started",
+          "Status": "published",
+          "Views": 1840,
+          "Updated": {
+            "$days": -30
+          },
+          "URL": "https://help.example.com/getting-started-in-5-minutes"
+        },
+        {
+          "Title": "Invite your team",
+          "Category": "getting_started",
+          "Status": "published",
+          "Views": 960,
+          "Updated": {
+            "$days": -45
+          },
+          "URL": "https://help.example.com/invite-your-team"
+        },
+        {
+          "Title": "Understanding your invoice",
+          "Category": "billing",
+          "Status": "published",
+          "Views": 720,
+          "Updated": {
+            "$days": -60
+          },
+          "URL": "https://help.example.com/understanding-your-invoice"
+        },
+        {
+          "Title": "Change your plan",
+          "Category": "billing",
+          "Status": "published",
+          "Views": 540,
+          "Updated": {
+            "$days": -20
+          },
+          "URL": "https://help.example.com/change-your-plan"
+        },
+        {
+          "Title": "Reset your password",
+          "Category": "account",
+          "Status": "published",
+          "Views": 2100,
+          "Updated": {
+            "$days": -90
+          },
+          "URL": "https://help.example.com/reset-your-password"
+        },
+        {
+          "Title": "Fixing failed CSV exports",
+          "Category": "troubleshooting",
+          "Status": "draft",
+          "Views": 0,
+          "Updated": {
+            "$days": -2
+          }
+        },
+        {
+          "Title": "Rotating API keys",
+          "Category": "troubleshooting",
+          "Status": "draft",
+          "Views": 0,
+          "Updated": {
+            "$days": -1
+          }
+        }
+      ]
+    }
+  ]
+}

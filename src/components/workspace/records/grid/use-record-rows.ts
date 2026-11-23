@@ -7,7 +7,7 @@ import { recordsCollection } from "@/data/workspace/records";
 import { tablesCollection } from "@/data/workspace/tables";
 import { useAccess } from "@/hooks/use-access";
 import { useSession } from "@/hooks/use-session";
-import type { FilterCondition } from "@/lib/records/filters";
+import { type FilterCondition, SYSTEM_FILTER_COLUMNS } from "@/lib/records/filters";
 import { type LocalRow, pageRows, selectRows } from "@/lib/records/local";
 
 import type { ViewerColumn } from "../columns";
@@ -134,11 +134,18 @@ export function useRecordRows({
   const label = useRelationLabels(columns);
 
   return useMemo(() => {
-    const local = tableColumns.map((column) => ({
-      columnName: column.columnName,
-      format: column.format,
-      isSearchable: column.isSearchable,
-    }));
+    const local = [
+      ...tableColumns.map((column) => ({
+        columnName: column.columnName,
+        format: column.format,
+        isSearchable: column.isSearchable,
+      })),
+      ...SYSTEM_FILTER_COLUMNS.map((column) => ({
+        columnName: column.columnName,
+        format: column.format as string,
+        isSearchable: false,
+      })),
+    ];
     const selected = selectRows(data as LocalRow[], local, {
       filters: view.filters,
       q: view.q,
