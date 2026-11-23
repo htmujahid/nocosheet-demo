@@ -23,9 +23,9 @@ export function DataTableViewOptions<TData extends RowData, TSelected>({
 
   return (
     <Menu>
-      <MenuTrigger render={<Button variant="outline" />}>
+      <MenuTrigger render={<Button variant="outline" aria-label="View" />}>
         <Settings2Icon />
-        View
+        <span className="max-sm:hidden">View</span>
       </MenuTrigger>
       <MenuPopup align="end">
         <MenuGroup>

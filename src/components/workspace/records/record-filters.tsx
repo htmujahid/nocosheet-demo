@@ -34,9 +34,9 @@ export function RecordFilters({
         }
       }}
     >
-      <PopoverTrigger render={<Button variant="outline" />}>
+      <PopoverTrigger render={<Button variant="outline" aria-label="Filter" />}>
         <FilterIcon />
-        Filter
+        <span className="max-sm:hidden">Filter</span>
         {value.length > 0 && <Badge variant="secondary">{value.length}</Badge>}
       </PopoverTrigger>
       <PopoverPopup align="start" className="w-[30rem] max-w-[calc(100vw-2rem)]">

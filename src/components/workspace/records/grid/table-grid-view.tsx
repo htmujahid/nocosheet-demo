@@ -104,7 +104,7 @@ export function TableGridView({
         >
           <ViewsMenu workspace={workspace} table={String(tableId)} />
           {onOpenAssistant && (
-            <Button variant="outline" onClick={onOpenAssistant}>
+            <Button variant="outline" aria-label="Assistant" onClick={onOpenAssistant}>
               <SparklesIcon aria-hidden="true" />
               <span className="max-sm:hidden">Assistant</span>
             </Button>
