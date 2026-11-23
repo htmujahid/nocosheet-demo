@@ -1,5 +1,5 @@
 allowBuilds:
- '@journeyapps/wa-sqlite': false
+  '@journeyapps/wa-sqlite': false
   better-sqlite3: false
   esbuild: true
   sharp: true
