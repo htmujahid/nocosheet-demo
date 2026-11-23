@@ -1,25 +1,25 @@
-import { CloudIcon, CodeXmlIcon, MousePointerClickIcon, Table2Icon } from "lucide-react";
+import { LockIcon, MousePointerClickIcon, Table2Icon, WifiOffIcon } from "lucide-react";
 
 const features = [
   {
     icon: MousePointerClickIcon,
-    title: "Fully no-code",
-    description: "Create tables, fields and relations straight from the UI.",
+    title: "No code needed",
+    description: "Set up tables, fields and links between them in a few clicks.",
   },
   {
     icon: Table2Icon,
-    title: "Spreadsheet-style grid",
-    description: "Browse and edit your records the way you already work.",
+    title: "Feels like a spreadsheet",
+    description: "Browse and edit your tables the way you already work.",
   },
   {
-    icon: CloudIcon,
-    title: "Self-host on Cloudflare",
-    description: "Runs on your own account with Workers, D1, R2 and more.",
+    icon: WifiOffIcon,
+    title: "Works offline",
+    description: "Open your tables anywhere and your changes are saved when you reconnect.",
   },
   {
-    icon: CodeXmlIcon,
-    title: "Open source",
-    description: "Read the code, extend it and make it yours.",
+    icon: LockIcon,
+    title: "Your data stays yours",
+    description: "Open source, with full control over who in your team sees what.",
   },
 ];
 
@@ -28,10 +28,10 @@ export function AuthBrandPanel() {
     <aside className="hidden flex-col justify-center gap-8 border-l bg-muted/50 p-10 md:flex">
       <div className="flex flex-col gap-2">
         <h2 className="font-semibold text-2xl leading-tight tracking-tight">
-          Your data, modelled and published without code.
+          Track anything with your team, no code needed.
         </h2>
         <p className="text-muted-foreground text-sm">
-          An open-source no-code CMS and spreadsheet-style database.
+          An open-source, offline-first no-code tool that feels like a spreadsheet.
         </p>
       </div>
       <ul className="flex flex-col gap-5">
