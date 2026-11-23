@@ -2,7 +2,7 @@
   "id": "/",
   "name": "Nocosheet",
   "short_name": "Nocosheet",
-  "description": "Self-hosted, offline-first no-code spreadsheet database.",
+  "description": "Self-hosted, offline-first no-code database that feels like a spreadsheet.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
