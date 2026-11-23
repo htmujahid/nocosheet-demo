@@ -1,0 +1,986 @@
+{
+  "version": 1,
+  "id": "property-management",
+  "name": "Property Management",
+  "description": "A small landlord or letting agent workspace: properties, tenants, leases, rent payments and maintenance requests.",
+  "icon": "building-2",
+  "tags": ["property", "real-estate", "sample"],
+  "tables": [
+    {
+      "name": "Properties",
+      "icon": "building-2",
+      "group": "Portfolio",
+      "description": "Units you own or manage.",
+      "title": "Name",
+      "audit": true,
+      "columns": [
+        {
+          "name": "Name",
+          "format": "text",
+          "required": true,
+          "searchable": true
+        },
+        {
+          "name": "Address",
+          "format": "text"
+        },
+        {
+          "name": "City",
+          "format": "text"
+        },
+        {
+          "name": "Type",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Apartment",
+                "value": "apartment"
+              },
+              {
+                "label": "House",
+                "value": "house"
+              },
+              {
+                "label": "Studio",
+                "value": "studio"
+              },
+              {
+                "label": "Duplex",
+                "value": "duplex"
+              }
+            ]
+          },
+          "filterable": true,
+          "sortable": true
+        },
+        {
+          "name": "Bedrooms",
+          "format": "integer",
+          "check": "{Bedrooms} >= 0"
+        },
+        {
+          "name": "Monthly rent",
+          "format": "currency",
+          "options": {
+            "currency": "GBP",
+            "precision": 0
+          },
+          "check": "{Monthly rent} >= 0"
+        },
+        {
+          "name": "Status",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Occupied",
+                "value": "occupied"
+              },
+              {
+                "label": "Vacant",
+                "value": "vacant"
+              },
+              {
+                "label": "Maintenance",
+                "value": "maintenance"
+              }
+            ]
+          },
+          "filterable": true,
+          "sortable": true,
+          "default": "vacant"
+        }
+      ],
+      "views": [
+        {
+          "name": "Vacant",
+          "icon": "door-open",
+          "description": "Units available to let.",
+          "columns": ["Name", "City", "Type", "Bedrooms", "Monthly rent"],
+          "filters": [
+            {
+              "column": "Status",
+              "op": "is",
+              "value": "vacant"
+            }
+          ]
+        },
+        {
+          "name": "Occupied",
+          "icon": "key-round",
+          "description": "Currently let.",
+          "columns": ["Name", "City", "Monthly rent"],
+          "filters": [
+            {
+              "column": "Status",
+              "op": "is",
+              "value": "occupied"
+            }
+          ]
+        }
+      ],
+      "rows": [
+        {
+          "Name": "Maple Court – Flat 1",
+          "Address": "12 Maple Street",
+          "City": "Bristol",
+          "Type": "apartment",
+          "Bedrooms": 2,
+          "Monthly rent": 1150,
+          "Status": "occupied"
+        },
+        {
+          "Name": "Maple Court – Flat 2",
+          "Address": "12 Maple Street",
+          "City": "Bristol",
+          "Type": "apartment",
+          "Bedrooms": 1,
+          "Monthly rent": 950,
+          "Status": "occupied"
+        },
+        {
+          "Name": "Oak Lane House",
+          "Address": "4 Oak Lane",
+          "City": "Leeds",
+          "Type": "house",
+          "Bedrooms": 3,
+          "Monthly rent": 1450,
+          "Status": "occupied"
+        },
+        {
+          "Name": "Riverside Studio",
+          "Address": "88 Riverside Walk",
+          "City": "Manchester",
+          "Type": "studio",
+          "Bedrooms": 0,
+          "Monthly rent": 780,
+          "Status": "vacant"
+        },
+        {
+          "Name": "Church Road Duplex",
+          "Address": "31 Church Road",
+          "City": "Bath",
+          "Type": "duplex",
+          "Bedrooms": 3,
+          "Monthly rent": 1700,
+          "Status": "occupied"
+        },
+        {
+          "Name": "Station Flat",
+          "Address": "7 Station Approach",
+          "City": "Reading",
+          "Type": "apartment",
+          "Bedrooms": 2,
+          "Monthly rent": 1250,
+          "Status": "maintenance"
+        },
+        {
+          "Name": "Elm Cottage",
+          "Address": "2 Elm Close",
+          "City": "York",
+          "Type": "house",
+          "Bedrooms": 2,
+          "Monthly rent": 1100,
+          "Status": "occupied"
+        }
+      ]
+    },
+    {
+      "name": "Tenants",
+      "icon": "users",
+      "group": "Portfolio",
+      "description": "People renting your properties.",
+      "title": "Name",
+      "columns": [
+        {
+          "name": "Name",
+          "format": "text",
+          "required": true,
+          "searchable": true
+        },
+        {
+          "name": "Email",
+          "format": "email",
+          "required": true,
+          "unique": true
+        },
+        {
+          "name": "Phone",
+          "format": "phone"
+        },
+        {
+          "name": "Property",
+          "format": "relation",
+          "options": {
+            "onDelete": "set null"
+          },
+          "relation": "Properties"
+        },
+        {
+          "name": "Move-in",
+          "format": "date"
+        },
+        {
+          "name": "Active",
+          "format": "checkbox",
+          "filterable": true,
+          "sortable": true,
+          "default": "true"
+        }
+      ],
+      "views": [
+        {
+          "name": "Current tenants",
+          "icon": "user-check",
+          "description": "Tenants currently living in a unit.",
+          "columns": ["Name", "Property", "Phone", "Move-in"],
+          "filters": [
+            {
+              "column": "Active",
+              "op": "is",
+              "value": true
+            }
+          ]
+        }
+      ],
+      "rows": [
+        {
+          "Name": "Hannah Clarke",
+          "Email": "hannah.clarke@example.com",
+          "Phone": "+44 7700 900101",
+          "Property": "Maple Court – Flat 1",
+          "Move-in": {
+            "$days": -540
+          },
+          "Active": true
+        },
+        {
+          "Name": "Omar Siddiqui",
+          "Email": "omar.siddiqui@example.com",
+          "Phone": "+44 7700 900102",
+          "Property": "Maple Court – Flat 2",
+          "Move-in": {
+            "$days": -320
+          },
+          "Active": true
+        },
+        {
+          "Name": "Emily & Jack Turner",
+          "Email": "turners@example.com",
+          "Phone": "+44 7700 900103",
+          "Property": "Oak Lane House",
+          "Move-in": {
+            "$days": -700
+          },
+          "Active": true
+        },
+        {
+          "Name": "Priyanka Desai",
+          "Email": "priyanka.desai@example.com",
+          "Phone": "+44 7700 900104",
+          "Property": "Church Road Duplex",
+          "Move-in": {
+            "$days": -150
+          },
+          "Active": true
+        },
+        {
+          "Name": "Lewis Morgan",
+          "Email": "lewis.morgan@example.com",
+          "Phone": "+44 7700 900105",
+          "Property": "Elm Cottage",
+          "Move-in": {
+            "$days": -410
+          },
+          "Active": true
+        },
+        {
+          "Name": "Aoife Byrne",
+          "Email": "aoife.byrne@example.com",
+          "Phone": "+44 7700 900106",
+          "Property": "Station Flat",
+          "Move-in": {
+            "$days": -900
+          },
+          "Active": false
+        }
+      ]
+    },
+    {
+      "name": "Leases",
+      "icon": "file-signature",
+      "group": "Portfolio",
+      "description": "Tenancy agreements with dates and deposits.",
+      "title": "Title",
+      "audit": true,
+      "columns": [
+        {
+          "name": "Title",
+          "format": "text",
+          "required": true,
+          "searchable": true
+        },
+        {
+          "name": "Tenant",
+          "format": "relation",
+          "options": {
+            "onDelete": "set null"
+          },
+          "relation": "Tenants"
+        },
+        {
+          "name": "Property",
+          "format": "relation",
+          "options": {
+            "onDelete": "set null"
+          },
+          "relation": "Properties"
+        },
+        {
+          "name": "Start",
+          "format": "date"
+        },
+        {
+          "name": "End",
+          "format": "date"
+        },
+        {
+          "name": "Monthly rent",
+          "format": "currency",
+          "options": {
+            "currency": "GBP",
+            "precision": 0
+          }
+        },
+        {
+          "name": "Deposit",
+          "format": "currency",
+          "options": {
+            "currency": "GBP",
+            "precision": 0
+          },
+          "check": "{Deposit} >= 0"
+        },
+        {
+          "name": "Status",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Pending",
+                "value": "pending"
+              },
+              {
+                "label": "Active",
+                "value": "active"
+              },
+              {
+                "label": "Expiring soon",
+                "value": "expiring_soon"
+              },
+              {
+                "label": "Ended",
+                "value": "ended"
+              }
+            ]
+          },
+          "filterable": true,
+          "sortable": true,
+          "default": "pending"
+        }
+      ],
+      "views": [
+        {
+          "name": "Expiring soon",
+          "icon": "hourglass",
+          "description": "Leases that need a renewal decision.",
+          "columns": ["Title", "Property", "End", "Monthly rent"],
+          "filters": [
+            {
+              "column": "Status",
+              "op": "is",
+              "value": "expiring_soon"
+            }
+          ]
+        },
+        {
+          "name": "Active leases",
+          "icon": "file-check",
+          "description": "Leases currently in force.",
+          "columns": ["Title", "Tenant", "Property", "End", "Monthly rent"],
+          "filters": [
+            {
+              "column": "Status",
+              "op": "is_any_of",
+              "value": ["active", "expiring_soon"]
+            }
+          ]
+        }
+      ],
+      "rows": [
+        {
+          "Title": "Lease – Hannah Clarke",
+          "Tenant": "Hannah Clarke",
+          "Property": "Maple Court – Flat 1",
+          "Start": {
+            "$days": -540
+          },
+          "End": {
+            "$days": 190
+          },
+          "Monthly rent": 1150,
+          "Deposit": 1150,
+          "Status": "active"
+        },
+        {
+          "Title": "Lease – Omar Siddiqui",
+          "Tenant": "Omar Siddiqui",
+          "Property": "Maple Court – Flat 2",
+          "Start": {
+            "$days": -320
+          },
+          "End": {
+            "$days": 45
+          },
+          "Monthly rent": 950,
+          "Deposit": 950,
+          "Status": "expiring_soon"
+        },
+        {
+          "Title": "Lease – Turner family",
+          "Tenant": "Emily & Jack Turner",
+          "Property": "Oak Lane House",
+          "Start": {
+            "$days": -700
+          },
+          "End": {
+            "$days": 30
+          },
+          "Monthly rent": 1450,
+          "Deposit": 1450,
+          "Status": "expiring_soon"
+        },
+        {
+          "Title": "Lease – Priyanka Desai",
+          "Tenant": "Priyanka Desai",
+          "Property": "Church Road Duplex",
+          "Start": {
+            "$days": -150
+          },
+          "End": {
+            "$days": 215
+          },
+          "Monthly rent": 1700,
+          "Deposit": 1700,
+          "Status": "active"
+        },
+        {
+          "Title": "Lease – Lewis Morgan",
+          "Tenant": "Lewis Morgan",
+          "Property": "Elm Cottage",
+          "Start": {
+            "$days": -410
+          },
+          "End": {
+            "$days": 320
+          },
+          "Monthly rent": 1100,
+          "Deposit": 1100,
+          "Status": "active"
+        },
+        {
+          "Title": "Lease – Aoife Byrne",
+          "Tenant": "Aoife Byrne",
+          "Property": "Station Flat",
+          "Start": {
+            "$days": -900
+          },
+          "End": {
+            "$days": -60
+          },
+          "Monthly rent": 1250,
+          "Deposit": 1250,
+          "Status": "ended"
+        }
+      ]
+    },
+    {
+      "name": "Rent Payments",
+      "icon": "banknote",
+      "group": "Finance",
+      "description": "Monthly rent due and received.",
+      "title": "Reference",
+      "audit": true,
+      "columns": [
+        {
+          "name": "Reference",
+          "format": "text",
+          "required": true,
+          "searchable": true
+        },
+        {
+          "name": "Tenant",
+          "format": "relation",
+          "options": {
+            "onDelete": "set null"
+          },
+          "relation": "Tenants"
+        },
+        {
+          "name": "Property",
+          "format": "relation",
+          "options": {
+            "onDelete": "set null"
+          },
+          "relation": "Properties"
+        },
+        {
+          "name": "Amount",
+          "format": "currency",
+          "options": {
+            "currency": "GBP",
+            "precision": 0
+          },
+          "required": true,
+          "check": "{Amount} > 0"
+        },
+        {
+          "name": "Due date",
+          "format": "date"
+        },
+        {
+          "name": "Paid on",
+          "format": "date"
+        },
+        {
+          "name": "Status",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Due",
+                "value": "due"
+              },
+              {
+                "label": "Paid",
+                "value": "paid"
+              },
+              {
+                "label": "Late",
+                "value": "late"
+              },
+              {
+                "label": "Partial",
+                "value": "partial"
+              }
+            ]
+          },
+          "filterable": true,
+          "sortable": true,
+          "default": "due"
+        }
+      ],
+      "views": [
+        {
+          "name": "Outstanding",
+          "icon": "wallet",
+          "description": "Rent not yet fully paid.",
+          "columns": ["Reference", "Tenant", "Property", "Amount", "Due date"],
+          "filters": [
+            {
+              "column": "Status",
+              "op": "is_any_of",
+              "value": ["due", "late", "partial"]
+            }
+          ]
+        },
+        {
+          "name": "Late payments",
+          "icon": "triangle-alert",
+          "description": "Overdue rent to chase.",
+          "columns": ["Reference", "Tenant", "Amount", "Due date"],
+          "filters": [
+            {
+              "column": "Status",
+              "op": "is",
+              "value": "late"
+            }
+          ]
+        }
+      ],
+      "rows": [
+        {
+          "Reference": "RENT-001",
+          "Tenant": "Hannah Clarke",
+          "Property": "Maple Court – Flat 1",
+          "Amount": 1150,
+          "Due date": {
+            "$days": -35
+          },
+          "Paid on": {
+            "$days": -35
+          },
+          "Status": "paid"
+        },
+        {
+          "Reference": "RENT-002",
+          "Tenant": "Omar Siddiqui",
+          "Property": "Maple Court – Flat 2",
+          "Amount": 950,
+          "Due date": {
+            "$days": -35
+          },
+          "Paid on": {
+            "$days": -34
+          },
+          "Status": "paid"
+        },
+        {
+          "Reference": "RENT-003",
+          "Tenant": "Emily & Jack Turner",
+          "Property": "Oak Lane House",
+          "Amount": 1450,
+          "Due date": {
+            "$days": -35
+          },
+          "Paid on": {
+            "$days": -33
+          },
+          "Status": "paid"
+        },
+        {
+          "Reference": "RENT-004",
+          "Tenant": "Priyanka Desai",
+          "Property": "Church Road Duplex",
+          "Amount": 1700,
+          "Due date": {
+            "$days": -35
+          },
+          "Paid on": {
+            "$days": -32
+          },
+          "Status": "paid"
+        },
+        {
+          "Reference": "RENT-005",
+          "Tenant": "Lewis Morgan",
+          "Property": "Elm Cottage",
+          "Amount": 1100,
+          "Due date": {
+            "$days": -35
+          },
+          "Paid on": {
+            "$days": -31
+          },
+          "Status": "paid"
+        },
+        {
+          "Reference": "RENT-006",
+          "Tenant": "Hannah Clarke",
+          "Property": "Maple Court – Flat 1",
+          "Amount": 1150,
+          "Due date": {
+            "$days": -5
+          },
+          "Paid on": {
+            "$days": -4
+          },
+          "Status": "paid"
+        },
+        {
+          "Reference": "RENT-007",
+          "Tenant": "Omar Siddiqui",
+          "Property": "Maple Court – Flat 2",
+          "Amount": 950,
+          "Due date": {
+            "$days": -5
+          },
+          "Status": "late"
+        },
+        {
+          "Reference": "RENT-008",
+          "Tenant": "Emily & Jack Turner",
+          "Property": "Oak Lane House",
+          "Amount": 1450,
+          "Due date": {
+            "$days": -5
+          },
+          "Paid on": {
+            "$days": -3
+          },
+          "Status": "partial"
+        },
+        {
+          "Reference": "RENT-009",
+          "Tenant": "Priyanka Desai",
+          "Property": "Church Road Duplex",
+          "Amount": 1700,
+          "Due date": {
+            "$days": -5
+          },
+          "Paid on": {
+            "$days": -4
+          },
+          "Status": "paid"
+        },
+        {
+          "Reference": "RENT-010",
+          "Tenant": "Lewis Morgan",
+          "Property": "Elm Cottage",
+          "Amount": 1100,
+          "Due date": {
+            "$days": 10
+          },
+          "Status": "due"
+        }
+      ]
+    },
+    {
+      "name": "Maintenance Requests",
+      "icon": "wrench",
+      "group": "Operations",
+      "description": "Repairs reported by tenants and who is handling them.",
+      "title": "Title",
+      "audit": true,
+      "columns": [
+        {
+          "name": "Title",
+          "format": "text",
+          "required": true,
+          "searchable": true
+        },
+        {
+          "name": "Property",
+          "format": "relation",
+          "options": {
+            "onDelete": "set null"
+          },
+          "relation": "Properties"
+        },
+        {
+          "name": "Tenant",
+          "format": "relation",
+          "options": {
+            "onDelete": "set null"
+          },
+          "relation": "Tenants"
+        },
+        {
+          "name": "Priority",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "Low",
+                "value": "low"
+              },
+              {
+                "label": "Medium",
+                "value": "medium"
+              },
+              {
+                "label": "High",
+                "value": "high"
+              },
+              {
+                "label": "Urgent",
+                "value": "urgent"
+              }
+            ]
+          },
+          "filterable": true,
+          "sortable": true,
+          "default": "medium"
+        },
+        {
+          "name": "Status",
+          "format": "single_select",
+          "options": {
+            "choices": [
+              {
+                "label": "New",
+                "value": "new"
+              },
+              {
+                "label": "Scheduled",
+                "value": "scheduled"
+              },
+              {
+                "label": "In progress",
+                "value": "in_progress"
+              },
+              {
+                "label": "Done",
+                "value": "done"
+              }
+            ]
+          },
+          "filterable": true,
+          "sortable": true,
+          "default": "new"
+        },
+        {
+          "name": "Reported",
+          "format": "date"
+        },
+        {
+          "name": "Contractor",
+          "format": "text"
+        },
+        {
+          "name": "Cost",
+          "format": "currency",
+          "options": {
+            "currency": "GBP",
+            "precision": 2
+          },
+          "check": "{Cost} >= 0"
+        },
+        {
+          "name": "Details",
+          "format": "long_text"
+        }
+      ],
+      "views": [
+        {
+          "name": "Open requests",
+          "icon": "list-todo",
+          "description": "Anything not finished yet.",
+          "columns": ["Title", "Property", "Priority", "Status", "Reported"],
+          "filters": [
+            {
+              "column": "Status",
+              "op": "is_not",
+              "value": "done"
+            }
+          ]
+        },
+        {
+          "name": "Urgent & high",
+          "icon": "siren",
+          "description": "Needs attention first.",
+          "columns": ["Title", "Property", "Status", "Reported"],
+          "filters": [
+            {
+              "column": "Priority",
+              "op": "is_any_of",
+              "value": ["high", "urgent"]
+            }
+          ]
+        }
+      ],
+      "rows": [
+        {
+          "Title": "Boiler not heating",
+          "Property": "Oak Lane House",
+          "Priority": "urgent",
+          "Status": "in_progress",
+          "Reported": {
+            "$days": -2
+          },
+          "Details": "No hot water since Sunday.",
+          "Tenant": "Emily & Jack Turner",
+          "Contractor": "WarmFlow Heating"
+        },
+        {
+          "Title": "Leaking kitchen tap",
+          "Property": "Maple Court – Flat 1",
+          "Priority": "medium",
+          "Status": "scheduled",
+          "Reported": {
+            "$days": -5
+          },
+          "Details": "Slow drip under the mixer tap.",
+          "Tenant": "Hannah Clarke",
+          "Contractor": "Bristol Plumbing"
+        },
+        {
+          "Title": "Broken window latch",
+          "Property": "Maple Court – Flat 2",
+          "Priority": "low",
+          "Status": "new",
+          "Reported": {
+            "$days": -1
+          },
+          "Details": "Bedroom window won't lock.",
+          "Tenant": "Omar Siddiqui"
+        },
+        {
+          "Title": "Damp patch in bathroom",
+          "Property": "Church Road Duplex",
+          "Priority": "high",
+          "Status": "new",
+          "Reported": {
+            "$days": -3
+          },
+          "Details": "Ceiling stain growing.",
+          "Tenant": "Priyanka Desai"
+        },
+        {
+          "Title": "Replace front door lock",
+          "Property": "Elm Cottage",
+          "Priority": "medium",
+          "Status": "done",
+          "Reported": {
+            "$days": -20
+          },
+          "Details": "Keys lost, lock changed.",
+          "Tenant": "Lewis Morgan",
+          "Contractor": "KeyFix Locksmiths",
+          "Cost": 95
+        },
+        {
+          "Title": "Repaint hallway",
+          "Property": "Station Flat",
+          "Priority": "low",
+          "Status": "in_progress",
+          "Reported": {
+            "$days": -12
+          },
+          "Details": "Between tenancies.",
+          "Contractor": "Fresh Coat Decorators",
+          "Cost": 420
+        },
+        {
+          "Title": "Smoke alarm batteries",
+          "Property": "Oak Lane House",
+          "Priority": "medium",
+          "Status": "done",
+          "Reported": {
+            "$days": -40
+          },
+          "Details": "Annual safety check.",
+          "Tenant": "Emily & Jack Turner",
+          "Contractor": "In-house",
+          "Cost": 12
+        },
+        {
+          "Title": "Garden fence repair",
+          "Property": "Elm Cottage",
+          "Priority": "low",
+          "Status": "scheduled",
+          "Reported": {
+            "$days": -8
+          },
+          "Details": "Two panels down after storm.",
+          "Tenant": "Lewis Morgan",
+          "Contractor": "GreenEdge Gardens"
+        },
+        {
+          "Title": "Annual gas safety check",
+          "Property": "Church Road Duplex",
+          "Priority": "high",
+          "Status": "done",
+          "Reported": {
+            "$days": -30
+          },
+          "Details": "Certificate filed.",
+          "Tenant": "Priyanka Desai",
+          "Contractor": "WarmFlow Heating",
+          "Cost": 85
+        }
+      ]
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-import { type ReactNode, useEffect, useState } from "react";
+import { type ReactNode, useEffect, useMemo, useState } from "react";
 
 import { PlusIcon, SearchIcon } from "lucide-react";
 
@@ -6,8 +6,10 @@ import { DataTableViewOptions } from "@/components/shared/data-table/data-table-
 import { Button } from "@/components/ui/button";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { toColumnFilters } from "@/lib/records/column-filters";
+import { SYSTEM_FILTER_COLUMNS } from "@/lib/records/filters";
 
 import type { ViewerColumn } from "../columns";
+import type { FilterField } from "../filter-builder";
 import { RecordFilters } from "../record-filters";
 import type { DraftRow } from "../use-draft-row";
 import type { GridTable } from "./use-grid-table";
@@ -29,6 +31,20 @@ export function GridToolbar({
   const searchable = columns.some((column) => column.searchable);
   const [search, setSearch] = useState(query.q);
   useEffect(() => setSearch(query.q), [query.q]);
+
+  const filterColumns = useMemo<FilterField[]>(
+    () => [
+      ...columns,
+      ...SYSTEM_FILTER_COLUMNS.map((column) => ({
+        key: column.columnName,
+        name: column.name,
+        format: column.format,
+        filterable: true,
+        options: {},
+      })),
+    ],
+    [columns],
+  );
 
   return (
     <div className="flex flex-wrap items-center gap-2 border-t px-4 py-2">
@@ -60,7 +76,7 @@ export function GridToolbar({
         </form>
       )}
       <RecordFilters
-        columns={columns}
+        columns={filterColumns}
         value={query.filters}
         onApply={(filters) => grid.setColumnFilters(toColumnFilters(filters))}
       />

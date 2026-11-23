@@ -3,6 +3,9 @@ import { useEffect, useMemo } from "react";
 import { eq, useLiveSuspenseQuery } from "@tanstack/react-db";
 import { notFound } from "@tanstack/react-router";
 
+import { SparklesIcon } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
 import { columnsCollection } from "@/data/workspace/columns";
 import { tablesCollection } from "@/data/workspace/tables";
 import { useAccess } from "@/hooks/use-access";
@@ -26,10 +29,12 @@ export function TableGridView({
   workspace,
   tableId,
   onOpenRecord,
+  onOpenAssistant,
 }: {
   workspace: string;
   tableId: number;
   onOpenRecord?: (id: number) => void;
+  onOpenAssistant?: () => void;
 }) {
   const access = useAccess();
   const { data: table } = useLiveSuspenseQuery((q) =>
@@ -98,6 +103,12 @@ export function TableGridView({
           draft={access.can(tableId, "create") ? draft : undefined}
         >
           <ViewsMenu workspace={workspace} table={String(tableId)} />
+          {onOpenAssistant && (
+            <Button variant="outline" onClick={onOpenAssistant}>
+              <SparklesIcon aria-hidden="true" />
+              <span className="max-sm:hidden">Assistant</span>
+            </Button>
+          )}
         </GridToolbar>
       )}
 
