@@ -51,7 +51,7 @@ export function GridToolbar({
       {searchable && (
         <form
           role="search"
-          className="w-full sm:w-64"
+          className="w-full lg:min-w-40 lg:max-w-64 lg:flex-1"
           onSubmit={(event) => {
             event.preventDefault();
             if (search !== query.q) grid.setGlobalFilter(search);
@@ -83,9 +83,14 @@ export function GridToolbar({
       {children}
       <div className="ms-auto flex items-center gap-2">
         {draft && (
-          <Button variant="outline" disabled={draft.row !== null} onClick={() => draft.new()}>
+          <Button
+            variant="outline"
+            aria-label="New row"
+            disabled={draft.row !== null}
+            onClick={() => draft.new()}
+          >
             <PlusIcon aria-hidden="true" />
-            New row
+            <span className="max-sm:hidden">New row</span>
           </Button>
         )}
         <DataTableViewOptions table={grid} />
