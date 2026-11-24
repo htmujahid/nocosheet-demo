@@ -6,7 +6,7 @@ import { PlusIcon } from "lucide-react";
 
 import { WorkspaceContent, WorkspaceHeader } from "@/components/layout/workspace-header";
 import { Button } from "@/components/ui/button";
-import { ViewDialog } from "@/components/workspace/views/view-dialog";
+import { ViewSheet } from "@/components/workspace/views/view-sheet";
 import { ViewsEmpty } from "@/components/workspace/views/views-empty";
 import { ViewsTable } from "@/components/workspace/views/views-table";
 import { useWorkspace } from "@/hooks/use-workspace";
@@ -44,7 +44,7 @@ function ViewsPage() {
       </WorkspaceContent>
       <Outlet />
       {isAdmin && (
-        <ViewDialog
+        <ViewSheet
           workspace={workspace}
           tableId={Number(table)}
           open={creating}

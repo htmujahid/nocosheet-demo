@@ -34,7 +34,7 @@ import { useOnline } from "@/hooks/use-online";
 import { ALL_VIEW } from "@/lib/views/constants";
 
 import { DeleteViewDialog } from "./delete-view-dialog";
-import { ViewDialog } from "./view-dialog";
+import { ViewSheet } from "./view-sheet";
 
 export function ViewActions({
   workspace,
@@ -167,7 +167,7 @@ export function ViewActions({
       </Group>
       {access.admin && active && (
         <>
-          <ViewDialog
+          <ViewSheet
             workspace={workspace}
             tableId={tableId}
             open={dialog === "edit"}

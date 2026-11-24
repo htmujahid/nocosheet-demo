@@ -18,19 +18,19 @@ import {
   ComboboxPopup,
   ComboboxValue,
 } from "@/components/ui/combobox";
-import {
-  Dialog,
-  DialogClose,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogPanel,
-  DialogPopup,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Field, FieldDescription, FieldError, FieldLabel } from "@/components/ui/field";
 import { Form } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import {
+  Sheet,
+  SheetClose,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetPanel,
+  SheetPopup,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 import { IconPicker } from "@/components/workspace/tables/icon-picker";
 import { columnsCollection } from "@/data/workspace/columns";
@@ -70,7 +70,7 @@ const draftOf = (view?: ViewSummary): ViewDraft => ({
   filters: [],
 });
 
-export function ViewDialog({
+export function ViewSheet({
   workspace,
   tableId,
   open,
@@ -84,24 +84,16 @@ export function ViewDialog({
   view?: ViewSummary;
 }) {
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogPopup className="max-w-2xl">
-        <DialogHeader>
-          <DialogTitle>{view ? "Edit view" : "Create a view"}</DialogTitle>
-          <DialogDescription>
-            {view
-              ? "A view's columns and filters can't change. Delete it and create a new one to change them."
-              : "A view shows a chosen set of columns and only the records that match its filters. It can't be edited afterwards."}
-          </DialogDescription>
-        </DialogHeader>
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetPopup variant="inset" className="max-w-2xl">
         <ViewForm
           workspace={workspace}
           tableId={tableId}
           view={view}
           onSaved={() => onOpenChange(false)}
         />
-      </DialogPopup>
-    </Dialog>
+      </SheetPopup>
+    </Sheet>
   );
 }
 
@@ -193,145 +185,150 @@ function ViewForm({
   });
 
   return (
-    <>
-      <DialogPanel>
-        <Form
-          id="view-form"
-          className="flex flex-col gap-4"
-          onSubmit={(event) => {
-            event.preventDefault();
-            event.stopPropagation();
-            void form.handleSubmit();
-          }}
-        >
-          <div className="flex items-start gap-3">
-            <form.Field name="icon">
-              {(field) => (
-                <Field name={field.name} className="w-auto">
-                  <FieldLabel>Icon</FieldLabel>
-                  <IconPicker
-                    label="View icon"
-                    value={field.state.value}
-                    onChange={field.handleChange}
-                  />
-                </Field>
-              )}
-            </form.Field>
-            <form.Field name="name">
+    <Form
+      className="flex min-h-0 flex-1 flex-col"
+      onSubmit={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        void form.handleSubmit();
+      }}
+    >
+      <SheetHeader>
+        <SheetTitle>{view ? "Edit view" : "Create a view"}</SheetTitle>
+        <SheetDescription>
+          {view
+            ? "A view's columns and filters can't change. Delete it and create a new one to change them."
+            : "A view shows a chosen set of columns and only the records that match its filters. It can't be edited afterwards."}
+        </SheetDescription>
+      </SheetHeader>
+      <SheetPanel className="flex flex-col gap-4">
+        <div className="flex items-start gap-3">
+          <form.Field name="icon">
+            {(field) => (
+              <Field name={field.name} className="w-auto">
+                <FieldLabel>Icon</FieldLabel>
+                <IconPicker
+                  label="View icon"
+                  value={field.state.value}
+                  onChange={field.handleChange}
+                />
+              </Field>
+            )}
+          </form.Field>
+          <form.Field name="name">
+            {(field) => (
+              <Field
+                name={field.name}
+                className="flex-1"
+                invalid={field.state.meta.isTouched && !field.state.meta.isValid}
+              >
+                <FieldLabel>Name</FieldLabel>
+                <Input
+                  autoFocus
+                  autoComplete="off"
+                  placeholder="Active clients"
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(event) => field.handleChange(event.target.value)}
+                />
+                <FieldError match={field.state.meta.isTouched && !field.state.meta.isValid}>
+                  {field.state.meta.errors.map((item) => item?.message).join(", ")}
+                </FieldError>
+              </Field>
+            )}
+          </form.Field>
+        </div>
+
+        <form.Field name="description">
+          {(field) => (
+            <Field name={field.name}>
+              <FieldLabel>Description</FieldLabel>
+              <Textarea
+                placeholder="Optional"
+                value={field.state.value}
+                onChange={(event) => field.handleChange(event.target.value)}
+              />
+            </Field>
+          )}
+        </form.Field>
+
+        {!view && (
+          <>
+            <form.Field name="selectColumns">
               {(field) => (
                 <Field
                   name={field.name}
-                  className="flex-1"
                   invalid={field.state.meta.isTouched && !field.state.meta.isValid}
                 >
-                  <FieldLabel>Name</FieldLabel>
-                  <Input
-                    autoFocus
-                    autoComplete="off"
-                    placeholder="Active clients"
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(event) => field.handleChange(event.target.value)}
-                  />
+                  <FieldLabel>Columns</FieldLabel>
+                  <Combobox
+                    multiple
+                    items={items}
+                    value={items.filter((item) => field.state.value.includes(item.value))}
+                    onValueChange={(next) => field.handleChange(next.map((item) => item.value))}
+                  >
+                    <ComboboxChips>
+                      <ComboboxValue>
+                        {(picked: { value: string; label: string }[]) => (
+                          <>
+                            {picked.map((item) => (
+                              <ComboboxChip aria-label={item.label} key={item.value}>
+                                {item.label}
+                              </ComboboxChip>
+                            ))}
+                            <ComboboxChipsInput
+                              aria-label="Columns"
+                              placeholder={picked.length > 0 ? undefined : "Pick columns"}
+                              onBlur={field.handleBlur}
+                            />
+                          </>
+                        )}
+                      </ComboboxValue>
+                    </ComboboxChips>
+                    <ComboboxPopup>
+                      <ComboboxEmpty>No columns found.</ComboboxEmpty>
+                      <ComboboxList>
+                        {(item: { value: string; label: string }) => (
+                          <ComboboxItem key={item.value} value={item}>
+                            {item.label}
+                          </ComboboxItem>
+                        )}
+                      </ComboboxList>
+                    </ComboboxPopup>
+                  </Combobox>
+                  <FieldDescription>The columns this view shows.</FieldDescription>
                   <FieldError match={field.state.meta.isTouched && !field.state.meta.isValid}>
                     {field.state.meta.errors.map((item) => item?.message).join(", ")}
                   </FieldError>
                 </Field>
               )}
             </form.Field>
-          </div>
 
-          <form.Field name="description">
-            {(field) => (
-              <Field name={field.name}>
-                <FieldLabel>Description</FieldLabel>
-                <Textarea
-                  placeholder="Optional"
-                  value={field.state.value}
-                  onChange={(event) => field.handleChange(event.target.value)}
-                />
-              </Field>
-            )}
-          </form.Field>
-
-          {!view && (
-            <>
-              <form.Field name="selectColumns">
-                {(field) => (
-                  <Field
-                    name={field.name}
-                    invalid={field.state.meta.isTouched && !field.state.meta.isValid}
-                  >
-                    <FieldLabel>Columns</FieldLabel>
-                    <Combobox
-                      multiple
-                      items={items}
-                      value={items.filter((item) => field.state.value.includes(item.value))}
-                      onValueChange={(next) => field.handleChange(next.map((item) => item.value))}
-                    >
-                      <ComboboxChips>
-                        <ComboboxValue>
-                          {(picked: { value: string; label: string }[]) => (
-                            <>
-                              {picked.map((item) => (
-                                <ComboboxChip aria-label={item.label} key={item.value}>
-                                  {item.label}
-                                </ComboboxChip>
-                              ))}
-                              <ComboboxChipsInput
-                                aria-label="Columns"
-                                placeholder={picked.length > 0 ? undefined : "Pick columns"}
-                                onBlur={field.handleBlur}
-                              />
-                            </>
-                          )}
-                        </ComboboxValue>
-                      </ComboboxChips>
-                      <ComboboxPopup>
-                        <ComboboxEmpty>No columns found.</ComboboxEmpty>
-                        <ComboboxList>
-                          {(item: { value: string; label: string }) => (
-                            <ComboboxItem key={item.value} value={item}>
-                              {item.label}
-                            </ComboboxItem>
-                          )}
-                        </ComboboxList>
-                      </ComboboxPopup>
-                    </Combobox>
-                    <FieldDescription>The columns this view shows.</FieldDescription>
-                    <FieldError match={field.state.meta.isTouched && !field.state.meta.isValid}>
-                      {field.state.meta.errors.map((item) => item?.message).join(", ")}
-                    </FieldError>
-                  </Field>
-                )}
-              </form.Field>
-
-              <form.Field name="filters">
-                {(field) => (
-                  <Field name={field.name}>
-                    <FieldLabel>Filters</FieldLabel>
-                    <FilterBuilder
-                      columns={userColumns}
-                      value={field.state.value}
-                      onChange={field.handleChange}
-                    />
-                    <FieldDescription>
-                      Only records matching these conditions belong to the view.
-                    </FieldDescription>
-                  </Field>
-                )}
-              </form.Field>
-            </>
-          )}
-        </Form>
+            <form.Field name="filters">
+              {(field) => (
+                <Field name={field.name}>
+                  <FieldLabel>Filters</FieldLabel>
+                  <FilterBuilder
+                    columns={userColumns}
+                    value={field.state.value}
+                    onChange={field.handleChange}
+                  />
+                  <FieldDescription>
+                    Only records matching these conditions belong to the view.
+                  </FieldDescription>
+                </Field>
+              )}
+            </form.Field>
+          </>
+        )}
         {error && (
-          <Alert variant="error" className="mt-4">
+          <Alert variant="error">
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
-      </DialogPanel>
-      <DialogFooter>
-        <DialogClose render={<Button variant="ghost" />}>Cancel</DialogClose>
+      </SheetPanel>
+      <SheetFooter>
+        <SheetClose render={<Button type="button" variant="ghost" />}>Cancel</SheetClose>
         <form.Subscribe
           selector={(state) => ({
             submitting: state.isSubmitting,
@@ -339,12 +336,12 @@ function ViewForm({
           })}
         >
           {({ submitting, invalid }) => (
-            <Button type="submit" form="view-form" loading={submitting} disabled={invalid}>
+            <Button type="submit" loading={submitting} disabled={invalid}>
               {view ? "Save" : "Create view"}
             </Button>
           )}
         </form.Subscribe>
-      </DialogFooter>
-    </>
+      </SheetFooter>
+    </Form>
   );
 }
