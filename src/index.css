@@ -6,6 +6,7 @@
 
 @theme inline {
   --animate-skeleton: skeleton 2s -1s infinite linear;
+  --animate-route-progress: route-progress 1.2s ease-in-out infinite;
   --animate-caret-blink: 1s ease-out infinite caret-blink;
   --animate-toast-success-odd: toast-success-odd 0.32s cubic-bezier(0.5, 1, 0.89, 1);
   --animate-toast-success-even: toast-success-even 0.32s cubic-bezier(0.5, 1, 0.89, 1);
@@ -65,6 +66,14 @@
   @keyframes skeleton {
     to {
       background-position: -200% 0;
+    }
+  }
+  @keyframes route-progress {
+    from {
+      translate: -100% 0;
+    }
+    to {
+      translate: 300% 0;
     }
   }
   @keyframes caret-blink {
@@ -237,6 +246,9 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+  #app {
+    @apply flex min-h-svh flex-col;
   }
   code,
   kbd,

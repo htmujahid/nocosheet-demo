@@ -5,6 +5,7 @@ import { Outlet, createRootRouteWithContext } from "@tanstack/react-router";
 
 import { NuqsAdapter } from "nuqs/adapters/tanstack-router";
 
+import { AppPending } from "@/components/layout/route-pending";
 import { ToastProvider } from "@/components/ui/toast";
 import { loadSession } from "@/data/auth/session";
 import { loadConfig } from "@/data/config";
@@ -20,6 +21,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     ]);
     return { session, config };
   },
+  pendingComponent: AppPending,
   component: RootComponent,
 });
 
