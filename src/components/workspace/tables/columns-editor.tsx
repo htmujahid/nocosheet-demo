@@ -30,8 +30,8 @@ import { workspaceKeys } from "@/data/workspace/keys";
 import { tablesCollection } from "@/data/workspace/tables";
 import { TRASH_RETENTION_DAYS } from "@/lib/records/retention";
 
-import { ColumnDialog } from "./column-dialog";
 import { columnToDraft, type ColumnDraft } from "./column-draft";
+import { ColumnSheet } from "./column-sheet";
 import { ColumnsList } from "./columns-list";
 
 type EditorColumn = ColumnRow;
@@ -63,9 +63,11 @@ export function ColumnsEditor({
   );
   const [, startTransition] = useTransition();
 
-  const [dialog, setDialog] = useState<{ open: boolean; column: EditorColumn | null; key: number }>(
-    { open: false, column: null, key: 0 },
-  );
+  const [sheet, setSheet] = useState<{ open: boolean; column: EditorColumn | null; key: number }>({
+    open: false,
+    column: null,
+    key: 0,
+  });
   const [removing, setRemoving] = useState<EditorColumn | null>(null);
 
   const columnRows = dbClient.collection(columnsCollection(tableId));
@@ -119,17 +121,17 @@ export function ColumnsEditor({
         .catch(() => undefined);
     });
 
-  const openDialog = (column: EditorColumn | null) =>
-    setDialog((current) => ({ open: true, column, key: current.key + 1 }));
+  const openSheet = (column: EditorColumn | null) =>
+    setSheet((current) => ({ open: true, column, key: current.key + 1 }));
 
   const nextPosition = columns.reduce((max, column) => Math.max(max, column.position), -1) + 1;
 
   const save = async (draft: ColumnDraft) => {
-    if (dialog.column) {
+    if (sheet.column) {
       await updateColumn.mutateAsync({
         workspace,
         id: tableId,
-        columnId: dialog.column.id,
+        columnId: sheet.column.id,
         patch: {
           name: draft.name,
           description: draft.description,
@@ -150,7 +152,7 @@ export function ColumnsEditor({
     }
   };
 
-  const others = columns.filter((column) => column.id !== dialog.column?.id);
+  const others = columns.filter((column) => column.id !== sheet.column?.id);
   const taken = others.map((column) => column.name.toLowerCase());
 
   return (
@@ -161,7 +163,7 @@ export function ColumnsEditor({
         </p>
         <div className="flex items-center gap-2">
           {actions}
-          <Button size="sm" onClick={() => openDialog(null)}>
+          <Button size="sm" onClick={() => openSheet(null)}>
             <PlusIcon />
             Add column
           </Button>
@@ -172,16 +174,16 @@ export function ColumnsEditor({
         columns={columns}
         titleColumnId={table.titleColumnId}
         empty="No columns yet. Add the columns that hold your data."
-        onEdit={openDialog}
+        onEdit={openSheet}
         onDelete={setRemoving}
         onReorder={reorder}
       />
 
-      <ColumnDialog
-        formKey={dialog.key}
-        open={dialog.open}
-        onOpenChange={(open) => setDialog((current) => ({ ...current, open }))}
-        initial={dialog.column ? columnToDraft(dialog.column) : null}
+      <ColumnSheet
+        formKey={sheet.key}
+        open={sheet.open}
+        onOpenChange={(open) => setSheet((current) => ({ ...current, open }))}
+        initial={sheet.column ? columnToDraft(sheet.column) : null}
         taken={taken}
         onSave={save}
       />

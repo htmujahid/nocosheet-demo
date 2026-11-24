@@ -20,7 +20,7 @@ import { useAccess } from "@/hooks/use-access";
 import { ALL_VIEW } from "@/lib/views/constants";
 
 import { NamedIcon } from "../tables/named-icon";
-import { ViewDialog } from "./view-dialog";
+import { ViewSheet } from "./view-sheet";
 
 export function ViewsMenu({
   workspace,
@@ -108,7 +108,7 @@ export function ViewsMenu({
         </MenuPopup>
       </Menu>
       {access.admin && (
-        <ViewDialog
+        <ViewSheet
           workspace={workspace}
           tableId={tableId}
           open={creating}

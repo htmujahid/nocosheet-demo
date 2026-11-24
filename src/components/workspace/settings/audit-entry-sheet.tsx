@@ -1,14 +1,14 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogDescription,
-  DialogHeader,
-  DialogPanel,
-  DialogPopup,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+  Sheet,
+  SheetDescription,
+  SheetHeader,
+  SheetPanel,
+  SheetPopup,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import {
   Table,
   TableBody,
@@ -142,27 +142,27 @@ function Records({ entry }: { entry: AuditEntry }) {
   );
 }
 
-export function AuditEntryDialog({ entry }: { entry: AuditEntry }) {
+export function AuditEntrySheet({ entry }: { entry: AuditEntry }) {
   const when = new Date(entry.createdAt).toLocaleString(undefined, {
     dateStyle: "medium",
     timeStyle: "short",
   });
 
   return (
-    <Dialog>
-      <DialogTrigger render={<Button variant="outline" size="sm" />}>View details</DialogTrigger>
-      <DialogPopup className="sm:max-w-2xl">
-        <DialogHeader>
-          <DialogTitle>{summarizeAudit(entry)}</DialogTitle>
-          <DialogDescription>
+    <Sheet>
+      <SheetTrigger render={<Button variant="outline" size="sm" />}>View details</SheetTrigger>
+      <SheetPopup variant="inset" className="max-w-2xl">
+        <SheetHeader>
+          <SheetTitle>{summarizeAudit(entry)}</SheetTitle>
+          <SheetDescription>
             {entry.actorName ?? "Deleted user"} · {entry.tableLabel} · {when}
-          </DialogDescription>
-        </DialogHeader>
-        <DialogPanel className="flex flex-col gap-5">
+          </SheetDescription>
+        </SheetHeader>
+        <SheetPanel className="flex flex-col gap-5">
           {entry.recordIds.length > 1 && <Records entry={entry} />}
           {entry.changes.length > 0 && <Changes entry={entry} />}
-        </DialogPanel>
-      </DialogPopup>
-    </Dialog>
+        </SheetPanel>
+      </SheetPopup>
+    </Sheet>
   );
 }

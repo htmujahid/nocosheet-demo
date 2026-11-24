@@ -5,7 +5,7 @@ import { summarizeAudit } from "@/lib/audit/format";
 import { formatRelativeTime } from "@/lib/format-relative-time";
 
 import { AuditActionBadge } from "./audit-action-badge";
-import { AuditEntryDialog } from "./audit-entry-dialog";
+import { AuditEntrySheet } from "./audit-entry-sheet";
 import type { AuditRow } from "./audit-log";
 
 export const auditColumns: ColumnDef<typeof dataTableFeatures, AuditRow>[] = [
@@ -51,7 +51,7 @@ export const auditColumns: ColumnDef<typeof dataTableFeatures, AuditRow>[] = [
       <div className="flex items-center justify-between gap-3">
         <span className="min-w-0 truncate">{summarizeAudit(row.original)}</span>
         {(row.original.changes.length > 0 || row.original.recordIds.length > 1) && (
-          <AuditEntryDialog entry={row.original} />
+          <AuditEntrySheet entry={row.original} />
         )}
       </div>
     ),

@@ -25,7 +25,7 @@ import { useAccess } from "@/hooks/use-access";
 import { useSession } from "@/hooks/use-session";
 import { ALL_VIEW } from "@/lib/views/constants";
 
-import { ViewDialog } from "../views/view-dialog";
+import { ViewSheet } from "../views/view-sheet";
 import { NamedIcon } from "./named-icon";
 import { RecentRecords } from "./recent-records";
 
@@ -160,7 +160,7 @@ export function TableOverview({ workspace, table }: { workspace: string; table: 
       <RecentRecords workspace={workspace} table={table} titleColumn={titleColumn} />
 
       {access.admin && (
-        <ViewDialog
+        <ViewSheet
           workspace={workspace}
           tableId={tableId}
           open={creating}
